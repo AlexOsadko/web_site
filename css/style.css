@@ -538,3 +538,70 @@ a.value:hover { color: var(--blue); }
 @media (max-width: 880px) {
   .cat-grid { grid-template-columns: 1fr; }
 }
+
+/* ===== SEO-елементи статей ===== */
+.crumbs {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  font-size: .82rem; color: var(--faint); margin-bottom: 26px;
+}
+.crumbs a { color: var(--muted); }
+.crumbs a:hover { color: var(--blue); }
+.crumbs .cur { color: var(--faint); }
+.crumbs span { color: var(--line); }
+
+.article-page .cat { margin-bottom: 16px; }
+.meta-line { color: var(--faint); font-size: .88rem; margin: 14px 0 30px; }
+.meta-line span { white-space: nowrap; }
+
+.tldr {
+  background: var(--tint);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px 26px;
+  margin-bottom: 36px;
+}
+.tldr strong {
+  display: block; color: var(--ink); font-weight: 700;
+  font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px;
+}
+.tldr ul { margin: 0 0 0 20px; color: #33425a; }
+.tldr li { margin-bottom: 6px; }
+
+/* FAQ */
+.faq { display: flex; flex-direction: column; gap: 12px; margin: 8px 0 8px; }
+.faq details {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 4px 22px;
+  transition: border-color .2s;
+}
+.faq details[open] { border-color: var(--blue2); }
+.faq summary {
+  cursor: pointer; list-style: none;
+  font-weight: 600; color: var(--ink);
+  padding: 18px 30px 18px 0; position: relative;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: "+"; position: absolute; right: 2px; top: 50%; transform: translateY(-50%);
+  font-size: 1.4rem; color: var(--blue); font-weight: 400; transition: transform .2s;
+}
+.faq details[open] summary::after { transform: translateY(-50%) rotate(45deg); }
+.faq details p { margin: 0 0 18px; color: #33425a; }
+
+/* Читайте також */
+.related { margin-top: 56px; padding-top: 8px; }
+.related h2 { font-size: 1.4rem; margin-bottom: 20px; }
+.related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.related-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 20px; color: var(--ink); transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+.related-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--blue2); }
+.related-card .cat { margin-bottom: 10px; }
+.related-card h3 { font-size: 1rem; font-weight: 600; line-height: 1.3; }
+
+@media (max-width: 760px) {
+  .related-grid { grid-template-columns: 1fr; }
+}
