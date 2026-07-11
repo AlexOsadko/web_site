@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Олександр Осадько — адвокат</title>
   <meta name="description" content="Адвокат Олександр Осадько. Правова допомога, представництво в судах, консультації. Захист ваших інтересів — професійно та конфіденційно.">
-  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="icon" type="image/svg+xml" href="assets/logo-dark.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -16,16 +16,13 @@
 <header class="site-header" id="top">
   <div class="container header-inner">
     <a href="#top" class="brand">
-      <span class="brand-logo"><img src="assets/logo.svg" alt="Логотип — монограма адвоката Осадька"></span>
-      <span class="brand-text">
-        <span class="brand-name">Олександр Осадько</span>
-        <span class="brand-role">Адвокат</span>
-      </span>
+      <span class="brand-logo"><img src="assets/logo-dark.svg" alt="Логотип — монограма адвоката Осадька"></span>
+      <span class="brand-name">Олександр Осадько</span>
     </a>
     <nav class="site-nav" id="nav">
       <a href="#about">Про мене</a>
       <a href="#services">Послуги</a>
-      <a href="#principles">Принципи</a>
+      <a href="#articles">Статті</a>
       <a href="#contacts">Контакти</a>
     </nav>
     <button class="nav-toggle" id="navToggle" aria-label="Відкрити меню" aria-expanded="false">
@@ -43,20 +40,14 @@
         <p class="hero-kicker">Адвокат</p>
         <h1>Олександр Осадько</h1>
         <p class="hero-lead">
-          Професійний правовий захист ваших інтересів.
-          Представництво в судах, юридичні консультації та супровід —
-          з увагою до деталей і повною конфіденційністю.
+          Правовий захист приватних осіб і бізнесу. Представництво в судах,
+          консультації, супровід — з увагою до деталей і повною конфіденційністю.
         </p>
-        <div class="hero-actions">
-          <a href="#contacts" class="btn btn-primary">Отримати консультацію</a>
-          <a href="#services" class="btn btn-ghost">Послуги</a>
-        </div>
+        <a href="#contacts" class="hero-contact">Отримати консультацію</a>
       </div>
       <div class="hero-photo">
-        <div class="photo-frame">
-          <img src="assets/photo.jpg" alt="Адвокат Олександр Осадько"
-               onerror="this.onerror=null;this.src='assets/photo-placeholder.svg'">
-        </div>
+        <img src="assets/photo.jpg" alt="Адвокат Олександр Осадько"
+             onerror="this.onerror=null;this.src='assets/photo-placeholder.svg'">
       </div>
     </div>
   </section>
@@ -64,18 +55,20 @@
   <!-- Про мене -->
   <section class="section" id="about">
     <div class="container">
-      <h2 class="section-title">Про мене</h2>
+      <div class="section-head">
+        <span class="section-num">01</span>
+        <h2 class="section-title">Про мене</h2>
+      </div>
       <div class="about-grid">
         <div class="about-text">
           <p>
-            Я — адвокат, який допомагає людям і бізнесу вирішувати правові питання
-            будь-якої складності. Моя мета — не просто надати юридичну послугу,
-            а знайти рішення, яке реально захистить ваші інтереси.
+            Я допомагаю людям і бізнесу вирішувати правові питання будь-якої
+            складності — від консультації до представництва в суді.
           </p>
           <p>
-            Кожна справа для мене — індивідуальна. Я особисто веду кожного клієнта:
-            від першої консультації до остаточного вирішення питання, тримаючи вас
-            у курсі на кожному етапі.
+            Моя мета — не просто надати юридичну послугу, а знайти рішення,
+            яке реально захистить ваші інтереси. Кожну справу веду особисто:
+            від першої зустрічі до остаточного вирішення питання.
           </p>
         </div>
         <ul class="about-facts">
@@ -97,84 +90,108 @@
   </section>
 
   <!-- Послуги -->
-  <section class="section section-alt" id="services">
+  <section class="section" id="services">
     <div class="container">
-      <h2 class="section-title">Послуги</h2>
-      <div class="services-grid">
-        <article class="service-card">
-          <h3>Юридичні консультації</h3>
-          <p>Усні та письмові консультації з правових питань, правовий аналіз документів і ситуацій.</p>
-        </article>
-        <article class="service-card">
-          <h3>Представництво в судах</h3>
-          <p>Захист інтересів у судах усіх інстанцій: підготовка позовів, участь у засіданнях, оскарження рішень.</p>
-        </article>
-        <article class="service-card">
-          <h3>Цивільні справи</h3>
-          <p>Договірні спори, стягнення боргів, захист права власності, відшкодування шкоди.</p>
-        </article>
-        <article class="service-card">
-          <h3>Сімейні справи</h3>
-          <p>Розірвання шлюбу, поділ майна, аліменти, визначення місця проживання дитини.</p>
-        </article>
-        <article class="service-card">
-          <h3>Господарські спори</h3>
-          <p>Супровід бізнесу, спори між суб'єктами господарювання, договірна робота.</p>
-        </article>
-        <article class="service-card">
-          <h3>Кримінальні справи</h3>
-          <p>Захист на всіх стадіях кримінального провадження, представництво інтересів потерпілих.</p>
-        </article>
+      <div class="section-head">
+        <span class="section-num">02</span>
+        <h2 class="section-title">Послуги</h2>
       </div>
+      <ul class="services-list">
+        <li>
+          <span class="service-num">01</span>
+          <span class="service-name">Юридичні консультації</span>
+          <span class="service-desc">Усні та письмові консультації, правовий аналіз документів і ситуацій.</span>
+        </li>
+        <li>
+          <span class="service-num">02</span>
+          <span class="service-name">Представництво в судах</span>
+          <span class="service-desc">Захист інтересів у судах усіх інстанцій: позови, засідання, оскарження рішень.</span>
+        </li>
+        <li>
+          <span class="service-num">03</span>
+          <span class="service-name">Цивільні справи</span>
+          <span class="service-desc">Договірні спори, стягнення боргів, захист права власності, відшкодування шкоди.</span>
+        </li>
+        <li>
+          <span class="service-num">04</span>
+          <span class="service-name">Сімейні справи</span>
+          <span class="service-desc">Розірвання шлюбу, поділ майна, аліменти, визначення місця проживання дитини.</span>
+        </li>
+        <li>
+          <span class="service-num">05</span>
+          <span class="service-name">Господарські спори</span>
+          <span class="service-desc">Супровід бізнесу, спори між суб'єктами господарювання, договірна робота.</span>
+        </li>
+        <li>
+          <span class="service-num">06</span>
+          <span class="service-name">Кримінальні справи</span>
+          <span class="service-desc">Захист на всіх стадіях провадження, представництво інтересів потерпілих.</span>
+        </li>
+      </ul>
     </div>
   </section>
 
-  <!-- Принципи -->
-  <section class="section" id="principles">
+  <!-- Статті -->
+  <section class="section" id="articles">
     <div class="container">
-      <h2 class="section-title">Принципи роботи</h2>
-      <ol class="principles">
+      <div class="section-head">
+        <span class="section-num">03</span>
+        <h2 class="section-title">Статті</h2>
+      </div>
+      <ul class="articles-list">
         <li>
-          <h3>Аналіз ситуації</h3>
-          <p>Детально вивчаю обставини справи та документи, щоб побачити повну картину.</p>
+          <a class="article-link" href="articles/yak-povernuty-borh.html">
+            <p class="article-date">Липень 2026</p>
+            <h3 class="article-title">Що робити, якщо вам не повертають борг: покроковий алгоритм</h3>
+            <p class="article-teaser">Від досудової претензії до виконавчого провадження — як діяти, щоб повернути свої гроші, і яких помилок припускаються найчастіше.</p>
+          </a>
         </li>
         <li>
-          <h3>Стратегія</h3>
-          <p>Пропоную варіанти вирішення з чесною оцінкою ризиків і перспектив кожного.</p>
+          <a class="article-link" href="articles/rozirvannya-shlyubu.html">
+            <p class="article-date">Липень 2026</p>
+            <h3 class="article-title">Розірвання шлюбу в Україні: як відбувається і що варто знати</h3>
+            <p class="article-teaser">Через РАЦС чи через суд, скільки це триває, що з майном і дітьми — відповіді на найпоширеніші питання.</p>
+          </a>
         </li>
         <li>
-          <h3>Дії</h3>
-          <p>Реалізую погоджену стратегію: документи, переговори, суд — беру процес на себе.</p>
+          <a class="article-link" href="articles/pershyi-dopyt.html">
+            <p class="article-date">Липень 2026</p>
+            <h3 class="article-title">Виклик на допит: права, про які варто пам'ятати кожному</h3>
+            <p class="article-teaser">Свідок, підозрюваний чи потерпілий — у кожного свій обсяг прав. Що можна, чого не можна і чому адвокат потрібен із самого початку.</p>
+          </a>
         </li>
         <li>
-          <h3>Результат</h3>
-          <p>Супроводжую до фактичного вирішення питання, а не лише до рішення суду.</p>
+          <a class="article-link" href="articles/yak-uklasty-dohovir.html">
+            <p class="article-date">Липень 2026</p>
+            <h3 class="article-title">Як укласти договір, щоб потім не судитися</h3>
+            <p class="article-teaser">Істотні умови, відповідальність сторін, порядок розірвання — на що звернути увагу до підписання, а не після.</p>
+          </a>
         </li>
-      </ol>
+      </ul>
     </div>
   </section>
 
   <!-- Контакти -->
-  <section class="section section-dark" id="contacts">
+  <section class="section" id="contacts">
     <div class="container">
-      <h2 class="section-title">Контакти</h2>
+      <div class="section-head">
+        <span class="section-num">04</span>
+        <h2 class="section-title">Контакти</h2>
+      </div>
       <div class="contacts-grid">
-        <div class="contact-item">
+        <div>
           <span class="contact-label">Телефон</span>
           <a class="contact-value" href="tel:+380000000000">+38 (000) 000-00-00</a>
         </div>
-        <div class="contact-item">
+        <div>
           <span class="contact-label">Email</span>
           <a class="contact-value" href="mailto:espir3@gmail.com">espir3@gmail.com</a>
         </div>
-        <div class="contact-item">
-          <span class="contact-label">Графік роботи</span>
+        <div>
+          <span class="contact-label">Графік</span>
           <span class="contact-value">Пн–Пт, 9:00–18:00</span>
         </div>
       </div>
-      <p class="contacts-note">
-        Напишіть або зателефонуйте — я відповім у найкоротший термін і запропоную зручний час для консультації.
-      </p>
     </div>
   </section>
 
@@ -182,11 +199,8 @@
 
 <footer class="site-footer">
   <div class="container footer-inner">
-    <div class="footer-brand">
-      <span class="brand-logo"><img src="assets/logo.svg" alt=""></span>
-      <span>Адвокат Олександр Осадько</span>
-    </div>
-    <p class="footer-copy">© <span id="year"></span> Усі права захищено.</p>
+    <span>Адвокат Олександр Осадько</span>
+    <span>© <span id="year"></span> Усі права захищено</span>
   </div>
 </footer>
 

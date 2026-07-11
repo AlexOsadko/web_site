@@ -1,6 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400">
-  <rect width="300" height="400" fill="#1d4463"/>
-  <circle cx="150" cy="150" r="55" fill="#3a5a78"/>
-  <path d="M 60 400 Q 60 275 150 275 Q 240 275 240 400 Z" fill="#3a5a78"/>
-  <text x="150" y="378" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#9fb2c1">Фото буде додано</text>
+  <rect width="300" height="400" fill="#f4f4f2"/>
+  <circle cx="150" cy="150" r="52" fill="#dcdcd8"/>
+  <path d="M 65 400 Q 65 280 150 280 Q 235 280 235 400 Z" fill="#dcdcd8"/>
 </svg>
