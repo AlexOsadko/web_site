@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Олександр Осадько — адвокат</title>
-  <meta name="description" content="Адвокат Олександр Осадько. Правова допомога, представництво в судах, консультації. Захист ваших інтересів — професійно та конфіденційно.">
-  <link rel="icon" type="image/svg+xml" href="assets/logo-dark.svg">
+  <meta name="description" content="Адвокат Олександр Осадько. Представництво в судах, юридичні консультації та супровід для людей і бізнесу. Захист ваших інтересів — професійно та конфіденційно.">
+  <link rel="icon" type="image/svg+xml" href="assets/logo-mark.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -16,14 +16,14 @@
 <header class="site-header" id="top">
   <div class="container header-inner">
     <a href="#top" class="brand">
-      <span class="brand-logo"><img src="assets/logo-dark.svg" alt="Логотип — монограма адвоката Осадька"></span>
-      <span class="brand-name">Олександр Осадько</span>
+      <span class="brand-mark"><img src="assets/logo-mark.svg" alt="Логотип адвоката Осадька"></span>
+      Осадько
     </a>
     <nav class="site-nav" id="nav">
       <a href="#about">Про мене</a>
       <a href="#services">Послуги</a>
       <a href="#articles">Статті</a>
-      <a href="#contacts">Контакти</a>
+      <a href="#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="nav-toggle" id="navToggle" aria-label="Відкрити меню" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -37,17 +37,26 @@
   <section class="hero">
     <div class="container hero-inner">
       <div class="hero-text">
-        <p class="hero-kicker">Адвокат</p>
-        <h1>Олександр Осадько</h1>
+        <span class="pill"><i></i>Адвокат • приймаю нові справи</span>
+        <h1>Правовий захист <span class="accent">без стресу</span></h1>
         <p class="hero-lead">
-          Правовий захист приватних осіб і бізнесу. Представництво в судах,
-          консультації, супровід — з увагою до деталей і повною конфіденційністю.
+          Представництво в судах, консультації та супровід для людей і бізнесу.
+          Пояснюю складне простими словами і працюю на результат.
         </p>
-        <a href="#contacts" class="hero-contact">Отримати консультацію</a>
+        <div class="hero-actions">
+          <a href="#contacts" class="btn btn-primary">Отримати консультацію</a>
+          <a href="#services" class="link-underline">Мої послуги</a>
+        </div>
       </div>
-      <div class="hero-photo">
-        <img src="assets/photo.jpg" alt="Адвокат Олександр Осадько"
-             onerror="this.onerror=null;this.src='assets/photo-placeholder.svg'">
+      <div class="hero-visual">
+        <div class="visual-card">
+          <img class="photo" src="assets/photo.jpg" alt="Адвокат Олександр Осадько"
+               onerror="this.onerror=null;this.src='assets/photo-placeholder.svg'">
+          <h3>Особистий супровід справи</h3>
+          <p>Веду кожного клієнта особисто — від першої консультації до фактичного вирішення питання.</p>
+        </div>
+        <div class="float-badge b1"><b>24 год</b>середній час відповіді</div>
+        <div class="float-badge b2"><b>100%</b>конфіденційно</div>
       </div>
     </div>
   </section>
@@ -55,12 +64,12 @@
   <!-- Про мене -->
   <section class="section" id="about">
     <div class="container">
-      <div class="section-head">
-        <span class="section-num">01</span>
-        <h2 class="section-title">Про мене</h2>
+      <div class="section-head reveal">
+        <span class="section-kicker">Про мене</span>
+        <h2 class="section-title">Адвокат, який на вашому боці</h2>
       </div>
       <div class="about-grid">
-        <div class="about-text">
+        <div class="about-text reveal">
           <p>
             Я допомагаю людям і бізнесу вирішувати правові питання будь-якої
             складності — від консультації до представництва в суді.
@@ -68,21 +77,26 @@
           <p>
             Моя мета — не просто надати юридичну послугу, а знайти рішення,
             яке реально захистить ваші інтереси. Кожну справу веду особисто:
-            від першої зустрічі до остаточного вирішення питання.
+            від першої зустрічі до остаточного вирішення питання, тримаючи вас
+            у курсі на кожному етапі.
+          </p>
+          <p>
+            Працюю чесно: ще до початку роботи даю відверту оцінку перспектив,
+            щоб ви ухвалювали рішення свідомо.
           </p>
         </div>
-        <ul class="about-facts">
+        <ul class="about-list reveal">
           <li>
-            <span class="fact-title">Індивідуальний підхід</span>
-            <span class="fact-text">Стратегія захисту під конкретну ситуацію</span>
+            <span class="t">Індивідуальний підхід</span>
+            <span class="d">Стратегія захисту під конкретну ситуацію</span>
           </li>
           <li>
-            <span class="fact-title">Конфіденційність</span>
-            <span class="fact-text">Адвокатська таємниця гарантована законом</span>
+            <span class="t">Конфіденційність</span>
+            <span class="d">Адвокатська таємниця гарантована законом</span>
           </li>
           <li>
-            <span class="fact-title">Чесна оцінка</span>
-            <span class="fact-text">Реальні перспективи справи ще до початку роботи</span>
+            <span class="t">Чесна оцінка</span>
+            <span class="d">Реальні перспективи справи ще до початку роботи</span>
           </li>
         </ul>
       </div>
@@ -92,104 +106,106 @@
   <!-- Послуги -->
   <section class="section" id="services">
     <div class="container">
-      <div class="section-head">
-        <span class="section-num">02</span>
-        <h2 class="section-title">Послуги</h2>
+      <div class="section-head reveal">
+        <span class="section-kicker">Послуги</span>
+        <h2 class="section-title">Напрями, у яких я допомагаю</h2>
+        <p class="section-sub">Беру справи, в яких можу дати реальний результат — і чесно кажу про перспективи ще до початку роботи.</p>
       </div>
-      <ul class="services-list">
-        <li>
-          <span class="service-num">01</span>
-          <span class="service-name">Юридичні консультації</span>
-          <span class="service-desc">Усні та письмові консультації, правовий аналіз документів і ситуацій.</span>
-        </li>
-        <li>
-          <span class="service-num">02</span>
-          <span class="service-name">Представництво в судах</span>
-          <span class="service-desc">Захист інтересів у судах усіх інстанцій: позови, засідання, оскарження рішень.</span>
-        </li>
-        <li>
-          <span class="service-num">03</span>
-          <span class="service-name">Цивільні справи</span>
-          <span class="service-desc">Договірні спори, стягнення боргів, захист права власності, відшкодування шкоди.</span>
-        </li>
-        <li>
-          <span class="service-num">04</span>
-          <span class="service-name">Сімейні справи</span>
-          <span class="service-desc">Розірвання шлюбу, поділ майна, аліменти, визначення місця проживання дитини.</span>
-        </li>
-        <li>
-          <span class="service-num">05</span>
-          <span class="service-name">Господарські спори</span>
-          <span class="service-desc">Супровід бізнесу, спори між суб'єктами господарювання, договірна робота.</span>
-        </li>
-        <li>
-          <span class="service-num">06</span>
-          <span class="service-name">Кримінальні справи</span>
-          <span class="service-desc">Захист на всіх стадіях провадження, представництво інтересів потерпілих.</span>
-        </li>
-      </ul>
+      <div class="cards">
+        <article class="card reveal">
+          <div class="ic">💬</div>
+          <h3>Юридичні консультації</h3>
+          <p>Усні та письмові консультації, правовий аналіз документів і ситуацій.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ic">⚖️</div>
+          <h3>Представництво в судах</h3>
+          <p>Захист інтересів у судах усіх інстанцій: позови, засідання, оскарження рішень.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ic">📄</div>
+          <h3>Цивільні справи</h3>
+          <p>Договірні спори, стягнення боргів, захист права власності, відшкодування шкоди.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ic">🏠</div>
+          <h3>Сімейні справи</h3>
+          <p>Розірвання шлюбу, поділ майна, аліменти, визначення місця проживання дитини.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ic">🏢</div>
+          <h3>Господарські спори</h3>
+          <p>Супровід бізнесу, спори між суб'єктами господарювання, договірна робота.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ic">🛡️</div>
+          <h3>Кримінальний захист</h3>
+          <p>Захист на всіх стадіях провадження, представництво інтересів потерпілих.</p>
+        </article>
+      </div>
     </div>
   </section>
 
   <!-- Статті -->
   <section class="section" id="articles">
     <div class="container">
-      <div class="section-head">
-        <span class="section-num">03</span>
-        <h2 class="section-title">Статті</h2>
+      <div class="section-head reveal">
+        <span class="section-kicker">Статті</span>
+        <h2 class="section-title">Пояснюю просто</h2>
+        <p class="section-sub">Розбираю правові питання зрозумілою мовою — щоб ви розуміли свої права ще до звернення.</p>
       </div>
-      <ul class="articles-list">
-        <li>
-          <a class="article-link" href="articles/yak-povernuty-borh.html">
-            <p class="article-date">Липень 2026</p>
-            <h3 class="article-title">Що робити, якщо вам не повертають борг: покроковий алгоритм</h3>
-            <p class="article-teaser">Від досудової претензії до виконавчого провадження — як діяти, щоб повернути свої гроші, і яких помилок припускаються найчастіше.</p>
-          </a>
-        </li>
-        <li>
-          <a class="article-link" href="articles/rozirvannya-shlyubu.html">
-            <p class="article-date">Липень 2026</p>
-            <h3 class="article-title">Розірвання шлюбу в Україні: як відбувається і що варто знати</h3>
-            <p class="article-teaser">Через РАЦС чи через суд, скільки це триває, що з майном і дітьми — відповіді на найпоширеніші питання.</p>
-          </a>
-        </li>
-        <li>
-          <a class="article-link" href="articles/pershyi-dopyt.html">
-            <p class="article-date">Липень 2026</p>
-            <h3 class="article-title">Виклик на допит: права, про які варто пам'ятати кожному</h3>
-            <p class="article-teaser">Свідок, підозрюваний чи потерпілий — у кожного свій обсяг прав. Що можна, чого не можна і чому адвокат потрібен із самого початку.</p>
-          </a>
-        </li>
-        <li>
-          <a class="article-link" href="articles/yak-uklasty-dohovir.html">
-            <p class="article-date">Липень 2026</p>
-            <h3 class="article-title">Як укласти договір, щоб потім не судитися</h3>
-            <p class="article-teaser">Істотні умови, відповідальність сторін, порядок розірвання — на що звернути увагу до підписання, а не після.</p>
-          </a>
-        </li>
-      </ul>
+      <div class="articles">
+        <a class="article-card reveal" href="articles/yak-povernuty-borh.html">
+          <span class="date">Липень 2026</span>
+          <h3>Що робити, якщо вам не повертають борг</h3>
+          <p>Від досудової претензії до виконавчого провадження — покроковий алгоритм і типові помилки.</p>
+          <span class="more">Читати <span>→</span></span>
+        </a>
+        <a class="article-card reveal" href="articles/rozirvannya-shlyubu.html">
+          <span class="date">Липень 2026</span>
+          <h3>Розірвання шлюбу в Україні</h3>
+          <p>ДРАЦС чи суд, скільки триває, що з майном і дітьми — відповіді на головні питання.</p>
+          <span class="more">Читати <span>→</span></span>
+        </a>
+        <a class="article-card reveal" href="articles/pershyi-dopyt.html">
+          <span class="date">Липень 2026</span>
+          <h3>Виклик на допит: ваші права</h3>
+          <p>Свідок, підозрюваний чи потерпілий — що можна, чого не можна і чому адвокат потрібен одразу.</p>
+          <span class="more">Читати <span>→</span></span>
+        </a>
+        <a class="article-card reveal" href="articles/yak-uklasty-dohovir.html">
+          <span class="date">Липень 2026</span>
+          <h3>Як укласти договір, щоб потім не судитися</h3>
+          <p>Істотні умови, відповідальність сторін, порядок розірвання — на що звернути увагу до підпису.</p>
+          <span class="more">Читати <span>→</span></span>
+        </a>
+      </div>
     </div>
   </section>
 
   <!-- Контакти -->
   <section class="section" id="contacts">
     <div class="container">
-      <div class="section-head">
-        <span class="section-num">04</span>
-        <h2 class="section-title">Контакти</h2>
-      </div>
       <div class="contacts-grid">
-        <div>
-          <span class="contact-label">Телефон</span>
-          <a class="contact-value" href="tel:+380000000000">+38 (000) 000-00-00</a>
+        <div class="contacts-card reveal">
+          <span class="section-kicker" style="color:var(--blue2)">Контакти</span>
+          <h2 class="section-title">Обговоримо вашу справу</h2>
+          <p>Напишіть або зателефонуйте — відповім у найкоротший термін і запропоную зручний час для консультації.</p>
+          <a href="tel:+380000000000" class="btn btn-primary">Зателефонувати</a>
         </div>
-        <div>
-          <span class="contact-label">Email</span>
-          <a class="contact-value" href="mailto:espir3@gmail.com">espir3@gmail.com</a>
-        </div>
-        <div>
-          <span class="contact-label">Графік</span>
-          <span class="contact-value">Пн–Пт, 9:00–18:00</span>
+        <div class="contact-lines reveal">
+          <div class="contact-item">
+            <span class="label">Телефон</span>
+            <a class="value" href="tel:+380000000000">+38 (000) 000-00-00</a>
+          </div>
+          <div class="contact-item">
+            <span class="label">Email</span>
+            <a class="value" href="mailto:espir3@gmail.com">espir3@gmail.com</a>
+          </div>
+          <div class="contact-item">
+            <span class="label">Графік роботи</span>
+            <span class="value">Пн–Пт, 9:00–18:00</span>
+          </div>
         </div>
       </div>
     </div>
@@ -199,8 +215,11 @@
 
 <footer class="site-footer">
   <div class="container footer-inner">
-    <span>Адвокат Олександр Осадько</span>
-    <span>© <span id="year"></span> Усі права захищено</span>
+    <span class="brand">
+      <span class="brand-mark" style="width:28px;height:28px"><img src="assets/logo-mark.svg" alt=""></span>
+      Осадько
+    </span>
+    <span>© <span id="year"></span> Адвокат Олександр Осадько. Усі права захищено.</span>
   </div>
 </footer>
 
@@ -217,6 +236,12 @@
     nav.classList.remove('open');
     toggle.setAttribute('aria-expanded', 'false');
   }));
+
+  // Поява при скролі
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 </script>
 
 </body>
