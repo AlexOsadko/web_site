@@ -82,8 +82,16 @@ CAT_DESC = {
 # Авто-перелінковка: ключова фраза → slug статті. Білдер робить першу згадку
 # фрази у тексті посиланням на відповідну статтю (не більше MAX_AUTOLINKS на статтю,
 # без самопосилань). Нові статті вплітаються автоматично — достатньо додати фразу.
-MAX_AUTOLINKS = 4
+MAX_AUTOLINKS = 7
 LINK_TERMS = {
+    "аліменти": "alimenty-na-dytynu", "аліментів": "alimenty-na-dytynu", "аліменти на дитину": "alimenty-na-dytynu",
+    "розлучення": "rozirvannya-shlyubu", "розлученні": "rozirvannya-shlyubu", "розлучення в україні": "rozirvannya-shlyubu",
+    "спадщині": "spadschyna-pryynyaty", "спадщиною": "spadschyna-pryynyaty",
+    "заповіті": "zapovit",
+    "претензію": "pretenziya", "претензії": "pretenziya",
+    "позов": "yak-podaty-pozov", "позову": "yak-podaty-pozov", "позовом": "yak-podaty-pozov",
+    "штраф": "oskarzhennia-shtrafu", "штрафу": "oskarzhennia-shtrafu",
+    "виконавчої служби": "vykonavche-provadzhennya",
     "позовної давності": "pozovna-davnist", "позовна давність": "pozovna-davnist",
     "судовий наказ": "sudovyi-nakaz", "судового наказу": "sudovyi-nakaz",
     "досудову претензію": "pretenziya", "досудової претензії": "pretenziya", "досудова претензія": "pretenziya",
@@ -128,6 +136,44 @@ LINK_TERMS = {
     "податкова перевірка": "podatkova-perevirka", "податкової перевірки": "podatkova-perevirka",
     "податкове повідомлення-рішення": "podatkova-perevirka",
     "касаційної скарги": "kasatsiine-oskarzhennia", "касаційну скаргу": "kasatsiine-oskarzhennia", "касації": "kasatsiine-oskarzhennia",
+    # --- додаткові фрази для щільнішої перелінковки ---
+    "не повертають борг": "yak-povernuty-borh", "повернення боргу": "yak-povernuty-borh",
+    "стягнення боргу з контрагента": "stiahnennia-borhu-kontragent",
+    "договір оренди": "dohovir-orendy-kvartyry", "оренди квартири": "dohovir-orendy-kvartyry",
+    "розірвання договору": "rozirvannya-dohovoru", "розірвати договір": "rozirvannya-dohovoru",
+    "захист прав споживачів": "zahyst-spozhyvachiv", "права споживача": "zahyst-spozhyvachiv", "неякісний товар": "zahyst-spozhyvachiv",
+    "неякісна послуга": "neyakisna-posluha", "неякісну послугу": "neyakisna-posluha",
+    "матеріальної шкоди": "vidshkoduvannya-shkody", "відшкодування збитків": "vidshkoduvannya-shkody",
+    "аліменти на дружину": "alimenty-na-druzhynu", "утримання подружжя": "alimenty-na-druzhynu",
+    "поділ бізнесу": "podil-maina-podruzhzhya",
+    "стягнення заборгованості з аліментів": "stiahnennia-zaborhovanosti-alimenty", "борг з аліментів": "stiahnennia-zaborhovanosti-alimenty",
+    "місце проживання дитини": "mistse-prozhyvannya-dytyny", "місця проживання дитини": "mistse-prozhyvannya-dytyny",
+    "трудовий договір": "trudovyi-vs-tsph", "договір цпх": "trudovyi-vs-tsph",
+    "звільнення за власним бажанням": "zvilnennya-vlasne-bazhannya",
+    "мобінг": "mobinh-na-roboti", "мобінгу": "mobinh-na-roboti",
+    "виробничої травми на роботі": "vyrobnycha-travma",
+    "на допит": "pershyi-dopyt", "виклик на допит": "pershyi-dopyt",
+    "права потерпілого": "poterpilyi-prava", "потерпілого": "poterpilyi-prava",
+    "заяву про злочин": "zayava-pro-zlochyn", "заява про злочин": "zayava-pro-zlochyn",
+    "умовно-дострокове звільнення": "umovno-dostrokove",
+    "закриття кримінального провадження": "zakryttia-kryminalnoho-provadzhennia",
+    "дтп": "dtp-algorytm", "після дтп": "dtp-algorytm",
+    "європротоколу": "evroprotokol",
+    "позбавлення водійських прав": "pozbavlennya-prav", "водійських прав": "pozbavlennya-prav",
+    "оскарження штрафу": "oskarzhennia-shtrafu", "штраф з камери": "oskarzhennia-shtrafu",
+    "страхове відшкодування": "strahove-vidshkoduvannya", "виплату за осцпв": "strahove-vidshkoduvannya",
+    "спадкові спори": "spory-pro-spadschynu", "спори про спадщину": "spory-pro-spadschynu",
+    "договір дарування": "daruvannya-neruhomosti",
+    "земельної ділянки": "zemelni-spory",
+    "приватизація земельної ділянки": "pryvatyzatsiia-zemli", "приватизувати земельну ділянку": "pryvatyzatsiia-zemli",
+    "договору довічного утримання": "dovichne-utrymannya",
+    "ліквідація підприємства": "likvidatsiya-pidpryyemstva", "ліквідувати підприємство": "likvidatsiya-pidpryyemstva",
+    "договір постачання": "dohovir-postachannya",
+    "ділової репутації": "zahyst-reputatsiyi", "захист репутації": "zahyst-reputatsiyi",
+    "судових витрат": "sudovi-vytraty",
+    "заочне рішення": "zaochne-rishennia", "заочного рішення": "zaochne-rishennia",
+    "усиновлення дитини": "usynovlennia-dytyny", "усиновлення": "usynovlennia-dytyny",
+    "реєстрацію фоп": "reyestratsiya-fop",
 }
 
 # Головна: 6 обраних статей у секції «Статті» (curated).
@@ -212,31 +258,42 @@ def blocks_to_html(blocks):
     return "\n\n".join(out)
 
 
+def _autolink_text(text, cur_slug, valid_slugs, used, terms):
+    """Вставляє посилання на першу згадку ключових фраз у рядку тексту."""
+    if "<a " in text:
+        return text
+    for phrase, slug in terms:
+        if len(used) >= MAX_AUTOLINKS:
+            break
+        if slug == cur_slug or slug in used or slug not in valid_slugs:
+            continue
+        pat = re.compile(r"(?<![\w’ʼ'\-])(" + re.escape(phrase) + r")(?![\w’ʼ'\-])", re.IGNORECASE)
+        m = pat.search(text)
+        if not m:
+            continue
+        before = text[:m.start()]
+        if before.count("<a ") > before.count("</a>"):  # уже всередині посилання
+            continue
+        text = before + f'<a href="{slug}.html">{m.group(1)}</a>' + text[m.end():]
+        used.add(slug)
+    return text
+
+
 def autolink_blocks(blocks, cur_slug, valid_slugs):
-    """Робить першу згадку ключових фраз посиланням на відповідну статтю."""
+    """Робить перші згадки ключових фраз (в абзацах і списках) посиланнями на статті."""
     used = set()
     terms = sorted(LINK_TERMS.items(), key=lambda kv: -len(kv[0]))
     out = []
     for b in blocks:
-        if b["type"] != "p" or "<a " in b["text"]:
+        if len(used) >= MAX_AUTOLINKS:
             out.append(b)
-            continue
-        text = b["text"]
-        for phrase, slug in terms:
-            if len(used) >= MAX_AUTOLINKS:
-                break
-            if slug == cur_slug or slug in used or slug not in valid_slugs:
-                continue
-            pat = re.compile(r"(?<![\w’ʼ'\-])(" + re.escape(phrase) + r")(?![\w’ʼ'\-])", re.IGNORECASE)
-            m = pat.search(text)
-            if not m:
-                continue
-            before = text[:m.start()]
-            if before.count("<a ") > before.count("</a>"):  # уже всередині посилання
-                continue
-            text = before + f'<a href="{slug}.html">{m.group(1)}</a>' + text[m.end():]
-            used.add(slug)
-        out.append({"type": "p", "text": text})
+        elif b["type"] == "p":
+            out.append({"type": "p", "text": _autolink_text(b["text"], cur_slug, valid_slugs, used, terms)})
+        elif b["type"] in ("ul", "ol"):
+            items = [_autolink_text(it, cur_slug, valid_slugs, used, terms) for it in b["items"]]
+            out.append({"type": b["type"], "items": items})
+        else:
+            out.append(b)
     return out
 
 
