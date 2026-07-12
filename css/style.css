@@ -336,7 +336,7 @@ a { color: var(--blue); text-decoration: none; }
 .article-card:hover .more span { transform: translateX(6px); }
 
 /* ===== Контакти ===== */
-.contacts-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: start; }
+.contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
 .contacts-card {
   background: var(--ink);
   color: #fff;
