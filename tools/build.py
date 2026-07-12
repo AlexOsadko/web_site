@@ -196,6 +196,27 @@ LINK_TERMS = {
     "самочинне будівництво": "uzakonennia-samobudu", "самочинного будівництва": "uzakonennia-samobudu", "самочинну споруду": "uzakonennia-samobudu",
     "торгову марку": "reyestratsiia-torhovoi-marky", "торгової марки": "reyestratsiia-torhovoi-marky", "торгова марка": "reyestratsiia-torhovoi-marky",
     "відвід судді": "vidvid-suddi", "відвід": "vidvid-suddi", "відводу": "vidvid-suddi",
+    # --- військове право та мобілізація ---
+    "влк": "vlk-oskarzhennia", "військово-лікарської комісії": "vlk-oskarzhennia", "військово-лікарська комісія": "vlk-oskarzhennia",
+    "відстрочка від мобілізації": "vidstrochka-mobilizatsiya", "відстрочку від мобілізації": "vidstrochka-mobilizatsiya", "відстрочки від мобілізації": "vidstrochka-mobilizatsiya",
+    "сзч": "szch-vidpovidalnist", "самовільне залишення частини": "szch-vidpovidalnist", "самовільного залишення частини": "szch-vidpovidalnist",
+    "звільнення з військової служби": "zvilnennya-z-viyskovoi-sluzhby", "звільнення зі служби": "zvilnennya-z-viyskovoi-sluzhby",
+    "тцк та сп": "oskarzhennia-tck", "рішень тцк": "oskarzhennia-tck", "рішення тцк": "oskarzhennia-tck",
+    "статус убд": "vyplaty-viyskovym-ubd", "убд": "vyplaty-viyskovym-ubd", "виплати військовим": "vyplaty-viyskovym-ubd", "виплати військовослужбовцям": "vyplaty-viyskovym-ubd",
+    # --- адміністративні спори ---
+    "адміністративний позов": "administratyvnyi-pozov", "адміністративного позову": "administratyvnyi-pozov", "адміністративним позовом": "administratyvnyi-pozov",
+    "бездіяльність органу": "bezdiyalnist-organu", "бездіяльності органу": "bezdiyalnist-organu", "протиправну бездіяльність": "bezdiyalnist-organu",
+    "публічної інформації": "dostup-do-publichnoi-informatsii", "публічну інформацію": "dostup-do-publichnoi-informatsii", "запит на інформацію": "dostup-do-publichnoi-informatsii",
+    "адміністративної послуги": "vidmova-administratyvna-posluha", "адміністративну послугу": "vidmova-administratyvna-posluha", "адміністративних послуг": "vidmova-administratyvna-posluha",
+    "місцевого самоврядування": "oskarzhennia-mistsevoi-vlady", "органів місцевого самоврядування": "oskarzhennia-mistsevoi-vlady",
+    "адміністративне правопорушення": "administratyvnyi-aresht", "адміністративного правопорушення": "administratyvnyi-aresht",
+    # --- пенсійні та соціальні виплати ---
+    "перерахунок пенсії": "pererahunok-pensii", "перерахунку пенсії": "pererahunok-pensii",
+    "призначенні пенсії": "vidmova-u-pensii", "відмова у пенсії": "vidmova-u-pensii", "відмову у призначенні пенсії": "vidmova-u-pensii",
+    "статус впо": "vyplaty-vpo", "впо": "vyplaty-vpo", "внутрішньо переміщеної особи": "vyplaty-vpo", "переселенця": "vyplaty-vpo",
+    "інвалідності": "invalidnist-msek", "мсек": "invalidnist-msek", "групу інвалідності": "invalidnist-msek",
+    "субсидію": "subsydiya", "субсидії": "subsydiya", "житлова субсидія": "subsydiya", "житлової субсидії": "subsydiya",
+    "трудового стажу": "pidtverdzhennia-stazhu", "трудовий стаж": "pidtverdzhennia-stazhu", "страхового стажу": "pidtverdzhennia-stazhu",
 }
 
 # Головна: 6 обраних статей у секції «Статті» (curated).
