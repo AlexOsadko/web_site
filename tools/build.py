@@ -463,6 +463,8 @@ ARTICLE_PAGE = """<!DOCTYPE html>
       Адвокат Осадько Олександр
     </a>
     <nav class="site-nav">
+      <a href="../index.html#about">Про мене</a>
+      <a href="../index.html#services">Послуги</a>
       <a href="../articles/index.html">Статті</a>
       <a href="../zrazky/index.html">Зразки</a>
       <a href="../index.html#contacts" class="nav-cta">Консультація</a>
@@ -756,6 +758,8 @@ def render_hub(cat, arts):
       Адвокат Осадько Олександр
     </a>
     <nav class="site-nav">
+      <a href="../index.html#about">Про мене</a>
+      <a href="../index.html#services">Послуги</a>
       <a href="index.html">Статті</a>
       <a href="../zrazky/index.html">Зразки</a>
       <a href="../index.html#contacts" class="nav-cta">Консультація</a>
