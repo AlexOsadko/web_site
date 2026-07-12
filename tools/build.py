@@ -82,7 +82,7 @@ CAT_DESC = {
 # Авто-перелінковка: ключова фраза → slug статті. Білдер робить першу згадку
 # фрази у тексті посиланням на відповідну статтю (не більше MAX_AUTOLINKS на статтю,
 # без самопосилань). Нові статті вплітаються автоматично — достатньо додати фразу.
-MAX_AUTOLINKS = 7
+MAX_AUTOLINKS = 8
 LINK_TERMS = {
     "аліменти": "alimenty-na-dytynu", "аліментів": "alimenty-na-dytynu", "аліменти на дитину": "alimenty-na-dytynu",
     "розлучення": "rozirvannya-shlyubu", "розлученні": "rozirvannya-shlyubu", "розлучення в україні": "rozirvannya-shlyubu",
@@ -323,11 +323,19 @@ def build_faq_html(faq):
 def build_related_html(cur_slug, cat, allmeta):
     same = [a for a in allmeta if a["cat"] == cat and a["slug"] != cur_slug]
     rest = [a for a in allmeta if a["cat"] != cat and a["slug"] != cur_slug]
-    pick = same[:2] + rest[:1]          # 2 з тієї ж теми + 1 суміжна
-    if len(pick) < 3:
+    # 3 з тієї ж теми + 3 суміжні з різних категорій (для різноманіття)
+    diverse, seen = [], set()
+    for a in rest:
+        if a["cat"] not in seen:
+            diverse.append(a)
+            seen.add(a["cat"])
+        if len(diverse) >= 3:
+            break
+    pick = same[:3] + diverse
+    if len(pick) < 6:
         extra = [a for a in (same + rest) if a not in pick]
-        pick += extra[:3 - len(pick)]
-    pick = pick[:3]
+        pick += extra[:6 - len(pick)]
+    pick = pick[:6]
     out = []
     for a in pick:
         out.append(f'''      <a class="related-card" href="{a['slug']}.html">
