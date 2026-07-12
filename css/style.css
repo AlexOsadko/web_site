@@ -235,7 +235,7 @@ a { color: var(--blue); text-decoration: none; }
 .contacts-divider { color: #8b98ad; font-size: .85rem; margin: 20px 0 0; }
 
 /* ===== Секції ===== */
-.section { padding: 84px 0; border-top: 1px solid var(--line); }
+.section { padding: 56px 0; border-top: 1px solid var(--line); }
 .section.tint {
   border-top: none;
   background: linear-gradient(180deg, var(--tint), transparent 70%);
@@ -244,7 +244,7 @@ a { color: var(--blue); text-decoration: none; }
   border-top: none;
   background: linear-gradient(180deg, var(--tint-warm), transparent 70%);
 }
-.section-head { margin-bottom: 46px; }
+.section-head { margin-bottom: 32px; }
 .section-kicker {
   display: inline-block;
   font-size: .78rem;
@@ -505,7 +505,7 @@ a.card:hover .more span { transform: translateX(5px); }
   .articles { grid-template-columns: 1fr; }
   .contacts-grid { grid-template-columns: 1fr; gap: 28px; }
   .contacts-card { padding: 36px; }
-  .section { padding: 64px 0; }
+  .section { padding: 44px 0; }
 }
 @media (max-width: 620px) {
   .site-nav {
@@ -687,7 +687,7 @@ a.card:hover .more span { transform: translateX(5px); }
 .cat-filter button:hover { color: var(--ink); border-color: var(--blue2); }
 .cat-filter button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
 
-.catalog { padding: 40px 0 90px; }
+.catalog { padding: 32px 0 60px; }
 .cat-group { margin-bottom: 56px; }
 .cat-group-head {
   display: flex; align-items: center; gap: 14px;
