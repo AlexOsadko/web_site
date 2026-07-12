@@ -217,6 +217,30 @@ a { color: var(--blue); text-decoration: none; }
 }
 .float-badge.b1 { top: -20px; right: -18px; }
 .float-badge.b2 { bottom: -54px; left: -26px; animation-delay: -2.5s; }
+
+/* Пігулки-переваги під hero */
+.hero-feats { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.hero-feats li {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: .9rem; color: var(--ink);
+  background: var(--card); border: 1px solid var(--line);
+  padding: 8px 15px; border-radius: 999px;
+}
+.hero-feats li::before { content: "✓"; color: var(--blue); font-weight: 700; }
+
+/* Форма заявки в блоці контактів */
+.lead-form { margin-top: 22px; display: grid; gap: 10px; }
+.lead-form input, .lead-form textarea {
+  width: 100%; padding: 12px 15px; border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .08);
+  color: #fff; font-family: inherit; font-size: .95rem;
+}
+.lead-form input::placeholder, .lead-form textarea::placeholder { color: #aeb9cc; }
+.lead-form input:focus, .lead-form textarea:focus { outline: none; border-color: var(--blue2); background: rgba(255, 255, 255, .12); }
+.lead-form textarea { resize: vertical; min-height: 88px; }
+.lead-form button { margin-top: 4px; }
+.form-ok { display: none; color: #6ee7a0; font-size: .9rem; margin-top: 10px; }
+.contacts-divider { color: #8b98ad; font-size: .85rem; margin: 20px 0 0; }
 .float-badge b {
   display: block;
   font-family: 'Bricolage Grotesque', sans-serif;

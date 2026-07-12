@@ -54,6 +54,10 @@
           <a href="#contacts" class="btn btn-primary">Отримати консультацію</a>
           <a href="#services" class="link-underline">Мої послуги</a>
         </div>
+        <ul class="hero-feats">
+          <li>Перша консультація — безкоштовно</li>
+          <li>Онлайн по всій Україні</li>
+        </ul>
       </div>
       <div class="hero-visual">
         <div class="visual-card">
@@ -212,8 +216,15 @@
         <div class="contacts-card reveal">
           <span class="section-kicker" style="color:var(--blue2)">Контакти</span>
           <h2 class="section-title">Обговоримо вашу справу</h2>
-          <p>Напишіть або зателефонуйте — відповім у найкоротший термін і запропоную зручний час для консультації.</p>
-          <a href="tel:+380934664443" class="btn btn-primary">Зателефонувати</a>
+          <p>Залиште заявку — відповім у найкоротший термін (у середньому за 15 хвилин) і запропоную зручний час. Перша консультація безкоштовна.</p>
+          <form class="lead-form" id="leadForm">
+            <input name="name" type="text" required placeholder="Ваше ім'я" autocomplete="name">
+            <input name="phone" type="tel" required placeholder="Телефон" inputmode="tel" autocomplete="tel">
+            <textarea name="message" placeholder="Коротко опишіть ваше питання"></textarea>
+            <button class="btn btn-primary" type="submit">Надіслати заявку</button>
+            <div class="form-ok" id="formOk">Дякую! Заявку надіслано — зв'яжуся найближчим часом.</div>
+          </form>
+          <p class="contacts-divider">Або зателефонуйте: <a href="tel:+380934664443" style="color:#fff;text-decoration:underline">+38 (093) 466-44-43</a></p>
         </div>
         <div class="contact-lines reveal">
           <div class="contact-item">
@@ -287,6 +298,37 @@
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Форма заявки.
+  // Щоб заявки йшли одразу на пошту (без відкриття поштового застосунку) —
+  // отримайте безкоштовний ключ на https://web3forms.com (вкажіть adv.osadko@gmail.com)
+  // і вставте його в лапки нижче. Поки ключа немає — форма відкриває поштовий клієнт.
+  const WEB3FORMS_KEY = "";
+  const leadForm = document.getElementById('leadForm');
+  if (leadForm) {
+    leadForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = leadForm.elements['name'].value.trim();
+      const phone = leadForm.elements['phone'].value.trim();
+      const message = leadForm.elements['message'].value.trim();
+      const ok = document.getElementById('formOk');
+      const mailFallback = () => {
+        const body = 'Імʼя: ' + name + '\nТелефон: ' + phone + '\nПитання: ' + message;
+        window.location.href = 'mailto:adv.osadko@gmail.com?subject=' +
+          encodeURIComponent('Заявка з сайту') + '&body=' + encodeURIComponent(body);
+      };
+      if (WEB3FORMS_KEY) {
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject: 'Заявка з сайту', name, phone, message })
+        }).then(r => r.json()).then(() => { leadForm.reset(); ok.style.display = 'block'; })
+          .catch(mailFallback);
+      } else {
+        mailFallback();
+      }
+    });
+  }
 </script>
 
 </body>
