@@ -119,6 +119,15 @@ LINK_TERMS = {
     "розписку": "rozpyska-pro-pozyku", "розписки": "rozpyska-pro-pozyku", "розписка": "rozpyska-pro-pozyku",
     "обшуку": "obshuk", "обшук": "obshuk",
     "затримання": "zatrymannya",
+    "затоплення квартири": "zatoplennia-kvartyry", "затопили квартиру": "zatoplennia-kvartyry",
+    "виїзд дитини за кордон": "vyizd-dytyny-za-kordon", "виїзду дитини за кордон": "vyizd-dytyny-za-kordon",
+    "виробнича травма": "vyrobnycha-travma", "виробничої травми": "vyrobnycha-travma",
+    "судимості": "znyattia-sudymosti", "судимість": "znyattia-sudymosti",
+    "тотальне пошкодження": "total-avto",
+    "іпотечного кредиту": "ipoteka-prava-pozychalnyka", "іпотеки": "ipoteka-prava-pozychalnyka",
+    "податкова перевірка": "podatkova-perevirka", "податкової перевірки": "podatkova-perevirka",
+    "податкове повідомлення-рішення": "podatkova-perevirka",
+    "касаційної скарги": "kasatsiine-oskarzhennia", "касаційну скаргу": "kasatsiine-oskarzhennia", "касації": "kasatsiine-oskarzhennia",
 }
 
 # Головна: 6 обраних статей у секції «Статті» (curated).
