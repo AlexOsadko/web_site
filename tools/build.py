@@ -234,7 +234,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <meta property="og:site_name" content="Адвокат Олександр Осадько">
   <meta property="og:locale" content="uk_UA">
   <meta name="twitter:card" content="summary">
-  <link rel="icon" type="image/svg+xml" href="../assets/logo-mark.svg">
+  <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -246,7 +246,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
 <header class="site-header">
   <div class="container header-inner">
     <a href="../index.html" class="brand">
-      <span class="brand-mark"><img src="../assets/logo-mark.svg" alt="Логотип адвоката Осадька"></span>
+      <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька"></span>
       Адвокат Осадько Олександр
     </a>
     <nav class="site-nav">
@@ -293,7 +293,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
 <footer class="site-footer">
   <div class="container footer-inner">
     <span class="brand">
-      <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.svg" alt=""></span>
+      <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt=""></span>
       Адвокат Осадько Олександр
     </span>
     <span>© <span id="year"></span> Адвокат Олександр Осадько. Усі права захищено.</span>
@@ -367,7 +367,7 @@ def render_catalog(arts):
   <title>Статті — Олександр Осадько, адвокат</title>
   <meta name="description" content="Юридичні статті адвоката Олександра Осадька: борги та договори, сімейне право, трудові спори, кримінальні справи, ДТП, нерухомість, бізнес і судовий процес.">
   <link rel="canonical" href="{ART_BASE_URL}index.html">
-  <link rel="icon" type="image/svg+xml" href="../assets/logo-mark.svg">
+  <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -378,7 +378,7 @@ def render_catalog(arts):
 <header class="site-header">
   <div class="container header-inner">
     <a href="../index.html" class="brand">
-      <span class="brand-mark"><img src="../assets/logo-mark.svg" alt="Логотип адвоката Осадька"></span>
+      <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька"></span>
       Адвокат Осадько Олександр
     </a>
     <nav class="site-nav">
@@ -414,7 +414,7 @@ def render_catalog(arts):
 <footer class="site-footer">
   <div class="container footer-inner">
     <span class="brand">
-      <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.svg" alt=""></span>
+      <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt=""></span>
       Адвокат Осадько Олександр
     </span>
     <span>© <span id="year"></span> Адвокат Олександр Осадько. Усі права захищено.</span>
