@@ -1,0 +1,75 @@
+name: Створити статтю (AI)
+
+# Запускається вручну: Actions → «Створити статтю (AI)» → Run workflow.
+# Вводите тему і категорію — модель Claude пише нову статтю, білдер генерує HTML
+# і автоматично оновлює кількість статей на сайті. Зміни комітяться у гілку,
+# після чого воркфлоу Deploy to GitHub Pages публікує оновлений сайт.
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Тема статті (українською), напр. «Банкрутство фізичної особи»"
+        required: true
+        type: string
+      category:
+        description: "Категорія статті"
+        required: true
+        type: choice
+        options:
+          - civil      # Цивільні справи та борги
+          - family     # Сімейні справи
+          - labor      # Трудові спори
+          - criminal   # Кримінальні справи
+          - auto       # ДТП та автоправо
+          - realty     # Нерухомість і спадщина
+          - business   # Бізнес і господарські спори
+          - process    # Судовий процес
+      slug:
+        description: "Необов'язковий slug латиницею (лишіть порожнім для авто)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: generate-article
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Встановити залежності
+        run: pip install -r tools/requirements.txt
+
+      - name: Згенерувати статтю
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python3 tools/generate_article.py \
+            --topic "${{ inputs.topic }}" \
+            --category "${{ inputs.category }}" \
+            --slug "${{ inputs.slug }}"
+
+      - name: Перебудувати сайт (HTML, каталог, лічильник, sitemap)
+        run: python3 tools/build.py
+
+      - name: Закомітити й запушити
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "Немає змін для коміту."
+            exit 0
+          fi
+          git add content/articles articles index.html sitemap.xml robots.txt
+          git commit -m "Нова стаття: ${{ inputs.topic }}"
+          git push
