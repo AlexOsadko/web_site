@@ -217,6 +217,10 @@ LINK_TERMS = {
     "інвалідності": "invalidnist-msek", "мсек": "invalidnist-msek", "групу інвалідності": "invalidnist-msek",
     "субсидію": "subsydiya", "субсидії": "subsydiya", "житлова субсидія": "subsydiya", "житлової субсидії": "subsydiya",
     "трудового стажу": "pidtverdzhennia-stazhu", "трудовий стаж": "pidtverdzhennia-stazhu", "страхового стажу": "pidtverdzhennia-stazhu",
+    # --- ст. 130 КУпАП (керування у стані сп'яніння) ---
+    "керування у стані сп'яніння": "st-130-kupap", "130 купап": "st-130-kupap", "стані сп'яніння": "st-130-kupap",
+    "огляду на стан сп'яніння": "ogljad-na-spjaninnja", "огляд на стан сп'яніння": "ogljad-na-spjaninnja", "огляд на сп'яніння": "ogljad-na-spjaninnja",
+    "відмова від огляду": "vidmova-vid-ogljadu", "відмову від огляду": "vidmova-vid-ogljadu", "відмови від огляду": "vidmova-vid-ogljadu",
 }
 
 # Головна: 6 обраних статей у секції «Статті» (curated).
