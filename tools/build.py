@@ -33,17 +33,22 @@ CATS = {
     "family":   "Сімейні справи",
     "labor":    "Трудові спори",
     "criminal": "Кримінальні справи",
+    "military": "Військове право та мобілізація",
     "auto":     "ДТП та автоправо",
     "realty":   "Нерухомість і спадщина",
     "business": "Бізнес і господарські спори",
+    "admin":    "Адміністративні спори з держорганами",
+    "social":   "Пенсійні та соціальні виплати",
     "process":  "Судовий процес",
 }
 SHORT_CAT = {
     "civil": "Борги та договори", "family": "Сімейне право", "labor": "Трудові спори",
-    "criminal": "Кримінальні справи", "auto": "ДТП та авто", "realty": "Нерухомість",
-    "business": "Бізнес", "process": "Судовий процес",
+    "criminal": "Кримінальні справи", "military": "Військове право", "auto": "ДТП та авто",
+    "realty": "Нерухомість", "business": "Бізнес", "admin": "Адмінспори",
+    "social": "Пенсії та соцвиплати", "process": "Судовий процес",
 }
-ORDER = ["civil", "family", "labor", "criminal", "auto", "realty", "business", "process"]
+ORDER = ["civil", "family", "labor", "criminal", "military", "auto",
+         "realty", "business", "admin", "social", "process"]
 
 KW_BASE = {
     "civil": "стягнення боргу, цивільний адвокат, позов, договір, відшкодування шкоди",
@@ -53,6 +58,9 @@ KW_BASE = {
     "auto": "автоюрист, ДТП, позбавлення прав, страхове відшкодування, оскарження штрафу",
     "realty": "нерухомість, спадщина, заповіт, купівля квартири, земельні спори",
     "business": "адвокат для бізнесу, господарський спір, договір, ФОП, стягнення боргу",
+    "military": "військовий адвокат, мобілізація, ВЛК, відстрочка, СЗЧ, звільнення з військової служби",
+    "admin": "адміністративний спір, оскарження рішення, КАСУ, адвокат, держоргани, субсидія",
+    "social": "пенсійний адвокат, перерахунок пенсії, соціальні виплати, ВПО, інвалідність, субсидія",
     "process": "судовий процес, позовна заява, апеляція, виконавче провадження, адвокат у суді",
 }
 CAT_NOTE = {
@@ -63,6 +71,9 @@ CAT_NOTE = {
     "auto": "тут результат часто залежить від процедури оформлення та фіксації обставин.",
     "realty": "тут ціна помилки висока, а угоду чи спадщину можуть оскаржити роками пізніше.",
     "business": "тут важливо передбачити ризики заздалегідь і діяти на випередження.",
+    "military": "тут ідеться про службу, свободу й життя, а строки на оскарження стислі — діяти треба швидко й точно.",
+    "admin": "тут проти вас держорган зі штатними юристами, а процесуальні строки в адмінсправах особливо стислі.",
+    "social": "тут кожна виплата рахується, а відмови органів часто ґрунтуються на формальностях, які можна оскаржити.",
     "process": "тут виграє той, хто знає процедуру і не пропускає процесуальних строків.",
 }
 NOTE_LINK = '<a href="../index.html#contacts">зв\'яжіться зі мною</a>'
@@ -77,6 +88,9 @@ CAT_DESC = {
     "realty": "Спадщина, заповіт, купівля квартири, дарування та земельні спори. Допомагаю уникнути помилок, через які угоду чи спадщину оскаржують роками пізніше.",
     "business": "Договори, стягнення боргів, реєстрація та ліквідація ФОП, захист репутації. Раджу, як передбачити ризики заздалегідь і діяти на випередження.",
     "process": "Позовна заява, судовий збір, апеляція, виконавче провадження та мирова угода. Пояснюю процедуру крок за кроком — щоб ви не пропустили процесуальних строків.",
+    "military": "Мобілізація, ВЛК, відстрочки, СЗЧ, звільнення зі служби, контракт і виплати військовим. Пояснюю, як діяти законно й захистити свої права під час служби та мобілізації.",
+    "admin": "Оскарження рішень, дій і бездіяльності органів влади, штрафів, відмов у наданні послуг, ліцензій і дозволів. Показую, як судитися з державою за правилами КАСУ.",
+    "social": "Перерахунок і призначення пенсії, соціальні виплати, статус і виплати ВПО, інвалідність та субсидії. Допомагаю оскаржити відмови органів і домогтися належних вам виплат.",
 }
 
 # Авто-перелінковка: ключова фраза → slug статті. Білдер робить першу згадку
@@ -406,7 +420,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=2">
+  <link rel="stylesheet" href="../css/style.css?v=3">
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
@@ -540,7 +554,7 @@ def render_catalog(arts):
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=2">
+  <link rel="stylesheet" href="../css/style.css?v=3">
 </head>
 <body>
 
@@ -658,7 +672,7 @@ def render_hub(cat, arts):
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=2">
+  <link rel="stylesheet" href="../css/style.css?v=3">
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
