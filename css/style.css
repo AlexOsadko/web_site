@@ -207,21 +207,6 @@ a { color: var(--blue); text-decoration: none; }
 }
 .visual-card h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 14px; }
 .visual-card p { color: var(--muted); font-size: .9rem; }
-.float-badge {
-  position: absolute;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 14px 18px;
-  box-shadow: 0 16px 40px rgba(11, 31, 58, .12);
-  font-size: .85rem;
-  color: var(--muted);
-  animation: floaty 5s ease-in-out infinite alternate;
-}
-.float-badge.b1 { top: -20px; right: -18px; }
-.float-badge.b2 { bottom: -54px; left: -26px; animation-delay: -2.5s; }
-.float-badge.b3 { top: 44%; right: -26px; animation-delay: -1.2s; }
-
 /* Пігулки-переваги під hero */
 .hero-feats { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
 .hero-feats li {
@@ -245,13 +230,6 @@ a { color: var(--blue); text-decoration: none; }
 .lead-form button { margin-top: 4px; }
 .form-ok { display: none; color: #6ee7a0; font-size: .9rem; margin-top: 10px; }
 .contacts-divider { color: #8b98ad; font-size: .85rem; margin: 20px 0 0; }
-.float-badge b {
-  display: block;
-  font-family: 'Bricolage Grotesque', sans-serif;
-  font-size: 1.3rem;
-  color: var(--blue);
-}
-@keyframes floaty { to { transform: translateY(-12px); } }
 
 /* ===== Секції ===== */
 .section { padding: 84px 0; border-top: 1px solid var(--line); }
@@ -474,7 +452,7 @@ a.card:hover .more span { transform: translateX(5px); }
 .reveal.in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
-  .float-badge, .pill i { animation: none; }
+  .pill i { animation: none; }
 }
 
 /* ===== Сторінка статті ===== */
