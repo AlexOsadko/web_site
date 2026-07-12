@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://alexosadko.github.io/web_site/sitemap.xml
+Sitemap: https://osadko.online/sitemap.xml
