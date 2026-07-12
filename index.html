@@ -119,36 +119,42 @@
         <p class="section-sub">Беру справи, в яких можу дати реальний результат — і чесно кажу про перспективи ще до початку роботи.</p>
       </div>
       <div class="cards">
-        <article class="card reveal">
+        <a class="card reveal" href="articles/index.html">
           <div class="ic">💬</div>
           <h3>Юридичні консультації</h3>
           <p>Усні та письмові консультації, правовий аналіз документів і ситуацій.</p>
-        </article>
-        <article class="card reveal">
+          <span class="more">Статті <span>→</span></span>
+        </a>
+        <a class="card reveal" href="articles/process.html">
           <div class="ic">⚖️</div>
           <h3>Представництво в судах</h3>
           <p>Захист інтересів у судах усіх інстанцій: позови, засідання, оскарження рішень.</p>
-        </article>
-        <article class="card reveal">
+          <span class="more">Судовий процес <span>→</span></span>
+        </a>
+        <a class="card reveal" href="articles/civil.html">
           <div class="ic">📄</div>
           <h3>Цивільні справи</h3>
           <p>Договірні спори, стягнення боргів, захист права власності, відшкодування шкоди.</p>
-        </article>
-        <article class="card reveal">
+          <span class="more">Статті теми <span>→</span></span>
+        </a>
+        <a class="card reveal" href="articles/family.html">
           <div class="ic">🏠</div>
           <h3>Сімейні справи</h3>
           <p>Розірвання шлюбу, поділ майна, аліменти, визначення місця проживання дитини.</p>
-        </article>
-        <article class="card reveal">
+          <span class="more">Статті теми <span>→</span></span>
+        </a>
+        <a class="card reveal" href="articles/business.html">
           <div class="ic">🏢</div>
           <h3>Господарські спори</h3>
           <p>Супровід бізнесу, спори між суб'єктами господарювання, договірна робота.</p>
-        </article>
-        <article class="card reveal">
+          <span class="more">Статті теми <span>→</span></span>
+        </a>
+        <a class="card reveal" href="articles/criminal.html">
           <div class="ic">🛡️</div>
           <h3>Кримінальний захист</h3>
           <p>Захист на всіх стадіях провадження, представництво інтересів потерпілих.</p>
-        </article>
+          <span class="more">Статті теми <span>→</span></span>
+        </a>
       </div>
     </div>
   </section>
@@ -217,6 +223,7 @@
             <input name="name" type="text" required placeholder="Ваше ім'я" autocomplete="name">
             <input name="phone" type="tel" required placeholder="Телефон" inputmode="tel" autocomplete="tel">
             <textarea name="message" placeholder="Коротко опишіть ваше питання"></textarea>
+            <input type="text" name="company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
             <button class="btn btn-primary" type="submit">Надіслати заявку</button>
             <div class="form-ok" id="formOk">Дякую! Заявку надіслано — зв'яжуся найближчим часом.</div>
           </form>
@@ -319,9 +326,13 @@
   // і вставте його в лапки нижче. Поки ключа немає — форма відкриває поштовий клієнт.
   const WEB3FORMS_KEY = "";
   const leadForm = document.getElementById('leadForm');
+  const formStart = Date.now();
   if (leadForm) {
     leadForm.addEventListener('submit', (e) => {
       e.preventDefault();
+      // Антиспам: honeypot (боти заповнюють приховане поле) + часова пастка (боти шлють миттєво).
+      if (leadForm.elements['company'] && leadForm.elements['company'].value) return;
+      if (Date.now() - formStart < 2000) return;
       const name = leadForm.elements['name'].value.trim();
       const phone = leadForm.elements['phone'].value.trim();
       const message = leadForm.elements['message'].value.trim();

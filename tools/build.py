@@ -67,6 +67,60 @@ CAT_NOTE = {
 }
 NOTE_LINK = '<a href="../index.html#contacts">зв\'яжіться зі мною</a>'
 
+# Описи категорій для тематичних сторінок-хабів.
+CAT_DESC = {
+    "civil": "Борги, розписки, договори, відшкодування шкоди та захист прав споживачів. Пояснюю, як стягнути борг, скласти претензію й відстояти свої інтереси в цивільних спорах.",
+    "family": "Розлучення, поділ майна, аліменти, батьківські права та шлюбний договір. Розбираю сімейні питання зрозуміло — з фокусом на інтересах дітей і збереженні нервів.",
+    "labor": "Незаконне звільнення, невиплата зарплати, скорочення та трудові гарантії. Нагадую про скорочені строки й пояснюю, як захистити свої права перед роботодавцем.",
+    "criminal": "Допит, затримання, обшук, запобіжні заходи та права потерпілого. Тут кожне слово має значення — пояснюю, як діяти, щоб не нашкодити собі.",
+    "auto": "ДТП, європротокол, позбавлення прав, штрафи та страхове відшкодування. Показую, як правильно зафіксувати обставини й отримати повну виплату.",
+    "realty": "Спадщина, заповіт, купівля квартири, дарування та земельні спори. Допомагаю уникнути помилок, через які угоду чи спадщину оскаржують роками пізніше.",
+    "business": "Договори, стягнення боргів, реєстрація та ліквідація ФОП, захист репутації. Раджу, як передбачити ризики заздалегідь і діяти на випередження.",
+    "process": "Позовна заява, судовий збір, апеляція, виконавче провадження та мирова угода. Пояснюю процедуру крок за кроком — щоб ви не пропустили процесуальних строків.",
+}
+
+# Авто-перелінковка: ключова фраза → slug статті. Білдер робить першу згадку
+# фрази у тексті посиланням на відповідну статтю (не більше MAX_AUTOLINKS на статтю,
+# без самопосилань). Нові статті вплітаються автоматично — достатньо додати фразу.
+MAX_AUTOLINKS = 4
+LINK_TERMS = {
+    "позовної давності": "pozovna-davnist", "позовна давність": "pozovna-davnist",
+    "судовий наказ": "sudovyi-nakaz", "судового наказу": "sudovyi-nakaz",
+    "досудову претензію": "pretenziya", "досудової претензії": "pretenziya", "досудова претензія": "pretenziya",
+    "моральної шкоди": "moralna-shkoda", "моральну шкоду": "moralna-shkoda",
+    "поділ майна": "podil-maina-podruzhzhya", "поділу майна": "podil-maina-podruzhzhya",
+    "розірвання шлюбу": "rozirvannya-shlyubu", "розірванні шлюбу": "rozirvannya-shlyubu",
+    "аліменти на дитину": "alimenty-na-dytynu", "аліментів на дитину": "alimenty-na-dytynu",
+    "шлюбний договір": "shlyubnyi-dohovir", "шлюбного договору": "shlyubnyi-dohovir",
+    "позбавлення батьківських прав": "pozbavlennya-batkivskyh-prav",
+    "встановлення батьківства": "vstanovlennya-batkivstva",
+    "незаконне звільнення": "nezakonne-zvilnennya", "незаконного звільнення": "nezakonne-zvilnennya",
+    "невиплати зарплати": "nevyplata-zarplaty", "невиплата зарплати": "nevyplata-zarplaty",
+    "скорочення штату": "skorochennya-shtatu",
+    "європротокол": "evroprotokol",
+    "запобіжний захід": "zapobizhnyi-zahid", "запобіжного заходу": "zapobizhnyi-zahid",
+    "домашнього насильства": "domashnie-nasylstvo", "домашнє насильство": "domashnie-nasylstvo",
+    "прийняти спадщину": "spadschyna-pryynyaty", "прийняття спадщини": "spadschyna-pryynyaty",
+    "заповіту": "zapovit", "заповіт": "zapovit",
+    "дарування": "daruvannya-neruhomosti",
+    "купівлі квартири": "kupivlya-kvartyry", "купівля квартири": "kupivlya-kvartyry",
+    "земельні спори": "zemelni-spory", "земельних спорів": "zemelni-spory",
+    "довічного утримання": "dovichne-utrymannya",
+    "реєстрація фоп": "reyestratsiya-fop", "реєстрації фоп": "reyestratsiya-fop",
+    "банкрутства фізичної особи": "bankrutstvo-fizychnoi-osoby", "банкрутство фізичної особи": "bankrutstvo-fizychnoi-osoby",
+    "виконавче провадження": "vykonavche-provadzhennya", "виконавчого провадження": "vykonavche-provadzhennya",
+    "апеляційну скаргу": "apelyatsiya", "апеляційної скарги": "apelyatsiya",
+    "судові витрати": "sudovi-vytraty", "судових витрат": "sudovi-vytraty",
+    "судовий збір": "sudovi-vytraty", "судового збору": "sudovi-vytraty",
+    "забезпечення позову": "zabezpechennya-pozovu",
+    "мирову угоду": "myrova-uhoda", "мирова угода": "myrova-uhoda",
+    "медіації": "dosudove-vrehulyuvannya", "медіація": "dosudove-vrehulyuvannya",
+    "позовну заяву": "yak-podaty-pozov", "позовної заяви": "yak-podaty-pozov",
+    "розписку": "rozpyska-pro-pozyku", "розписки": "rozpyska-pro-pozyku", "розписка": "rozpyska-pro-pozyku",
+    "обшуку": "obshuk", "обшук": "obshuk",
+    "затримання": "zatrymannya",
+}
+
 # Головна: 6 обраних статей у секції «Статті» (curated).
 FEATURED = ["yak-povernuty-borh", "rozirvannya-shlyubu", "pershyi-dopyt",
             "nezakonne-zvilnennya", "dtp-algorytm", "spadschyna-pryynyaty"]
@@ -149,6 +203,34 @@ def blocks_to_html(blocks):
     return "\n\n".join(out)
 
 
+def autolink_blocks(blocks, cur_slug, valid_slugs):
+    """Робить першу згадку ключових фраз посиланням на відповідну статтю."""
+    used = set()
+    terms = sorted(LINK_TERMS.items(), key=lambda kv: -len(kv[0]))
+    out = []
+    for b in blocks:
+        if b["type"] != "p" or "<a " in b["text"]:
+            out.append(b)
+            continue
+        text = b["text"]
+        for phrase, slug in terms:
+            if len(used) >= MAX_AUTOLINKS:
+                break
+            if slug == cur_slug or slug in used or slug not in valid_slugs:
+                continue
+            pat = re.compile(r"(?<![\w’ʼ'\-])(" + re.escape(phrase) + r")(?![\w’ʼ'\-])", re.IGNORECASE)
+            m = pat.search(text)
+            if not m:
+                continue
+            before = text[:m.start()]
+            if before.count("<a ") > before.count("</a>"):  # уже всередині посилання
+                continue
+            text = before + f'<a href="{slug}.html">{m.group(1)}</a>' + text[m.end():]
+            used.add(slug)
+        out.append({"type": "p", "text": text})
+    return out
+
+
 def closing_blocks(cat, h1):
     topic = h1[0].lower() + h1[1:]
     return [
@@ -175,7 +257,11 @@ def build_faq_html(faq):
 def build_related_html(cur_slug, cat, allmeta):
     same = [a for a in allmeta if a["cat"] == cat and a["slug"] != cur_slug]
     rest = [a for a in allmeta if a["cat"] != cat and a["slug"] != cur_slug]
-    pick = (same + rest)[:3]
+    pick = same[:2] + rest[:1]          # 2 з тієї ж теми + 1 суміжна
+    if len(pick) < 3:
+        extra = [a for a in (same + rest) if a not in pick]
+        pick += extra[:3 - len(pick)]
+    pick = pick[:3]
     out = []
     for a in pick:
         out.append(f'''      <a class="related-card" href="{a['slug']}.html">
@@ -201,7 +287,7 @@ def build_jsonld(a, faq):
         "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "Головна", "item": BASE_URL},
             {"@type": "ListItem", "position": 2, "name": "Статті", "item": ART_BASE_URL},
-            {"@type": "ListItem", "position": 3, "name": CATS[cat], "item": ART_BASE_URL + "index.html"},
+            {"@type": "ListItem", "position": 3, "name": CATS[cat], "item": ART_BASE_URL + cat + ".html"},
             {"@type": "ListItem", "position": 4, "name": title, "item": url},
         ],
     }
@@ -260,7 +346,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <nav class="crumbs" aria-label="Хлібні крихти">
     <a href="../index.html">Головна</a><span>/</span>
     <a href="index.html">Статті</a><span>/</span>
-    <a href="index.html#{cat}">{catname}</a><span>/</span>
+    <a href="{cat}.html">{catname}</a><span>/</span>
     <span class="cur">{crumb}</span>
   </nav>
   <span class="cat cat-{cat}">{catname}</span>
@@ -309,7 +395,8 @@ ARTICLE_PAGE = """<!DOCTYPE html>
 
 def render_article(a, allmeta):
     faq = a.get("faq", [])
-    full_blocks = a["blocks"] + closing_blocks(a["cat"], a["h1"])
+    valid = {x["slug"] for x in allmeta}
+    full_blocks = autolink_blocks(a["blocks"], a["slug"], valid) + closing_blocks(a["cat"], a["h1"])
     body = blocks_to_html(full_blocks)
     kw = f"{a['title'].lower()}, адвокат, юрист, {KW_BASE[a['cat']]}, Україна, консультація адвоката"
     repl = {
@@ -345,7 +432,7 @@ def render_catalog(arts):
         groups_html.append(f'''    <div class="cat-group" data-cat="{cat}">
       <div class="cat-group-head">
         <span class="cat cat-{cat}">{esc(SHORT_CAT[cat])}</span>
-        <h2>{esc(CATS[cat])}</h2>
+        <h2><a href="{cat}.html">{esc(CATS[cat])}</a></h2>
         <span class="count">{len(items)} {plural_uk(len(items), ("стаття","статті","статей"))}</span>
       </div>
       <div class="cat-grid">
@@ -443,6 +530,121 @@ def render_catalog(arts):
 '''
 
 
+# ---------- ТЕМАТИЧНА СТОРІНКА-ХАБ articles/<cat>.html ----------
+def render_hub(cat, arts):
+    items = [a for a in arts if a["cat"] == cat]
+    n = len(items)
+    cards = []
+    for a in items:
+        cards.append(f'''      <a class="mini-card reveal" href="{a['slug']}.html">
+        <span class="cat cat-{cat}">{esc(SHORT_CAT[cat])}</span>
+        <h3>{esc(a['title'])}</h3>
+        <p>{esc(a['desc'])}</p>
+        <span class="more">Читати →</span>
+      </a>''')
+    others = "\n".join(
+        f'        <a class="cat cat-{c}" href="{c}.html">{esc(SHORT_CAT[c])}</a>'
+        for c in ORDER if c != cat and any(x["cat"] == c for x in arts)
+    )
+    url = ART_BASE_URL + cat + ".html"
+    jsonld = json.dumps({"@context": "https://schema.org", "@graph": [
+        {"@type": "CollectionPage", "name": CATS[cat], "description": CAT_DESC[cat],
+         "inLanguage": "uk", "url": url},
+        {"@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Головна", "item": BASE_URL},
+            {"@type": "ListItem", "position": 2, "name": "Статті", "item": ART_BASE_URL},
+            {"@type": "ListItem", "position": 3, "name": CATS[cat], "item": url},
+        ]},
+    ]}, ensure_ascii=False)
+    return f'''<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{esc(CATS[cat])} — статті адвоката Олександра Осадька</title>
+  <meta name="description" content="{esc(CAT_DESC[cat])}">
+  <meta name="keywords" content="{esc(KW_BASE[cat])}, адвокат, юрист, Україна">
+  <link rel="canonical" href="{url}">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{esc(CATS[cat])} — статті адвоката">
+  <meta property="og:description" content="{esc(CAT_DESC[cat])}">
+  <meta property="og:url" content="{url}">
+  <meta property="og:site_name" content="Адвокат Олександр Осадько">
+  <meta property="og:locale" content="uk_UA">
+  <link rel="icon" type="image/png" href="../assets/logo-mark.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css?v=2">
+  <script type="application/ld+json">{jsonld}</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="../index.html" class="brand">
+      <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька"></span>
+      Адвокат Осадько Олександр
+    </a>
+    <nav class="site-nav">
+      <a href="index.html">Статті</a>
+      <a href="../index.html#contacts" class="nav-cta">Консультація</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="catalog-hero">
+    <div class="container">
+      <nav class="crumbs" aria-label="Хлібні крихти">
+        <a href="../index.html">Головна</a><span>/</span>
+        <a href="index.html">Статті</a><span>/</span>
+        <span class="cur">{esc(CATS[cat])}</span>
+      </nav>
+      <span class="cat cat-{cat}">{esc(SHORT_CAT[cat])}</span>
+      <h1>{esc(CATS[cat])}</h1>
+      <p>{esc(CAT_DESC[cat])} Усього {n} {plural_uk(n, ("стаття", "статті", "статей"))}.</p>
+    </div>
+  </section>
+
+  <section class="catalog">
+    <div class="container">
+      <div class="cat-grid">
+{chr(10).join(cards)}
+      </div>
+      <div class="hub-others">
+        <span class="hub-others-label">Інші теми:</span>
+{others}
+      </div>
+    </div>
+  </section>
+</main>
+
+{FAB_HTML}
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <span class="brand">
+      <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt=""></span>
+      Адвокат Осадько Олександр
+    </span>
+    <span>© <span id="year"></span> Адвокат Олександр Осадько. Усі права захищено.</span>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+  const io = new IntersectionObserver((e) => {{
+    e.forEach(x => {{ if (x.isIntersecting) {{ x.target.classList.add('in'); io.unobserve(x.target); }} }});
+  }}, {{ threshold: 0.08 }});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
+'''
+
+
 # ---------- ОНОВЛЕННЯ ЛІЧИЛЬНИКА НА ГОЛОВНІЙ ----------
 def update_homepage_count(n):
     """Оновлює лише кількість статей на index.html (обрані картки лишаються без змін)."""
@@ -462,7 +664,9 @@ def update_homepage_count(n):
 
 # ---------- SITEMAP + ROBOTS ----------
 def write_sitemap(arts):
+    cats_present = [c for c in ORDER if any(a["cat"] == c for a in arts)]
     urls = [BASE_URL, ART_BASE_URL + "index.html"]
+    urls += [ART_BASE_URL + c + ".html" for c in cats_present]
     urls += [ART_BASE_URL + a["slug"] + ".html" for a in arts]
     lastmod = max((a.get("date_modified", "2026-07-11") for a in arts), default="2026-07-11")
     body = "\n".join(
@@ -499,12 +703,17 @@ def main():
     with open(os.path.join(ART, "index.html"), "w", encoding="utf-8") as f:
         f.write(render_catalog(arts))
 
+    hubs = [c for c in ORDER if any(a["cat"] == c for a in arts)]
+    for c in hubs:
+        with open(os.path.join(ART, c + ".html"), "w", encoding="utf-8") as f:
+            f.write(render_hub(c, arts))
+
     c1, c2 = update_homepage_count(n)
     write_sitemap(arts)
     write_robots()
 
     missing_slug = [s for s in FEATURED if s not in {a["slug"] for a in arts}]
-    print(f"Побудовано статей: {n}")
+    print(f"Побудовано статей: {n}; тематичних хабів: {len(hubs)}")
     print(f"Оновлено лічильник на головній: секція={c1}, кнопка={c2}")
     if missing_slug:
         print(f"⚠ Обрані статті відсутні в даних: {missing_slug}")
