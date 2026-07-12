@@ -247,7 +247,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <div class="container header-inner">
     <a href="../index.html" class="brand">
       <span class="brand-mark"><img src="../assets/logo-mark.svg" alt="Логотип адвоката Осадька"></span>
-      Осадько
+      Адвокат Осадько Олександр
     </a>
     <nav class="site-nav">
       <a href="../articles/index.html">Статті</a>
@@ -294,7 +294,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <div class="container footer-inner">
     <span class="brand">
       <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.svg" alt=""></span>
-      Осадько
+      Адвокат Осадько Олександр
     </span>
     <span>© <span id="year"></span> Адвокат Олександр Осадько. Усі права захищено.</span>
   </div>
@@ -379,7 +379,7 @@ def render_catalog(arts):
   <div class="container header-inner">
     <a href="../index.html" class="brand">
       <span class="brand-mark"><img src="../assets/logo-mark.svg" alt="Логотип адвоката Осадька"></span>
-      Осадько
+      Адвокат Осадько Олександр
     </a>
     <nav class="site-nav">
       <a href="../index.html#about">Про мене</a>
@@ -415,7 +415,7 @@ def render_catalog(arts):
   <div class="container footer-inner">
     <span class="brand">
       <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.svg" alt=""></span>
-      Осадько
+      Адвокат Осадько Олександр
     </span>
     <span>© <span id="year"></span> Адвокат Олександр Осадько. Усі права захищено.</span>
   </div>
