@@ -451,7 +451,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css?v=14">
   <script defer src="../assets/header-scroll.js?v=13"></script>
-  <script defer src="../assets/callback-popup.js?v=15"></script>
+  <script defer src="../assets/callback-popup.js?v=16"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
@@ -596,7 +596,7 @@ def render_catalog(arts):
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css?v=14">
   <script defer src="../assets/header-scroll.js?v=13"></script>
-  <script defer src="../assets/callback-popup.js?v=15"></script>
+  <script defer src="../assets/callback-popup.js?v=16"></script>
 </head>
 <body>
 
@@ -744,7 +744,7 @@ def render_hub(cat, arts):
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css?v=14">
   <script defer src="../assets/header-scroll.js?v=13"></script>
-  <script defer src="../assets/callback-popup.js?v=15"></script>
+  <script defer src="../assets/callback-popup.js?v=16"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>

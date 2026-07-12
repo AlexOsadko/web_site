@@ -3,12 +3,20 @@
 // Таймер зберігається в sessionStorage, тож переживає переходи між сторінками.
 // Після успішного надсилання більше не показується (у межах сесії).
 (function () {
-  var FIRST = 20000;  // перша поява — 20 секунд
-  var REPEAT = 90000; // повтор після закриття — 90 секунд
+  var FIRST = 15000;  // перша поява — 15 секунд
+  var REPEAT = 60000; // повтор після закриття — 60 секунд
+  var VER = "16";     // зміна версії скидає збережений стан таймера (нові тайминги діють одразу)
 
   // Ендпоінти (як і в формах на головній). Порожньо = лист на пошту.
   var NOTIFY_ENDPOINT = "";  // URL Cloudflare Worker (Telegram)
   var WEB3FORMS_KEY = "";    // ключ web3forms.com (пошта)
+
+  // Скидання старого стану при новій версії (щоб зміни таймінгів діяли й у відкритій вкладці).
+  if (sessionStorage.getItem("cbVer") !== VER) {
+    sessionStorage.removeItem("cbDone");
+    sessionStorage.removeItem("cbNext");
+    sessionStorage.setItem("cbVer", VER);
+  }
 
   if (sessionStorage.getItem("cbDone") === "1") return; // вже залишив заявку
 
