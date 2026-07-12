@@ -132,6 +132,7 @@
 </main>
 
 <div class="fab" aria-label="Швидкий зв'язок">
+  <div class="fab-group">
   <a class="fab-btn fab-call" href="tel:+380934664443" aria-label="Подзвонити">
     <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
   </a>
@@ -144,6 +145,10 @@
   <a class="fab-btn fab-vb" href="viber://chat?number=%2B380934664443" aria-label="Viber">
     <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
   </a>
+  </div>
+  <button class="fab-btn fab-toggle" type="button" aria-expanded="false" aria-label="Зв'язатися" onclick="this.parentElement.classList.toggle('open');this.setAttribute('aria-expanded',this.parentElement.classList.contains('open'))">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
   <button class="fab-btn fab-top" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Нагору">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
   </button>

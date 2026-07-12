@@ -216,7 +216,7 @@ a { color: var(--blue); text-decoration: none; }
   animation: floaty 5s ease-in-out infinite alternate;
 }
 .float-badge.b1 { top: -20px; right: -18px; }
-.float-badge.b2 { bottom: -24px; left: 18px; animation-delay: -2.5s; }
+.float-badge.b2 { bottom: -52px; left: 10px; animation-delay: -2.5s; }
 .float-badge b {
   display: block;
   font-family: 'Bricolage Grotesque', sans-serif;
@@ -354,7 +354,18 @@ a { color: var(--blue); text-decoration: none; }
 }
 .fab-btn svg { width: 24px; height: 24px; fill: currentColor; }
 .fab-btn:hover { transform: translateY(-3px) scale(1.06); box-shadow: 0 14px 32px rgba(11, 31, 58, .34); filter: brightness(1.05); }
-.fab-call { background: var(--blue); }
+.fab-group { display: flex; flex-direction: column; gap: 14px; margin-bottom: 14px; }
+.fab:not(.open) .fab-group { display: none; }
+.fab.open .fab-group .fab-btn { animation: fabPop .22s ease backwards; }
+.fab.open .fab-group .fab-btn:nth-child(1) { animation-delay: .02s; }
+.fab.open .fab-group .fab-btn:nth-child(2) { animation-delay: .05s; }
+.fab.open .fab-group .fab-btn:nth-child(3) { animation-delay: .08s; }
+.fab.open .fab-group .fab-btn:nth-child(4) { animation-delay: .11s; }
+@keyframes fabPop { from { opacity: 0; transform: translateY(14px) scale(.5); } to { opacity: 1; transform: none; } }
+.fab-toggle svg { transition: transform .22s ease; }
+.fab.open .fab-toggle svg { transform: rotate(135deg); }
+.fab-toggle { background: var(--blue); }
+.fab-call { background: #0d9488; }
 .fab-tg { background: #229ed9; }
 .fab-wa { background: #25d366; }
 .fab-vb { background: #7360f2; }
