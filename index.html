@@ -386,68 +386,54 @@
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-  // Форма заявки.
-  // Щоб заявки йшли одразу на пошту (без відкриття поштового застосунку) —
-  // отримайте безкоштовний ключ на https://web3forms.com (вкажіть adv.osadko@gmail.com)
-  // і вставте його в лапки нижче. Поки ключа немає — форма відкриває поштовий клієнт.
+  // ── Обробка заявок ──────────────────────────────────────────────
+  // NOTIFY_ENDPOINT — URL релея (Cloudflare Worker), який надсилає заявку
+  //   в Telegram. Токен бота зберігається в релеї, а не в цьому коді.
+  //   Поки порожньо — використовується пошта (Web3Forms або поштовий клієнт).
+  // WEB3FORMS_KEY — безкоштовний ключ з web3forms.com (заявки на пошту).
+  const NOTIFY_ENDPOINT = "";
   const WEB3FORMS_KEY = "";
-  const leadForm = document.getElementById('leadForm');
   const formStart = Date.now();
-  if (leadForm) {
-    leadForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      // Антиспам: honeypot (боти заповнюють приховане поле) + часова пастка (боти шлють миттєво).
-      if (leadForm.elements['company'] && leadForm.elements['company'].value) return;
-      if (Date.now() - formStart < 2000) return;
-      const name = leadForm.elements['name'].value.trim();
-      const phone = leadForm.elements['phone'].value.trim();
-      const message = leadForm.elements['message'].value.trim();
-      const ok = document.getElementById('formOk');
-      const mailFallback = () => {
-        const body = 'Імʼя: ' + name + '\nТелефон: ' + phone + '\nПитання: ' + message;
-        window.location.href = 'mailto:adv.osadko@gmail.com?subject=' +
-          encodeURIComponent('Заявка з сайту') + '&body=' + encodeURIComponent(body);
-      };
-      if (WEB3FORMS_KEY) {
-        fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject: 'Заявка з сайту', name, phone, message })
-        }).then(r => r.json()).then(() => { leadForm.reset(); ok.style.display = 'block'; })
-          .catch(mailFallback);
-      } else {
-        mailFallback();
-      }
-    });
+
+  function submitLead(form, okId, source) {
+    // Антиспам: honeypot (приховане поле) + часова пастка (миттєве надсилання).
+    if (form.elements['company'] && form.elements['company'].value) return;
+    if (Date.now() - formStart < 2000) return;
+    const name = form.elements['name'] ? form.elements['name'].value.trim() : '';
+    const phone = form.elements['phone'] ? form.elements['phone'].value.trim() : '';
+    const message = form.elements['message'] ? form.elements['message'].value.trim() : '';
+    const ok = document.getElementById(okId);
+    const showOk = () => { form.reset(); if (ok) ok.style.display = 'block'; };
+    const mailFallback = () => {
+      const body = 'Джерело: ' + source + '\nІмʼя: ' + name + '\nТелефон: ' + phone +
+        (message ? '\nПитання: ' + message : '');
+      window.location.href = 'mailto:adv.osadko@gmail.com?subject=' +
+        encodeURIComponent(source) + '&body=' + encodeURIComponent(body);
+    };
+    if (NOTIFY_ENDPOINT) {
+      fetch(NOTIFY_ENDPOINT, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, message, source, page: location.href })
+      }).then(r => { if (!r.ok) throw new Error('bad'); return r; }).then(showOk).catch(mailFallback);
+    } else if (WEB3FORMS_KEY) {
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject: source, name, phone, message })
+      }).then(r => r.json()).then(showOk).catch(mailFallback);
+    } else {
+      mailFallback();
+    }
   }
 
-  // «Замовити дзвінок» — компактна форма (ім'я + телефон)
+  const leadForm = document.getElementById('leadForm');
+  if (leadForm) leadForm.addEventListener('submit', (e) => {
+    e.preventDefault(); submitLead(leadForm, 'formOk', 'Заявка на консультацію');
+  });
   const cbForm = document.getElementById('callbackForm');
-  if (cbForm) {
-    cbForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (cbForm.elements['company'] && cbForm.elements['company'].value) return;
-      if (Date.now() - formStart < 2000) return;
-      const name = cbForm.elements['name'].value.trim();
-      const phone = cbForm.elements['phone'].value.trim();
-      const cbOk = document.getElementById('callbackOk');
-      const mailFallback = () => {
-        const body = 'Замовлення дзвінка\nІмʼя: ' + name + '\nТелефон: ' + phone;
-        window.location.href = 'mailto:adv.osadko@gmail.com?subject=' +
-          encodeURIComponent('Замовити дзвінок') + '&body=' + encodeURIComponent(body);
-      };
-      if (WEB3FORMS_KEY) {
-        fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject: 'Замовити дзвінок', name, phone })
-        }).then(r => r.json()).then(() => { cbForm.reset(); cbOk.style.display = 'block'; })
-          .catch(mailFallback);
-      } else {
-        mailFallback();
-      }
-    });
-  }
+  if (cbForm) cbForm.addEventListener('submit', (e) => {
+    e.preventDefault(); submitLead(cbForm, 'callbackOk', 'Замовлення дзвінка');
+  });
 </script>
 
 </body>
