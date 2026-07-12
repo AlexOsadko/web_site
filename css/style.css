@@ -216,7 +216,7 @@ a { color: var(--blue); text-decoration: none; }
   animation: floaty 5s ease-in-out infinite alternate;
 }
 .float-badge.b1 { top: -20px; right: -18px; }
-.float-badge.b2 { bottom: -78px; left: 10px; animation-delay: -2.5s; }
+.float-badge.b2 { bottom: -54px; left: -26px; animation-delay: -2.5s; }
 .float-badge b {
   display: block;
   font-family: 'Bricolage Grotesque', sans-serif;
