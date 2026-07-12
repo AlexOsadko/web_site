@@ -680,6 +680,33 @@ a.card:hover .more span { transform: translateX(5px); }
 .callback-form input:focus { outline: none; border-color: var(--blue2); background: rgba(255, 255, 255, .15); }
 .callback-form button { white-space: nowrap; }
 .callback-form .form-ok { flex-basis: 100%; margin-top: 8px; }
+
+/* ===== Спливаюче вікно «Замовити дзвінок» ===== */
+.cb-modal { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+.cb-modal.open { display: flex; }
+.cb-backdrop { position: absolute; inset: 0; background: rgba(11, 31, 58, .55); backdrop-filter: blur(2px); }
+.cb-card {
+  position: relative; z-index: 1; width: 100%; max-width: 400px;
+  background: var(--card); border-radius: 20px; padding: 32px 28px 28px;
+  box-shadow: var(--shadow-lg); animation: cbIn .3s ease;
+}
+@keyframes cbIn { from { opacity: 0; transform: translateY(18px) scale(.98); } to { opacity: 1; transform: none; } }
+.cb-close {
+  position: absolute; top: 10px; right: 14px; width: 34px; height: 34px;
+  border: none; background: transparent; font-size: 1.9rem; line-height: 1;
+  color: var(--muted); cursor: pointer; border-radius: 8px; transition: .2s;
+}
+.cb-close:hover { color: var(--ink); background: rgba(11, 31, 58, .06); }
+.cb-card h3 { font-size: 1.4rem; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+.cb-card > p { color: var(--muted); font-size: .95rem; line-height: 1.5; margin-bottom: 18px; }
+.cb-form { display: grid; gap: 10px; }
+.cb-form input[type="text"], .cb-form input[type="tel"] {
+  width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid var(--line);
+  font-family: inherit; font-size: .95rem; color: var(--ink); background: #fff;
+}
+.cb-form input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37, 99, 235, .12); }
+.cb-form button { margin-top: 4px; }
+.cb-ok { display: none; color: #16a34a; font-size: .9rem; margin: 4px 0 0; }
 @media (max-width: 860px) {
   .callback-inner { flex-wrap: wrap; }
   .callback-form { width: 100%; }
