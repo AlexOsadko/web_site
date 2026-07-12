@@ -174,6 +174,14 @@ LINK_TERMS = {
     "заочне рішення": "zaochne-rishennia", "заочного рішення": "zaochne-rishennia",
     "усиновлення дитини": "usynovlennia-dytyny", "усиновлення": "usynovlennia-dytyny",
     "реєстрацію фоп": "reyestratsiya-fop",
+    "персональних даних": "zahyst-personalnyh-danyh", "персональні дані": "zahyst-personalnyh-danyh",
+    "опіка": "opika-pikluvannia", "опіку": "opika-pikluvannia", "опіки та піклування": "opika-pikluvannia",
+    "невикористану відпустку": "kompensatsiia-vidpustka", "компенсацію за відпустку": "kompensatsiia-vidpustka",
+    "апеляція на вирок": "apelyatsiia-na-vyrok", "вироку": "apelyatsiia-na-vyrok", "вирок": "apelyatsiia-na-vyrok",
+    "регрес": "rehres-strakhovoi", "регресну вимогу": "rehres-strakhovoi",
+    "самочинне будівництво": "uzakonennia-samobudu", "самочинного будівництва": "uzakonennia-samobudu", "самочинну споруду": "uzakonennia-samobudu",
+    "торгову марку": "reyestratsiia-torhovoi-marky", "торгової марки": "reyestratsiia-torhovoi-marky", "торгова марка": "reyestratsiia-torhovoi-marky",
+    "відвід судді": "vidvid-suddi", "відвід": "vidvid-suddi", "відводу": "vidvid-suddi",
 }
 
 # Головна: 6 обраних статей у секції «Статті» (curated).
