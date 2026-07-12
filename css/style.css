@@ -24,6 +24,9 @@
   --c-realty: #16a34a;
   --c-business: #7c3aed;
   --c-process: #0891b2;
+  --c-military: #4d7c0f;
+  --c-admin: #475569;
+  --c-social: #4338ca;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -572,6 +575,9 @@ a.card:hover .more span { transform: translateX(5px); }
 .cat-realty   { color: var(--c-realty);   background: rgba(22,163,74,.12); }
 .cat-business { color: var(--c-business); background: rgba(124,58,237,.10); }
 .cat-process  { color: var(--c-process);  background: rgba(8,145,178,.12); }
+.cat-military { color: var(--c-military); background: rgba(77,124,15,.12); }
+.cat-admin    { color: var(--c-admin);    background: rgba(71,85,105,.12); }
+.cat-social   { color: var(--c-social);   background: rgba(67,56,202,.10); }
 
 /* Верхня кольорова смужка на картці статті */
 .article-card { position: relative; overflow: hidden; }
@@ -590,6 +596,9 @@ a.card:hover .more span { transform: translateX(5px); }
 .ac-realty   { --accent-c: var(--c-realty); }
 .ac-business { --accent-c: var(--c-business); }
 .ac-process  { --accent-c: var(--c-process); }
+.ac-military { --accent-c: var(--c-military); }
+.ac-admin    { --accent-c: var(--c-admin); }
+.ac-social   { --accent-c: var(--c-social); }
 
 .articles-more { margin-top: 40px; text-align: center; }
 
