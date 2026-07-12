@@ -137,7 +137,7 @@ a { color: var(--blue); text-decoration: none; }
 .link-underline:hover { color: var(--blue); }
 
 /* ===== Головний екран ===== */
-.hero { padding: 80px 0 72px; position: relative; overflow: hidden; }
+.hero { padding: 8px 0 72px; position: relative; overflow: hidden; }
 .hero::before {
   content: "";
   position: absolute;
@@ -494,7 +494,7 @@ a.card:hover .more span { transform: translateX(5px); }
 
 /* ===== Адаптивність ===== */
 @media (max-width: 880px) {
-  .hero { padding: 56px 0; }
+  .hero { padding: 12px 0 56px; }
   .hero-inner { grid-template-columns: 1fr; gap: 64px; }
   .hero-visual { max-width: 420px; }
   .about-grid { grid-template-columns: 1fr; gap: 36px; }
