@@ -23,7 +23,7 @@ import os, re, json, glob, html
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONTENT = os.path.join(ROOT, "content", "articles")
 ART = os.path.join(ROOT, "articles")
-BASE_URL = "https://osadko.online/"
+BASE_URL = "https://alexosadko.github.io/web_site/"
 ART_BASE_URL = BASE_URL + "articles/"
 DATE_LABEL = "Липень 2026"
 
