@@ -440,12 +440,16 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <meta property="og:url" content="{url}">
   <meta property="og:site_name" content="Адвокат Олександр Осадько">
   <meta property="og:locale" content="uk_UA">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="{ogimg}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=7">
+  <link rel="stylesheet" href="../css/style.css?v=8">
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
@@ -524,6 +528,7 @@ def render_article(a, allmeta):
         "{title}": esc(a["title"]), "{desc}": esc(a["desc"]), "{kw}": esc(kw),
         "{url}": ART_BASE_URL + a["slug"] + ".html", "{jsonld}": build_jsonld(a, faq),
         "{cat}": a["cat"], "{catname}": CATS[a["cat"]], "{crumb}": esc(a["title"]),
+        "{ogimg}": BASE_URL + "assets/og-image.jpg",
         "{h1}": esc(a["h1"]), "{date}": DATE_LABEL, "{read}": str(reading_time(body)),
         "{body}": body, "{faq}": build_faq_html(faq), "{related}": build_related_html(a["slug"], a["cat"], allmeta),
         "{fab}": FAB_HTML,
@@ -575,11 +580,18 @@ def render_catalog(arts):
   <title>Статті — Олександр Осадько, адвокат</title>
   <meta name="description" content="Юридичні статті адвоката Олександра Осадька: борги та договори, сімейне право, трудові спори, кримінальні справи, ДТП, нерухомість, бізнес і судовий процес.">
   <link rel="canonical" href="{ART_BASE_URL}index.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Статті — адвокат Олександр Осадько">
+  <meta property="og:url" content="{ART_BASE_URL}index.html">
+  <meta property="og:site_name" content="Адвокат Олександр Осадько">
+  <meta property="og:image" content="{BASE_URL}assets/og-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=7">
+  <link rel="stylesheet" href="../css/style.css?v=8">
 </head>
 <body>
 
@@ -604,6 +616,7 @@ def render_catalog(arts):
       <a href="../index.html" class="back-link">← На головну</a>
       <h1>Статті</h1>
       <p>Пояснюю правові питання простою мовою — {n} {materials} про борги, сім'ю, роботу, кримінальні справи, ДТП, нерухомість і бізнес. Оберіть тему нижче.</p>
+      <input type="search" id="q" class="catalog-search" placeholder="🔍 Пошук статті за темою або ключовим словом…" autocomplete="off" aria-label="Пошук статей">
       <div class="cat-filter" id="filter">
 {chr(10).join(filter_btns)}
       </div>
@@ -613,6 +626,7 @@ def render_catalog(arts):
   <section class="catalog">
     <div class="container" id="groups">
 {chr(10).join(groups_html)}
+      <p class="no-results" id="noResults" hidden>За вашим запитом нічого не знайдено. Спробуйте інші слова або оберіть тему вище.</p>
     </div>
   </section>
 </main>
@@ -631,15 +645,35 @@ def render_catalog(arts):
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
-  // Фільтр за категоріями
+  // Фільтр за категоріями + живий пошук
+  const q = document.getElementById('q');
   const btns = document.querySelectorAll('#filter button');
   const groups = document.querySelectorAll('#groups .cat-group');
+  const noRes = document.getElementById('noResults');
+  let activeCat = 'all';
+  function apply() {{
+    const term = (q.value || '').trim().toLowerCase();
+    let total = 0;
+    groups.forEach(g => {{
+      const catOk = (activeCat === 'all' || g.dataset.cat === activeCat);
+      let shown = 0;
+      g.querySelectorAll('.mini-card').forEach(card => {{
+        const vis = catOk && (term === '' || card.textContent.toLowerCase().includes(term));
+        card.style.display = vis ? '' : 'none';
+        if (vis) {{ card.classList.add('in'); shown++; }}
+      }});
+      g.style.display = shown ? '' : 'none';
+      total += shown;
+    }});
+    noRes.hidden = total !== 0;
+  }}
   btns.forEach(b => b.addEventListener('click', () => {{
     btns.forEach(x => x.classList.remove('active'));
     b.classList.add('active');
-    const f = b.dataset.f;
-    groups.forEach(g => g.style.display = (f === 'all' || g.dataset.cat === f) ? '' : 'none');
+    activeCat = b.dataset.f;
+    apply();
   }}));
+  q.addEventListener('input', apply);
   // Поява при скролі
   const io = new IntersectionObserver((e) => {{
     e.forEach(x => {{ if (x.isIntersecting) {{ x.target.classList.add('in'); io.unobserve(x.target); }} }});
@@ -693,11 +727,16 @@ def render_hub(cat, arts):
   <meta property="og:url" content="{url}">
   <meta property="og:site_name" content="Адвокат Олександр Осадько">
   <meta property="og:locale" content="uk_UA">
+  <meta property="og:image" content="{BASE_URL}assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=7">
+  <link rel="stylesheet" href="../css/style.css?v=8">
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>

@@ -601,7 +601,27 @@ a.card:hover .more span { transform: translateX(5px); }
 .catalog-hero h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 800; margin-bottom: 14px; }
 .catalog-hero p { color: var(--muted); max-width: 56ch; font-size: 1.08rem; }
 
-.cat-filter { display: flex; flex-wrap: wrap; gap: 10px; margin: 32px 0 8px; position: relative; z-index: 1; }
+.catalog-search {
+  width: 100%;
+  max-width: 560px;
+  margin-top: 26px;
+  padding: 14px 20px;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  position: relative;
+  z-index: 1;
+  box-shadow: var(--shadow);
+}
+.catalog-search::placeholder { color: var(--muted); }
+.catalog-search:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 4px rgba(37, 99, 235, .12); }
+
+.no-results { color: var(--muted); font-size: 1.05rem; padding: 30px 4px; }
+
+.cat-filter { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 8px; position: relative; z-index: 1; }
 .cat-filter button {
   border: 1px solid var(--line);
   background: var(--card);
