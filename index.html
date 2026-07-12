@@ -101,23 +101,6 @@
     </div>
   </section>
 
-  <!-- Замовити дзвінок -->
-  <section class="callback-band">
-    <div class="container callback-inner">
-      <div class="callback-text">
-        <h2>Не знаєте, з чого почати?</h2>
-        <p>Залиште номер — я передзвоню й безкоштовно зорієнтую щодо вашої ситуації.</p>
-      </div>
-      <form class="callback-form" id="callbackForm">
-        <input type="text" name="name" placeholder="Ваше ім'я" autocomplete="name" aria-label="Ваше ім'я">
-        <input type="tel" name="phone" placeholder="Номер телефону" required autocomplete="tel" aria-label="Номер телефону">
-        <input type="text" name="company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <button type="submit" class="btn btn-primary">Замовити дзвінок</button>
-        <p class="form-ok" id="callbackOk">Дякую! Я зателефоную вам найближчим часом.</p>
-      </form>
-    </div>
-  </section>
-
   <!-- Про мене -->
   <section class="section" id="about">
     <div class="container">
@@ -431,10 +414,6 @@
   const leadForm = document.getElementById('leadForm');
   if (leadForm) leadForm.addEventListener('submit', (e) => {
     e.preventDefault(); submitLead(leadForm, 'formOk', 'Заявка на консультацію');
-  });
-  const cbForm = document.getElementById('callbackForm');
-  if (cbForm) cbForm.addEventListener('submit', (e) => {
-    e.preventDefault(); submitLead(cbForm, 'callbackOk', 'Замовлення дзвінка');
   });
 </script>
 
