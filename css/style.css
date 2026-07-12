@@ -354,6 +354,7 @@ a { color: var(--blue); text-decoration: none; }
 }
 .fab-btn svg { width: 24px; height: 24px; fill: currentColor; }
 .fab-btn:hover { transform: translateY(-3px) scale(1.06); box-shadow: 0 14px 32px rgba(11, 31, 58, .34); filter: brightness(1.05); }
+.fab-call { background: var(--blue); }
 .fab-tg { background: #229ed9; }
 .fab-wa { background: #25d366; }
 .fab-vb { background: #7360f2; }
