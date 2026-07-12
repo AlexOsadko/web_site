@@ -67,6 +67,20 @@ a { color: var(--blue); text-decoration: none; }
   will-change: transform;
 }
 .site-header.hidden { transform: translateY(-100%); }
+
+/* Шкала прогресу гортання сторінки */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  width: 100%;
+  height: 3px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--blue), var(--blue2));
+  pointer-events: none;
+}
 .header-inner {
   display: flex;
   justify-content: space-between;
