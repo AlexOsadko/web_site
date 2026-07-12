@@ -548,6 +548,9 @@ a.card:hover .more span { transform: translateX(5px); }
 .card:nth-child(4) .ic { background: rgba(219,39,119,.12); color: var(--c-family); }
 .card:nth-child(5) .ic { background: rgba(124,58,237,.12); color: var(--c-business); }
 .card:nth-child(6) .ic { background: rgba(220,38,38,.12);  color: var(--c-criminal); }
+.card:nth-child(7) .ic { background: rgba(77,124,15,.12);  color: var(--c-military); }
+.card:nth-child(8) .ic { background: rgba(71,85,105,.12);  color: var(--c-admin); }
+.card:nth-child(9) .ic { background: rgba(67,56,202,.12);  color: var(--c-social); }
 
 /* Кольорові ліві межі карток-переваг */
 .about-list li { border-left: 3px solid var(--blue2); }
