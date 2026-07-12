@@ -322,6 +322,23 @@ a { color: var(--blue); text-decoration: none; }
 .contacts-card h2 { color: #fff; margin-bottom: 12px; }
 .contacts-card p { color: #aeb9cc; margin-bottom: 28px; max-width: 46ch; }
 .contacts-card .btn-primary { background: var(--blue); }
+.social-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.social-btn {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 10px 16px; border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .16);
+  color: #fff; font-size: .92rem; font-weight: 500;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.social-btn .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.social-btn:hover { transform: translateY(-2px); border-color: transparent; }
+.social-btn:hover .dot { color: #fff; }
+.sb-wa .dot { color: #25d366; } .sb-wa:hover { background: #25d366; }
+.sb-vb .dot { color: #7360f2; } .sb-vb:hover { background: #7360f2; }
+.sb-tg .dot { color: #229ed9; } .sb-tg:hover { background: #229ed9; }
+.sb-ig .dot { color: #e4405f; }
+.sb-ig:hover { background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); }
 .contact-lines { display: flex; flex-direction: column; gap: 20px; }
 .contact-item .label {
   display: block;
