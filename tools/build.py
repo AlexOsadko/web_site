@@ -449,7 +449,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=8">
+  <link rel="stylesheet" href="../css/style.css?v=9">
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
@@ -462,6 +462,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
     </a>
     <nav class="site-nav">
       <a href="../articles/index.html">Статті</a>
+      <a href="../zrazky/index.html">Зразки</a>
       <a href="../index.html#contacts" class="nav-cta">Консультація</a>
     </nav>
   </div>
@@ -591,7 +592,7 @@ def render_catalog(arts):
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=8">
+  <link rel="stylesheet" href="../css/style.css?v=9">
 </head>
 <body>
 
@@ -605,6 +606,7 @@ def render_catalog(arts):
       <a href="../index.html#about">Про мене</a>
       <a href="../index.html#services">Послуги</a>
       <a href="index.html">Статті</a>
+      <a href="../zrazky/index.html">Зразки</a>
       <a href="../index.html#contacts" class="nav-cta">Консультація</a>
     </nav>
   </div>
@@ -736,7 +738,7 @@ def render_hub(cat, arts):
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=8">
+  <link rel="stylesheet" href="../css/style.css?v=9">
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
@@ -749,6 +751,7 @@ def render_hub(cat, arts):
     </a>
     <nav class="site-nav">
       <a href="index.html">Статті</a>
+      <a href="../zrazky/index.html">Зразки</a>
       <a href="../index.html#contacts" class="nav-cta">Консультація</a>
     </nav>
   </div>
@@ -825,7 +828,7 @@ def update_homepage_count(n):
 # ---------- SITEMAP + ROBOTS ----------
 def write_sitemap(arts):
     cats_present = [c for c in ORDER if any(a["cat"] == c for a in arts)]
-    urls = [BASE_URL, ART_BASE_URL + "index.html"]
+    urls = [BASE_URL, ART_BASE_URL + "index.html", BASE_URL + "zrazky/index.html"]
     urls += [ART_BASE_URL + c + ".html" for c in cats_present]
     urls += [ART_BASE_URL + a["slug"] + ".html" for a in arts]
     lastmod = max((a.get("date_modified", "2026-07-11") for a in arts), default="2026-07-11")

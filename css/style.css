@@ -621,6 +621,47 @@ a.card:hover .more span { transform: translateX(5px); }
 
 .no-results { color: var(--muted); font-size: 1.05rem; padding: 30px 4px; }
 
+.dl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: var(--blue);
+  color: #fff;
+  font-weight: 600;
+  font-size: .92rem;
+  text-decoration: none;
+  transition: .2s;
+}
+.dl-btn:hover { background: var(--blue2); transform: translateY(-2px); }
+.docs-note {
+  margin-top: 40px;
+  padding: 20px 24px;
+  border-radius: 14px;
+  background: rgba(217, 119, 6, .07);
+  border: 1px solid rgba(217, 119, 6, .2);
+  color: var(--muted);
+  font-size: .95rem;
+  line-height: 1.6;
+}
+.docs-note a { color: var(--blue); font-weight: 600; }
+
+/* ===== Смуга «Замовити дзвінок» ===== */
+.callback-band { background: linear-gradient(135deg, #0e1e3a, #172d52); color: #fff; padding: 40px 0; }
+.callback-inner { display: flex; align-items: center; justify-content: space-between; gap: 28px; flex-wrap: wrap; }
+.callback-text h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
+.callback-text p { color: #c4cfe0; font-size: 1rem; max-width: 46ch; }
+.callback-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.callback-form input[type="text"], .callback-form input[type="tel"] {
+  padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .18);
+  background: rgba(255, 255, 255, .10); color: #fff; font-family: inherit; font-size: .95rem; min-width: 180px;
+}
+.callback-form input::placeholder { color: #aeb9cc; }
+.callback-form input:focus { outline: none; border-color: var(--blue2); background: rgba(255, 255, 255, .15); }
+.callback-form .form-ok { flex-basis: 100%; margin-top: 8px; }
+
 .cat-filter { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 8px; position: relative; z-index: 1; }
 .cat-filter button {
   border: 1px solid var(--line);

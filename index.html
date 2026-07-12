@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=8">
+  <link rel="stylesheet" href="css/style.css?v=9">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -62,6 +62,7 @@
       <a href="#about">Про мене</a>
       <a href="#services">Послуги</a>
       <a href="articles/index.html">Статті</a>
+      <a href="zrazky/index.html">Зразки</a>
       <a href="#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="nav-toggle" id="navToggle" aria-label="Відкрити меню" aria-expanded="false">
@@ -95,6 +96,23 @@
           <p>Веду кожного клієнта особисто — від першої консультації до фактичного вирішення питання.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Замовити дзвінок -->
+  <section class="callback-band">
+    <div class="container callback-inner">
+      <div class="callback-text">
+        <h2>Не знаєте, з чого почати?</h2>
+        <p>Залиште номер — я передзвоню й безкоштовно зорієнтую щодо вашої ситуації.</p>
+      </div>
+      <form class="callback-form" id="callbackForm">
+        <input type="text" name="name" placeholder="Ваше ім'я" autocomplete="name" aria-label="Ваше ім'я">
+        <input type="tel" name="phone" placeholder="Номер телефону" required autocomplete="tel" aria-label="Номер телефону">
+        <input type="text" name="company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button type="submit" class="btn btn-primary">Замовити дзвінок</button>
+        <p class="form-ok" id="callbackOk">Дякую! Я зателефоную вам найближчим часом.</p>
+      </form>
     </div>
   </section>
 
@@ -396,6 +414,34 @@
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject: 'Заявка з сайту', name, phone, message })
         }).then(r => r.json()).then(() => { leadForm.reset(); ok.style.display = 'block'; })
+          .catch(mailFallback);
+      } else {
+        mailFallback();
+      }
+    });
+  }
+
+  // «Замовити дзвінок» — компактна форма (ім'я + телефон)
+  const cbForm = document.getElementById('callbackForm');
+  if (cbForm) {
+    cbForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (cbForm.elements['company'] && cbForm.elements['company'].value) return;
+      if (Date.now() - formStart < 2000) return;
+      const name = cbForm.elements['name'].value.trim();
+      const phone = cbForm.elements['phone'].value.trim();
+      const cbOk = document.getElementById('callbackOk');
+      const mailFallback = () => {
+        const body = 'Замовлення дзвінка\nІмʼя: ' + name + '\nТелефон: ' + phone;
+        window.location.href = 'mailto:adv.osadko@gmail.com?subject=' +
+          encodeURIComponent('Замовити дзвінок') + '&body=' + encodeURIComponent(body);
+      };
+      if (WEB3FORMS_KEY) {
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject: 'Замовити дзвінок', name, phone })
+        }).then(r => r.json()).then(() => { cbForm.reset(); cbOk.style.display = 'block'; })
           .catch(mailFallback);
       } else {
         mailFallback();
