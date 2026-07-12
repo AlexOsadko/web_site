@@ -649,18 +649,25 @@ a.card:hover .more span { transform: translateX(5px); }
 .docs-note a { color: var(--blue); font-weight: 600; }
 
 /* ===== Смуга «Замовити дзвінок» ===== */
-.callback-band { background: linear-gradient(135deg, #0e1e3a, #172d52); color: #fff; padding: 40px 0; }
-.callback-inner { display: flex; align-items: center; justify-content: space-between; gap: 28px; flex-wrap: wrap; }
-.callback-text h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
-.callback-text p { color: #c4cfe0; font-size: 1rem; max-width: 46ch; }
-.callback-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.callback-band { background: linear-gradient(135deg, #0e1e3a, #172d52); color: #fff; padding: 32px 0; }
+.callback-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: nowrap; }
+.callback-text { flex: 1 1 auto; min-width: 0; }
+.callback-text h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+.callback-text p { color: #c4cfe0; font-size: .98rem; max-width: 52ch; }
+.callback-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; flex: 0 0 auto; }
 .callback-form input[type="text"], .callback-form input[type="tel"] {
   padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .18);
-  background: rgba(255, 255, 255, .10); color: #fff; font-family: inherit; font-size: .95rem; min-width: 180px;
+  background: rgba(255, 255, 255, .10); color: #fff; font-family: inherit; font-size: .95rem; width: 160px;
 }
 .callback-form input::placeholder { color: #aeb9cc; }
 .callback-form input:focus { outline: none; border-color: var(--blue2); background: rgba(255, 255, 255, .15); }
+.callback-form button { white-space: nowrap; }
 .callback-form .form-ok { flex-basis: 100%; margin-top: 8px; }
+@media (max-width: 860px) {
+  .callback-inner { flex-wrap: wrap; }
+  .callback-form { width: 100%; }
+  .callback-form input[type="text"], .callback-form input[type="tel"] { flex: 1 1 160px; width: auto; }
+}
 
 .cat-filter { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 8px; position: relative; z-index: 1; }
 .cat-filter button {
