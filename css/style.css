@@ -892,8 +892,9 @@ a.card:hover .more span { transform: translateX(5px); }
 .related-grid .reveal:nth-child(3n+3) { transition-delay: .14s; }
 
 /* Плавна поява тексту статті (лише коли працює JS — інакше текст видно одразу) */
-.js .article-page .body-reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
-.article-page .body-reveal.in { opacity: 1; transform: none; }
+.js .article-page .body-reveal { opacity: 0; }
+.js .article-page .body-reveal.in { animation: bodyReveal .6s ease both; }
+@keyframes bodyReveal { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
 /* FAQ: плавне розкриття відповіді */
 .faq details[open] > p { animation: faqOpen .3s ease; }
@@ -919,6 +920,7 @@ a.card:hover .more span { transform: translateX(5px); }
   .hero-text > .hero-actions, .hero-visual,
   .reveal-page > * { animation: none; }
   .js .article-page .body-reveal { opacity: 1; transform: none; }
+  .js .article-page .body-reveal.in { animation: none; }
   .faq details[open] > p { animation: none; }
   .dl-btn:hover .dl-ico { animation: none; }
 }
