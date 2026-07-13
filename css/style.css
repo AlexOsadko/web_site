@@ -411,6 +411,12 @@ a { color: var(--blue); text-decoration: none; }
 .fab-wa { background: #25d366; }
 .fab-vb { background: #7360f2; }
 .fab-top { background: #e5462f; }
+.fab-top svg { animation: fabArrowUp 1.6s ease-in-out infinite; }
+.fab-top:hover svg { animation-duration: .9s; }
+@keyframes fabArrowUp {
+  0%, 100% { transform: translateY(2.5px); }
+  50%      { transform: translateY(-3px); }
+}
 @media (max-width: 620px) {
   .fab { right: 14px; bottom: 14px; gap: 11px; }
   .fab-btn { width: 46px; height: 46px; }
@@ -490,6 +496,7 @@ a.card:hover .more span { transform: translateX(5px); }
   .pill i { animation: none; }
   .fab-toggle .fi-phone, .fab-toggle .fi-mail { animation: none; }
   .fab:not(.open) .fab-toggle .fi-mail { opacity: 0; }
+  .fab-top svg { animation: none; }
 }
 
 /* ===== Сторінка статті ===== */
