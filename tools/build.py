@@ -460,7 +460,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=22">
+  <link rel="stylesheet" href="../css/style.css?v=23">
   <script defer src="../assets/header-scroll.js?v=13"></script>
   <script defer src="../assets/callback-popup.js?v=17"></script>
   <script type="application/ld+json">{jsonld}</script>
@@ -615,7 +615,7 @@ def render_catalog(arts):
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=22">
+  <link rel="stylesheet" href="../css/style.css?v=23">
   <script defer src="../assets/header-scroll.js?v=13"></script>
   <script defer src="../assets/callback-popup.js?v=17"></script>
 </head>
@@ -764,7 +764,7 @@ def render_hub(cat, arts):
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=22">
+  <link rel="stylesheet" href="../css/style.css?v=23">
   <script defer src="../assets/header-scroll.js?v=13"></script>
   <script defer src="../assets/callback-popup.js?v=17"></script>
   <script type="application/ld+json">{jsonld}</script>

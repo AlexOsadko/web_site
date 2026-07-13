@@ -490,10 +490,12 @@ a.card:hover .more span { transform: translateX(5px); }
 .footer-inner .brand { font-size: 1rem; }
 
 /* ===== Поява при скролі ===== */
-.reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
-.reveal.in { opacity: 1; transform: none; }
+.reveal { opacity: 0; }
+.reveal.in { animation: revealIn .7s cubic-bezier(.2,.7,.3,1) both; }
+@keyframes revealIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal { opacity: 1; }
+  .reveal.in { animation: none; }
   .pill i { animation: none; }
   .fab-toggle .fi-phone, .fab-toggle .fi-mail { animation: none; }
   .fab:not(.open) .fab-toggle .fi-mail { opacity: 0; }
@@ -887,9 +889,9 @@ a.card:hover .more span { transform: translateX(5px); }
 
 /* Каскадна поява карток у сітках (зліва направо по рядах) */
 .cat-grid .reveal:nth-child(3n+2),
-.related-grid .reveal:nth-child(3n+2) { transition-delay: .07s; }
+.related-grid .reveal:nth-child(3n+2) { animation-delay: .07s; }
 .cat-grid .reveal:nth-child(3n+3),
-.related-grid .reveal:nth-child(3n+3) { transition-delay: .14s; }
+.related-grid .reveal:nth-child(3n+3) { animation-delay: .14s; }
 
 /* Плавна поява тексту статті (лише коли працює JS — інакше текст видно одразу) */
 .js .article-page .body-reveal { opacity: 0; }
@@ -905,6 +907,18 @@ a.card:hover .more span { transform: translateX(5px); }
 .dl-btn:hover .dl-ico { animation: dlBounce .6s ease infinite; }
 @keyframes dlBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
 
+/* Каталог статей: послідовна поява шапки при завантаженні */
+.catalog-hero .back-link,
+.catalog-hero h1,
+.catalog-hero p,
+.catalog-hero .catalog-search,
+.catalog-hero .cat-filter { animation: heroIn .6s cubic-bezier(.2,.7,.3,1) both; }
+.catalog-hero .back-link      { animation-delay: .02s; }
+.catalog-hero h1              { animation-delay: .08s; }
+.catalog-hero p               { animation-delay: .16s; }
+.catalog-hero .catalog-search { animation-delay: .24s; }
+.catalog-hero .cat-filter     { animation-delay: .32s; }
+
 /* Політика: делікатна поява розділів при завантаженні */
 .reveal-page > * { animation: heroIn .55s ease both; }
 .reveal-page > *:nth-child(1) { animation-delay: .02s; }
@@ -918,7 +932,9 @@ a.card:hover .more span { transform: translateX(5px); }
 @media (prefers-reduced-motion: reduce) {
   .hero-text > .pill, .hero-text > h1, .hero-text > .hero-lead,
   .hero-text > .hero-actions, .hero-visual,
-  .reveal-page > * { animation: none; }
+  .reveal-page > *,
+  .catalog-hero .back-link, .catalog-hero h1, .catalog-hero p,
+  .catalog-hero .catalog-search, .catalog-hero .cat-filter { animation: none; }
   .js .article-page .body-reveal { opacity: 1; transform: none; }
   .js .article-page .body-reveal.in { animation: none; }
   .faq details[open] > p { animation: none; }
