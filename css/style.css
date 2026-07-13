@@ -235,17 +235,17 @@ a { color: var(--blue); text-decoration: none; }
 .hero-feats li::before { content: "✓"; color: var(--blue); font-weight: 700; }
 
 /* Форма заявки в блоці контактів */
-.lead-form { margin-top: 22px; display: grid; gap: 14px; }
-.lead-form label { display: grid; gap: 7px; font-size: .86rem; font-weight: 500; color: #cbd5e8; }
+.lead-form { margin-top: 16px; display: grid; gap: 10px; }
+.lead-form label { display: grid; gap: 5px; font-size: .82rem; font-weight: 500; color: #cbd5e8; }
 .cf-turnstile { margin-top: 2px; min-height: 65px; }
 .lead-form input, .lead-form textarea {
-  width: 100%; padding: 12px 15px; border-radius: 12px;
+  width: 100%; padding: 10px 14px; border-radius: 11px;
   border: 1px solid rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .08);
   color: #fff; font-family: inherit; font-size: .95rem;
 }
 .lead-form input::placeholder, .lead-form textarea::placeholder { color: #aeb9cc; }
 .lead-form input:focus, .lead-form textarea:focus { outline: none; border-color: var(--blue2); background: rgba(255, 255, 255, .12); }
-.lead-form textarea { resize: vertical; min-height: 88px; }
+.lead-form textarea { resize: vertical; min-height: 64px; }
 .lead-form button { margin-top: 4px; }
 .form-ok { display: none; color: #6ee7a0; font-size: .9rem; margin-top: 10px; }
 .contacts-divider { color: #8b98ad; font-size: .85rem; margin: 20px 0 0; }
@@ -342,11 +342,11 @@ a { color: var(--blue); text-decoration: none; }
 .contacts-card {
   background: var(--ink);
   color: #fff;
-  border-radius: 28px;
-  padding: 48px;
+  border-radius: 24px;
+  padding: 34px 36px;
 }
-.contacts-card h2 { color: #fff; margin-bottom: 12px; }
-.contacts-card p { color: #aeb9cc; margin-bottom: 28px; max-width: 46ch; }
+.contacts-card h2 { color: #fff; margin-bottom: 10px; font-size: clamp(1.7rem, 3vw, 2.3rem); }
+.contacts-card p { color: #aeb9cc; margin-bottom: 20px; max-width: 46ch; font-size: .96rem; }
 .contacts-card .btn-primary { background: var(--blue); }
 .social-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 .social-btn {
