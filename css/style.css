@@ -513,7 +513,7 @@ a.card:hover .more span { transform: translateX(5px); }
 @media (max-width: 880px) {
   .hero { padding: 12px 0 56px; }
   .hero-inner { grid-template-columns: 1fr; gap: 64px; }
-  .hero-visual { max-width: 420px; }
+  .hero-visual { max-width: 420px; margin: 0 auto; width: 100%; }
   .about-grid { grid-template-columns: 1fr; gap: 36px; }
   .cards { grid-template-columns: 1fr; }
   .articles { grid-template-columns: 1fr; }
