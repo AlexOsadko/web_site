@@ -5,9 +5,10 @@
 // у секретах воркера. Форма на сайті лише шле дані на URL цього воркера.
 //
 // НАЛАШТУВАННЯ (Cloudflare → ваш Worker → Settings → Variables and Secrets):
-//   TELEGRAM_BOT_TOKEN  — токен бота від @BotFather                (тип: Secret)
-//   TELEGRAM_CHAT_ID    — ваш chat_id (дізнатися через @userinfobot) (тип: Secret)
-//   ALLOWED_ORIGIN      — https://alexosadko.github.io   (необов'язково, обмежує доступ)
+//   TELEGRAM_BOT_TOKEN  — токен бота від @BotFather                  (тип: Secret)
+//   TELEGRAM_CHAT_ID    — ваш chat_id (дізнатися через @userinfobot)  (тип: Secret)
+//   TURNSTILE_SECRET    — Secret Key віджета Turnstile (перевірка від спаму) (тип: Secret)
+//   ALLOWED_ORIGIN      — https://osadko.online   (необов'язково, обмежує доступ)
 // ─────────────────────────────────────────────────────────────────────────
 
 export default {
@@ -32,6 +33,25 @@ export default {
 
     // Антиспам: приховане поле-пастка (боти його заповнюють).
     if (data.company) return json({ ok: true }, 200, cors); // тихо ігноруємо
+
+    // Перевірка Turnstile (якщо задано TURNSTILE_SECRET у секретах воркера).
+    if (env.TURNSTILE_SECRET) {
+      const token = String(data.token || "");
+      const verify = await fetch(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            secret: env.TURNSTILE_SECRET,
+            response: token,
+            remoteip: request.headers.get("CF-Connecting-IP") || "",
+          }),
+        }
+      );
+      const outcome = await verify.json().catch(() => ({ success: false }));
+      if (!outcome.success) return json({ ok: false, error: "turnstile" }, 403, cors);
+    }
 
     const name = String(data.name || "").slice(0, 200);
     const phone = String(data.phone || "").slice(0, 60);
