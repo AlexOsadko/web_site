@@ -303,6 +303,7 @@ a { color: var(--blue); text-decoration: none; }
   display: grid; place-items: center;
   font-size: 1.2rem;
   margin-bottom: 18px;
+  transition: transform .3s cubic-bezier(.2,.7,.3,1);
 }
 .card h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 9px; }
 .card p { color: var(--muted); font-size: .93rem; }
@@ -861,4 +862,63 @@ a.card:hover .more span { transform: translateX(5px); }
 
 @media (max-width: 760px) {
   .related-grid { grid-template-columns: 1fr; }
+}
+
+/* ===================== Анімації сторінок ===================== */
+
+/* Hero: послідовна поява елементів при завантаженні */
+.hero-text > .pill,
+.hero-text > h1,
+.hero-text > .hero-lead,
+.hero-text > .hero-actions,
+.hero-visual { animation: heroIn .7s cubic-bezier(.2,.7,.3,1) both; }
+.hero-text > .pill         { animation-delay: .05s; }
+.hero-text > h1            { animation-delay: .15s; }
+.hero-text > .hero-lead    { animation-delay: .27s; }
+.hero-text > .hero-actions { animation-delay: .39s; }
+.hero-visual               { animation-delay: .22s; }
+@keyframes heroIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+/* Картки послуг: оживання кольорової іконки при наведенні */
+.card:hover .ic { transform: scale(1.1) rotate(-5deg); }
+
+/* Лічильник статей (щоб ширина не «стрибала» під час підрахунку) */
+.stat-count { font-variant-numeric: tabular-nums; }
+
+/* Каскадна поява карток у сітках (зліва направо по рядах) */
+.cat-grid .reveal:nth-child(3n+2),
+.related-grid .reveal:nth-child(3n+2) { transition-delay: .07s; }
+.cat-grid .reveal:nth-child(3n+3),
+.related-grid .reveal:nth-child(3n+3) { transition-delay: .14s; }
+
+/* Плавна поява тексту статті (лише коли працює JS — інакше текст видно одразу) */
+.js .article-page .body-reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+.article-page .body-reveal.in { opacity: 1; transform: none; }
+
+/* FAQ: плавне розкриття відповіді */
+.faq details[open] > p { animation: faqOpen .3s ease; }
+@keyframes faqOpen { from { opacity: 0; transform: translateY(-7px); } to { opacity: 1; transform: none; } }
+
+/* Зразки: підстрибування іконки завантаження при наведенні */
+.dl-ico { display: inline-block; transition: transform .25s ease; }
+.dl-btn:hover .dl-ico { animation: dlBounce .6s ease infinite; }
+@keyframes dlBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+
+/* Політика: делікатна поява розділів при завантаженні */
+.reveal-page > * { animation: heroIn .55s ease both; }
+.reveal-page > *:nth-child(1) { animation-delay: .02s; }
+.reveal-page > *:nth-child(2) { animation-delay: .06s; }
+.reveal-page > *:nth-child(3) { animation-delay: .10s; }
+.reveal-page > *:nth-child(4) { animation-delay: .14s; }
+.reveal-page > *:nth-child(5) { animation-delay: .18s; }
+.reveal-page > *:nth-child(6) { animation-delay: .22s; }
+.reveal-page > *:nth-child(n+7) { animation-delay: .26s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-text > .pill, .hero-text > h1, .hero-text > .hero-lead,
+  .hero-text > .hero-actions, .hero-visual,
+  .reveal-page > * { animation: none; }
+  .js .article-page .body-reveal { opacity: 1; transform: none; }
+  .faq details[open] > p { animation: none; }
+  .dl-btn:hover .dl-ico { animation: none; }
 }

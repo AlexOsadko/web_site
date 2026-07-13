@@ -305,12 +305,12 @@ def blocks_to_html(blocks):
     for b in blocks:
         t = b["type"]
         if t == "h2":
-            out.append(f"  <h2>{b['text']}</h2>")
+            out.append(f'  <h2 class="body-reveal">{b["text"]}</h2>')
         elif t == "p":
-            out.append(f"  <p>{b['text']}</p>")
+            out.append(f'  <p class="body-reveal">{b["text"]}</p>')
         elif t in ("ul", "ol"):
             items = "\n".join(f"    <li>{i}</li>" for i in b["items"])
-            out.append(f"  <{t}>\n{items}\n  </{t}>")
+            out.append(f'  <{t} class="body-reveal">\n{items}\n  </{t}>')
     return "\n\n".join(out)
 
 
@@ -394,7 +394,7 @@ def build_related_html(cur_slug, cat, allmeta):
     pick = pick[:6]
     out = []
     for a in pick:
-        out.append(f'''      <a class="related-card" href="{a['slug']}.html">
+        out.append(f'''      <a class="related-card reveal" href="{a['slug']}.html">
         <span class="cat cat-{a['cat']}">{esc(SHORT_CAT[a['cat']])}</span>
         <h3>{esc(a['title'])}</h3>
       </a>''')
@@ -438,6 +438,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>document.documentElement.classList.add('js')</script>
   <script src="../assets/ga.js?v=3"></script>
   <title>{title} — адвокат Олександр Осадько</title>
   <meta name="description" content="{desc}">
@@ -459,7 +460,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=20">
+  <link rel="stylesheet" href="../css/style.css?v=21">
   <script defer src="../assets/header-scroll.js?v=13"></script>
   <script defer src="../assets/callback-popup.js?v=17"></script>
   <script type="application/ld+json">{jsonld}</script>
@@ -526,7 +527,14 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   </div>
 </footer>
 
-<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+  // Плавна поява тексту статті та карток при гортанні
+  const io = new IntersectionObserver((es) => {
+    es.forEach(x => { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.body-reveal, .reveal').forEach(el => io.observe(el));
+</script>
 
 </body>
 </html>
@@ -607,7 +615,7 @@ def render_catalog(arts):
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=20">
+  <link rel="stylesheet" href="../css/style.css?v=21">
   <script defer src="../assets/header-scroll.js?v=13"></script>
   <script defer src="../assets/callback-popup.js?v=17"></script>
 </head>
@@ -756,7 +764,7 @@ def render_hub(cat, arts):
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=20">
+  <link rel="stylesheet" href="../css/style.css?v=21">
   <script defer src="../assets/header-scroll.js?v=13"></script>
   <script defer src="../assets/callback-popup.js?v=17"></script>
   <script type="application/ld+json">{jsonld}</script>
@@ -838,10 +846,10 @@ def update_homepage_count(n):
         idx = f.read()
     materials = plural_uk(n, ("матеріал", "матеріали", "матеріалів"))
     articles_word = plural_uk(n, ("статтю", "статті", "статей"))
-    idx, c1 = re.subn(r"Усього \d+ матеріал\w* за темами\.",
-                      f"Усього {n} {materials} за темами.", idx)
-    idx, c2 = re.subn(r"Переглянути всі \d+ стат\w+ →",
-                      f"Переглянути всі {n} {articles_word} →", idx)
+    idx, c1 = re.subn(r'Усього <span class="stat-count"[^>]*>\d+</span> матеріал\w* за темами\.',
+                      f'Усього <span class="stat-count" data-to="{n}">{n}</span> {materials} за темами.', idx)
+    idx, c2 = re.subn(r'Переглянути всі <span class="stat-count"[^>]*>\d+</span> стат\w+ →',
+                      f'Переглянути всі <span class="stat-count" data-to="{n}">{n}</span> {articles_word} →', idx)
     with open(idx_path, "w", encoding="utf-8") as f:
         f.write(idx)
     return c1, c2

@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20">
+  <link rel="stylesheet" href="css/style.css?v=21">
   <script defer src="assets/header-scroll.js?v=13"></script>
   <script defer src="assets/callback-popup.js?v=17"></script>
   <script type="application/ld+json">
@@ -217,7 +217,7 @@
       <div class="section-head reveal">
         <span class="section-kicker">Статті</span>
         <h2 class="section-title">Пояснюю просто</h2>
-        <p class="section-sub">Розбираю правові питання зрозумілою мовою — щоб ви розуміли свої права ще до звернення. Усього 139 матеріалів за темами.</p>
+        <p class="section-sub">Розбираю правові питання зрозумілою мовою — щоб ви розуміли свої права ще до звернення. Усього <span class="stat-count" data-to="139">139</span> матеріалів за темами.</p>
       </div>
       <div class="articles">
         <a class="article-card ac-civil reveal" href="articles/yak-povernuty-borh.html">
@@ -258,7 +258,7 @@
         </a>
       </div>
       <div class="articles-more reveal">
-        <a class="btn btn-primary" href="articles/index.html">Переглянути всі 139 статей →</a>
+        <a class="btn btn-primary" href="articles/index.html">Переглянути всі <span class="stat-count" data-to="139">139</span> статей →</a>
       </div>
     </div>
   </section>
@@ -371,6 +371,22 @@
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Лічильник статей: цифра набігає від 0, коли потрапляє в поле зору
+  const cio = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      cio.unobserve(e.target);
+      const el = e.target, to = +el.dataset.to || 0, steps = 45;
+      let i = 0;
+      const t = setInterval(() => {
+        i++;
+        el.textContent = Math.round(to * i / steps);
+        if (i >= steps) { el.textContent = to; clearInterval(t); }
+      }, 22);
+    });
+  }, { threshold: 0.6 });
+  document.querySelectorAll('.stat-count').forEach(el => cio.observe(el));
 
   // ── Обробка заявок ──────────────────────────────────────────────
   // NOTIFY_ENDPOINT — URL релея (Cloudflare Worker), який надсилає заявку
