@@ -221,6 +221,15 @@ LINK_TERMS = {
     "керування у стані сп'яніння": "st-130-kupap", "130 купап": "st-130-kupap", "стані сп'яніння": "st-130-kupap",
     "огляду на стан сп'яніння": "ogljad-na-spjaninnja", "огляд на стан сп'яніння": "ogljad-na-spjaninnja", "огляд на сп'яніння": "ogljad-na-spjaninnja",
     "відмова від огляду": "vidmova-vid-ogljadu", "відмову від огляду": "vidmova-vid-ogljadu", "відмови від огляду": "vidmova-vid-ogljadu",
+    # --- нова партія ---
+    "колектор": "zahyst-vid-kolektoriv", "колекторів": "zahyst-vid-kolektoriv", "колекторами": "zahyst-vid-kolektoriv", "колектори": "zahyst-vid-kolektoriv",
+    "завдаток": "zavdatok-avans", "завдатку": "zavdatok-avans", "завдатком": "zavdatok-avans",
+    "упущена вигода": "upushchena-vyhoda", "упущену вигоду": "upushchena-vyhoda", "упущеної вигоди": "upushchena-vyhoda",
+    "дисциплінарне стягнення": "dystsyplinarne-styagnennia", "дисциплінарного стягнення": "dystsyplinarne-styagnennia", "догана": "dystsyplinarne-styagnennia", "догану": "dystsyplinarne-styagnennia", "догани": "dystsyplinarne-styagnennia",
+    "аліменти на повнолітню дитину": "alimenty-povnolitni", "аліментів на повнолітню дитину": "alimenty-povnolitni",
+    "забудовник": "spory-z-zabudovnykom", "забудовника": "spory-z-zabudovnykom", "забудовником": "spory-z-zabudovnykom", "новобудові": "spory-z-zabudovnykom", "новобудову": "spory-z-zabudovnykom",
+    "поліса осцпв": "dtp-bez-strakhovky", "без поліса осцпв": "dtp-bez-strakhovky", "без страховки": "dtp-bez-strakhovky",
+    "борг за комунальні послуги": "borg-za-komunalku", "заборгованість за комунальні послуги": "borg-za-komunalku", "борг за комуналку": "borg-za-komunalku",
 }
 
 # Головна: 6 обраних статей у секції «Статті» (curated).
