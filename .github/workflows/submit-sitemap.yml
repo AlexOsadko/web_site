@@ -1,0 +1,37 @@
+name: Надіслати sitemap у Search Console
+
+# Автоматично надсилає sitemap.xml у Google Search Console щоразу, коли він
+# змінюється (тобто після додавання нової статті). Потребує двох секретів:
+#   GSC_SA_KEY   — JSON-ключ сервісного акаунта Google (доданого власником у GSC)
+#   GSC_SITE_URL — ресурс у GSC (https://osadko.online/ або sc-domain:osadko.online)
+# Налаштування описано в docs/search-console-auto.md.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - sitemap.xml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: submit-sitemap
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Встановити залежності
+        run: pip install google-auth requests
+      - name: Надіслати sitemap
+        env:
+          GSC_SA_KEY: ${{ secrets.GSC_SA_KEY }}
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+        run: python3 tools/submit_sitemap.py
