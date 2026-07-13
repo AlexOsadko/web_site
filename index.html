@@ -390,11 +390,9 @@
 
   // ── Обробка заявок ──────────────────────────────────────────────
   // NOTIFY_ENDPOINT — URL релея (Cloudflare Worker), який надсилає заявку
-  //   в Telegram. Токен бота зберігається в релеї, а не в цьому коді.
-  //   Поки порожньо — використовується пошта (Web3Forms або поштовий клієнт).
-  // WEB3FORMS_KEY — безкоштовний ключ з web3forms.com (заявки на пошту).
+  //   в Telegram. Токен бота зберігається в релеї (Worker Secret), а не
+  //   в цьому коді. Поки порожньо — використовується поштовий клієнт (mailto).
   const NOTIFY_ENDPOINT = "";
-  const WEB3FORMS_KEY = "";
   const formStart = Date.now();
 
   function submitLead(form, okId, source) {
@@ -417,12 +415,6 @@
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, phone, message, source, page: location.href })
       }).then(r => { if (!r.ok) throw new Error('bad'); return r; }).then(showOk).catch(mailFallback);
-    } else if (WEB3FORMS_KEY) {
-      fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject: source, name, phone, message })
-      }).then(r => r.json()).then(showOk).catch(mailFallback);
     } else {
       mailFallback();
     }

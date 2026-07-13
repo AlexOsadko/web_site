@@ -8,8 +8,7 @@
   var VER = "17";      // зміна версії скидає збережений стан таймера (нові тайминги діють одразу)
 
   // Ендпоінти (як і в формах на головній). Порожньо = лист на пошту.
-  var NOTIFY_ENDPOINT = "";  // URL Cloudflare Worker (Telegram)
-  var WEB3FORMS_KEY = "";    // ключ web3forms.com (пошта)
+  var NOTIFY_ENDPOINT = "";  // URL Cloudflare Worker (relay → Telegram)
 
   // Скидання старого стану при новій версії (щоб зміни таймінгів діяли й у відкритій вкладці).
   if (sessionStorage.getItem("cbVer") !== VER) {
@@ -97,11 +96,6 @@
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name, phone: phone, source: "Замовити дзвінок (спливаюче вікно)", page: location.href }),
       }).then(function (r) { if (!r.ok) throw new Error("bad"); }).then(done).catch(mail);
-    } else if (WEB3FORMS_KEY) {
-      fetch("https://api.web3forms.com/submit", {
-        method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject: "Замовити дзвінок", name: name, phone: phone }),
-      }).then(function (r) { return r.json(); }).then(done).catch(mail);
     } else {
       mail();
     }
