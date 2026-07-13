@@ -1,5 +1,6 @@
-// Google Analytics 4 зі згодою на cookie + події-конверсії.
-// GA завантажується ЛИШЕ після згоди (localStorage cookieConsent=granted).
+// Google Analytics 4 + Google Consent Mode v2.
+// gtag.js вантажиться завжди; до згоди — cookieless-сигнали (без cookie й ідентифікації),
+// після згоди («Прийняти») — повноцінне вимірювання з cookie.
 (function () {
   var GA_ID = "G-YS9JTNL11Q";
   var KEY = "cookieConsent";
@@ -8,27 +9,37 @@
   function gtag() { dataLayer.push(arguments); }
   window.gtag = gtag;
 
-  var granted = false;
+  var stored = null;
+  try { stored = localStorage.getItem(KEY); } catch (e) {}
 
-  function loadGA() {
-    if (granted) return;
-    granted = true;
-    var s = document.createElement("script");
-    s.async = true;
-    s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
-    document.head.appendChild(s);
-    gtag("js", new Date());
-    gtag("config", GA_ID);
+  // Consent Mode v2 — стан за замовчуванням (до вибору користувача — denied).
+  gtag("consent", "default", {
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+    analytics_storage: (stored === "granted") ? "granted" : "denied",
+    wait_for_update: 500
+  });
+
+  // gtag.js вантажиться завжди (перевірка встановлення Google проходить).
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+  document.head.appendChild(s);
+  gtag("js", new Date());
+  gtag("config", GA_ID);
+
+  function grant() {
+    gtag("consent", "update", { analytics_storage: "granted" });
+  }
+  function deny() {
+    gtag("consent", "update", { analytics_storage: "denied" });
   }
 
-  // Відправка події лише за наявності згоди.
-  function track(name, params) {
-    if (!granted) return;
-    gtag("event", name, params || {});
-  }
+  // Події-конверсії (Consent Mode сам вирішує cookie/cookieless за станом згоди).
+  function track(name, params) { gtag("event", name, params || {}); }
   window.osadkoTrack = track;
 
-  // ── Події-конверсії (слухачі ставимо завжди; без згоди вони мовчать) ──
   document.addEventListener("click", function (e) {
     var a = e.target && e.target.closest ? e.target.closest("a") : null;
     if (!a) return;
@@ -66,18 +77,16 @@
     document.body.appendChild(b);
     b.querySelector(".ck-accept").addEventListener("click", function () {
       try { localStorage.setItem(KEY, "granted"); } catch (e) {}
-      b.remove(); loadGA();
+      b.remove(); grant();
     });
     b.querySelector(".ck-decline").addEventListener("click", function () {
       try { localStorage.setItem(KEY, "denied"); } catch (e) {}
-      b.remove();
+      b.remove(); deny();
     });
   }
 
-  var choice = null;
-  try { choice = localStorage.getItem(KEY); } catch (e) {}
-  if (choice === "granted") loadGA();
-  else if (choice === "denied") { /* без аналітики */ }
-  else if (document.body) buildBanner();
-  else document.addEventListener("DOMContentLoaded", buildBanner);
+  if (!stored) {
+    if (document.body) buildBanner();
+    else document.addEventListener("DOMContentLoaded", buildBanner);
+  }
 })();
