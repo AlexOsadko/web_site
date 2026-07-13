@@ -27,8 +27,9 @@
   посилання, вбудую календар на сайт.
 - [ ] **Google Search Console + Google Business Profile.** Завести акаунти
   (дам покрокову інструкцію); я підготую підтвердження сайту й подам sitemap.
-- [ ] **Власний домен osadko.online.** Коли DNS буде готовий — під'єднати домен
-  (Settings → Pages) і повернути BASE_URL на osadko.online.
+- [x] **Власний домен osadko.online.** Під'єднано: CNAME у репозиторії, DNS (A + www CNAME)
+  вказує на GitHub Pages, BASE_URL і всі URL переведено на osadko.online. Лишилось увімкнути
+  Enforce HTTPS у Settings → Pages, коли GitHub випустить сертифікат.
 
 ## 🟡 Можу зробити далі (без ваших даних)
 
