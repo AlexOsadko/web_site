@@ -862,7 +862,8 @@ def write_sitemap(arts):
             BASE_URL + "privacy/index.html"]
     urls += [ART_BASE_URL + c + ".html" for c in cats_present]
     urls += [ART_BASE_URL + a["slug"] + ".html" for a in arts]
-    lastmod = max((a.get("date_modified", "2026-07-11") for a in arts), default="2026-07-11")
+    import datetime
+    lastmod = datetime.date.today().isoformat()
     body = "\n".join(
         f"  <url><loc>{u}</loc><lastmod>{lastmod}</lastmod>"
         f"<changefreq>monthly</changefreq><priority>{'1.0' if u == BASE_URL else '0.7'}</priority></url>"
