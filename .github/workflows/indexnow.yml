@@ -1,0 +1,38 @@
+name: IndexNow (Bing/Yandex)
+
+# Миттєво повідомляє Bing, Yandex та інші пошуковики, що підтримують IndexNow,
+# про нові чи оновлені сторінки — при кожному пуші зі зміною контенту.
+# Ключ IndexNow публічний (лежить у корені сайту), секрети не потрібні.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'articles/**'
+      - 'index.html'
+      - 'zrazky/index.html'
+      - 'privacy/index.html'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Зібрати змінені сторінки та повідомити IndexNow
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'articles/*.html' 'index.html' 'zrazky/index.html' 'privacy/index.html' | tr '\n' ' ')
+          echo "Змінені сторінки: $CHANGED"
+          python3 tools/indexnow.py $CHANGED
