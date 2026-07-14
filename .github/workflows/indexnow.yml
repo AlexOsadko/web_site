@@ -31,8 +31,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Зібрати змінені сторінки та повідомити IndexNow
+      - name: Повідомити IndexNow
         run: |
-          CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'articles/*.html' 'index.html' 'zrazky/index.html' 'privacy/index.html' | tr '\n' ' ')
-          echo "Змінені сторінки: $CHANGED"
-          python3 tools/indexnow.py $CHANGED
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Ручний запуск — надсилаю ВСІ сторінки з sitemap"
+            python3 tools/indexnow.py --all
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'articles/*.html' 'index.html' 'zrazky/index.html' 'privacy/index.html' | tr '\n' ' ')
+            echo "Змінені сторінки: $CHANGED"
+            python3 tools/indexnow.py $CHANGED
+          fi

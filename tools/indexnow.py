@@ -32,16 +32,31 @@ def path_to_url(path):
     return BASE + path
 
 
+def read_sitemap_urls():
+    import re
+    try:
+        txt = open("sitemap.xml", encoding="utf-8").read()
+    except OSError:
+        return []
+    return re.findall(r"<loc>([^<]+)</loc>", txt)
+
+
 def main(argv):
-    paths = [a for a in argv if a.endswith(".html")]
-    urls = []
-    for p in paths:
-        u = path_to_url(p)
-        if u and u not in urls:
-            urls.append(u)
-    if not urls:
-        urls = [BASE, BASE + "articles/index.html"]
+    if argv and argv[0] == "--all":
+        urls = read_sitemap_urls()
+    else:
+        paths = [a for a in argv if a.endswith(".html")]
+        urls = []
+        for p in paths:
+            u = path_to_url(p)
+            if u and u not in urls:
+                urls.append(u)
+        if not urls:
+            urls = [BASE, BASE + "articles/index.html"]
     urls = urls[:10000]
+    if not urls:
+        print("IndexNow: немає URL для надсилання.")
+        return 0
 
     payload = {
         "host": HOST,
