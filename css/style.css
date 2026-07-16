@@ -313,6 +313,12 @@ a { color: var(--blue); text-decoration: none; }
    щоб під textarea не «провисав» порожній проміжок перед кнопкою. Коли Cloudflare
    вставить свій iframe, слот перестане бути порожнім і місце відкриється. */
 .cf-turnstile:empty { display: none; }
+/* Віджет Turnstile має фіксовану ширину ~300px і не вміщається у вузьку картку
+   форми на телефоні — трохи масштабуємо, щоб вкладався в поле з відступами й не
+   наповзав на край картки та плаваючі кнопки. */
+@media (max-width: 620px) {
+  .cf-turnstile { transform: scale(.84); transform-origin: left center; min-height: 56px; }
+}
 .lead-form input, .lead-form textarea {
   width: 100%; padding: 10px 14px; border-radius: 11px;
   border: 1px solid rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .08);
@@ -631,6 +637,9 @@ a.card:hover .more span { transform: translateX(5px); }
   .section { padding: 44px 0; }
 }
 @media (max-width: 620px) {
+  /* Вужчі відступи картки на телефоні — щоб віджет captcha і кнопки мали більше
+     місця й не притискалися до краю. */
+  .contacts-card { padding: 28px 20px; }
   .site-nav {
     display: none;
     position: absolute;
