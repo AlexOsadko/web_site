@@ -312,16 +312,13 @@ a, button, [role="button"] { touch-action: manipulation; }
 .lead-form { margin-top: 16px; display: grid; gap: 10px; }
 .lead-form label { display: grid; gap: 5px; font-size: .82rem; font-weight: 500; color: #cbd5e8; }
 .cf-turnstile { margin-top: 2px; min-height: 65px; }
+/* Turnstile у формі — компактний розмір (150×140), щоб гарантовано вміщався у
+   вузьку картку на телефоні без масштабування. */
+.cf-turnstile[data-size="compact"] { min-height: 140px; }
 /* Поки віджет Turnstile не завантажився (порожній div) — не резервувати місце,
    щоб під textarea не «провисав» порожній проміжок перед кнопкою. Коли Cloudflare
    вставить свій iframe, слот перестане бути порожнім і місце відкриється. */
 .cf-turnstile:empty { display: none; }
-/* Віджет Turnstile має фіксовану ширину ~300px і не вміщається у вузьку картку
-   форми на телефоні. zoom (на відміну від transform: scale) зменшує САМ layout-
-   бокс, тож віджет реально стає вужчим і не з'їдає правий відступ картки. */
-@media (max-width: 620px) {
-  .cf-turnstile { zoom: .85; min-height: 0; }
-}
 .lead-form input, .lead-form textarea {
   width: 100%; padding: 10px 14px; border-radius: 11px;
   border: 1px solid rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .08);
