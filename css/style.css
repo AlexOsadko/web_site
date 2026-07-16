@@ -1061,13 +1061,21 @@ a.card:hover .more span { transform: translateX(5px); }
 .mcta.show { transform: translateY(0); }
 .mcta-btn {
   flex: 1;
+  min-width: 0; /* дозволити кнопкам звужуватися, щоб пара вміщалася в екран */
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 13px 10px;
+  padding: 13px 8px;
   border-radius: 12px;
-  font-weight: 600; font-size: 1rem;
+  font-weight: 600; font-size: .95rem;
+  white-space: nowrap;
   text-decoration: none;
 }
-.mcta-btn svg { width: 20px; height: 20px; }
+.mcta-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+/* Дуже вузькі екрани — ще трохи стиснути, щоб «Консультація» не виходила за край */
+@media (max-width: 380px) {
+  .mcta { padding-left: 10px; padding-right: 10px; gap: 8px; }
+  .mcta-btn { font-size: .85rem; gap: 6px; padding: 12px 6px; }
+  .mcta-btn svg { width: 17px; height: 17px; }
+}
 .mcta-call { background: var(--tint); color: var(--blue); }
 .mcta-lead { background: var(--blue); color: #fff; }
 .mcta-btn:active { transform: scale(.97); }
