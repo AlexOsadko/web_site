@@ -966,6 +966,9 @@ a.card:hover .more span { transform: translateX(5px); }
 
 /* Лічильник статей (щоб ширина не «стрибала» під час підрахунку) */
 .stat-count { font-variant-numeric: tabular-nums; }
+/* Напис у кнопці «Переглянути всі N статті» — єдина фраза (а не 3 flex-елементи),
+   щоб число не «випадало» в окрему колонку й текст переносився по центру. */
+.btn-label { text-align: center; }
 
 /* Каскадна поява карток у сітках (зліва направо по рядах) */
 .cat-grid .reveal:nth-child(3n+2),
