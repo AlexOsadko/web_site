@@ -317,10 +317,10 @@ a, button, [role="button"] { touch-action: manipulation; }
    вставить свій iframe, слот перестане бути порожнім і місце відкриється. */
 .cf-turnstile:empty { display: none; }
 /* Віджет Turnstile має фіксовану ширину ~300px і не вміщається у вузьку картку
-   форми на телефоні — трохи масштабуємо, щоб вкладався в поле з відступами й не
-   наповзав на край картки та плаваючі кнопки. */
+   форми на телефоні. zoom (на відміну від transform: scale) зменшує САМ layout-
+   бокс, тож віджет реально стає вужчим і не з'їдає правий відступ картки. */
 @media (max-width: 620px) {
-  .cf-turnstile { transform: scale(.84); transform-origin: left center; min-height: 56px; }
+  .cf-turnstile { zoom: .85; min-height: 0; }
 }
 .lead-form input, .lead-form textarea {
   width: 100%; padding: 10px 14px; border-radius: 11px;
