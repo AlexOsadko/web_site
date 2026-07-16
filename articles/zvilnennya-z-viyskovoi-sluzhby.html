@@ -25,8 +25,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=28">
-  <script defer src="../assets/header-scroll.js?v=13"></script>
+  <link rel="stylesheet" href="../css/style.css?v=29">
+  <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
+  <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=18"></script>
   <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "Звільнення з військової служби: підстави, порядок і що робити при відмові", "description": "За яких підстав можливе звільнення з військової служби, як відбувається процедура і що робити, якщо командування зволікає. Пояснює адвокат.", "inLanguage": "uk", "image": ["https://osadko.online/assets/og-image.jpg"], "datePublished": "2026-07-12", "dateModified": "2026-07-12", "author": {"@type": "Person", "name": "Олександр Осадько", "jobTitle": "Адвокат", "url": "https://osadko.online/"}, "publisher": {"@type": "Organization", "name": "Адвокат Олександр Осадько", "logo": {"@type": "ImageObject", "url": "https://osadko.online/assets/logo-mark.png"}}, "mainEntityOfPage": {"@type": "WebPage", "@id": "https://osadko.online/articles/zvilnennya-z-viyskovoi-sluzhby.html"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Головна", "item": "https://osadko.online/"}, {"@type": "ListItem", "position": 2, "name": "Статті", "item": "https://osadko.online/articles/"}, {"@type": "ListItem", "position": 3, "name": "Військове право та мобілізація", "item": "https://osadko.online/articles/military.html"}, {"@type": "ListItem", "position": 4, "name": "Звільнення з військової служби: підстави та порядок", "item": "https://osadko.online/articles/zvilnennya-z-viyskovoi-sluzhby.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "За яких підстав звільняють з військової служби?", "acceptedAnswer": {"@type": "Answer", "text": "За станом здоров'я (висновок ВЛК про непридатність), у зв'язку із сімейними обставинами, після закінчення контракту чи досягнення граничного віку та з інших підстав, передбачених законом."}}, {"@type": "Question", "name": "Що робити, якщо звільнення затягують?", "acceptedAnswer": {"@type": "Answer", "text": "Бездіяльність або відмову командування можна оскаржити в порядку підпорядкованості та в адміністративному суді."}}, {"@type": "Question", "name": "Як звільнитися за станом здоров'я?", "acceptedAnswer": {"@type": "Answer", "text": "Підставою є висновок ВЛК про непридатність; на його основі подається рапорт і порушується питання про звільнення."}}]}]}</script>
 </head>
@@ -45,6 +46,10 @@
       <a href="../zrazky/index.html">Зразки</a>
       <a href="../index.html#contacts" class="nav-cta">Консультація</a>
     </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
+      <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
+    </button>
   </div>
 </header>
 

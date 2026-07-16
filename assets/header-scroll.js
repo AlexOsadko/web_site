@@ -28,3 +28,15 @@
   window.addEventListener('resize', update, { passive: true });
   update();
 })();
+
+/* Перемикач теми (день/ніч). Ініціалізація теми — інлайн у <head>. */
+(function () {
+  var btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  btn.addEventListener('click', function () {
+    var r = document.documentElement;
+    var next = r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    r.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+})();

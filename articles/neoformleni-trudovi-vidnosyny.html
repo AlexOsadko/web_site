@@ -25,8 +25,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=28">
-  <script defer src="../assets/header-scroll.js?v=13"></script>
+  <link rel="stylesheet" href="../css/style.css?v=29">
+  <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
+  <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=18"></script>
   <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "Робота без оформлення: як довести трудові відносини та стягнути зарплату", "description": "Чим небезпечна робота без трудового договору, як довести факт трудових відносин у суді, якими доказами й що можна стягнути з роботодавця. Пояснює адвокат.", "inLanguage": "uk", "image": ["https://osadko.online/assets/og-image.jpg"], "datePublished": "2026-07-13", "dateModified": "2026-07-13", "author": {"@type": "Person", "name": "Олександр Осадько", "jobTitle": "Адвокат", "url": "https://osadko.online/"}, "publisher": {"@type": "Organization", "name": "Адвокат Олександр Осадько", "logo": {"@type": "ImageObject", "url": "https://osadko.online/assets/logo-mark.png"}}, "mainEntityOfPage": {"@type": "WebPage", "@id": "https://osadko.online/articles/neoformleni-trudovi-vidnosyny.html"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Головна", "item": "https://osadko.online/"}, {"@type": "ListItem", "position": 2, "name": "Статті", "item": "https://osadko.online/articles/"}, {"@type": "ListItem", "position": 3, "name": "Трудові спори", "item": "https://osadko.online/articles/labor.html"}, {"@type": "ListItem", "position": 4, "name": "Робота без оформлення: як довести трудові відносини в суді", "item": "https://osadko.online/articles/neoformleni-trudovi-vidnosyny.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Чи можна довести роботу без трудового договору?", "acceptedAnswer": {"@type": "Answer", "text": "Так, факт трудових відносин установлюється в суді на підставі сукупності доказів — листування, свідчень, перепусток, виписок про виплати."}}, {"@type": "Question", "name": "Що можна стягнути з роботодавця?", "acceptedAnswer": {"@type": "Answer", "text": "Заборговану зарплату, компенсацію за відпустку, а в разі незаконного звільнення — і середній заробіток за час вимушеного прогулу, а також зобов'язання оформити відносини."}}, {"@type": "Question", "name": "Які докази найважливіші?", "acceptedAnswer": {"@type": "Answer", "text": "Будь-що, що підтверджує виконання роботи за плату й підпорядкування роботодавцю: листування з керівництвом, графіки, підписані вами документи, свідчення колег."}}]}]}</script>
 </head>
@@ -45,6 +46,10 @@
       <a href="../zrazky/index.html">Зразки</a>
       <a href="../index.html#contacts" class="nav-cta">Консультація</a>
     </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
+      <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
+    </button>
   </div>
 </header>
 
