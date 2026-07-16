@@ -69,7 +69,13 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  /* Заборонити iOS Safari «роздувати» шрифт (font boosting) — саме через це на
+     деяких iPhone заголовки в картці контактів виходили за правий край екрана. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -78,7 +84,17 @@ body {
   line-height: 1.6;
   font-weight: 300;
   -webkit-font-smoothing: antialiased;
+  /* Захист від горизонтального «виповзання» контенту. clip (а не hidden) —
+     щоб не створювати scroll-контейнер і не ламати sticky-шапку. */
+  overflow-x: clip;
 }
+
+/* Довгі слова в заголовках/тексті переносяться, а не обрізаються краєм екрана */
+h1, h2, h3, p, .section-title, .contacts-card h2, .contacts-card p, .article-card h3 {
+  overflow-wrap: break-word;
+}
+/* Дозволити елементам grid/flex звужуватися нижче ширини їхнього вмісту */
+.contacts-grid > *, .about-grid > *, .cards > *, .articles > * { min-width: 0; }
 
 img { max-width: 100%; display: block; }
 
@@ -1038,10 +1054,6 @@ a.card:hover .more span { transform: translateX(5px); }
   .mcta { display: flex; }
   .mcta.show ~ .fab { bottom: 84px; }
   .fab { transition: bottom .3s ease; }
-  /* На мобільному дії «Подзвонити / Консультація» вже є в липкій панелі знизу,
-     тож ховаємо плаваючий віджет контактів (щоб не дублювати кнопку дзвінка й
-     не захаращувати кут). Лишаємо тільки кнопку «нагору». */
-  .fab .fab-toggle, .fab .fab-group { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mcta { transition: none; }
