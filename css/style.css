@@ -106,6 +106,9 @@ h1, h2, h3, .disp {
 
 a { color: var(--blue); text-decoration: none; }
 ::selection { background: var(--blue); color: #fff; }
+/* Швидший відгук на тап: прибрати браузерну затримку подвійного тапу на
+   клікабельних елементах (кнопки й посилання). */
+a, button, [role="button"] { touch-action: manipulation; }
 
 .container { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
 
@@ -457,10 +460,18 @@ a { color: var(--blue); text-decoration: none; }
   display: grid; place-items: center;
   color: #fff; border: none; padding: 0; cursor: pointer;
   box-shadow: 0 10px 26px rgba(11, 31, 58, .28);
-  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+  transition: transform .12s ease, box-shadow .18s ease, filter .18s ease;
+  /* Миттєвий відгук на тап: прибрати затримку браузера й підсвітку-заглушку */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 .fab-btn svg { width: 24px; height: 24px; fill: currentColor; }
-.fab-btn:hover { transform: translateY(-3px) scale(1.06); box-shadow: 0 14px 32px rgba(11, 31, 58, .34); filter: brightness(1.05); }
+/* Ефект наведення — лише для пристроїв з мишкою, щоб на тачскріні він не
+   «залипав» і не гальмував реакцію на дотик. */
+@media (hover: hover) {
+  .fab-btn:hover { transform: translateY(-3px) scale(1.06); box-shadow: 0 14px 32px rgba(11, 31, 58, .34); filter: brightness(1.05); }
+}
+.fab-btn:active { transform: scale(.9); }
 .fab-group { display: flex; flex-direction: column; gap: 14px; margin-bottom: 14px; }
 .fab:not(.open) .fab-group { display: none; }
 .fab.open .fab-group .fab-btn { animation: fabPop .22s ease backwards; }
