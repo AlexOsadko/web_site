@@ -27,7 +27,7 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
   <link rel="preload" as="image" href="assets/photo.jpg">
-  <link rel="stylesheet" href="css/style.css?v=32">
+  <link rel="stylesheet" href="css/style.css?v=33">
   <script defer src="assets/header-scroll.js?v=14"></script>
   <script defer src="assets/callback-popup.js?v=18"></script>
   <script type="application/ld+json">
@@ -376,15 +376,7 @@
             </div>
           </div>
           <div class="contact-map">
-            <button type="button" class="map-facade" id="mapFacade"
-              aria-label="Показати карту Google: просп. Повітряних Сил, 20/1, Київ"
-              data-src="https://maps.google.com/maps?q=просп.%20Повітряних%20Сил%2C%2020%2F1%2C%20Київ&hl=uk&z=16&output=embed">
-              <span class="mf-badge">🗺️ Карта — за кліком</span>
-              <span class="mf-pin"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg></span>
-              <span class="mf-addr">просп. Повітряних Сил, 20/1, Київ</span>
-              <span class="mf-sub">Натисніть, щоб відкрити карту Google</span>
-              <span class="mf-btn"><svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Показати карту</span>
-            </button>
+            <iframe title="Мапа: офіс на просп. Повітряних Сил, 20/1, Київ" loading="lazy" src="https://maps.google.com/maps?q=просп.%20Повітряних%20Сил%2C%2020%2F1%2C%20Київ&hl=uk&z=16&output=embed"></iframe>
           </div>
         </div>
       </div>
@@ -531,21 +523,6 @@
     window.addEventListener('scroll', upd, { passive: true });
     window.addEventListener('resize', upd);
     upd();
-  })();
-
-  // ── Карта-фасад: завантажуємо справжню карту Google лише за кліком ──
-  (function () {
-    var f = document.getElementById('mapFacade');
-    if (!f) return;
-    f.addEventListener('click', function () {
-      var ifr = document.createElement('iframe');
-      ifr.title = 'Мапа: офіс на просп. Повітряних Сил, 20/1, Київ';
-      ifr.loading = 'lazy';
-      ifr.src = f.getAttribute('data-src');
-      var wrap = f.parentNode;
-      wrap.innerHTML = '';
-      wrap.appendChild(ifr);
-    });
   })();
 </script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
