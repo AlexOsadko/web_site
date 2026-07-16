@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Деплой після завершення генератора статей (його бот-коміт сам по собі
+  # не тригерить push-подію через анти-рекурсію GitHub, тому ловимо workflow_run).
+  workflow_run:
+    workflows: ["Створити статтю (AI)"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -16,12 +21,16 @@ concurrency:
 
 jobs:
   deploy:
+    # Для workflow_run — деплоїмо лише при успішній генерації; для інших подій — завжди.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main   # завжди беремо найсвіжіший main (із щойно створеною статтею)
       - uses: actions/configure-pages@v5
         with:
           enablement: true

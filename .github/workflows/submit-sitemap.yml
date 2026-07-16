@@ -12,6 +12,10 @@ on:
     paths:
       - sitemap.xml
   workflow_dispatch:
+  # Після генератора статей (бот-коміт не тригерить push-подію).
+  workflow_run:
+    workflows: ["Створити статтю (AI)"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -22,6 +26,7 @@ concurrency:
 
 jobs:
   submit:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -13,6 +13,10 @@ on:
       - 'zrazky/index.html'
       - 'privacy/index.html'
   workflow_dispatch:
+  # Після генератора статей (бот-коміт не тригерить push-подію).
+  workflow_run:
+    workflows: ["Створити статтю (AI)"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -23,18 +27,20 @@ concurrency:
 
 jobs:
   ping:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 2
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Повідомити IndexNow
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "Ручний запуск — надсилаю ВСІ сторінки з sitemap"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "Ручний запуск або після генератора — надсилаю ВСІ сторінки з sitemap"
             python3 tools/indexnow.py --all
           else
             CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'articles/*.html' 'index.html' 'zrazky/index.html' 'privacy/index.html' | tr '\n' ' ')
