@@ -24,6 +24,17 @@ export default {
     if (request.method !== "POST")
       return new Response("Method Not Allowed", { status: 405, headers: cors });
 
+    // Антиспам №1: заявку приймаємо ЛИШЕ з нашого сайту.
+    // Боти, що б'ють напряму по адресі воркера, або не шлють Origin,
+    // або шлють чужий — таких тихо відхиляємо.
+    if (env.ALLOWED_ORIGIN) {
+      const origin = request.headers.get("Origin") || "";
+      const referer = request.headers.get("Referer") || "";
+      const okOrigin =
+        origin === env.ALLOWED_ORIGIN || referer.startsWith(env.ALLOWED_ORIGIN);
+      if (!okOrigin) return json({ ok: false, error: "origin" }, 403, cors);
+    }
+
     let data;
     try {
       data = await request.json();
@@ -31,12 +42,16 @@ export default {
       return json({ ok: false, error: "bad json" }, 400, cors);
     }
 
-    // Антиспам: приховане поле-пастка (боти його заповнюють).
+    // Антиспам №2: приховане поле-пастка (боти його заповнюють).
     if (data.company) return json({ ok: true }, 200, cors); // тихо ігноруємо
+
+    // Антиспам №3: Turnstile-токен обовʼязковий завжди.
+    // Справжня форма й попап його додають; прямий POST від бота — ні.
+    const token = String(data.token || "");
+    if (!token) return json({ ok: false, error: "no-token" }, 403, cors);
 
     // Перевірка Turnstile (якщо задано TURNSTILE_SECRET у секретах воркера).
     if (env.TURNSTILE_SECRET) {
-      const token = String(data.token || "");
       const verify = await fetch(
         "https://challenges.cloudflare.com/turnstile/v0/siteverify",
         {
