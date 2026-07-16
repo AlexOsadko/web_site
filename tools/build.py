@@ -408,10 +408,15 @@ def build_jsonld(a, faq):
     url = ART_BASE_URL + slug + ".html"
     article = {
         "@type": "Article", "headline": h1, "description": desc, "inLanguage": "uk",
+        "image": [BASE_URL + "assets/og-image.jpg"],
         "datePublished": a.get("date_published", "2026-07-01"),
         "dateModified": a.get("date_modified", "2026-07-11"),
-        "author": {"@type": "Person", "name": "Олександр Осадько", "jobTitle": "Адвокат"},
-        "publisher": {"@type": "Person", "name": "Адвокат Олександр Осадько"},
+        "author": {"@type": "Person", "name": "Олександр Осадько", "jobTitle": "Адвокат",
+                   "url": BASE_URL},
+        "publisher": {
+            "@type": "Organization", "name": "Адвокат Олександр Осадько",
+            "logo": {"@type": "ImageObject", "url": BASE_URL + "assets/logo-mark.png"},
+        },
         "mainEntityOfPage": {"@type": "WebPage", "@id": url},
     }
     crumbs = {
