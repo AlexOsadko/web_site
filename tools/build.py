@@ -306,6 +306,8 @@ def blocks_to_html(blocks):
         t = b["type"]
         if t == "h2":
             out.append(f'  <h2 class="body-reveal">{b["text"]}</h2>')
+        elif t == "h3":
+            out.append(f'  <h3 class="body-reveal">{b["text"]}</h3>')
         elif t == "p":
             out.append(f'  <p class="body-reveal">{b["text"]}</p>')
         elif t in ("ul", "ol"):
@@ -460,7 +462,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=27">
+  <link rel="stylesheet" href="../css/style.css?v=28">
   <script defer src="../assets/header-scroll.js?v=13"></script>
   <script defer src="../assets/callback-popup.js?v=18"></script>
   <script type="application/ld+json">{jsonld}</script>
@@ -615,7 +617,7 @@ def render_catalog(arts):
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=27">
+  <link rel="stylesheet" href="../css/style.css?v=28">
   <script defer src="../assets/header-scroll.js?v=13"></script>
   <script defer src="../assets/callback-popup.js?v=18"></script>
 </head>
@@ -764,7 +766,7 @@ def render_hub(cat, arts):
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=27">
+  <link rel="stylesheet" href="../css/style.css?v=28">
   <script defer src="../assets/header-scroll.js?v=13"></script>
   <script defer src="../assets/callback-popup.js?v=18"></script>
   <script type="application/ld+json">{jsonld}</script>

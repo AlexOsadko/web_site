@@ -17,39 +17,90 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Олександр Осадько — адвокат">
+  <meta name="twitter:description" content="Представництво в судах, юридичні консультації та супровід для людей і бізнесу. Захист ваших інтересів — професійно та конфіденційно.">
   <meta name="twitter:image" content="https://osadko.online/assets/og-image.jpg">
   <link rel="icon" type="image/png" href="assets/logo-mark.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=27">
+  <link rel="stylesheet" href="css/style.css?v=28">
   <script defer src="assets/header-scroll.js?v=13"></script>
   <script defer src="assets/callback-popup.js?v=18"></script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "Attorney",
-    "name": "Адвокат Осадько Олександр",
-    "description": "Адвокат Олександр Осадько: представництво в судах, юридичні консультації та супровід для людей і бізнесу.",
-    "url": "https://osadko.online/",
-    "image": "https://osadko.online/assets/og-image.jpg",
-    "logo": "https://osadko.online/assets/logo-mark.png",
-    "telephone": "+380934664443",
-    "email": "adv.osadko@gmail.com",
-    "priceRange": "₴₴",
-    "inLanguage": "uk",
-    "knowsLanguage": ["uk"],
-    "areaServed": { "@type": "Country", "name": "Україна" },
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "просп. Повітряних Сил, 20/1, оф. 2",
-      "addressLocality": "Київ",
-      "postalCode": "03049",
-      "addressCountry": "UA"
-    },
-    "founder": { "@type": "Person", "name": "Олександр Осадько", "jobTitle": "Адвокат" },
-    "sameAs": ["https://t.me/adv_osadko"],
-    "knowsAbout": ["Сімейне право", "Кримінальне право", "ДТП та автоправо", "Військове право та мобілізація", "Нерухомість і спадщина", "Трудові спори", "Господарські спори", "Адміністративні спори"]
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://osadko.online/#website",
+        "url": "https://osadko.online/",
+        "name": "Адвокат Олександр Осадько",
+        "description": "Юридичні послуги, представництво в судах і правові консультації в Києві та по Україні.",
+        "inLanguage": "uk",
+        "publisher": { "@id": "https://osadko.online/#attorney" }
+      },
+      {
+        "@type": ["Attorney", "LegalService", "LocalBusiness"],
+        "@id": "https://osadko.online/#attorney",
+        "name": "Адвокат Осадько Олександр",
+        "description": "Адвокат Олександр Осадько: представництво в судах, юридичні консультації та супровід для людей і бізнесу.",
+        "url": "https://osadko.online/",
+        "image": "https://osadko.online/assets/og-image.jpg",
+        "logo": "https://osadko.online/assets/logo-mark.png",
+        "telephone": "+380934664443",
+        "email": "adv.osadko@gmail.com",
+        "priceRange": "₴₴",
+        "inLanguage": "uk",
+        "knowsLanguage": ["uk"],
+        "areaServed": [
+          { "@type": "City", "name": "Київ" },
+          { "@type": "Country", "name": "Україна" }
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "просп. Повітряних Сил, 20/1, оф. 2",
+          "addressLocality": "Київ",
+          "postalCode": "03049",
+          "addressCountry": "UA"
+        },
+        "geo": { "@type": "GeoCoordinates", "latitude": 50.4501, "longitude": 30.5234 },
+        "openingHoursSpecification": {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "opens": "09:00",
+          "closes": "19:00"
+        },
+        "founder": { "@id": "https://osadko.online/#person" },
+        "sameAs": ["https://t.me/adv_osadko"],
+        "knowsAbout": ["Сімейне право", "Кримінальне право", "ДТП та автоправо", "Військове право та мобілізація", "Нерухомість і спадщина", "Трудові спори", "Господарські спори", "Адміністративні спори"],
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Юридичні послуги",
+          "itemListElement": [
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Юридичні консультації", "serviceType": "Правова консультація", "provider": { "@id": "https://osadko.online/#attorney" } } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Представництво в судах", "serviceType": "Судове представництво", "provider": { "@id": "https://osadko.online/#attorney" } } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Сімейні справи", "serviceType": "Сімейне право", "provider": { "@id": "https://osadko.online/#attorney" } } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Кримінальний захист", "serviceType": "Кримінальне право", "provider": { "@id": "https://osadko.online/#attorney" } } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "ДТП та автоправо", "serviceType": "Автоправо", "provider": { "@id": "https://osadko.online/#attorney" } } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Військове право та мобілізація", "serviceType": "Військове право", "provider": { "@id": "https://osadko.online/#attorney" } } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Нерухомість і спадщина", "serviceType": "Цивільне право", "provider": { "@id": "https://osadko.online/#attorney" } } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Трудові спори", "serviceType": "Трудове право", "provider": { "@id": "https://osadko.online/#attorney" } } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Господарські спори", "serviceType": "Господарське право", "provider": { "@id": "https://osadko.online/#attorney" } } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Адміністративні спори", "serviceType": "Адміністративне право", "provider": { "@id": "https://osadko.online/#attorney" } } }
+          ]
+        }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://osadko.online/#person",
+        "name": "Олександр Осадько",
+        "jobTitle": "Адвокат",
+        "worksFor": { "@id": "https://osadko.online/#attorney" },
+        "url": "https://osadko.online/",
+        "image": "https://osadko.online/assets/og-image.jpg"
+      }
+    ]
   }
   </script>
 </head>
@@ -327,6 +378,18 @@
 
 </main>
 
+<!-- Липка CTA-панель для мобільних (з'являється на прокручуванні) -->
+<div class="mcta" id="mcta" aria-label="Швидкі дії">
+  <a class="mcta-btn mcta-call" href="tel:+380934664443">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+    Подзвонити
+  </a>
+  <a class="mcta-btn mcta-lead" href="#contacts">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+    Консультація
+  </a>
+</div>
+
 <div class="fab" aria-label="Швидкий зв'язок">
   <div class="fab-group">
   <a class="fab-btn fab-call" href="tel:+380934664443" aria-label="Подзвонити">
@@ -435,6 +498,25 @@
   if (leadForm) leadForm.addEventListener('submit', (e) => {
     e.preventDefault(); submitLead(leadForm, 'formOk', 'Заявка на консультацію');
   });
+
+  // ── Липка мобільна CTA-панель: показ після прокручування, ховаємо біля контактів ──
+  (function () {
+    const mcta = document.getElementById('mcta');
+    if (!mcta) return;
+    const contacts = document.getElementById('contacts');
+    function upd() {
+      const scrolled = window.scrollY > 600;
+      let nearContacts = false;
+      if (contacts) {
+        const r = contacts.getBoundingClientRect();
+        nearContacts = r.top < window.innerHeight && r.bottom > 0;
+      }
+      mcta.classList.toggle('show', scrolled && !nearContacts);
+    }
+    window.addEventListener('scroll', upd, { passive: true });
+    window.addEventListener('resize', upd);
+    upd();
+  })();
 </script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 

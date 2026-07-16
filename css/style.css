@@ -945,3 +945,41 @@ a.card:hover .more span { transform: translateX(5px); }
   .faq details[open] > p { animation: none; }
   .dl-btn:hover .dl-ico { animation: none; }
 }
+
+/* ─── Липка мобільна CTA-панель ─────────────────────────────────────── */
+.mcta {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 60;
+  display: none;
+  gap: 10px;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 -6px 24px rgba(11,31,58,.12);
+  transform: translateY(110%);
+  transition: transform .3s cubic-bezier(.2,.7,.3,1);
+}
+.mcta.show { transform: translateY(0); }
+.mcta-btn {
+  flex: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 13px 10px;
+  border-radius: 12px;
+  font-weight: 600; font-size: 1rem;
+  text-decoration: none;
+}
+.mcta-btn svg { width: 20px; height: 20px; }
+.mcta-call { background: #eef2ff; color: var(--blue); }
+.mcta-lead { background: var(--blue); color: #fff; }
+.mcta-btn:active { transform: scale(.97); }
+
+/* показуємо панель лише на мобільних; FAB піднімаємо над нею */
+@media (max-width: 760px) {
+  .mcta { display: flex; }
+  .mcta.show ~ .fab { bottom: 84px; }
+  .fab { transition: bottom .3s ease; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mcta { transition: none; }
+}
