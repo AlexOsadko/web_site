@@ -1038,3 +1038,69 @@ a.card:hover .more span { transform: translateX(5px); }
 @media (prefers-reduced-motion: reduce) {
   .mcta { transition: none; }
 }
+
+/* ============================================================
+   Сучасний мінімалізм — застосовано ЛИШЕ на головній (body.home).
+   Приглушений акцент, тонка типографіка, повітря, hairline, площинні картки.
+   ============================================================ */
+body.home { --blue: #3a5a8f; --blue2: #6a83ad; }
+:root[data-theme="dark"] body.home { --blue: #86a2d8; --blue2: #97acd9; }
+
+/* тонша типографіка — великі заголовки на Inter light */
+body.home .hero h1, body.home .section-title, body.home .visual-card h3 {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 300; letter-spacing: -.022em;
+}
+body.home .hero h1 { letter-spacing: -.03em; }
+/* дрібні заголовки — Inter 400 для легкості й читабельності */
+body.home .card h3, body.home .about-list .t {
+  font-family: 'Inter', system-ui, sans-serif; font-weight: 400; letter-spacing: -.01em;
+}
+body.home .hero-lead, body.home .section-sub,
+body.home .about-text p:first-child { font-weight: 300; }
+
+/* більше повітря + чистий hero без кольорового mesh */
+body.home .section { padding: 94px 0; }
+body.home .hero { padding: 44px 0 86px; }
+body.home .hero::before { display: none; }
+body.home .section.tint { background: transparent; }
+
+/* пігулка → eyebrow */
+body.home .pill {
+  background: transparent; border: none; padding: 0; margin-bottom: 22px;
+  color: var(--blue); font-size: .72rem; letter-spacing: .2em;
+  text-transform: uppercase; font-weight: 600;
+}
+body.home .pill i { display: none; }
+
+/* площинні кнопки */
+body.home .btn { border-radius: 8px; padding: 14px 28px; font-weight: 500; }
+body.home .btn-primary:hover { transform: none; box-shadow: none; opacity: .9; }
+
+/* крупне фото без важкої тіні */
+body.home .visual-card { box-shadow: none; border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+body.home .visual-card .photo { aspect-ratio: 4 / 4.4; margin-bottom: 20px; }
+
+/* послуги — hairline-список замість «карток із тінню» */
+body.home .cards { gap: 0 48px; }
+body.home .card {
+  background: transparent; border: none; border-radius: 0;
+  border-top: 1px solid var(--line); padding: 30px 0;
+  transition: padding .2s ease;
+}
+body.home .card:hover { transform: none; box-shadow: none; padding-left: 8px; }
+body.home .card .ic {
+  background: transparent; width: auto; height: auto; border-radius: 0;
+  margin-bottom: 14px; color: var(--blue); font-size: 1.3rem;
+}
+body.home .card:hover .ic { transform: none; }
+body.home .card h3 { font-size: 1.24rem; }
+
+/* про мене — hairline замість карток із кольоровою лінією */
+body.home .about-list li {
+  background: transparent; border: none; border-radius: 0;
+  border-top: 1px solid var(--line); border-left: none; padding: 20px 0;
+}
+
+/* прев'ю статей — площинні */
+body.home .article-card { box-shadow: none; }
