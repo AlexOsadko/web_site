@@ -13,7 +13,7 @@
   сторінці).
 - **ЧПУ-структура URL** — людиночитні адреси без параметрів:
   `/articles/rozirvannya-shlyubu.html`, `/zrazky/`. Slug-и генеруються
-  транслітерацією заголовка (`tools/ai_article.py → slugify`, `tools/build.py`).
+  транслітерацією заголовка (`tools/generate_article.py`, `tools/build.py`).
 - **Наскрізна перелінковка** — `tools/build.py` автоматично проставляє
   внутрішні посилання на перші згадки ключових фраз (`autolink_blocks`,
   `LINK_TERMS`, ліміт `MAX_AUTOLINKS`) + блок «Схожі теми» (`build_related_html`)
@@ -74,7 +74,7 @@
 
 ## 3. AI-генерація статей (Claude API)
 
-Скрипт `tools/ai_article.py` генерує повноцінну SEO-статтю через Anthropic SDK
+Скрипт `tools/generate_article.py` генерує повноцінну SEO-статтю через Anthropic SDK
 (модель `claude-opus-4-8`, адаптивне мислення, стрімінг).
 
 **Що робить модель:**
@@ -86,45 +86,39 @@
 5. повертає **строгий JSON** у схемі сайту → зберігається у
    `content/articles/<slug>.json`, звідки його підхоплює `tools/build.py`.
 
-**Встановлення й ключ:**
+### Спосіб 1 — через GitHub Actions (рекомендовано, без термінала)
+Воркфлов **`.github/workflows/generate-article.yml`** («Створити статтю (AI)»):
+1. GitHub → вкладка **Actions** → зліва **«Створити статтю (AI)»** → **Run workflow**.
+2. Введіть **тему** й оберіть **категорію** → **Run**.
+3. Модель напише статтю, `build.py` збере HTML і оновить sitemap, зміни
+   закомітяться в `main`, а Deploy опублікує сайт.
+
+> Потрібен **секрет `ANTHROPIC_API_KEY`** у репозиторії:
+> GitHub → **Settings → Secrets and variables → Actions → New repository secret**.
+
+### Спосіб 2 — локально (термінал)
 ```bash
-pip install "anthropic>=0.40"
+pip install -r tools/requirements.txt
 export ANTHROPIC_API_KEY="sk-ant-..."
-```
-
-**Запуск:**
-```bash
-# згенерувати й одразу перезібрати сайт
-python3 tools/ai_article.py \
+python3 tools/generate_article.py \
     --topic "Оскарження податкового повідомлення-рішення" \
-    --cat business \
-    --keyword "оскарження ППР адвокат" \
-    --build
-
-# лише подивитися результат, без запису
-python3 tools/ai_article.py --topic "..." --cat family --dry-run
-```
-
-**Категорії (`--cat`):** family, criminal, civil, admin, business, military,
-labor, auto, realty, social, process.
-
-**Після генерації:**
-```bash
-python3 tools/build.py                     # зібрати сторінки + оновити sitemap
+    --category business --build
 git add -A && git commit -m "Нова стаття" && git push origin HEAD:main
 ```
-Пуш автоматично тригерить сабміт sitemap (Google) та IndexNow (Bing/Yandex).
 
-> Примітка: `internal_links` та `image_alt` зберігаються у JSON як метадані для
-> ревʼю. Наскрізну перелінковку у тілі статті додатково робить `build.py`
-> автоматично (`autolink_blocks`).
+**Категорії (`--category`):** family, criminal, civil, admin, business, military,
+labor, auto, realty, social, process.
+
+Пуш автоматично тригерить сабміт sitemap (Google) та IndexNow (Bing/Yandex).
+Наскрізну перелінковку у тілі статті `build.py` додає автоматично
+(`autolink_blocks`).
 
 ---
 
 ## Робочий процес (single source of truth)
 
 ```
-content/articles/*.json   ← джерело (руками або через ai_article.py)
+content/articles/*.json   ← джерело (руками або через generate_article.py)
         │
         ▼  python3 tools/build.py
 articles/*.html, articles/index.html, index.html, sitemap.xml, robots.txt
