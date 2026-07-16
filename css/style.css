@@ -293,6 +293,10 @@ a { color: var(--blue); text-decoration: none; }
 .lead-form { margin-top: 16px; display: grid; gap: 10px; }
 .lead-form label { display: grid; gap: 5px; font-size: .82rem; font-weight: 500; color: #cbd5e8; }
 .cf-turnstile { margin-top: 2px; min-height: 65px; }
+/* Поки віджет Turnstile не завантажився (порожній div) — не резервувати місце,
+   щоб під textarea не «провисав» порожній проміжок перед кнопкою. Коли Cloudflare
+   вставить свій iframe, слот перестане бути порожнім і місце відкриється. */
+.cf-turnstile:empty { display: none; }
 .lead-form input, .lead-form textarea {
   width: 100%; padding: 10px 14px; border-radius: 11px;
   border: 1px solid rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .08);
@@ -1034,6 +1038,10 @@ a.card:hover .more span { transform: translateX(5px); }
   .mcta { display: flex; }
   .mcta.show ~ .fab { bottom: 84px; }
   .fab { transition: bottom .3s ease; }
+  /* На мобільному дії «Подзвонити / Консультація» вже є в липкій панелі знизу,
+     тож ховаємо плаваючий віджет контактів (щоб не дублювати кнопку дзвінка й
+     не захаращувати кут). Лишаємо тільки кнопку «нагору». */
+  .fab .fab-toggle, .fab .fab-group { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mcta { transition: none; }
