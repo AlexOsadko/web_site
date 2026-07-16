@@ -45,13 +45,10 @@ export default {
     // Антиспам №2: приховане поле-пастка (боти його заповнюють).
     if (data.company) return json({ ok: true }, 200, cors); // тихо ігноруємо
 
-    // Антиспам №3: Turnstile-токен обовʼязковий завжди.
-    // Справжня форма й попап його додають; прямий POST від бота — ні.
-    const token = String(data.token || "");
-    if (!token) return json({ ok: false, error: "no-token" }, 403, cors);
-
-    // Перевірка Turnstile (якщо задано TURNSTILE_SECRET у секретах воркера).
+    // Перевірка Turnstile (лише якщо задано TURNSTILE_SECRET у секретах воркера).
+    // Головний захист від прямого спаму — перевірка Origin вище + honeypot.
     if (env.TURNSTILE_SECRET) {
+      const token = String(data.token || "");
       const verify = await fetch(
         "https://challenges.cloudflare.com/turnstile/v0/siteverify",
         {
