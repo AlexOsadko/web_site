@@ -486,7 +486,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="stylesheet" href="../css/style.css?v=44">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
-  <script defer src="../assets/callback-popup.js?v=19"></script>
+  <script defer src="../assets/callback-popup.js?v=20"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
@@ -647,7 +647,7 @@ def render_catalog(arts):
   <link rel="stylesheet" href="../css/style.css?v=44">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
-  <script defer src="../assets/callback-popup.js?v=19"></script>
+  <script defer src="../assets/callback-popup.js?v=20"></script>
 </head>
 <body>
 
@@ -802,7 +802,7 @@ def render_hub(cat, arts):
   <link rel="stylesheet" href="../css/style.css?v=44">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
-  <script defer src="../assets/callback-popup.js?v=19"></script>
+  <script defer src="../assets/callback-popup.js?v=20"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
