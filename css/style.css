@@ -264,7 +264,7 @@ a, button, [role="button"] { touch-action: manipulation; }
 }
 .pill i {
   width: 7px; height: 7px; border-radius: 50%;
-  background: var(--green); box-shadow: 0 0 10px var(--green);
+  background: var(--blue); box-shadow: 0 0 10px var(--blue);
   animation: pulse 2s infinite;
 }
 @keyframes pulse { 50% { opacity: .4; } }
