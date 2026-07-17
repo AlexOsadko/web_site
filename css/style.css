@@ -354,6 +354,12 @@ a, button, [role="button"] { touch-action: manipulation; }
 }
 .section-title { font-size: clamp(1.9rem, 3.5vw, 2.6rem); font-weight: 600; margin-bottom: 12px; }
 .section-sub { color: var(--muted); max-width: 60ch; }
+/* Вирівнювання описових абзаців по ширині (останній рядок — ліворуч) */
+.about-text p, .section-sub, .contacts-card p {
+  text-align: justify;
+  text-align-last: left;
+  hyphens: auto;
+}
 
 /* ===== Про мене ===== */
 .about-grid { display: grid; grid-template-columns: 1.3fr .7fr; gap: 56px; align-items: start; }
