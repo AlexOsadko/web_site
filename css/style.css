@@ -460,7 +460,7 @@ p.body-reveal,
   display: grid;
   grid-template-columns: 1.35fr .85fr;
   gap: 34px;
-  align-items: start;
+  align-items: center; /* форма завжди по центру відносно списку памʼяток */
   background: var(--tint);
   border: 1px solid var(--line);
   border-radius: 24px;
