@@ -27,7 +27,7 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
   <link rel="preload" as="image" href="assets/photo.jpg">
-  <link rel="stylesheet" href="css/style.css?v=44">
+  <link rel="stylesheet" href="css/style.css?v=45">
   <script defer src="assets/header-scroll.js?v=14"></script>
   <script defer src="assets/callback-popup.js?v=20"></script>
   <script type="application/ld+json">
@@ -321,6 +321,38 @@
     </div>
   </section>
 
+  <!-- Lead-магніт: безкоштовна пам'ятка -->
+  <section class="section" id="lead-magnet">
+    <div class="container">
+      <div class="magnet">
+        <div class="magnet-text">
+          <span class="section-kicker">Безкоштовно</span>
+          <h2 class="magnet-title">Пам'ятка: що робити, якщо на вас складають протокол за ст. 130 КУпАП</h2>
+          <p class="magnet-lead">Керування у стані сп'яніння чи відмова від огляду — одна з найпоширеніших ситуацій на дорозі. Коротка інструкція від адвоката, як діяти й не нашкодити собі.</p>
+          <ul class="magnet-list">
+            <li>ваші права під час зупинки та огляду;</li>
+            <li>чи можна відмовитися від огляду і які наслідки;</li>
+            <li>помилки поліції, що допомагають оскаржити протокол;</li>
+            <li>покроковий алгоритм «що зробити одразу».</li>
+          </ul>
+        </div>
+        <form class="magnet-form" id="magnetForm">
+          <p class="magnet-form-title">Отримати пам'ятку (PDF)</p>
+          <label>Ваше ім'я
+            <input name="name" type="text" required placeholder="Ім'я" autocomplete="name">
+          </label>
+          <label>Телефон
+            <input name="phone" type="tel" required placeholder="+38 (0__) ___-__-__" inputmode="tel" autocomplete="tel">
+          </label>
+          <input type="text" name="company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="btn btn-primary" type="submit">Надіслати й отримати</button>
+          <div class="form-ok" id="magnetOk">Дякуємо! Пам'ятка готова — <a href="assets/pamyatka-st-130.pdf" target="_blank" rel="noopener" download>завантажити PDF →</a></div>
+          <p class="magnet-hint">Телефонуємо лише за потреби. Контакт не передаємо третім особам.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
   <!-- Контакти -->
   <section class="section" id="contacts">
     <div class="container">
@@ -504,6 +536,28 @@
   const leadForm = document.getElementById('leadForm');
   if (leadForm) leadForm.addEventListener('submit', (e) => {
     e.preventDefault(); submitLead(leadForm, 'formOk', 'Заявка на консультацію');
+  });
+
+  // ── Lead-магніт: контакт в обмін на пам'ятку (PDF) ──
+  const magnetForm = document.getElementById('magnetForm');
+  if (magnetForm) magnetForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (magnetForm.elements['company'] && magnetForm.elements['company'].value) return; // honeypot
+    if (Date.now() - formStart < 1500) return;                                           // часова пастка
+    const name = magnetForm.elements['name'].value.trim();
+    const phone = magnetForm.elements['phone'].value.trim();
+    if (!name || !phone) return;
+    // Надсилання заявки — best-effort; доступ до пам'ятки видаємо в будь-якому разі.
+    if (NOTIFY_ENDPOINT) {
+      fetch(NOTIFY_ENDPOINT, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, message: 'Запит пам’ятки (ст. 130 КУпАП)', source: 'Lead-магніт: пам’ятка ст.130 КУпАП', page: location.href, token: '' })
+      }).catch(() => {});
+    }
+    const ok = document.getElementById('magnetOk');
+    magnetForm.querySelectorAll('input, button').forEach(el => { el.disabled = true; });
+    if (ok) ok.style.display = 'block';
+    if (window.osadkoConversion) window.osadkoConversion();
   });
 
   // ── Липка мобільна CTA-панель: показ після прокручування, ховаємо біля контактів ──

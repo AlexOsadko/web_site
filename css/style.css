@@ -418,6 +418,49 @@ a, button, [role="button"] { touch-action: manipulation; }
 .article-card .more span { display: inline-block; transition: transform .25s; }
 .article-card:hover .more span { transform: translateX(6px); }
 
+/* ===== Lead-магніт ===== */
+.magnet {
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 40px;
+  align-items: center;
+  background: var(--tint);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 40px;
+}
+.magnet-title { font-size: clamp(1.4rem, 2.6vw, 1.9rem); font-weight: 600; margin: 10px 0 12px; line-height: 1.25; }
+.magnet-lead { color: var(--muted); font-size: 1rem; margin-bottom: 16px; }
+.magnet-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.magnet-list li { position: relative; padding-left: 26px; color: var(--ink); font-size: .95rem; }
+.magnet-list li::before {
+  content: "✓"; position: absolute; left: 0; top: -1px;
+  color: var(--blue); font-weight: 700;
+}
+.magnet-form {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 24px;
+  display: grid; gap: 10px;
+  box-shadow: var(--shadow);
+}
+.magnet-form-title { font-weight: 600; font-size: 1.05rem; margin-bottom: 2px; }
+.magnet-form label { display: grid; gap: 5px; font-size: .82rem; font-weight: 500; color: var(--muted); }
+.magnet-form input {
+  padding: 12px 14px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--field);
+  color: var(--ink); font-size: .95rem; font-family: inherit;
+}
+.magnet-form input:focus { outline: none; border-color: var(--blue2); }
+.magnet-form .btn { margin-top: 4px; justify-content: center; }
+.magnet-hint { color: var(--faint); font-size: .78rem; line-height: 1.4; margin-top: 2px; }
+.magnet-form .form-ok { display: none; color: var(--green); font-size: .92rem; font-weight: 500; }
+.magnet-form .form-ok a { font-weight: 600; }
+@media (max-width: 880px) {
+  .magnet { grid-template-columns: 1fr; gap: 28px; padding: 28px 22px; }
+}
+
 /* ===== Контакти ===== */
 .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: stretch; }
 .contacts-card {
