@@ -27,7 +27,7 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
   <link rel="preload" as="image" href="assets/photo.jpg">
-  <link rel="stylesheet" href="css/style.css?v=57">
+  <link rel="stylesheet" href="css/style.css?v=58">
   <script defer src="assets/header-scroll.js?v=14"></script>
   <script defer src="assets/callback-popup.js?v=20"></script>
   <script type="application/ld+json">
@@ -138,7 +138,7 @@
   <section class="hero">
     <div class="container hero-inner">
       <div class="hero-text">
-        <span class="hero-eyebrow">Адвокат · Київ та вся Україна</span>
+        <span class="hero-eyebrow"><span class="he-text">Адвокат · Київ та вся Україна</span></span>
         <h1>Правовий захист <span class="accent">без стресу</span></h1>
         <p class="hero-lead">
           Представництво в судах, консультації та супровід для людей і бізнесу.
@@ -505,6 +505,22 @@
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Надзаголовок hero: «друкування» тексту по літері (з повагою до reduced-motion)
+  (function () {
+    const el = document.querySelector('.hero-eyebrow .he-text');
+    if (!el) return;
+    const full = el.textContent;
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    el.textContent = '';
+    el.classList.add('typing');
+    let i = 0;
+    (function tick() {
+      el.textContent = full.slice(0, i);
+      if (i++ <= full.length) { setTimeout(tick, 80); }
+      else { el.classList.remove('typing'); }
+    })();
+  })();
 
   const toggle = document.getElementById('navToggle');
   const nav = document.getElementById('nav');
