@@ -257,13 +257,13 @@ a, button, [role="button"] { touch-action: manipulation; }
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 100px;
-  padding: 7px 16px;
-  font-size: .82rem;
+  padding: 9px 18px;
+  font-size: .95rem;
   color: var(--muted);
   margin-bottom: 26px;
 }
 .pill i {
-  width: 7px; height: 7px; border-radius: 50%;
+  width: 8px; height: 8px; border-radius: 50%;
   background: var(--blue); box-shadow: 0 0 10px var(--blue);
   animation: pulse 2s infinite;
 }
