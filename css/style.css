@@ -207,6 +207,7 @@ a, button, [role="button"] { touch-action: manipulation; }
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   font-weight: 500;
   font-size: .96rem;
