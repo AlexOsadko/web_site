@@ -363,11 +363,7 @@ a, button, [role="button"] { touch-action: manipulation; }
 p.body-reveal,
 .faq details p,
 .article-note,
-.card p,
-.article-card p,
-.mc-body p,
-.catalog-hero p,
-.related-card p {
+.catalog-hero p {
   text-align: justify;
   text-align-last: left;
   hyphens: auto;
