@@ -354,8 +354,20 @@ a, button, [role="button"] { touch-action: manipulation; }
 }
 .section-title { font-size: clamp(1.9rem, 3.5vw, 2.6rem); font-weight: 600; margin-bottom: 12px; }
 .section-sub { color: var(--muted); max-width: 60ch; }
-/* Вирівнювання описових абзаців по ширині (останній рядок — ліворуч) */
-.about-text p, .section-sub, .contacts-card p {
+/* Вирівнювання описових абзаців по ширині (останній рядок — ліворуч).
+   Лише багаторядкові описові абзаци; заголовки, списки, дати й підписи — ні. */
+.about-text p,
+.section-sub,
+.contacts-card p,
+.hero-lead,
+p.body-reveal,
+.faq details p,
+.article-note,
+.card p,
+.article-card p,
+.mc-body p,
+.catalog-hero p,
+.related-card p {
   text-align: justify;
   text-align-last: left;
   hyphens: auto;
