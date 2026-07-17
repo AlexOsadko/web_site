@@ -595,8 +595,17 @@
     e.preventDefault(); submitLead(leadForm, 'formOk', 'Заявка на консультацію');
   });
 
-  // ── Lead-магніт: контакт в обмін на пам'ятку (PDF) ──
+  // ── Lead-магніт: контакт в обмін на пам'ятки (PDF) ──
   const magnetForm = document.getElementById('magnetForm');
+  let magnetLead = null;                 // збережений контакт після надсилання форми
+  const magnetSent = new Set();          // щоб не дублювати повідомлення про ту саму пам'ятку
+  function magnetNotify(payload) {
+    if (!NOTIFY_ENDPOINT) return;
+    fetch(NOTIFY_ENDPOINT, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(() => {});
+  }
   if (magnetForm) magnetForm.addEventListener('submit', (e) => {
     e.preventDefault();
     if (magnetForm.elements['company'] && magnetForm.elements['company'].value) return; // honeypot
@@ -604,19 +613,31 @@
     const name = magnetForm.elements['name'].value.trim();
     const phone = magnetForm.elements['phone'].value.trim();
     if (!name || !phone) return;
-    // Надсилання заявки — best-effort; доступ до пам'ятки видаємо в будь-якому разі.
-    if (NOTIFY_ENDPOINT) {
-      fetch(NOTIFY_ENDPOINT, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, message: 'Запит пам’ятки (ст. 130 КУпАП)', source: 'Lead-магніт: пам’ятка ст.130 КУпАП', page: location.href, token: '' })
-      }).catch(() => {});
-    }
+    magnetLead = { name, phone };
+    // Заявка (контакт) — best-effort; доступ до пам'яток видаємо в будь-якому разі.
+    magnetNotify({ name, phone, message: 'Відкрив доступ до пам’яток', source: 'Lead-магніт: бібліотека пам’яток', page: location.href, token: '' });
     const ok = document.getElementById('magnetOk');
     const lib = document.getElementById('magnetLib');
     if (lib) lib.classList.add('unlocked');            // розблокувати всі завантаження
     magnetForm.querySelectorAll('input, button').forEach(el => { el.disabled = true; });
     if (ok) ok.style.display = 'block';
     if (window.osadkoConversion) window.osadkoConversion();
+  });
+  // Відстеження, яку саме пам'ятку завантажують → окреме повідомлення в Telegram із контактом.
+  document.querySelectorAll('#magnetLib .mc-dl').forEach((link) => {
+    link.addEventListener('click', () => {
+      if (!magnetLead) return;                         // без контакту не шлемо
+      const card = link.closest('.magnet-card');
+      const h3 = card && card.querySelector('h3');
+      const title = h3 ? h3.textContent.trim() : (link.getAttribute('href') || '');
+      if (magnetSent.has(title)) return;               // не дублювати
+      magnetSent.add(title);
+      magnetNotify({
+        name: magnetLead.name, phone: magnetLead.phone,
+        message: 'Завантажив пам’ятку: ' + title,
+        source: 'Завантаження пам’ятки', page: location.href, token: ''
+      });
+    });
   });
 
   // ── Липка мобільна CTA-панель: показ після прокручування, ховаємо біля контактів ──
