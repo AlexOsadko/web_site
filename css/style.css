@@ -250,22 +250,14 @@ a, button, [role="button"] { touch-action: manipulation; }
   gap: 56px;
   align-items: center;
 }
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 100px;
-  padding: 9px 18px;
-  font-size: .95rem;
-  color: var(--muted);
-  margin-bottom: 26px;
-}
-.pill i {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--blue); box-shadow: 0 0 10px var(--blue);
-  animation: pulse 2s infinite;
+.hero-eyebrow {
+  display: inline-block;
+  font-size: .9rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--blue);
+  font-weight: 600;
+  margin-bottom: 22px;
 }
 @keyframes pulse { 50% { opacity: .4; } }
 
@@ -657,7 +649,6 @@ a.card:hover .more span { transform: translateX(5px); }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; }
   .reveal.in { animation: none; }
-  .pill i { animation: none; }
   .fab-toggle .fi-phone, .fab-toggle .fi-mail { animation: none; }
   .fab:not(.open) .fab-toggle .fi-mail { opacity: 0; }
   .fab-top svg { animation: none; }
@@ -1034,12 +1025,12 @@ a.card:hover .more span { transform: translateX(5px); }
 /* ===================== Анімації сторінок ===================== */
 
 /* Hero: послідовна поява елементів при завантаженні */
-.hero-text > .pill,
+.hero-text > .hero-eyebrow,
 .hero-text > h1,
 .hero-text > .hero-lead,
 .hero-text > .hero-actions,
 .hero-visual { animation: heroIn .7s cubic-bezier(.2,.7,.3,1) both; }
-.hero-text > .pill         { animation-delay: .05s; }
+.hero-text > .hero-eyebrow         { animation-delay: .05s; }
 .hero-text > h1            { animation-delay: .15s; }
 .hero-text > .hero-lead    { animation-delay: .27s; }
 .hero-text > .hero-actions { animation-delay: .39s; }
@@ -1098,7 +1089,7 @@ a.card:hover .more span { transform: translateX(5px); }
 .reveal-page > *:nth-child(n+7) { animation-delay: .26s; }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-text > .pill, .hero-text > h1, .hero-text > .hero-lead,
+  .hero-text > .hero-eyebrow, .hero-text > h1, .hero-text > .hero-lead,
   .hero-text > .hero-actions, .hero-visual,
   .reveal-page > *,
   .catalog-hero .back-link, .catalog-hero h1, .catalog-hero p,
