@@ -251,13 +251,33 @@ a, button, [role="button"] { touch-action: manipulation; }
   align-items: center;
 }
 .hero-eyebrow {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   font-size: .9rem;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: var(--blue);
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 22px;
+  /* Сучасний градієнтний текст (синій перелив) */
+  background: linear-gradient(92deg, var(--blue), var(--blue2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+/* Тонка акцентна лінія перед написом, що мʼяко «дихає» */
+.hero-eyebrow::before {
+  content: "";
+  flex: none;
+  width: 26px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--blue), var(--blue2));
+  transform-origin: left center;
+  animation: eyebrowLine 2.8s ease-in-out infinite;
+}
+@keyframes eyebrowLine {
+  0%, 100% { transform: scaleX(1); opacity: .75; }
+  50%      { transform: scaleX(1.55); opacity: 1; }
 }
 @keyframes pulse { 50% { opacity: .4; } }
 
@@ -649,6 +669,7 @@ a.card:hover .more span { transform: translateX(5px); }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; }
   .reveal.in { animation: none; }
+  .hero-eyebrow::before { animation: none; }
   .fab-toggle .fi-phone, .fab-toggle .fi-mail { animation: none; }
   .fab:not(.open) .fab-toggle .fi-mail { opacity: 0; }
   .fab-top svg { animation: none; }
