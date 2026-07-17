@@ -45,9 +45,11 @@ export default {
     // Антиспам №2: приховане поле-пастка (боти його заповнюють).
     if (data.company) return json({ ok: true }, 200, cors); // тихо ігноруємо
 
-    // Перевірка Turnstile (лише якщо задано TURNSTILE_SECRET у секретах воркера).
-    // Головний захист від прямого спаму — перевірка Origin вище + honeypot.
-    if (env.TURNSTILE_SECRET) {
+    // Перевірка Turnstile — лише якщо задано TURNSTILE_SECRET І заявка містить токен.
+    // Форми з віджетом (основна консультація) шлють токен → перевіряються повністю.
+    // Заявки без віджета (бібліотека памʼяток, трекінг завантажень) токена не мають —
+    // для них головний захист це перевірка Origin вище + honeypot нижче/вище.
+    if (env.TURNSTILE_SECRET && data.token) {
       const token = String(data.token || "");
       const verify = await fetch(
         "https://challenges.cloudflare.com/turnstile/v0/siteverify",
