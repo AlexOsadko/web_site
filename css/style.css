@@ -391,6 +391,24 @@ a, button, [role="button"] { touch-action: manipulation; }
 .card h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 9px; }
 .card p { color: var(--muted); font-size: .93rem; }
 
+/* ===== Кейси ===== */
+.cases-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.case-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 26px 24px;
+  display: flex; flex-direction: column;
+  transition: transform .25s, box-shadow .25s, border-color .25s;
+}
+.case-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); border-color: var(--blue2); }
+.case-card h3 { font-size: 1.12rem; font-weight: 600; margin: 12px 0 14px; line-height: 1.3; }
+.case-steps { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.case-steps li { color: var(--muted); font-size: .92rem; line-height: 1.55; }
+.case-steps b { color: var(--ink); font-weight: 600; }
+.cases-note { margin-top: 22px; color: var(--faint); font-size: .82rem; line-height: 1.5; }
+@media (max-width: 880px) { .cases-grid { grid-template-columns: 1fr; } }
+
 /* ===== Статті ===== */
 .articles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 .article-card {
