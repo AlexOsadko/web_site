@@ -403,14 +403,29 @@ def build_related_html(cur_slug, cat, allmeta):
     return "\n".join(out)
 
 
+def _wordcount(blocks):
+    n = 0
+    for b in blocks:
+        if b.get("type") == "p":
+            n += len(strip_tags(b.get("text", "")).split())
+        elif b.get("type") in ("ul", "ol"):
+            for it in b.get("items", []):
+                n += len(strip_tags(it).split())
+    return n
+
+
 def build_jsonld(a, faq):
     slug, cat, title, desc, h1 = a["slug"], a["cat"], a["title"], a["desc"], a["h1"]
     url = ART_BASE_URL + slug + ".html"
+    wc = _wordcount(a.get("blocks", [])) + sum(len((it.get("a", "")).split()) for it in faq)
     article = {
-        "@type": "Article", "headline": h1, "description": desc, "inLanguage": "uk",
+        "@type": "Article", "headline": h1[:110], "description": desc, "inLanguage": "uk",
         "image": [BASE_URL + "assets/og-image.jpg"],
         "datePublished": a.get("date_published", "2026-07-01"),
         "dateModified": a.get("date_modified", "2026-07-11"),
+        "articleSection": CATS[cat],
+        "wordCount": wc,
+        "isAccessibleForFree": True,
         "author": {"@type": "Person", "name": "Олександр Осадько", "jobTitle": "Адвокат",
                    "url": BASE_URL},
         "publisher": {
@@ -882,17 +897,26 @@ def update_homepage_count(n):
 
 # ---------- SITEMAP + ROBOTS ----------
 def write_sitemap(arts):
-    cats_present = [c for c in ORDER if any(a["cat"] == c for a in arts)]
-    urls = [BASE_URL, ART_BASE_URL + "index.html", BASE_URL + "zrazky/index.html",
-            BASE_URL + "privacy/index.html"]
-    urls += [ART_BASE_URL + c + ".html" for c in cats_present]
-    urls += [ART_BASE_URL + a["slug"] + ".html" for a in arts]
     import datetime
-    lastmod = datetime.date.today().isoformat()
+    today = datetime.date.today().isoformat()
+    cats_present = [c for c in ORDER if any(a["cat"] == c for a in arts)]
+    # (loc, lastmod, changefreq, priority)
+    entries = [
+        (BASE_URL, today, "weekly", "1.0"),
+        (ART_BASE_URL + "index.html", today, "weekly", "0.8"),
+        (BASE_URL + "zrazky/index.html", today, "monthly", "0.5"),
+        (BASE_URL + "privacy/index.html", "2026-07-01", "yearly", "0.3"),
+    ]
+    entries += [(ART_BASE_URL + c + ".html", today, "weekly", "0.7") for c in cats_present]
+    # Для кожної статті — її РЕАЛЬНА дата зміни (точний сигнал свіжості для Google,
+    # а не однакова дата збірки на всіх сторінках).
+    for a in arts:
+        lm = a.get("date_modified") or a.get("date_published") or today
+        entries.append((ART_BASE_URL + a["slug"] + ".html", lm, "monthly", "0.7"))
     body = "\n".join(
-        f"  <url><loc>{u}</loc><lastmod>{lastmod}</lastmod>"
-        f"<changefreq>monthly</changefreq><priority>{'1.0' if u == BASE_URL else '0.7'}</priority></url>"
-        for u in urls
+        f"  <url><loc>{loc}</loc><lastmod>{lm}</lastmod>"
+        f"<changefreq>{cf}</changefreq><priority>{pr}</priority></url>"
+        for (loc, lm, cf, pr) in entries
     )
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
