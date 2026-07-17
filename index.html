@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-  <script defer src="assets/ga.js?v=3"></script>
+  <script defer src="assets/ga.js?v=4"></script>
   <title>Олександр Осадько — адвокат</title>
   <meta name="description" content="Адвокат Олександр Осадько. Представництво в судах, юридичні консультації та супровід для людей і бізнесу. Захист ваших інтересів — професійно та конфіденційно.">
   <link rel="canonical" href="https://osadko.online/">
@@ -29,7 +29,7 @@
   <link rel="preload" as="image" href="assets/photo.jpg">
   <link rel="stylesheet" href="css/style.css?v=41">
   <script defer src="assets/header-scroll.js?v=14"></script>
-  <script defer src="assets/callback-popup.js?v=18"></script>
+  <script defer src="assets/callback-popup.js?v=19"></script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -484,7 +484,7 @@
     const tf = form.querySelector('[name="cf-turnstile-response"]');
     const token = tf ? tf.value : '';
     const ok = document.getElementById(okId);
-    const showOk = () => { form.reset(); if (ok) ok.style.display = 'block'; if (window.turnstile) turnstile.reset(); };
+    const showOk = () => { form.reset(); if (ok) ok.style.display = 'block'; if (window.turnstile) turnstile.reset(); if (window.osadkoConversion) window.osadkoConversion(); };
     const mailFallback = () => {
       const body = 'Джерело: ' + source + '\nІмʼя: ' + name + '\nТелефон: ' + phone +
         (message ? '\nПитання: ' + message : '');

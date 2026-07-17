@@ -116,6 +116,7 @@
       sessionStorage.setItem("cbDone", "1");
       form.reset();
       if (okEl) okEl.style.display = "block";
+      if (window.osadkoConversion) window.osadkoConversion();
       setTimeout(hide, 2500);
     };
     var mail = function () {

@@ -446,7 +446,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>document.documentElement.classList.add('js')</script>
-  <script defer src="../assets/ga.js?v=3"></script>
+  <script defer src="../assets/ga.js?v=4"></script>
   <title>{title} — адвокат Олександр Осадько</title>
   <meta name="description" content="{desc}">
   <meta name="keywords" content="{kw}">
@@ -471,7 +471,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="stylesheet" href="../css/style.css?v=41">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
-  <script defer src="../assets/callback-popup.js?v=18"></script>
+  <script defer src="../assets/callback-popup.js?v=19"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
@@ -613,7 +613,7 @@ def render_catalog(arts):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script defer src="../assets/ga.js?v=3"></script>
+  <script defer src="../assets/ga.js?v=4"></script>
   <title>Статті — Олександр Осадько, адвокат</title>
   <meta name="description" content="Юридичні статті адвоката Олександра Осадька: борги та договори, сімейне право, трудові спори, кримінальні справи, ДТП, нерухомість, бізнес і судовий процес.">
   <link rel="canonical" href="{ART_BASE_URL}index.html">
@@ -632,7 +632,7 @@ def render_catalog(arts):
   <link rel="stylesheet" href="../css/style.css?v=41">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
-  <script defer src="../assets/callback-popup.js?v=18"></script>
+  <script defer src="../assets/callback-popup.js?v=19"></script>
 </head>
 <body>
 
@@ -762,7 +762,7 @@ def render_hub(cat, arts):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script defer src="../assets/ga.js?v=3"></script>
+  <script defer src="../assets/ga.js?v=4"></script>
   <title>{esc(CATS[cat])} — статті адвоката Олександра Осадька</title>
   <meta name="description" content="{esc(CAT_DESC[cat])}">
   <meta name="keywords" content="{esc(KW_BASE[cat])}, адвокат, юрист, Україна">
@@ -787,7 +787,7 @@ def render_hub(cat, arts):
   <link rel="stylesheet" href="../css/style.css?v=41">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
-  <script defer src="../assets/callback-popup.js?v=18"></script>
+  <script defer src="../assets/callback-popup.js?v=19"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>

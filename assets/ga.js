@@ -29,6 +29,17 @@
   gtag("js", new Date());
   gtag("config", GA_ID);
 
+  // Google Ads — тег для відстеження конверсій (заявок).
+  var ADS_ID = "AW-18325879759";
+  var CONV_LABEL = "AW-18325879759/MmC8CI728dEcEM_3uqJE"; // конверсія типу «Контакт»
+  gtag("config", ADS_ID);
+
+  // Викликати В МОМЕНТ успішної заявки (не при завантаженні сторінки).
+  // Consent Mode сам обере cookie/cookieless-режим за станом згоди.
+  window.osadkoConversion = function () {
+    gtag("event", "conversion", { send_to: CONV_LABEL });
+  };
+
   function grant() {
     gtag("consent", "update", { analytics_storage: "granted" });
   }
