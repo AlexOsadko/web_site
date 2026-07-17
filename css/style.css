@@ -300,6 +300,12 @@ a, button, [role="button"] { touch-action: manipulation; }
 .hero h1 .accent { color: var(--blue); }
 .hero-lead { color: var(--muted); max-width: 44ch; margin-bottom: 34px; font-size: 1.08rem; }
 .hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+/* На мобільному — кнопка й «Мої послуги» в один рядок */
+@media (max-width: 520px) {
+  .hero-actions { flex-wrap: nowrap; gap: 12px; }
+  .hero-actions .btn { padding: 13px 18px; font-size: .9rem; white-space: nowrap; }
+  .hero-actions .link-underline { flex: none; white-space: nowrap; }
+}
 
 /* Візуальний кластер */
 .hero-visual { position: relative; }
