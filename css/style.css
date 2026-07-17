@@ -1,6 +1,6 @@
 /* ===== Дизайн-система «Синій довіра» ===== */
 :root {
-  --bg: #f2f4fc;
+  --bg: #e7ebf6;
   --card: #ffffff;
   --ink: #0b1f3a;
   --muted: #5a6b82;
@@ -9,8 +9,8 @@
   --blue2: #5b7cff;
   --line: #e4e8f4;
   --green: #22c55e;
-  --tint: #e9eeff;
-  --tint-warm: #fdefe6;
+  --tint: #dfe6fb;
+  --tint-warm: #fbe8db;
   --radius: 20px;
   --shadow: 0 22px 50px rgba(11, 31, 58, .10);
   --shadow-lg: 0 30px 60px rgba(11, 31, 58, .12);
@@ -18,7 +18,7 @@
   /* Семантичні токени (для перемикача тем) */
   --text: #33425a;                      /* м'який текст статей */
   --field: #ffffff;                     /* фон полів вводу на світлих картках */
-  --header-bg: rgba(245, 246, 248, .82);
+  --header-bg: rgba(231, 235, 246, .85);
   --hover: #e8ebf2;                     /* ховер пунктів меню */
   --hover-soft: rgba(11, 31, 58, .06);
   --mcta-bg: rgba(255, 255, 255, .92);
