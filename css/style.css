@@ -39,24 +39,24 @@
 
 /* ===== Темна преміум-тема (перемикач) ===== */
 :root[data-theme="dark"] {
-  --bg: #1b273f;
-  --card: #26334f;
-  --ink: #eef3fc;
-  --muted: #a7b6cf;
-  --faint: #8593ac;
-  --blue: #6f9bff;
-  --blue2: #8fb0ff;
-  --line: rgba(255, 255, 255, .12);
-  --tint: rgba(111, 155, 255, .18);
-  --tint-warm: rgba(217, 119, 6, .18);
-  --shadow: 0 22px 50px rgba(0, 0, 0, .38);
-  --shadow-lg: 0 30px 60px rgba(0, 0, 0, .42);
-  --text: #ccd6e8;
-  --field: #2c3a57;
-  --header-bg: rgba(27, 39, 63, .85);
-  --hover: rgba(255, 255, 255, .07);
-  --hover-soft: rgba(255, 255, 255, .09);
-  --mcta-bg: rgba(30, 43, 68, .92);
+  --bg: #2e3d5b;
+  --card: #3a4c70;
+  --ink: #f2f6fd;
+  --muted: #b4c2d9;
+  --faint: #97a5be;
+  --blue: #7aa2ff;
+  --blue2: #9cbaff;
+  --line: rgba(255, 255, 255, .15);
+  --tint: rgba(122, 162, 255, .20);
+  --tint-warm: rgba(217, 119, 6, .20);
+  --shadow: 0 22px 50px rgba(0, 0, 0, .32);
+  --shadow-lg: 0 30px 60px rgba(0, 0, 0, .36);
+  --text: #d3dcec;
+  --field: #435477;
+  --header-bg: rgba(46, 61, 91, .85);
+  --hover: rgba(255, 255, 255, .09);
+  --hover-soft: rgba(255, 255, 255, .11);
+  --mcta-bg: rgba(50, 64, 94, .92);
 }
 :root[data-theme="dark"] body { -webkit-font-smoothing: antialiased; }
 :root[data-theme="dark"] img.photo,
