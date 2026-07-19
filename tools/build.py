@@ -76,7 +76,7 @@ CAT_NOTE = {
     "social": "тут кожна виплата рахується, а відмови органів часто ґрунтуються на формальностях, які можна оскаржити.",
     "process": "тут виграє той, хто знає процедуру і не пропускає процесуальних строків.",
 }
-NOTE_LINK = '<a href="../index.html#contacts">зв\'яжіться зі мною</a>'
+NOTE_LINK = '<a href="../#contacts">зв\'яжіться зі мною</a>'
 
 # Описи категорій для тематичних сторінок-хабів.
 CAT_DESC = {
@@ -493,16 +493,16 @@ ARTICLE_PAGE = """<!DOCTYPE html>
 
 <header class="site-header">
   <div class="container header-inner">
-    <a href="../index.html" class="brand">
+    <a href="../" class="brand">
       <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька"></span>
       Адвокат Осадько Олександр
     </a>
     <nav class="site-nav">
-      <a href="../index.html#about">Про мене</a>
-      <a href="../index.html#services">Послуги</a>
+      <a href="../#about">Про мене</a>
+      <a href="../#services">Послуги</a>
       <a href="../articles/index.html">Статті</a>
       <a href="../zrazky/index.html">Зразки</a>
-      <a href="../index.html#contacts" class="nav-cta">Консультація</a>
+      <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
       <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -513,7 +513,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
 
 <main class="article-page">
   <nav class="crumbs" aria-label="Хлібні крихти">
-    <a href="../index.html">Головна</a><span>/</span>
+    <a href="../">Головна</a><span>/</span>
     <a href="index.html">Статті</a><span>/</span>
     <a href="{cat}.html">{catname}</a><span>/</span>
     <span class="cur">{crumb}</span>
@@ -532,7 +532,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <p class="article-note">
     Ця стаття має загальний інформаційний характер і не є юридичною
     консультацією. Кожна ситуація індивідуальна — щоб отримати пораду саме для
-    вашого випадку, <a href="../index.html#contacts">зв'яжіться з адвокатом</a>.
+    вашого випадку, <a href="../#contacts">зв'яжіться з адвокатом</a>.
   </p>
 
   <aside class="related">
@@ -653,16 +653,16 @@ def render_catalog(arts):
 
 <header class="site-header">
   <div class="container header-inner">
-    <a href="../index.html" class="brand">
+    <a href="../" class="brand">
       <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька"></span>
       Адвокат Осадько Олександр
     </a>
     <nav class="site-nav">
-      <a href="../index.html#about">Про мене</a>
-      <a href="../index.html#services">Послуги</a>
+      <a href="../#about">Про мене</a>
+      <a href="../#services">Послуги</a>
       <a href="index.html">Статті</a>
       <a href="../zrazky/index.html">Зразки</a>
-      <a href="../index.html#contacts" class="nav-cta">Консультація</a>
+      <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
       <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -674,7 +674,7 @@ def render_catalog(arts):
 <main>
   <section class="catalog-hero">
     <div class="container">
-      <a href="../index.html" class="back-link">← На головну</a>
+      <a href="../" class="back-link">← На головну</a>
       <h1>Статті</h1>
       <p>Пояснюю правові питання простою мовою — {n} {materials} про борги, сім'ю, роботу, кримінальні справи, ДТП, нерухомість і бізнес. Оберіть тему нижче.</p>
       <input type="search" id="q" class="catalog-search" placeholder="🔍 Пошук статті за темою або ключовим словом…" autocomplete="off" aria-label="Пошук статей">
@@ -809,16 +809,16 @@ def render_hub(cat, arts):
 
 <header class="site-header">
   <div class="container header-inner">
-    <a href="../index.html" class="brand">
+    <a href="../" class="brand">
       <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька"></span>
       Адвокат Осадько Олександр
     </a>
     <nav class="site-nav">
-      <a href="../index.html#about">Про мене</a>
-      <a href="../index.html#services">Послуги</a>
+      <a href="../#about">Про мене</a>
+      <a href="../#services">Послуги</a>
       <a href="index.html">Статті</a>
       <a href="../zrazky/index.html">Зразки</a>
-      <a href="../index.html#contacts" class="nav-cta">Консультація</a>
+      <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
       <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -831,7 +831,7 @@ def render_hub(cat, arts):
   <section class="catalog-hero">
     <div class="container">
       <nav class="crumbs" aria-label="Хлібні крихти">
-        <a href="../index.html">Головна</a><span>/</span>
+        <a href="../">Головна</a><span>/</span>
         <a href="index.html">Статті</a><span>/</span>
         <span class="cur">{esc(CATS[cat])}</span>
       </nav>
