@@ -398,7 +398,7 @@ p.body-reveal,
 }
 
 /* ===== Про мене ===== */
-.about-grid { display: grid; grid-template-columns: 1.3fr .7fr; gap: 56px; align-items: stretch; }
+.about-grid { display: grid; grid-template-columns: 1.35fr .65fr; gap: 40px; align-items: stretch; }
 .about-text p { margin-bottom: 18px; color: var(--muted); }
 .about-text p:first-child { color: var(--ink); font-size: 1.14rem; }
 .about-list { list-style: none; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; }
