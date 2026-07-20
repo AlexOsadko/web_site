@@ -401,7 +401,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 /* Вирівнювання описових абзаців по ширині (останній рядок — ліворуч).
    Лише багаторядкові описові абзаци; заголовки, списки, дати й підписи — ні. */
 .about-text p,
-.section-sub,
 .contacts-card p,
 .hero-lead,
 p.body-reveal,
