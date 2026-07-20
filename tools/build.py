@@ -502,7 +502,6 @@ ARTICLE_PAGE = """<!DOCTYPE html>
       <a href="../#services">Послуги</a>
       <a href="../articles/index.html">Статті</a>
       <a href="../zrazky/index.html">Зразки</a>
-      <a href="../kalkulyatory/index.html">Калькулятори</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
@@ -663,7 +662,6 @@ def render_catalog(arts):
       <a href="../#services">Послуги</a>
       <a href="index.html">Статті</a>
       <a href="../zrazky/index.html">Зразки</a>
-      <a href="../kalkulyatory/index.html">Калькулятори</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
@@ -820,7 +818,6 @@ def render_hub(cat, arts):
       <a href="../#services">Послуги</a>
       <a href="index.html">Статті</a>
       <a href="../zrazky/index.html">Зразки</a>
-      <a href="../kalkulyatory/index.html">Калькулятори</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
@@ -907,11 +904,6 @@ def write_sitemap(arts):
     entries = [
         (BASE_URL, today, "weekly", "1.0"),
         (ART_BASE_URL + "index.html", today, "weekly", "0.8"),
-        (BASE_URL + "poslugy/rozluchennya.html", today, "monthly", "0.8"),
-        (BASE_URL + "poslugy/kryminalni-spravy.html", today, "monthly", "0.8"),
-        (BASE_URL + "poslugy/dtp.html", today, "monthly", "0.8"),
-        (BASE_URL + "poslugy/mobilizatsiya.html", today, "monthly", "0.8"),
-        (BASE_URL + "kalkulyatory/index.html", today, "monthly", "0.6"),
         (BASE_URL + "zrazky/index.html", today, "monthly", "0.5"),
         (BASE_URL + "privacy/index.html", "2026-07-01", "yearly", "0.3"),
     ]
