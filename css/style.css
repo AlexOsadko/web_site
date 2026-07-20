@@ -112,6 +112,21 @@ a { color: var(--blue); text-decoration: none; }
    клікабельних елементах (кнопки й посилання). */
 a, button, [role="button"] { touch-action: manipulation; }
 
+/* ── Доступність (a11y) ── */
+.skip-link {
+  position: absolute; left: 12px; top: -64px; z-index: 1200;
+  background: var(--blue); color: #fff; padding: 11px 18px; border-radius: 10px;
+  font-weight: 600; text-decoration: none; box-shadow: var(--shadow-lg);
+  transition: top .16s ease;
+}
+.skip-link:focus { top: 12px; }
+a:focus-visible, button:focus-visible, summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--blue2);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
 .container { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
 
 /* ===== Шапка ===== */

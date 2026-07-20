@@ -483,13 +483,14 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=64">
+  <link rel="stylesheet" href="../css/style.css?v=65">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Перейти до вмісту</a>
 
 <header class="site-header">
   <div class="container header-inner">
@@ -511,7 +512,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   </div>
 </header>
 
-<main class="article-page">
+<main id="main" class="article-page">
   <nav class="crumbs" aria-label="Хлібні крихти">
     <a href="../">Головна</a><span>/</span>
     <a href="index.html">Статті</a><span>/</span>
@@ -644,12 +645,13 @@ def render_catalog(arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=64">
+  <link rel="stylesheet" href="../css/style.css?v=65">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
 </head>
 <body>
+<a class="skip-link" href="#main">Перейти до вмісту</a>
 
 <header class="site-header">
   <div class="container header-inner">
@@ -671,7 +673,7 @@ def render_catalog(arts):
   </div>
 </header>
 
-<main>
+<main id="main">
   <section class="catalog-hero">
     <div class="container">
       <a href="../" class="back-link">← На головну</a>
@@ -799,13 +801,14 @@ def render_hub(cat, arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=64">
+  <link rel="stylesheet" href="../css/style.css?v=65">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Перейти до вмісту</a>
 
 <header class="site-header">
   <div class="container header-inner">
@@ -827,7 +830,7 @@ def render_hub(cat, arts):
   </div>
 </header>
 
-<main>
+<main id="main">
   <section class="catalog-hero">
     <div class="container">
       <nav class="crumbs" aria-label="Хлібні крихти">
