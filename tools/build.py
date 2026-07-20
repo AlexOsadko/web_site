@@ -907,6 +907,9 @@ def write_sitemap(arts):
     entries = [
         (BASE_URL, today, "weekly", "1.0"),
         (ART_BASE_URL + "index.html", today, "weekly", "0.8"),
+        (BASE_URL + "poslugy/rozluchennya.html", today, "monthly", "0.8"),
+        (BASE_URL + "poslugy/dtp.html", today, "monthly", "0.8"),
+        (BASE_URL + "poslugy/mobilizatsiya.html", today, "monthly", "0.8"),
         (BASE_URL + "kalkulyatory/index.html", today, "monthly", "0.6"),
         (BASE_URL + "zrazky/index.html", today, "monthly", "0.5"),
         (BASE_URL + "privacy/index.html", "2026-07-01", "yearly", "0.3"),
