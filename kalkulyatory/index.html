@@ -278,7 +278,28 @@
   const alKids = document.getElementById('al-kids');
   const alAge = document.getElementById('al-age');
   const alPm = document.getElementById('al-pm');
-  const PM_CHILD = { child6: 2563, child18: 3196 }; // орієнтовні значення, редаговані
+  // Офіційні прожиткові мінімуми (грн) за роками — джерело: щорічний Закон про Держбюджет.
+  // Значення підтягуються автоматично за поточним роком; оновлювати таблицю при зміні закону.
+  const PM_TABLE = {
+    2024: { work: 3028, child6: 2563, child18: 3196 },
+    2025: { work: 3028, child6: 2563, child18: 3196 },
+    2026: { work: 3028, child6: 2563, child18: 3196 }
+  };
+  function pmForYear(y) {
+    const years = Object.keys(PM_TABLE).map(Number).sort((a, b) => a - b);
+    let pick = years[0];
+    for (const yr of years) if (yr <= y) pick = yr;
+    return Object.assign({ year: pick }, PM_TABLE[pick]);
+  }
+  const PM = pmForYear(new Date().getFullYear());
+  const PM_CHILD = { child6: PM.child6, child18: PM.child18 };
+  const pmHint = 'Значення станом на ' + PM.year + ' р. — за потреби змініть';
+
+  // Автопідстановка актуальних значень на завантаженні.
+  alPm.value = PM_CHILD[alAge.value];
+  const alHint = document.querySelector('label[for="al-pm"] .hint');
+  if (alHint) alHint.textContent = pmHint;
+
   let alPmTouched = false;
   alPm.addEventListener('input', () => { alPmTouched = true; });
   alAge.addEventListener('change', () => { if (!alPmTouched) alPm.value = PM_CHILD[alAge.value]; });
@@ -302,6 +323,11 @@
   const feePayer = document.getElementById('fee-payer');
   const feeClaim = document.getElementById('fee-claim');
   const feePm = document.getElementById('fee-pm');
+
+  // Автопідстановка актуального прожиткового мінімуму для працездатних осіб.
+  feePm.value = PM.work;
+  const feeHint = document.querySelector('label[for="fee-pm"] .hint');
+  if (feeHint) feeHint.textContent = pmHint;
 
   function calcFee() {
     const claim = Math.max(0, parseFloat(feeClaim.value) || 0);
