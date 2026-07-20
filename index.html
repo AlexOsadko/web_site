@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-  <script defer src="assets/ga.js?v=4"></script>
+  <script defer src="assets/ga.js?v=5"></script>
   <title>Адвокат у Києві — Олександр Осадько | Консультації та захист у судах</title>
   <meta name="description" content="Адвокат у Києві Олександр Осадько: юридичні консультації, представництво в судах, сімейні, кримінальні, ДТП, спадкові та трудові справи. Перша консультація безкоштовна.">
   <link rel="canonical" href="https://osadko.online/">
@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="preload" as="image" href="assets/photo.jpg">
+  <link rel="preload" as="image" href="assets/photo.jpg" fetchpriority="high">
   <link rel="stylesheet" href="css/style.css?v=63">
   <script defer src="assets/header-scroll.js?v=14"></script>
   <script defer src="assets/callback-popup.js?v=20"></script>
@@ -112,7 +112,7 @@
 <header class="site-header" id="top">
   <div class="container header-inner">
     <a href="#top" class="brand">
-      <span class="brand-mark"><img src="assets/logo-mark.png" alt="Логотип адвоката Осадька"></span>
+      <span class="brand-mark"><img src="assets/logo-mark.png" alt="Логотип адвоката Осадька" width="36" height="36"></span>
       Адвокат Осадько Олександр
     </a>
     <nav class="site-nav" id="nav">
@@ -152,6 +152,7 @@
       <div class="hero-visual">
         <div class="visual-card">
           <img class="photo" src="assets/photo.jpg" alt="Адвокат Олександр Осадько"
+               width="724" height="1086" fetchpriority="high" decoding="async"
                onerror="this.onerror=null;this.src='assets/photo-placeholder.svg'">
           <h3>Особистий супровід справи</h3>
           <p>Веду кожного клієнта особисто — від першої консультації до фактичного вирішення питання.</p>
@@ -507,7 +508,7 @@
 <footer class="site-footer">
   <div class="container footer-inner">
     <span class="brand">
-      <span class="brand-mark" style="width:28px;height:28px"><img src="assets/logo-mark.png" alt=""></span>
+      <span class="brand-mark" style="width:28px;height:28px"><img src="assets/logo-mark.png" alt="" width="28" height="28" loading="lazy" decoding="async"></span>
       Адвокат Осадько Олександр
     </span>
     <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="privacy/index.html">Політика конфіденційності</a></span>

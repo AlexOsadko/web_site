@@ -51,16 +51,26 @@
   function track(name, params) { gtag("event", name, params || {}); }
   window.osadkoTrack = track;
 
+  // Мікроконверсія в Google Ads: дзвінок і месенджер — це теж «Контакт».
+  // Дедуплікація за типом у межах одного перегляду, щоб не роздувати статистику.
+  var microFired = {};
+  function microContact(kind) {
+    if (microFired[kind]) return;
+    microFired[kind] = true;
+    if (window.osadkoConversion) window.osadkoConversion();
+  }
+
   document.addEventListener("click", function (e) {
     var a = e.target && e.target.closest ? e.target.closest("a") : null;
     if (!a) return;
     var href = a.getAttribute("href") || "";
-    if (href.indexOf("tel:") === 0) track("click_phone");
+    if (href.indexOf("tel:") === 0) { track("click_phone"); microContact("phone"); }
     else if (href.indexOf("mailto:") === 0) track("click_email");
-    else if (href.indexOf("t.me/") > -1) track("click_messenger", { channel: "telegram" });
-    else if (href.indexOf("wa.me") > -1 || href.indexOf("whatsapp") > -1) track("click_messenger", { channel: "whatsapp" });
-    else if (href.indexOf("viber:") === 0) track("click_messenger", { channel: "viber" });
+    else if (href.indexOf("t.me/") > -1) { track("click_messenger", { channel: "telegram" }); microContact("telegram"); }
+    else if (href.indexOf("wa.me") > -1 || href.indexOf("whatsapp") > -1) { track("click_messenger", { channel: "whatsapp" }); microContact("whatsapp"); }
+    else if (href.indexOf("viber:") === 0) { track("click_messenger", { channel: "viber" }); microContact("viber"); }
     else if (/\.docx($|\?)/i.test(href)) track("download_template", { file: href.split("/").pop() });
+    else if (/\.pdf($|\?)/i.test(href)) track("download_pamyatka", { file: (href.split("/").pop() || "").split("?")[0] });
   }, true);
 
   document.addEventListener("submit", function (e) {

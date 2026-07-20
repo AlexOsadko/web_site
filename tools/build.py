@@ -461,7 +461,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>document.documentElement.classList.add('js')</script>
-  <script defer src="../assets/ga.js?v=4"></script>
+  <script defer src="../assets/ga.js?v=5"></script>
   <title>{title} — адвокат Олександр Осадько</title>
   <meta name="description" content="{desc}">
   <meta name="keywords" content="{kw}">
@@ -494,7 +494,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
 <header class="site-header">
   <div class="container header-inner">
     <a href="../" class="brand">
-      <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька"></span>
+      <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька" width="36" height="36"></span>
       Адвокат Осадько Олександр
     </a>
     <nav class="site-nav">
@@ -548,7 +548,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
 <footer class="site-footer">
   <div class="container footer-inner">
     <span class="brand">
-      <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt=""></span>
+      <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt="" width="28" height="28" loading="lazy" decoding="async"></span>
       Адвокат Осадько Олександр
     </span>
     <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/index.html">Політика конфіденційності</a></span>
@@ -628,7 +628,7 @@ def render_catalog(arts):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script defer src="../assets/ga.js?v=4"></script>
+  <script defer src="../assets/ga.js?v=5"></script>
   <title>Статті — Олександр Осадько, адвокат</title>
   <meta name="description" content="Юридичні статті адвоката Олександра Осадька: борги та договори, сімейне право, трудові спори, кримінальні справи, ДТП, нерухомість, бізнес і судовий процес.">
   <link rel="canonical" href="{ART_BASE_URL}index.html">
@@ -654,7 +654,7 @@ def render_catalog(arts):
 <header class="site-header">
   <div class="container header-inner">
     <a href="../" class="brand">
-      <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька"></span>
+      <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька" width="36" height="36"></span>
       Адвокат Осадько Олександр
     </a>
     <nav class="site-nav">
@@ -697,7 +697,7 @@ def render_catalog(arts):
 <footer class="site-footer">
   <div class="container footer-inner">
     <span class="brand">
-      <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt=""></span>
+      <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt="" width="28" height="28" loading="lazy" decoding="async"></span>
       Адвокат Осадько Олександр
     </span>
     <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/index.html">Політика конфіденційності</a></span>
@@ -777,7 +777,7 @@ def render_hub(cat, arts):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script defer src="../assets/ga.js?v=4"></script>
+  <script defer src="../assets/ga.js?v=5"></script>
   <title>{esc(CATS[cat])} — статті адвоката Олександра Осадька</title>
   <meta name="description" content="{esc(CAT_DESC[cat])}">
   <meta name="keywords" content="{esc(KW_BASE[cat])}, адвокат, юрист, Україна">
@@ -810,7 +810,7 @@ def render_hub(cat, arts):
 <header class="site-header">
   <div class="container header-inner">
     <a href="../" class="brand">
-      <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька"></span>
+      <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька" width="36" height="36"></span>
       Адвокат Осадько Олександр
     </a>
     <nav class="site-nav">
@@ -859,7 +859,7 @@ def render_hub(cat, arts):
 <footer class="site-footer">
   <div class="container footer-inner">
     <span class="brand">
-      <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt=""></span>
+      <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt="" width="28" height="28" loading="lazy" decoding="async"></span>
       Адвокат Осадько Олександр
     </span>
     <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/index.html">Політика конфіденційності</a></span>
