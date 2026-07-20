@@ -397,7 +397,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
   margin-bottom: 14px;
 }
 .section-title { font-size: clamp(1.9rem, 3.5vw, 2.6rem); font-weight: 600; margin-bottom: 12px; }
-.section-sub { color: var(--muted); max-width: 60ch; }
+.section-sub { color: var(--muted); }
 /* Вирівнювання описових абзаців по ширині (останній рядок — ліворуч).
    Лише багаторядкові описові абзаци; заголовки, списки, дати й підписи — ні. */
 .about-text p,
