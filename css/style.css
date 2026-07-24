@@ -47,6 +47,7 @@
   --faint: #97a5be;
   --blue: #7aa2ff;
   --blue2: #9cbaff;
+  --green: #4ade80;
   --line: rgba(255, 255, 255, .15);
   --dot-ring: rgba(122, 162, 255, .5);
   --tint: rgba(122, 162, 255, .20);
@@ -958,7 +959,7 @@ a.card:hover .more span { transform: translateX(5px); }
 }
 .cb-form input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37, 99, 235, .12); }
 .cb-form button { margin-top: 4px; }
-.cb-ok { display: none; color: #16a34a; font-size: .9rem; margin: 4px 0 0; }
+.cb-ok { display: none; color: var(--green); font-size: .9rem; margin: 4px 0 0; }
 
 /* ===== Банер згоди на cookie ===== */
 .cookie-banner {
