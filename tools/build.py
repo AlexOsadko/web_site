@@ -96,7 +96,7 @@ CAT_DESC = {
 # Авто-перелінковка: ключова фраза → slug статті. Білдер робить першу згадку
 # фрази у тексті посиланням на відповідну статтю (не більше MAX_AUTOLINKS на статтю,
 # без самопосилань). Нові статті вплітаються автоматично — достатньо додати фразу.
-MAX_AUTOLINKS = 8
+MAX_AUTOLINKS = 12
 LINK_TERMS = {
     "неустойки": "stiahnennia-neustojky-za-dogovorom", "неустойку": "stiahnennia-neustojky-za-dogovorom", "неустойка": "stiahnennia-neustojky-za-dogovorom",
     "прогул": "zvilnennia-za-prohul", "прогулу": "zvilnennia-za-prohul",
@@ -386,10 +386,60 @@ def build_faq_html(faq):
     return "\n".join(out)
 
 
+AUTO_ANCHOR_STOP = {
+    "адвокат", "юрист", "консультація", "договір", "суд", "заява", "позов",
+    "право", "права", "порядок", "питання", "справа", "стаття", "закон",
+    "україні", "україна", "як", "що",
+}
+AUTO_ANCHOR_TAIL = {
+    "і", "та", "й", "з", "із", "зі", "у", "в", "на", "за", "до", "для",
+    "від", "про", "по", "а", "чи", "о", "як", "що", "цього", "цих",
+    "через", "її", "його", "їх", "свого", "своїх", "цим", "цією",
+}
+
+
+def build_auto_anchors(arts):
+    """Для статей без ручного анкора генерує анкор із заголовка — ширша перелінковка.
+    Додаються лише однозначні (одна ціль) фрази, довші за 13 символів."""
+    covered = set(LINK_TERMS.values())
+    existing = set(LINK_TERMS.keys())
+    cand = {}
+    for a in arts:
+        if a["slug"] in covered:
+            continue
+        phrase = re.split(r"[:—–(]", a["h1"].lower())[0].strip(" .,:;")
+        words = phrase.split()[:4]
+        if words and words[0] in AUTO_ANCHOR_STOP:
+            words = words[1:]
+        while words and words[-1] in AUTO_ANCHOR_TAIL:
+            words = words[:-1]
+        phrase = " ".join(words)
+        if len(words) < 2 or len(phrase) < 14 or phrase in existing:
+            continue
+        cand.setdefault(phrase, set()).add(a["slug"])
+    added = 0
+    for phrase, slugs in cand.items():
+        if len(slugs) == 1:
+            LINK_TERMS[phrase] = next(iter(slugs))
+            added += 1
+    return added
+
+
+_KW_RE = re.compile(r"[Ѐ-ӿ]{4,}")
+
+
+def _kw(a):
+    return set(_KW_RE.findall((a["title"] + " " + a.get("desc", "")).lower()))
+
+
 def build_related_html(cur_slug, cat, allmeta):
+    cur = next((x for x in allmeta if x["slug"] == cur_slug), None)
+    ck = _kw(cur) if cur else set()
     same = [a for a in allmeta if a["cat"] == cat and a["slug"] != cur_slug]
     rest = [a for a in allmeta if a["cat"] != cat and a["slug"] != cur_slug]
-    # 3 з тієї ж теми + 3 суміжні з різних категорій (для різноманіття)
+    # найрелевантніші з тієї ж теми (за перетином ключових слів) + суміжні з різних категорій
+    same.sort(key=lambda a: -len(ck & _kw(a)))
+    rest.sort(key=lambda a: -len(ck & _kw(a)))
     diverse, seen = [], set()
     for a in rest:
         if a["cat"] not in seen:
@@ -951,6 +1001,7 @@ def main():
     os.makedirs(ART, exist_ok=True)
     arts = load_articles()
     n = len(arts)
+    auto_anchors = build_auto_anchors(arts)
 
     for a in arts:
         page = render_article(a, arts)
@@ -971,6 +1022,7 @@ def main():
 
     missing_slug = [s for s in FEATURED if s not in {a["slug"] for a in arts}]
     print(f"Побудовано статей: {n}; тематичних хабів: {len(hubs)}")
+    print(f"Авто-анкорів згенеровано: {auto_anchors}; усього анкорів: {len(LINK_TERMS)}")
     print(f"Оновлено лічильник на головній: секція={c1}, кнопка={c2}")
     if missing_slug:
         print(f"⚠ Обрані статті відсутні в даних: {missing_slug}")
