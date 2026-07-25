@@ -98,6 +98,14 @@ CAT_DESC = {
 # без самопосилань). Нові статті вплітаються автоматично — достатньо додати фразу.
 MAX_AUTOLINKS = 8
 LINK_TERMS = {
+    "неустойки": "stiahnennia-neustojky-za-dogovorom", "неустойку": "stiahnennia-neustojky-za-dogovorom", "неустойка": "stiahnennia-neustojky-za-dogovorom",
+    "прогул": "zvilnennia-za-prohul", "прогулу": "zvilnennia-za-prohul",
+    "опікунство": "oformlennia-opikunstva-nad-dytynoyu", "опікунства": "oformlennia-opikunstva-nad-dytynoyu", "опікуном": "oformlennia-opikunstva-nad-dytynoyu",
+    "корпоративного договору": "zminy-do-korporatyvnoho-dogovoru", "корпоративний договір": "zminy-do-korporatyvnoho-dogovoru",
+    "фіктивний правочин": "spir-pro-vyznannya-pravochynu-fiktyvnym", "фіктивного правочину": "spir-pro-vyznannya-pravochynu-fiktyvnym",
+    "зміни імені": "zmina-imeni-ta-prizvyshcha", "зміну імені": "zmina-imeni-ta-prizvyshcha", "зміна прізвища": "zmina-imeni-ta-prizvyshcha",
+    "режим майна подружжя": "pravovyj-rezhym-mayna-podruzhzhya",
+    "спадкування за заповітом": "spadkuvannya-za-zapovitom-osoblyvosti",
     "аліменти": "alimenty-na-dytynu", "аліментів": "alimenty-na-dytynu", "аліменти на дитину": "alimenty-na-dytynu",
     "розлучення": "rozirvannya-shlyubu", "розлученні": "rozirvannya-shlyubu", "розлучення в україні": "rozirvannya-shlyubu",
     "спадщині": "spadschyna-pryynyaty", "спадщиною": "spadschyna-pryynyaty",
