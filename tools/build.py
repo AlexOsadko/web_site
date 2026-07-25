@@ -324,6 +324,37 @@ def blocks_to_html(blocks):
     return "\n\n".join(out)
 
 
+_UK_LETTER = "[а-яіїєґ'ʼ’]"
+_MORPH_MIN_STEM = 5   # мінімальна незмінна основа слова
+_MORPH_MAX_END = 4    # скільки літер закінчення може відрізнятися
+_morph_cache = {}
+
+
+def _morph_pattern(phrase):
+    """Регекс, що зіставляє фразу з урахуванням українських відмінкових закінчень.
+    Короткі слова (<5 літер) матчаться точно; довші — за основою + змінне закінчення."""
+    pat = _morph_cache.get(phrase)
+    if pat is not None:
+        return pat
+    words = phrase.split()
+    if len(words) == 1:
+        # Однослівні анкори — лише точний збіг (морфологія на одному слові
+        # дає хибні збіги через спільні основи різних лексем, напр. завдаток/завдати).
+        body = re.escape(phrase)
+    else:
+        parts = []
+        for w in words:
+            if len(w) < _MORPH_MIN_STEM:
+                parts.append(re.escape(w))
+            else:
+                stem = w[:max(_MORPH_MIN_STEM, len(w) - 3)]
+                parts.append(re.escape(stem) + _UK_LETTER + "{0,%d}" % _MORPH_MAX_END)
+        body = r"\s+".join(parts)
+    pat = re.compile(r"(?<![\w’ʼ'\-])(" + body + r")(?![\w’ʼ'\-])", re.IGNORECASE)
+    _morph_cache[phrase] = pat
+    return pat
+
+
 def _autolink_text(text, cur_slug, valid_slugs, used, terms):
     """Вставляє посилання на першу згадку ключових фраз у рядку тексту."""
     if "<a " in text:
@@ -333,7 +364,7 @@ def _autolink_text(text, cur_slug, valid_slugs, used, terms):
             break
         if slug == cur_slug or slug in used or slug not in valid_slugs:
             continue
-        pat = re.compile(r"(?<![\w’ʼ'\-])(" + re.escape(phrase) + r")(?![\w’ʼ'\-])", re.IGNORECASE)
+        pat = _morph_pattern(phrase)
         m = pat.search(text)
         if not m:
             continue
