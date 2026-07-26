@@ -30,6 +30,12 @@
 - [x] **Власний домен osadko.online.** Під'єднано: CNAME у репозиторії, DNS (A + www CNAME)
   вказує на GitHub Pages, BASE_URL і всі URL переведено на osadko.online. Лишилось увімкнути
   Enforce HTTPS у Settings → Pages, коли GitHub випустить сертифікат.
+- [ ] **Видалити стару робочу гілку `claude/osadkov-lawyer-website-8z6ifu`.** Гілку
+  перейменовано на `claude/osadko-lawyer-website-8z6ifu` (нова гілка створена, Routine
+  оновлено, локальне відстеження переведено). Стару гілку не вдалося видалити з сесії —
+  egress-проксі повертає 403 на видалення гілки. Приберіть її вручну через веб-інтерфейс
+  GitHub: Branches → видалити `claude/osadkov-lawyer-website-8z6ifu` (вона осиротіла, нові
+  коміти в неї не йдуть).
 
 ## 🟡 Можу зробити далі (без ваших даних)
 
