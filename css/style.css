@@ -758,6 +758,39 @@ a.card:hover .more span { transform: translateX(5px); }
   font-size: .92rem;
 }
 
+/* Контекстна перелінковка всередині статті */
+.seealso {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  background: var(--tint);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin: 30px 0;
+  font-size: .95rem;
+}
+:root[data-theme="dark"] .seealso { background: var(--card); }
+.seealso-label {
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-size: .74rem;
+  flex: 0 0 auto;
+  align-self: center;
+}
+.seealso a {
+  color: var(--blue);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color .15s;
+}
+.seealso a:hover,
+.seealso a:focus-visible { border-bottom-color: var(--blue); }
+.seealso-sep { color: var(--faint); user-select: none; }
+
 /* ===== Адаптивність ===== */
 @media (max-width: 880px) {
   .hero { padding: 12px 0 56px; }

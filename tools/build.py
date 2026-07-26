@@ -321,6 +321,14 @@ def blocks_to_html(blocks):
         elif t in ("ul", "ol"):
             items = "\n".join(f"    <li>{i}</li>" for i in b["items"])
             out.append(f'  <{t} class="body-reveal">\n{items}\n  </{t}>')
+        elif t == "seealso":
+            sep = '<span class="seealso-sep" aria-hidden="true">·</span>'
+            links = sep.join(
+                f'<a href="{it["slug"]}.html">{esc(it["title"])}</a>' for it in b["items"])
+            out.append(
+                '  <aside class="seealso body-reveal">'
+                '<span class="seealso-label">Читайте також</span>'
+                f'{links}</aside>')
     return "\n\n".join(out)
 
 
@@ -492,6 +500,42 @@ def build_related_html(cur_slug, cat, allmeta):
     return "\n".join(out)
 
 
+def build_inline_seealso(cur_slug, cat, allmeta, n=3):
+    """Контекстний інлайн-блок «Читайте також» усередині статті — щільніша
+    перелінковка незалежно від того, чи трапляються в тексті ключові фрази.
+    Обирає найрелевантніші статті за перетином ключових слів; та ж категорія
+    отримує невеликий бонус."""
+    cur = next((x for x in allmeta if x["slug"] == cur_slug), None)
+    if not cur:
+        return None
+    ck = _kw(cur)
+    cands = [a for a in allmeta if a["slug"] != cur_slug]
+    cands.sort(key=lambda a: (-(len(ck & _kw(a)) + (1 if a["cat"] == cat else 0)),
+                              a["title"]))
+    pick = cands[:n]
+    if not pick:
+        return None
+    return {"type": "seealso",
+            "items": [{"slug": a["slug"], "title": a["title"]} for a in pick]}
+
+
+def inject_seealso(blocks, seealso):
+    """Вставляє інлайн-блок перелінковки в середину статті — між розділами,
+    приблизно посередині, але не перед першим і не перед завершальними."""
+    if not seealso:
+        return blocks
+    blocks = list(blocks)
+    h2i = [i for i, b in enumerate(blocks) if b.get("type") == "h2"]
+    if len(h2i) >= 4:
+        pos = h2i[2]
+    elif len(h2i) >= 2:
+        pos = h2i[1]
+    else:
+        pos = len(blocks)
+    blocks.insert(pos, seealso)
+    return blocks
+
+
 def _wordcount(blocks):
     n = 0
     for b in blocks:
@@ -572,7 +616,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=68">
+  <link rel="stylesheet" href="../css/style.css?v=69">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -662,7 +706,8 @@ ARTICLE_PAGE = """<!DOCTYPE html>
 def render_article(a, allmeta):
     faq = a.get("faq", [])
     valid = {x["slug"] for x in allmeta}
-    full_blocks = autolink_blocks(a["blocks"], a["slug"], valid) + closing_blocks(a["cat"], a["h1"])
+    body_blocks = inject_seealso(a["blocks"], build_inline_seealso(a["slug"], a["cat"], allmeta))
+    full_blocks = autolink_blocks(body_blocks, a["slug"], valid) + closing_blocks(a["cat"], a["h1"])
     body = blocks_to_html(full_blocks)
     kw = f"{a['title'].lower()}, адвокат, юрист, {KW_BASE[a['cat']]}, Україна, консультація адвоката"
     repl = {
@@ -734,7 +779,7 @@ def render_catalog(arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=68">
+  <link rel="stylesheet" href="../css/style.css?v=69">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -890,7 +935,7 @@ def render_hub(cat, arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=68">
+  <link rel="stylesheet" href="../css/style.css?v=69">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
