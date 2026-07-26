@@ -761,13 +761,12 @@ a.card:hover .more span { transform: translateX(5px); }
 /* Контекстна перелінковка всередині статті */
 .seealso {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px 12px;
+  flex-direction: column;
+  gap: 12px;
   background: var(--tint);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 16px 20px;
+  padding: 18px 22px;
   margin: 30px 0;
   font-size: .95rem;
 }
@@ -776,20 +775,37 @@ a.card:hover .more span { transform: translateX(5px); }
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: .04em;
-  font-size: .74rem;
-  flex: 0 0 auto;
-  align-self: center;
+  letter-spacing: .06em;
+  font-size: .72rem;
 }
-.seealso a {
+.seealso-links {
+  display: flex;
+  flex-direction: column;
+}
+.seealso-links a {
+  display: block;
   color: var(--blue);
   text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color .15s;
+  padding: 9px 0 9px 22px;
+  position: relative;
+  border-top: 1px solid var(--line);
+  transition: color .15s;
 }
-.seealso a:hover,
-.seealso a:focus-visible { border-bottom-color: var(--blue); }
-.seealso-sep { color: var(--faint); user-select: none; }
+.seealso-links a:first-child { border-top: none; }
+.seealso-links a::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--faint);
+  transition: transform .15s, color .15s;
+}
+.seealso-links a:hover,
+.seealso-links a:focus-visible { color: var(--blue2); }
+.seealso-links a:hover::before,
+.seealso-links a:focus-visible::before {
+  color: var(--blue);
+  transform: translateX(3px);
+}
 
 /* ===== Адаптивність ===== */
 @media (max-width: 880px) {
