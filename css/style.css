@@ -879,10 +879,16 @@ a.card:hover .more span { transform: translateX(5px); }
 .lp-btn-tg { background: #229ed9; color: #fff; }
 .lp-btn-wa { background: #25d366; color: #06331b; }
 .lp-btn-vb { background: #7360f2; color: #fff; }
-/* Кнопки месенджерів у картці контактів/консультації — трохи компактніші,
-   з відступом перед формою. */
-.contacts-cta { gap: 10px; margin: 4px 0 22px; }
-.contacts-cta .lp-btn { padding: 11px 20px; font-size: .95rem; }
+/* Кнопки месенджерів у картці контактів/консультації — завжди в один рядок,
+   рівні за шириною. На телефонах підписи ховаються (лишаються іконки). */
+.contacts-cta { flex-wrap: nowrap; gap: 8px; margin: 4px 0 22px; }
+.contacts-cta .lp-btn { flex: 1 1 0; min-width: 0; gap: 8px; padding: 11px 6px; font-size: .92rem; white-space: nowrap; }
+.contacts-cta .lp-btn svg { width: 18px; height: 18px; flex: none; }
+@media (max-width: 520px) {
+  .contacts-cta .lbl { display: none; }
+  .contacts-cta .lp-btn { padding: 13px 0; }
+  .contacts-cta .lp-btn svg { width: 20px; height: 20px; }
+}
 /* Лише вертикальні відступи — горизонтальні (0 28px) успадковуються від
    .container, інакше на мобільних заголовки й текст притискаються до краю. */
 .lp-section { padding-top: 40px; padding-bottom: 8px; }
