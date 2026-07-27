@@ -1093,6 +1093,7 @@ LANDING_CTA = """  <div class="lp-cta">
     <a class="lp-btn lp-btn-call" href="tel:+380934664443">Зателефонувати</a>
     <a class="lp-btn lp-btn-tg" href="https://t.me/adv_osadko" target="_blank" rel="noopener">Telegram</a>
     <a class="lp-btn lp-btn-wa" href="https://wa.me/380934664443" target="_blank" rel="noopener">WhatsApp</a>
+    <a class="lp-btn lp-btn-vb" href="viber://chat?number=%2B380934664443">Viber</a>
   </div>"""
 
 
