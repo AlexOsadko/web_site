@@ -879,7 +879,9 @@ a.card:hover .more span { transform: translateX(5px); }
 .lp-btn-tg { background: #229ed9; color: #fff; }
 .lp-btn-wa { background: #25d366; color: #06331b; }
 .lp-btn-vb { background: #7360f2; color: #fff; }
-.lp-section { padding: 40px 0 8px; }
+/* Лише вертикальні відступи — горизонтальні (0 28px) успадковуються від
+   .container, інакше на мобільних заголовки й текст притискаються до краю. */
+.lp-section { padding-top: 40px; padding-bottom: 8px; }
 .lp-section > h2 { font-size: 1.5rem; margin-bottom: 22px; text-wrap: balance; }
 .lp-situations { list-style: none; display: grid; gap: 12px; padding: 0; }
 .lp-situations li {
