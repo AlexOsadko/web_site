@@ -620,7 +620,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
   <link rel="stylesheet" href="../css/style.css?v=77">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
-  <script defer src="../assets/header-scroll.js?v=14"></script>
+  <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
@@ -633,7 +633,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
       <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька" width="36" height="36"></span>
       Адвокат Осадько Олександр
     </a>
-    <nav class="site-nav">
+    <nav class="site-nav" id="nav">
       <a href="../#about">Про мене</a>
       <a href="../poslugy/index.html">Послуги</a>
       <a href="../articles/index.html">Статті</a>
@@ -645,6 +645,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
       <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
     </button>
+    <button class="nav-toggle" id="navToggle" type="button" aria-label="Відкрити меню" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </header>
 
@@ -784,7 +785,7 @@ def render_catalog(arts):
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
   <link rel="stylesheet" href="../css/style.css?v=77">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
-  <script defer src="../assets/header-scroll.js?v=14"></script>
+  <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
 </head>
 <body>
@@ -796,7 +797,7 @@ def render_catalog(arts):
       <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька" width="36" height="36"></span>
       Адвокат Осадько Олександр
     </a>
-    <nav class="site-nav">
+    <nav class="site-nav" id="nav">
       <a href="../#about">Про мене</a>
       <a href="../poslugy/index.html">Послуги</a>
       <a href="index.html">Статті</a>
@@ -808,6 +809,7 @@ def render_catalog(arts):
       <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
     </button>
+    <button class="nav-toggle" id="navToggle" type="button" aria-label="Відкрити меню" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </header>
 
@@ -941,7 +943,7 @@ def render_hub(cat, arts):
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
   <link rel="stylesheet" href="../css/style.css?v=77">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
-  <script defer src="../assets/header-scroll.js?v=14"></script>
+  <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
@@ -954,7 +956,7 @@ def render_hub(cat, arts):
       <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька" width="36" height="36"></span>
       Адвокат Осадько Олександр
     </a>
-    <nav class="site-nav">
+    <nav class="site-nav" id="nav">
       <a href="../#about">Про мене</a>
       <a href="../poslugy/index.html">Послуги</a>
       <a href="index.html">Статті</a>
@@ -966,6 +968,7 @@ def render_hub(cat, arts):
       <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
     </button>
+    <button class="nav-toggle" id="navToggle" type="button" aria-label="Відкрити меню" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </header>
 
@@ -1157,7 +1160,7 @@ LANDING_PAGE = """<!DOCTYPE html>
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
   <link rel="stylesheet" href="../css/style.css?v=77">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
-  <script defer src="../assets/header-scroll.js?v=14"></script>
+  <script defer src="../assets/header-scroll.js?v=15"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
@@ -1169,7 +1172,7 @@ LANDING_PAGE = """<!DOCTYPE html>
       <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька" width="36" height="36"></span>
       Адвокат Осадько Олександр
     </a>
-    <nav class="site-nav">
+    <nav class="site-nav" id="nav">
       <a href="../#about">Про мене</a>
       <a href="../poslugy/index.html">Послуги</a>
       <a href="../articles/index.html">Статті</a>
@@ -1181,6 +1184,7 @@ LANDING_PAGE = """<!DOCTYPE html>
       <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
     </button>
+    <button class="nav-toggle" id="navToggle" type="button" aria-label="Відкрити меню" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </header>
 
@@ -1333,7 +1337,7 @@ PAGE_SHELL = """<!DOCTYPE html>
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
   <link rel="stylesheet" href="../css/style.css?v=77">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
-  <script defer src="../assets/header-scroll.js?v=14"></script>
+  <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
   {jsonld}
 </head>
@@ -1346,7 +1350,7 @@ PAGE_SHELL = """<!DOCTYPE html>
       <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька" width="36" height="36"></span>
       Адвокат Осадько Олександр
     </a>
-    <nav class="site-nav">
+    <nav class="site-nav" id="nav">
       <a href="../#about">Про мене</a>
       <a href="../poslugy/index.html">Послуги</a>
       <a href="../articles/index.html">Статті</a>
@@ -1358,6 +1362,7 @@ PAGE_SHELL = """<!DOCTYPE html>
       <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
     </button>
+    <button class="nav-toggle" id="navToggle" type="button" aria-label="Відкрити меню" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </header>
 

@@ -28,7 +28,7 @@
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
   <link rel="preload" as="image" href="assets/photo.jpg" fetchpriority="high">
   <link rel="stylesheet" href="css/style.css?v=77">
-  <script defer src="assets/header-scroll.js?v=14"></script>
+  <script defer src="assets/header-scroll.js?v=15"></script>
   <script defer src="assets/callback-popup.js?v=20"></script>
   <script type="application/ld+json">
   {
@@ -532,16 +532,7 @@
     })();
   })();
 
-  const toggle = document.getElementById('navToggle');
-  const nav = document.getElementById('nav');
-  toggle.addEventListener('click', () => {
-    const open = nav.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', open);
-  });
-  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-    nav.classList.remove('open');
-    toggle.setAttribute('aria-expanded', 'false');
-  }));
+  // Мобільне меню (гамбургер) — спільний обробник у assets/header-scroll.js
 
   // Поява при скролі
   const io = new IntersectionObserver((entries) => {
