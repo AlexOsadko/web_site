@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="../assets/ga.js?v=5"></script>
+  <script>document.documentElement.classList.add('js')</script>
+  <script defer src="../assets/ga.js?v=5"></script>
   <title>Політика конфіденційності — адвокат Олександр Осадько</title>
   <meta name="description" content="Політика конфіденційності сайту адвоката Олександра Осадька: які дані обробляються, використання файлів cookie та Google Analytics, ваші права.">
   <link rel="canonical" href="https://osadko.online/privacy/">
@@ -16,9 +17,12 @@
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=28">
-  <script defer src="../assets/header-scroll.js?v=13"></script>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
+  <link rel="stylesheet" href="../css/style.css?v=93">
+  <script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <script defer src="../assets/header-scroll.js?v=15"></script>
+  <script defer src="../assets/callback-popup.js?v=20"></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Перейти до вмісту</a>
@@ -29,13 +33,19 @@
       <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька" width="36" height="36"></span>
       Адвокат Осадько Олександр
     </a>
-    <nav class="site-nav">
+    <nav class="site-nav" id="nav">
       <a href="../#about">Про мене</a>
-      <a href="../#services">Послуги</a>
+      <a href="../poslugy/">Послуги</a>
       <a href="../articles/">Статті</a>
       <a href="../zrazky/">Зразки</a>
+      <a href="../kontakty/">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
+      <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
+    </button>
+    <button class="nav-toggle" id="navToggle" type="button" aria-label="Відкрити меню" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </header>
 
