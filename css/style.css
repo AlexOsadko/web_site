@@ -1181,10 +1181,11 @@ a.card:hover .more span { transform: translateX(5px); }
 .catalog { padding: 32px 0 60px; }
 .cat-group { margin-bottom: 56px; }
 .cat-group-head {
-  display: flex; align-items: center; gap: 14px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px;
   margin-bottom: 24px; padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
 }
+.cat-group-head h2 { min-width: 0; }
 .cat-group-head h2 { font-size: 1.5rem; font-weight: 700; }
 .cat-group-head .count { color: var(--faint); font-size: .9rem; margin-left: auto; }
 .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
