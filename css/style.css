@@ -373,7 +373,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
   margin-bottom: 32px;
   background: linear-gradient(135deg, var(--blue), var(--blue2));
 }
-.visual-card h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 14px; }
+.visual-card .vc-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 14px; color: var(--ink); }
 .visual-card p { color: var(--muted); font-size: .9rem; }
 /* Пігулки-переваги під hero */
 .hero-feats { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }

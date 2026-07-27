@@ -618,7 +618,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=94">
+  <link rel="stylesheet" href="../css/style.css?v=95">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -783,7 +783,7 @@ def render_catalog(arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=94">
+  <link rel="stylesheet" href="../css/style.css?v=95">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -942,7 +942,7 @@ def render_hub(cat, arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=94">
+  <link rel="stylesheet" href="../css/style.css?v=95">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -989,6 +989,7 @@ def render_hub(cat, arts):
 
   <section class="catalog">
     <div class="container">
+      <h2 class="sr-only">Статті за темою</h2>
       <div class="cat-grid">
 {chr(10).join(cards)}
       </div>
@@ -1162,7 +1163,7 @@ LANDING_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=94">
+  <link rel="stylesheet" href="../css/style.css?v=95">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1340,7 +1341,7 @@ PAGE_SHELL = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=94">
+  <link rel="stylesheet" href="../css/style.css?v=95">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1490,6 +1491,7 @@ def render_services_index(landings):
         'детально розписано, коли варто звернутися, що ви отримаєте і як я працюю.</p>\n'
         '  </div></section>\n'
         '  <section class="lp-section container container-wide">\n'
+        '    <h2 class="sr-only">Напрями роботи</h2>\n'
         '    <div class="cards">\n' + "\n".join(cards) + '\n    </div>\n'
         '    <p class="section-sub" style="margin-top:28px">Не знайшли свою ситуацію? '
         'Дивіться <a href="../articles/">статті за темами</a> або '
