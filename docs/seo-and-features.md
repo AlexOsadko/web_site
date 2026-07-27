@@ -21,6 +21,15 @@
   `inject_seealso` — 3 найрелевантніші за перетином ключових слів статті,
   не залежить від наявності ключових фраз у тексті) + блок «Схожі теми»
   внизу (`build_related_html`) на кожній статті.
+- **Посадкові лендінги послуг** — конверсійні сторінки під конкретні послуги
+  в `poslugy/<slug>.html` (напр. `poslugy/rozluchennia.html`, `poslugy/dtp.html`).
+  Контент — у `content/landings/*.json` (поля: slug, service, title, desc, h1,
+  subtitle, intro, situations[], benefits[{t,d}], steps[{t,d}], faq[{q,a}],
+  final_title/final_text, related{slug,title}). Білдер (`render_landing`,
+  `LANDING_PAGE`) рендерить їх у фірмовому стилі з CTA (дзвінок + Telegram +
+  WhatsApp), розміткою `LegalService`/`FAQPage` і додає в sitemap. Щоб додати
+  нову послугу — достатньо створити ще один JSON у `content/landings/`.
+  Призначення: цільові сторінки для реклами (вища конверсія, ніж стаття).
 
 ### Мета-теги та соцмережі
 - **Meta Title / Description** — унікальні на кожній сторінці.

@@ -807,6 +807,77 @@ a.card:hover .more span { transform: translateX(5px); }
   transform: translateX(3px);
 }
 
+/* ===== Посадкові лендінги послуг ===== */
+.lp { padding-bottom: 40px; }
+.lp .container { max-width: 900px; }
+.lp-hero {
+  padding: 56px 0 40px;
+  background: linear-gradient(180deg, var(--tint), transparent);
+  border-bottom: 1px solid var(--line);
+}
+:root[data-theme="dark"] .lp-hero {
+  background: linear-gradient(180deg, rgba(30,80,230,.12), transparent);
+}
+.lp-hero h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); text-wrap: balance; margin-bottom: 14px; }
+.lp-sub { font-size: 1.15rem; color: var(--text); max-width: 60ch; margin-bottom: 24px; }
+.lp-intro { color: var(--muted); max-width: 65ch; margin-top: 22px; }
+.lp-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.lp-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 13px 26px; border-radius: 12px; font-weight: 600; font-size: 1rem;
+  text-decoration: none; transition: transform .12s, box-shadow .15s, opacity .15s;
+}
+.lp-btn:hover { transform: translateY(-1px); }
+.lp-btn-call { background: var(--blue); color: #fff; box-shadow: var(--shadow); }
+.lp-btn-tg { background: #229ed9; color: #fff; }
+.lp-btn-wa { background: #25d366; color: #06331b; }
+.lp-section { padding: 40px 0 8px; }
+.lp-section > h2 { font-size: 1.5rem; margin-bottom: 22px; text-wrap: balance; }
+.lp-situations { list-style: none; display: grid; gap: 12px; padding: 0; }
+.lp-situations li {
+  position: relative; padding-left: 34px; color: var(--text); line-height: 1.5;
+}
+.lp-situations li::before {
+  content: "✓"; position: absolute; left: 0; top: -1px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--tint); color: var(--blue); font-weight: 700;
+  display: grid; place-items: center; font-size: .8rem;
+}
+:root[data-theme="dark"] .lp-situations li::before { background: rgba(30,80,230,.2); }
+.lp-benefits { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.lp-benefit {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 20px 22px;
+}
+.lp-benefit h3 { font-size: 1.05rem; margin-bottom: 8px; }
+.lp-benefit p { color: var(--muted); font-size: .95rem; }
+.lp-steps { list-style: none; counter-reset: lp; padding: 0; display: grid; gap: 14px; }
+.lp-steps li {
+  counter-increment: lp; position: relative; padding-left: 52px;
+  display: flex; flex-direction: column; gap: 3px; min-height: 36px; justify-content: center;
+}
+.lp-steps li::before {
+  content: counter(lp); position: absolute; left: 0; top: 0;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--blue); color: #fff; font-weight: 700;
+  display: grid; place-items: center;
+}
+.lp-step-t { font-weight: 600; color: var(--ink); }
+.lp-step-d { color: var(--muted); font-size: .95rem; }
+.lp-final {
+  margin-top: 44px; padding: 44px 0;
+  background: var(--tint); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+:root[data-theme="dark"] .lp-final { background: var(--card); }
+.lp-final h2 { font-size: 1.6rem; margin-bottom: 12px; text-wrap: balance; }
+.lp-final > .container > p { color: var(--text); max-width: 55ch; margin-bottom: 22px; }
+.lp-more { margin-top: 20px; font-size: .9rem; color: var(--muted); }
+.lp-more a { color: var(--blue); }
+@media (max-width: 640px) {
+  .lp-benefits { grid-template-columns: 1fr; }
+  .lp-btn { flex: 1 1 auto; }
+}
+
 /* ===== Адаптивність ===== */
 @media (max-width: 880px) {
   .hero { padding: 12px 0 56px; }

@@ -22,9 +22,12 @@ import os, re, json, glob, html
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONTENT = os.path.join(ROOT, "content", "articles")
+CONTENT_LANDINGS = os.path.join(ROOT, "content", "landings")
 ART = os.path.join(ROOT, "articles")
+POSLUGY = os.path.join(ROOT, "poslugy")
 BASE_URL = "https://osadko.online/"
 ART_BASE_URL = BASE_URL + "articles/"
+POSLUGY_BASE_URL = BASE_URL + "poslugy/"
 DATE_LABEL = "Липень 2026"
 
 # ---------- КАТЕГОРІЇ ----------
@@ -615,7 +618,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=70">
+  <link rel="stylesheet" href="../css/style.css?v=71">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -778,7 +781,7 @@ def render_catalog(arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=70">
+  <link rel="stylesheet" href="../css/style.css?v=71">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -934,7 +937,7 @@ def render_hub(cat, arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=70">
+  <link rel="stylesheet" href="../css/style.css?v=71">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1032,8 +1035,9 @@ def update_homepage_count(n):
 
 
 # ---------- SITEMAP + ROBOTS ----------
-def write_sitemap(arts):
+def write_sitemap(arts, landings=None):
     import datetime
+    landings = landings or []
     today = datetime.date.today().isoformat()
     cats_present = [c for c in ORDER if any(a["cat"] == c for a in arts)]
     # (loc, lastmod, changefreq, priority)
@@ -1043,6 +1047,9 @@ def write_sitemap(arts):
         (BASE_URL + "zrazky/index.html", today, "monthly", "0.5"),
         (BASE_URL + "privacy/index.html", "2026-07-01", "yearly", "0.3"),
     ]
+    # Посадкові лендінги послуг — вищий пріоритет (конверсійні сторінки).
+    entries += [(POSLUGY_BASE_URL + l["slug"] + ".html",
+                 l.get("date_modified") or today, "monthly", "0.8") for l in landings]
     entries += [(ART_BASE_URL + c + ".html", today, "weekly", "0.7") for c in cats_present]
     # Для кожної статті — її РЕАЛЬНА дата зміни (точний сигнал свіжості для Google,
     # а не однакова дата збірки на всіх сторінках).
@@ -1071,6 +1078,221 @@ def write_robots():
         f.write(txt)
 
 
+# ---------- ПОСАДКОВІ ЛЕНДІНГИ ПОСЛУГ ----------
+
+# Конверсійні сторінки під конкретні послуги (для реклами/переходів). Контент —
+# у content/landings/*.json; білдер рендерить їх у poslugy/<slug>.html у фірмовому
+# стилі, з CTA (дзвінок + месенджери) і розміткою LegalService/FAQPage.
+LANDING_CTA = """  <div class="lp-cta">
+    <a class="lp-btn lp-btn-call" href="tel:+380934664443">Зателефонувати</a>
+    <a class="lp-btn lp-btn-tg" href="https://t.me/adv_osadko" target="_blank" rel="noopener">Telegram</a>
+    <a class="lp-btn lp-btn-wa" href="https://wa.me/380934664443" target="_blank" rel="noopener">WhatsApp</a>
+  </div>"""
+
+
+def build_landing_jsonld(l):
+    url = POSLUGY_BASE_URL + l["slug"] + ".html"
+    service = {
+        "@type": "LegalService", "name": l["h1"], "description": l["desc"],
+        "url": url, "inLanguage": "uk",
+        "areaServed": "UA",
+        "provider": {
+            "@type": "Attorney", "name": "Адвокат Олександр Осадько", "url": BASE_URL,
+            "telephone": "+380934664443",
+        },
+    }
+    crumbs = {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Головна", "item": BASE_URL},
+            {"@type": "ListItem", "position": 2, "name": l["service"], "item": url},
+        ],
+    }
+    graph = {"@context": "https://schema.org", "@graph": [service, crumbs]}
+    if l.get("faq"):
+        graph["@graph"].append({
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": it["q"],
+                 "acceptedAnswer": {"@type": "Answer", "text": it["a"]}}
+                for it in l["faq"]
+            ],
+        })
+    return json.dumps(graph, ensure_ascii=False)
+
+
+LANDING_PAGE = """<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>document.documentElement.classList.add('js')</script>
+  <script defer src="../assets/ga.js?v=5"></script>
+  <title>{title} — адвокат Олександр Осадько</title>
+  <meta name="description" content="{desc}">
+  <link rel="canonical" href="{url}">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{title}">
+  <meta property="og:description" content="{desc}">
+  <meta property="og:url" content="{url}">
+  <meta property="og:site_name" content="Адвокат Олександр Осадько">
+  <meta property="og:locale" content="uk_UA">
+  <meta property="og:image" content="{ogimg}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{ogimg}">
+  <link rel="icon" type="image/png" href="../assets/logo-mark.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
+  <link rel="stylesheet" href="../css/style.css?v=71">
+  <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
+  <script defer src="../assets/header-scroll.js?v=14"></script>
+  <script type="application/ld+json">{jsonld}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Перейти до вмісту</a>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="../" class="brand">
+      <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька" width="36" height="36"></span>
+      Адвокат Осадько Олександр
+    </a>
+    <nav class="site-nav">
+      <a href="../#about">Про мене</a>
+      <a href="../#services">Послуги</a>
+      <a href="../articles/index.html">Статті</a>
+      <a href="../zrazky/index.html">Зразки</a>
+      <a href="../#contacts" class="nav-cta">Консультація</a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
+      <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main" class="lp">
+  <section class="lp-hero">
+    <div class="container">
+      <h1>{h1}</h1>
+      <p class="lp-sub">{subtitle}</p>
+{cta}
+      <p class="lp-intro">{intro}</p>
+    </div>
+  </section>
+
+  <section class="lp-section container">
+    <h2>Коли варто звернутися</h2>
+    <ul class="lp-situations">
+{situations}
+    </ul>
+  </section>
+
+  <section class="lp-section container">
+    <h2>Що ви отримаєте</h2>
+    <div class="lp-benefits">
+{benefits}
+    </div>
+  </section>
+
+  <section class="lp-section container">
+    <h2>Як я працюю</h2>
+    <ol class="lp-steps">
+{steps}
+    </ol>
+  </section>
+
+  <section class="lp-section container">
+    <h2>Часті запитання</h2>
+    <div class="faq">
+{faq}
+    </div>
+  </section>
+
+  <section class="lp-final">
+    <div class="container">
+      <h2>{final_title}</h2>
+      <p>{final_text}</p>
+{cta}
+      <p class="lp-more">{more}</p>
+    </div>
+  </section>
+</main>
+
+{fab}
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <span class="brand">
+      <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt="" width="28" height="28" loading="lazy" decoding="async"></span>
+      Адвокат Осадько Олександр
+    </span>
+    <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/index.html">Політика конфіденційності</a></span>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+  const io = new IntersectionObserver((es) => {
+    es.forEach(x => { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.body-reveal, .reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
+"""
+
+
+def load_landings():
+    items = []
+    if not os.path.isdir(CONTENT_LANDINGS):
+        return items
+    for path in glob.glob(os.path.join(CONTENT_LANDINGS, "*.json")):
+        with open(path, encoding="utf-8") as f:
+            items.append(json.load(f))
+    items.sort(key=lambda l: (l.get("order", 10_000), l["slug"]))
+    return items
+
+
+def render_landing(l):
+    situations = "\n".join(f'      <li>{esc(s)}</li>' for s in l["situations"])
+    benefits = "\n".join(
+        f'      <div class="lp-benefit reveal"><h3>{esc(b["t"])}</h3><p>{esc(b["d"])}</p></div>'
+        for b in l["benefits"])
+    steps = "\n".join(
+        f'      <li class="reveal"><span class="lp-step-t">{esc(s["t"])}</span>'
+        f'<span class="lp-step-d">{esc(s["d"])}</span></li>'
+        for s in l["steps"])
+    faq = "\n".join(
+        f'      <details><summary>{esc(it["q"])}</summary><p>{esc(it["a"])}</p></details>'
+        for it in l.get("faq", []))
+    rel = l.get("related")
+    more = (f'Хочете розібратися детальніше? Читайте статтю: '
+            f'<a href="../articles/{rel["slug"]}.html">{esc(rel["title"])}</a>.') if rel else \
+           'Ця сторінка має загальний інформаційний характер і не є юридичною консультацією.'
+    repl = {
+        "{title}": esc(l["title"]), "{desc}": esc(l["desc"]),
+        "{url}": POSLUGY_BASE_URL + l["slug"] + ".html",
+        "{ogimg}": BASE_URL + "assets/og-image.jpg",
+        "{jsonld}": build_landing_jsonld(l),
+        "{h1}": esc(l["h1"]), "{subtitle}": esc(l["subtitle"]), "{intro}": esc(l["intro"]),
+        "{situations}": situations, "{benefits}": benefits, "{steps}": steps, "{faq}": faq,
+        "{final_title}": esc(l.get("final_title", "Готові допомогти")),
+        "{final_text}": esc(l["final_text"]), "{more}": more,
+        "{cta}": LANDING_CTA, "{fab}": FAB_HTML,
+    }
+    page = LANDING_PAGE
+    for k, v in repl.items():
+        page = page.replace(k, v)
+    return page
+
+
 # ---------- ГОЛОВНИЙ ПРОХІД ----------
 def main():
     os.makedirs(ART, exist_ok=True)
@@ -1091,17 +1313,24 @@ def main():
         with open(os.path.join(ART, c + ".html"), "w", encoding="utf-8") as f:
             f.write(render_hub(c, arts))
 
+    landings = load_landings()
+    if landings:
+        os.makedirs(POSLUGY, exist_ok=True)
+        for l in landings:
+            with open(os.path.join(POSLUGY, l["slug"] + ".html"), "w", encoding="utf-8") as f:
+                f.write(render_landing(l))
+
     c1, c2 = update_homepage_count(n)
-    write_sitemap(arts)
+    write_sitemap(arts, landings)
     write_robots()
 
     missing_slug = [s for s in FEATURED if s not in {a["slug"] for a in arts}]
-    print(f"Побудовано статей: {n}; тематичних хабів: {len(hubs)}")
+    print(f"Побудовано статей: {n}; тематичних хабів: {len(hubs)}; лендінгів послуг: {len(landings)}")
     print(f"Авто-анкорів згенеровано: {auto_anchors}; усього анкорів: {len(LINK_TERMS)}")
     print(f"Оновлено лічильник на головній: секція={c1}, кнопка={c2}")
     if missing_slug:
         print(f"⚠ Обрані статті відсутні в даних: {missing_slug}")
-    print("Готово: articles/, articles/index.html, index.html, sitemap.xml, robots.txt")
+    print("Готово: articles/, poslugy/, articles/index.html, index.html, sitemap.xml, robots.txt")
 
 
 if __name__ == "__main__":
