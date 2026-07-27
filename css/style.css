@@ -250,6 +250,20 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(30, 80, 230, .35); }
 .btn-ghost { background: var(--card); border: 1px solid var(--line); color: var(--ink); }
 .btn-ghost:hover { border-color: var(--blue2); color: var(--blue); }
+
+/* Рядок тем-хабів під картками послуг — компактна альтернатива дублюючим карткам */
+.topic-strip { margin-top: 30px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.topic-strip-label { font-size: .92rem; color: var(--muted); margin-right: 4px; }
+.topic-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  font-size: .9rem; font-weight: 500; line-height: 1;
+  transition: border-color .16s, color .16s, background .16s, transform .16s;
+}
+.topic-chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); flex: none; }
+.topic-chip:hover { border-color: var(--blue); background: var(--blue); color: #fff; transform: translateY(-1px); }
+.topic-chip:hover::before { background: #fff; }
 .link-underline {
   color: var(--ink);
   font-weight: 500;
