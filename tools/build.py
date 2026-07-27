@@ -787,6 +787,7 @@ def render_catalog(arts):
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
+  <script type="application/ld+json">{{"@context":"https://schema.org","@type":"CollectionPage","name":"Статті адвоката Олександра Осадька","description":"Юридичні статті простою мовою: борги, сімейне, трудове, кримінальне право, ДТП, нерухомість, бізнес.","url":"{ART_BASE_URL}","inLanguage":"uk","isPartOf":{{"@type":"WebSite","name":"Адвокат Олександр Осадько","url":"{BASE_URL}"}}}}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Перейти до вмісту</a>
