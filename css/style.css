@@ -441,6 +441,22 @@ p.body-reveal,
   text-align-last: left;
   hyphens: auto;
 }
+/* На вузьких екранах вирівнювання по ширині створює завеликі проміжки й
+   притискає текст до правого краю. Тому на мобільних — по лівому краю з
+   природним «рваним» правим краєм (більше повітря справа). */
+@media (max-width: 640px) {
+  .about-text p,
+  .section-sub,
+  .contacts-card p,
+  .hero-lead,
+  p.body-reveal,
+  .faq details p,
+  .article-note,
+  .catalog-hero p {
+    text-align: left;
+    hyphens: manual;
+  }
+}
 
 /* ===== Про мене ===== */
 .about-grid { display: grid; grid-template-columns: 1.35fr .65fr; gap: 40px; align-items: start; }
