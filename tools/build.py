@@ -635,9 +635,10 @@ ARTICLE_PAGE = """<!DOCTYPE html>
     </a>
     <nav class="site-nav">
       <a href="../#about">Про мене</a>
-      <a href="../#services">Послуги</a>
+      <a href="../poslugy/index.html">Послуги</a>
       <a href="../articles/index.html">Статті</a>
       <a href="../zrazky/index.html">Зразки</a>
+      <a href="../kontakty/index.html">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
@@ -797,9 +798,10 @@ def render_catalog(arts):
     </a>
     <nav class="site-nav">
       <a href="../#about">Про мене</a>
-      <a href="../#services">Послуги</a>
+      <a href="../poslugy/index.html">Послуги</a>
       <a href="index.html">Статті</a>
       <a href="../zrazky/index.html">Зразки</a>
+      <a href="../kontakty/index.html">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
@@ -954,9 +956,10 @@ def render_hub(cat, arts):
     </a>
     <nav class="site-nav">
       <a href="../#about">Про мене</a>
-      <a href="../#services">Послуги</a>
+      <a href="../poslugy/index.html">Послуги</a>
       <a href="index.html">Статті</a>
       <a href="../zrazky/index.html">Зразки</a>
+      <a href="../kontakty/index.html">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
@@ -1045,8 +1048,11 @@ def write_sitemap(arts, landings=None):
         (BASE_URL, today, "weekly", "1.0"),
         (ART_BASE_URL + "index.html", today, "weekly", "0.8"),
         (BASE_URL + "zrazky/index.html", today, "monthly", "0.5"),
+        (BASE_URL + "kontakty/index.html", today, "monthly", "0.6"),
         (BASE_URL + "privacy/index.html", "2026-07-01", "yearly", "0.3"),
     ]
+    if landings:
+        entries.append((POSLUGY_BASE_URL + "index.html", today, "monthly", "0.7"))
     # Посадкові лендінги послуг — вищий пріоритет (конверсійні сторінки).
     entries += [(POSLUGY_BASE_URL + l["slug"] + ".html",
                  l.get("date_modified") or today, "monthly", "0.8") for l in landings]
@@ -1164,9 +1170,10 @@ LANDING_PAGE = """<!DOCTYPE html>
     </a>
     <nav class="site-nav">
       <a href="../#about">Про мене</a>
-      <a href="../#services">Послуги</a>
+      <a href="../poslugy/index.html">Послуги</a>
       <a href="../articles/index.html">Статті</a>
       <a href="../zrazky/index.html">Зразки</a>
+      <a href="../kontakty/index.html">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
@@ -1293,6 +1300,202 @@ def render_landing(l):
     return page
 
 
+# ---------- ОКРЕМІ СТОРІНКИ: ПОСЛУГИ ТА КОНТАКТИ ----------
+
+# Спільний каркас сторінки (глибина 1 рівень, шляхи `../`), із тією ж шапкою,
+# темою, підвалом і FAB, що й решта сайту. Використовується для poslugy/index.html
+# (перелік послуг) та kontakty/index.html (контакти).
+PAGE_SHELL = """<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>document.documentElement.classList.add('js')</script>
+  <script defer src="../assets/ga.js?v=5"></script>
+  <title>{title} — адвокат Олександр Осадько</title>
+  <meta name="description" content="{desc}">
+  <link rel="canonical" href="{url}">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{title}">
+  <meta property="og:description" content="{desc}">
+  <meta property="og:url" content="{url}">
+  <meta property="og:site_name" content="Адвокат Олександр Осадько">
+  <meta property="og:locale" content="uk_UA">
+  <meta property="og:image" content="{ogimg}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{ogimg}">
+  <link rel="icon" type="image/png" href="../assets/logo-mark.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
+  <link rel="stylesheet" href="../css/style.css?v=71">
+  <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
+  <script defer src="../assets/header-scroll.js?v=14"></script>
+  <script defer src="../assets/callback-popup.js?v=20"></script>
+  {jsonld}
+</head>
+<body>
+<a class="skip-link" href="#main">Перейти до вмісту</a>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="../" class="brand">
+      <span class="brand-mark"><img src="../assets/logo-mark.png" alt="Логотип адвоката Осадька" width="36" height="36"></span>
+      Адвокат Осадько Олександр
+    </a>
+    <nav class="site-nav">
+      <a href="../#about">Про мене</a>
+      <a href="../poslugy/index.html">Послуги</a>
+      <a href="../articles/index.html">Статті</a>
+      <a href="../zrazky/index.html">Зразки</a>
+      <a href="../kontakty/index.html">Контакти</a>
+      <a href="../#contacts" class="nav-cta">Консультація</a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
+      <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
+    </button>
+  </div>
+</header>
+
+{main}
+
+{fab}
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <span class="brand">
+      <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt="" width="28" height="28" loading="lazy" decoding="async"></span>
+      Адвокат Осадько Олександр
+    </span>
+    <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/index.html">Політика конфіденційності</a></span>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+  const io = new IntersectionObserver((es) => {
+    es.forEach(x => { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.body-reveal, .reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
+"""
+
+SERVICE_ICON = {
+    "rozluchennia": "💍", "dtp": "🚗", "kryminalnyi-zahyst": "🛡️",
+    "nezakonne-zvilnennya": "💼", "spadschyna": "📜", "tck": "🪖",
+}
+
+# Контактний блок — ті самі реальні дані, що на головній (адреса, телефон,
+# e-mail, графік, мапа). Єдине джерело — щоб не розходилося.
+CONTACT_LINES = """      <div class="contact-item">
+        <span class="ci-ico"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+        <div><span class="label">Адреса офісу</span>
+          <a class="value" href="https://maps.google.com/?q=просп.%20Повітряних%20Сил%2C%2020%2F1%2C%20Київ" target="_blank" rel="noopener">03049, м. Київ, просп. Повітряних Сил, 20/1, оф. 2</a></div>
+      </div>
+      <div class="contact-item">
+        <span class="ci-ico"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg></span>
+        <div><span class="label">Телефон</span>
+          <a class="value" href="tel:+380934664443">+38 (093) 466-44-43</a></div>
+      </div>
+      <div class="contact-item">
+        <span class="ci-ico"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>
+        <div><span class="label">E-mail</span>
+          <a class="value" href="mailto:adv.osadko@gmail.com">adv.osadko@gmail.com</a></div>
+      </div>
+      <div class="contact-item">
+        <span class="ci-ico"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+        <div><span class="label">Графік роботи</span>
+          <span class="value">Пн–Пт, 9:00–18:00</span></div>
+      </div>
+      <div class="contact-map">
+        <iframe title="Мапа: офіс на просп. Повітряних Сил, 20/1, Київ" loading="lazy" src="https://maps.google.com/maps?q=просп.%20Повітряних%20Сил%2C%2020%2F1%2C%20Київ&hl=uk&z=16&output=embed"></iframe>
+      </div>"""
+
+
+def render_services_index(landings):
+    cards = []
+    for l in landings:
+        ic = SERVICE_ICON.get(l["slug"], "⚖️")
+        cards.append(
+            f'        <a class="card reveal" href="{l["slug"]}.html">\n'
+            f'          <div class="ic">{ic}</div>\n'
+            f'          <h3>{esc(l["service"])}</h3>\n'
+            f'          <p>{esc(l["subtitle"])}</p>\n'
+            f'          <span class="more">Детальніше <span>→</span></span>\n'
+            f'        </a>')
+    url = POSLUGY_BASE_URL + "index.html"
+    jsonld = json.dumps({
+        "@context": "https://schema.org", "@type": "CollectionPage",
+        "name": "Послуги адвоката Олександра Осадька", "url": url, "inLanguage": "uk",
+    }, ensure_ascii=False)
+    main = (
+        '<main id="main" class="lp">\n'
+        '  <section class="lp-hero"><div class="container">\n'
+        '    <h1>Послуги адвоката</h1>\n'
+        '    <p class="lp-sub">Основні напрями, у яких я допомагаю. Оберіть послугу — на сторінці '
+        'детально розписано, коли варто звернутися, що ви отримаєте і як я працюю.</p>\n'
+        '  </div></section>\n'
+        '  <section class="lp-section container">\n'
+        '    <div class="cards">\n' + "\n".join(cards) + '\n    </div>\n'
+        '    <p class="section-sub" style="margin-top:28px">Не знайшли свою ситуацію? '
+        'Дивіться <a href="../articles/index.html">статті за темами</a> або '
+        '<a href="../kontakty/index.html">напишіть мені</a> — розберемо ваш випадок.</p>\n'
+        '  </section>\n'
+        '</main>')
+    return (PAGE_SHELL
+            .replace("{title}", "Послуги адвоката").replace("{desc}",
+             "Послуги адвоката Олександра Осадька: розлучення, ДТП, кримінальний захист, "
+             "трудові спори, спадщина, спори з ТЦК. Детально по кожному напряму.")
+            .replace("{url}", url).replace("{ogimg}", BASE_URL + "assets/og-image.jpg")
+            .replace("{jsonld}", f'<script type="application/ld+json">{jsonld}</script>')
+            .replace("{main}", main).replace("{fab}", FAB_HTML))
+
+
+def render_contacts():
+    url = BASE_URL + "kontakty/index.html"
+    jsonld = json.dumps({
+        "@context": "https://schema.org", "@type": "Attorney",
+        "name": "Адвокат Олександр Осадько", "url": BASE_URL,
+        "telephone": "+380934664443", "email": "adv.osadko@gmail.com",
+        "address": {"@type": "PostalAddress", "streetAddress": "просп. Повітряних Сил, 20/1, оф. 2",
+                    "addressLocality": "Київ", "postalCode": "03049", "addressCountry": "UA"},
+        "openingHours": "Mo-Fr 09:00-18:00", "areaServed": "UA",
+    }, ensure_ascii=False)
+    main = (
+        '<main id="main" class="lp">\n'
+        '  <section class="lp-hero"><div class="container">\n'
+        '    <h1>Контакти</h1>\n'
+        '    <p class="lp-sub">Зателефонуйте або напишіть у зручний месенджер — відповім у '
+        'найкоротший термін. Перша консультація безкоштовна.</p>\n'
+        '    <div class="lp-cta">\n'
+        '      <a class="lp-btn lp-btn-call" href="tel:+380934664443">Зателефонувати</a>\n'
+        '      <a class="lp-btn lp-btn-tg" href="https://t.me/adv_osadko" target="_blank" rel="noopener">Telegram</a>\n'
+        '      <a class="lp-btn lp-btn-wa" href="https://wa.me/380934664443" target="_blank" rel="noopener">WhatsApp</a>\n'
+        '      <a class="lp-btn lp-btn-vb" href="viber://chat?number=%2B380934664443">Viber</a>\n'
+        '    </div>\n'
+        '  </div></section>\n'
+        '  <section class="lp-section container">\n'
+        '    <div class="contact-lines">\n' + CONTACT_LINES + '\n    </div>\n'
+        '    <p class="section-sub" style="margin-top:28px">Зручніше залишити заявку? '
+        'Скористайтеся <a href="../#contacts">формою на головній</a> — опишіть ситуацію, '
+        'і я запропоную зручний час.</p>\n'
+        '  </section>\n'
+        '</main>')
+    return (PAGE_SHELL
+            .replace("{title}", "Контакти").replace("{desc}",
+             "Контакти адвоката Олександра Осадька: телефон, Telegram, WhatsApp, Viber, "
+             "e-mail, адреса офісу в Києві та графік роботи.")
+            .replace("{url}", url).replace("{ogimg}", BASE_URL + "assets/og-image.jpg")
+            .replace("{jsonld}", f'<script type="application/ld+json">{jsonld}</script>')
+            .replace("{main}", main).replace("{fab}", FAB_HTML))
+
+
 # ---------- ГОЛОВНИЙ ПРОХІД ----------
 def main():
     os.makedirs(ART, exist_ok=True)
@@ -1319,6 +1522,14 @@ def main():
         for l in landings:
             with open(os.path.join(POSLUGY, l["slug"] + ".html"), "w", encoding="utf-8") as f:
                 f.write(render_landing(l))
+        # Окрема сторінка «Послуги» (перелік → лендінги).
+        with open(os.path.join(POSLUGY, "index.html"), "w", encoding="utf-8") as f:
+            f.write(render_services_index(landings))
+    # Окрема сторінка «Контакти».
+    kontakty_dir = os.path.join(ROOT, "kontakty")
+    os.makedirs(kontakty_dir, exist_ok=True)
+    with open(os.path.join(kontakty_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(render_contacts())
 
     c1, c2 = update_homepage_count(n)
     write_sitemap(arts, landings)
