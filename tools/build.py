@@ -1387,7 +1387,7 @@ PAGE_SHELL = """<!DOCTYPE html>
 """
 
 SERVICE_ICON = {
-    "rozluchennia": "💍", "dtp": "🚗", "kryminalnyi-zahyst": "🛡️",
+    "rozluchennia": "💍", "st-130-kupap": "🚗", "kryminalnyi-zahyst": "🛡️",
     "nezakonne-zvilnennya": "💼", "spadschyna": "📜", "tck": "🪖",
 }
 
