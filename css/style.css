@@ -371,9 +371,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 .lead-form { margin-top: 16px; display: grid; gap: 10px; }
 .lead-form label { display: grid; gap: 5px; font-size: .82rem; font-weight: 500; color: #cbd5e8; }
 .cf-turnstile { margin-top: 2px; min-height: 65px; }
-/* Turnstile у формі — компактний розмір (150×140), щоб гарантовано вміщався у
-   вузьку картку на телефоні без масштабування. */
-.cf-turnstile[data-size="compact"] { min-height: 140px; }
+/* Turnstile у формі — гнучкий розмір (flexible): віджет розтягується на всю
+   ширину картки (мін. 300px, висота 65px). */
+.cf-turnstile[data-size="flexible"] { width: 100%; min-height: 65px; }
+.cf-turnstile[data-size="flexible"] iframe { width: 100% !important; }
 /* Поки віджет Turnstile не завантажився (порожній div) — не резервувати місце,
    щоб під textarea не «провисав» порожній проміжок перед кнопкою. Коли Cloudflare
    вставить свій iframe, слот перестане бути порожнім і місце відкриється. */
