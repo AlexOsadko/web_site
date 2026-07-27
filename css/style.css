@@ -256,7 +256,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 .btn-ghost:hover { border-color: var(--blue2); color: var(--blue); }
 
 /* Рядок тем-хабів під картками послуг — компактна альтернатива дублюючим карткам */
-.topic-strip { margin-top: 30px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.topic-strip { margin: 0 0 30px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .topic-strip-label { font-size: .92rem; color: var(--muted); margin-right: 4px; }
 .topic-chip {
   display: inline-flex; align-items: center; gap: 8px;
