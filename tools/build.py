@@ -618,7 +618,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=81">
+  <link rel="stylesheet" href="../css/style.css?v=82">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -635,10 +635,10 @@ ARTICLE_PAGE = """<!DOCTYPE html>
     </a>
     <nav class="site-nav" id="nav">
       <a href="../#about">Про мене</a>
-      <a href="../poslugy/index.html">Послуги</a>
-      <a href="../articles/index.html">Статті</a>
-      <a href="../zrazky/index.html">Зразки</a>
-      <a href="../kontakty/index.html">Контакти</a>
+      <a href="../poslugy/">Послуги</a>
+      <a href="../articles/">Статті</a>
+      <a href="../zrazky/">Зразки</a>
+      <a href="../kontakty/">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
@@ -652,7 +652,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
 <main id="main" class="article-page">
   <nav class="crumbs" aria-label="Хлібні крихти">
     <a href="../">Головна</a><span>/</span>
-    <a href="index.html">Статті</a><span>/</span>
+    <a href="./">Статті</a><span>/</span>
     <a href="{cat}.html">{catname}</a><span>/</span>
     <span class="cur">{crumb}</span>
   </nav>
@@ -689,7 +689,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
       <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt="" width="28" height="28" loading="lazy" decoding="async"></span>
       Адвокат Осадько Олександр
     </span>
-    <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/index.html">Політика конфіденційності</a></span>
+    <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/">Політика конфіденційності</a></span>
   </div>
 </footer>
 
@@ -770,10 +770,10 @@ def render_catalog(arts):
   <script defer src="../assets/ga.js?v=5"></script>
   <title>Статті — Олександр Осадько, адвокат</title>
   <meta name="description" content="Юридичні статті адвоката Олександра Осадька: борги та договори, сімейне право, трудові спори, кримінальні справи, ДТП, нерухомість, бізнес і судовий процес.">
-  <link rel="canonical" href="{ART_BASE_URL}index.html">
+  <link rel="canonical" href="{ART_BASE_URL}">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Статті — адвокат Олександр Осадько">
-  <meta property="og:url" content="{ART_BASE_URL}index.html">
+  <meta property="og:url" content="{ART_BASE_URL}">
   <meta property="og:site_name" content="Адвокат Олександр Осадько">
   <meta property="og:image" content="{BASE_URL}assets/og-image.jpg">
   <meta name="twitter:card" content="summary_large_image">
@@ -783,7 +783,7 @@ def render_catalog(arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=81">
+  <link rel="stylesheet" href="../css/style.css?v=82">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -799,10 +799,10 @@ def render_catalog(arts):
     </a>
     <nav class="site-nav" id="nav">
       <a href="../#about">Про мене</a>
-      <a href="../poslugy/index.html">Послуги</a>
-      <a href="index.html">Статті</a>
-      <a href="../zrazky/index.html">Зразки</a>
-      <a href="../kontakty/index.html">Контакти</a>
+      <a href="../poslugy/">Послуги</a>
+      <a href="./">Статті</a>
+      <a href="../zrazky/">Зразки</a>
+      <a href="../kontakty/">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
@@ -842,7 +842,7 @@ def render_catalog(arts):
       <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt="" width="28" height="28" loading="lazy" decoding="async"></span>
       Адвокат Осадько Олександр
     </span>
-    <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/index.html">Політика конфіденційності</a></span>
+    <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/">Політика конфіденційності</a></span>
   </div>
 </footer>
 
@@ -941,7 +941,7 @@ def render_hub(cat, arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=81">
+  <link rel="stylesheet" href="../css/style.css?v=82">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -958,10 +958,10 @@ def render_hub(cat, arts):
     </a>
     <nav class="site-nav" id="nav">
       <a href="../#about">Про мене</a>
-      <a href="../poslugy/index.html">Послуги</a>
-      <a href="index.html">Статті</a>
-      <a href="../zrazky/index.html">Зразки</a>
-      <a href="../kontakty/index.html">Контакти</a>
+      <a href="../poslugy/">Послуги</a>
+      <a href="./">Статті</a>
+      <a href="../zrazky/">Зразки</a>
+      <a href="../kontakty/">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
@@ -977,7 +977,7 @@ def render_hub(cat, arts):
     <div class="container">
       <nav class="crumbs" aria-label="Хлібні крихти">
         <a href="../">Головна</a><span>/</span>
-        <a href="index.html">Статті</a><span>/</span>
+        <a href="./">Статті</a><span>/</span>
         <span class="cur">{esc(CATS[cat])}</span>
       </nav>
       <span class="cat cat-{cat}">{esc(SHORT_CAT[cat])}</span>
@@ -1007,7 +1007,7 @@ def render_hub(cat, arts):
       <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt="" width="28" height="28" loading="lazy" decoding="async"></span>
       Адвокат Осадько Олександр
     </span>
-    <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/index.html">Політика конфіденційності</a></span>
+    <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/">Політика конфіденційності</a></span>
   </div>
 </footer>
 
@@ -1047,15 +1047,18 @@ def write_sitemap(arts, landings=None):
     today = datetime.date.today().isoformat()
     cats_present = [c for c in ORDER if any(a["cat"] == c for a in arts)]
     # (loc, lastmod, changefreq, priority)
+    # Каталожні сторінки — у вигляді директорій (з кінцевою «/»), а не index.html:
+    # GitHub Pages перенаправляє /dir/index.html → /dir/, тож index.html-URL у мапі
+    # створювали б у Search Console «Сторінку з переадресацією».
     entries = [
         (BASE_URL, today, "weekly", "1.0"),
-        (ART_BASE_URL + "index.html", today, "weekly", "0.8"),
-        (BASE_URL + "zrazky/index.html", today, "monthly", "0.5"),
-        (BASE_URL + "kontakty/index.html", today, "monthly", "0.6"),
-        (BASE_URL + "privacy/index.html", "2026-07-01", "yearly", "0.3"),
+        (ART_BASE_URL, today, "weekly", "0.8"),
+        (BASE_URL + "zrazky/", today, "monthly", "0.5"),
+        (BASE_URL + "kontakty/", today, "monthly", "0.6"),
+        (BASE_URL + "privacy/", "2026-07-01", "yearly", "0.3"),
     ]
     if landings:
-        entries.append((POSLUGY_BASE_URL + "index.html", today, "monthly", "0.7"))
+        entries.append((POSLUGY_BASE_URL, today, "monthly", "0.7"))
     # Посадкові лендінги послуг — вищий пріоритет (конверсійні сторінки).
     entries += [(POSLUGY_BASE_URL + l["slug"] + ".html",
                  l.get("date_modified") or today, "monthly", "0.8") for l in landings]
@@ -1158,7 +1161,7 @@ LANDING_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=81">
+  <link rel="stylesheet" href="../css/style.css?v=82">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script type="application/ld+json">{jsonld}</script>
@@ -1174,10 +1177,10 @@ LANDING_PAGE = """<!DOCTYPE html>
     </a>
     <nav class="site-nav" id="nav">
       <a href="../#about">Про мене</a>
-      <a href="../poslugy/index.html">Послуги</a>
-      <a href="../articles/index.html">Статті</a>
-      <a href="../zrazky/index.html">Зразки</a>
-      <a href="../kontakty/index.html">Контакти</a>
+      <a href="../poslugy/">Послуги</a>
+      <a href="../articles/">Статті</a>
+      <a href="../zrazky/">Зразки</a>
+      <a href="../kontakty/">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
@@ -1244,7 +1247,7 @@ LANDING_PAGE = """<!DOCTYPE html>
       <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt="" width="28" height="28" loading="lazy" decoding="async"></span>
       Адвокат Осадько Олександр
     </span>
-    <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/index.html">Політика конфіденційності</a></span>
+    <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/">Політика конфіденційності</a></span>
   </div>
 </footer>
 
@@ -1335,7 +1338,7 @@ PAGE_SHELL = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=81">
+  <link rel="stylesheet" href="../css/style.css?v=82">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1352,10 +1355,10 @@ PAGE_SHELL = """<!DOCTYPE html>
     </a>
     <nav class="site-nav" id="nav">
       <a href="../#about">Про мене</a>
-      <a href="../poslugy/index.html">Послуги</a>
-      <a href="../articles/index.html">Статті</a>
-      <a href="../zrazky/index.html">Зразки</a>
-      <a href="../kontakty/index.html">Контакти</a>
+      <a href="../poslugy/">Послуги</a>
+      <a href="../articles/">Статті</a>
+      <a href="../zrazky/">Зразки</a>
+      <a href="../kontakty/">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
@@ -1376,7 +1379,7 @@ PAGE_SHELL = """<!DOCTYPE html>
       <span class="brand-mark" style="width:28px;height:28px"><img src="../assets/logo-mark.png" alt="" width="28" height="28" loading="lazy" decoding="async"></span>
       Адвокат Осадько Олександр
     </span>
-    <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/index.html">Політика конфіденційності</a></span>
+    <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="../privacy/">Політика конфіденційності</a></span>
   </div>
 </footer>
 
@@ -1472,7 +1475,7 @@ def render_services_index(landings):
             f'          <p>{esc(l["subtitle"])}</p>\n'
             f'          <span class="more">Детальніше <span>→</span></span>\n'
             f'        </a>')
-    url = POSLUGY_BASE_URL + "index.html"
+    url = POSLUGY_BASE_URL
     jsonld = json.dumps({
         "@context": "https://schema.org", "@type": "CollectionPage",
         "name": "Послуги адвоката Олександра Осадька", "url": url, "inLanguage": "uk",
@@ -1487,8 +1490,8 @@ def render_services_index(landings):
         '  <section class="lp-section container">\n'
         '    <div class="cards">\n' + "\n".join(cards) + '\n    </div>\n'
         '    <p class="section-sub" style="margin-top:28px">Не знайшли свою ситуацію? '
-        'Дивіться <a href="../articles/index.html">статті за темами</a> або '
-        '<a href="../kontakty/index.html">напишіть мені</a> — розберемо ваш випадок.</p>\n'
+        'Дивіться <a href="../articles/">статті за темами</a> або '
+        '<a href="../kontakty/">напишіть мені</a> — розберемо ваш випадок.</p>\n'
         '  </section>\n'
         '</main>')
     return (PAGE_SHELL
@@ -1501,7 +1504,7 @@ def render_services_index(landings):
 
 
 def render_contacts():
-    url = BASE_URL + "kontakty/index.html"
+    url = BASE_URL + "kontakty/"
     jsonld = json.dumps({
         "@context": "https://schema.org", "@type": "Attorney",
         "name": "Адвокат Олександр Осадько", "url": BASE_URL,
