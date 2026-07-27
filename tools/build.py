@@ -618,7 +618,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=71">
+  <link rel="stylesheet" href="../css/style.css?v=72">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -782,7 +782,7 @@ def render_catalog(arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=71">
+  <link rel="stylesheet" href="../css/style.css?v=72">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -939,7 +939,7 @@ def render_hub(cat, arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=71">
+  <link rel="stylesheet" href="../css/style.css?v=72">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1154,7 +1154,7 @@ LANDING_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=71">
+  <link rel="stylesheet" href="../css/style.css?v=72">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script type="application/ld+json">{jsonld}</script>
@@ -1330,7 +1330,7 @@ PAGE_SHELL = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=71">
+  <link rel="stylesheet" href="../css/style.css?v=72">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1473,11 +1473,11 @@ def render_contacts():
         '    <h1>Контакти</h1>\n'
         '    <p class="lp-sub">Зателефонуйте або напишіть у зручний месенджер — відповім у '
         'найкоротший термін. Перша консультація безкоштовна.</p>\n'
-        '    <div class="lp-cta">\n'
-        '      <a class="lp-btn lp-btn-call" href="tel:+380934664443">Зателефонувати</a>\n'
-        '      <a class="lp-btn lp-btn-tg" href="https://t.me/adv_osadko" target="_blank" rel="noopener">Telegram</a>\n'
-        '      <a class="lp-btn lp-btn-wa" href="https://wa.me/380934664443" target="_blank" rel="noopener">WhatsApp</a>\n'
-        '      <a class="lp-btn lp-btn-vb" href="viber://chat?number=%2B380934664443">Viber</a>\n'
+        '    <div class="social-row">\n'
+        '      <a class="social-btn sb-call" href="tel:+380934664443"><span class="dot"></span>Зателефонувати</a>\n'
+        '      <a class="social-btn sb-tg" href="https://t.me/adv_osadko" target="_blank" rel="noopener"><span class="dot"></span>Telegram</a>\n'
+        '      <a class="social-btn sb-wa" href="https://wa.me/380934664443" target="_blank" rel="noopener"><span class="dot"></span>WhatsApp</a>\n'
+        '      <a class="social-btn sb-vb" href="viber://chat?number=%2B380934664443"><span class="dot"></span>Viber</a>\n'
         '    </div>\n'
         '  </div></section>\n'
         '  <section class="lp-section container">\n'

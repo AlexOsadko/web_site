@@ -559,14 +559,16 @@ p.body-reveal,
 .social-btn {
   display: inline-flex; align-items: center; gap: 9px;
   padding: 10px 16px; border-radius: 999px;
-  background: rgba(255, 255, 255, .08);
-  border: 1px solid rgba(255, 255, 255, .16);
-  color: #fff; font-size: .92rem; font-weight: 500;
-  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--ink); font-size: .92rem; font-weight: 500;
+  text-decoration: none;
+  transition: background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
 }
 .social-btn .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
-.social-btn:hover { transform: translateY(-2px); border-color: transparent; }
+.social-btn:hover { transform: translateY(-2px); border-color: transparent; color: #fff; }
 .social-btn:hover .dot { color: #fff; }
+.sb-call .dot { color: var(--blue); } .sb-call:hover { background: var(--blue); }
 .sb-wa .dot { color: #25d366; } .sb-wa:hover { background: #25d366; }
 .sb-vb .dot { color: #7360f2; } .sb-vb:hover { background: #7360f2; }
 .sb-tg .dot { color: #229ed9; } .sb-tg:hover { background: #229ed9; }
@@ -831,6 +833,7 @@ a.card:hover .more span { transform: translateX(5px); }
 .lp-btn-call { background: var(--blue); color: #fff; box-shadow: var(--shadow); }
 .lp-btn-tg { background: #229ed9; color: #fff; }
 .lp-btn-wa { background: #25d366; color: #06331b; }
+.lp-btn-vb { background: #7360f2; color: #fff; }
 .lp-section { padding: 40px 0 8px; }
 .lp-section > h2 { font-size: 1.5rem; margin-bottom: 22px; text-wrap: balance; }
 .lp-situations { list-style: none; display: grid; gap: 12px; padding: 0; }
