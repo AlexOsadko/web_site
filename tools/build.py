@@ -1425,7 +1425,7 @@ CONTACT_SCRIPTS = """<script>
 
 SERVICE_ICON = {
     "rozluchennia": "💍", "st-130-kupap": "🚗", "kryminalnyi-zahyst": "🛡️",
-    "nezakonne-zvilnennya": "💼", "spadschyna": "📜", "tck": "🪖",
+    "pensiine-sotsialne": "🧾", "tsyvilne-pravo": "📄", "tck": "🪖",
 }
 
 # Контактний блок — ті самі реальні дані, що на головній (адреса, телефон,
