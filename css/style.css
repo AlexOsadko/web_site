@@ -853,6 +853,9 @@ a.card:hover .more span { transform: translateX(5px); }
 /* ===== Посадкові лендінги послуг ===== */
 .lp { padding-bottom: 40px; }
 .lp .container { max-width: 900px; }
+/* Секція з сіткою карток на сторінці «Послуги» — повна ширина, як на головній
+   (текстові блоки лишаються вузькими 900px для читабельності). */
+.lp .container-wide { max-width: 1160px; }
 .lp-hero {
   padding: 56px 0 40px;
   background: linear-gradient(180deg, var(--tint), transparent);
