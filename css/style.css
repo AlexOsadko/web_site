@@ -882,7 +882,7 @@ a.card:hover .more span { transform: translateX(5px); }
 /* Кнопки месенджерів у картці контактів/консультації — завжди в один рядок,
    рівні за шириною. На телефонах підписи ховаються (лишаються іконки). */
 .contacts-cta { flex-wrap: nowrap; gap: 8px; margin: 4px 0 22px; }
-.contacts-cta .lp-btn { flex: 1 1 0; min-width: 0; gap: 8px; padding: 11px 6px; font-size: .92rem; white-space: nowrap; }
+.contacts-cta .lp-btn { flex: 1 1 0; min-width: 0; gap: 7px; padding: 11px 4px; font-size: .9rem; white-space: nowrap; overflow: hidden; }
 .contacts-cta .lp-btn svg { width: 18px; height: 18px; flex: none; }
 @media (max-width: 520px) {
   .contacts-cta .lbl { display: none; }
