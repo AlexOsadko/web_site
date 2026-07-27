@@ -860,8 +860,12 @@ a.card:hover .more span { transform: translateX(5px); }
 .lp-hero-tight { padding-bottom: 20px; border-bottom: 0; }
 .lp-hero-tight .lp-sub { margin-bottom: 0; }
 .lp-hero h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); text-wrap: balance; margin-bottom: 14px; }
-.lp-sub { font-size: 1.15rem; color: var(--text); max-width: 60ch; margin-bottom: 24px; }
-.lp-intro { color: var(--muted); max-width: 65ch; margin-top: 22px; }
+.lp-sub { font-size: 1.15rem; color: var(--text); max-width: 62ch; margin-bottom: 24px; }
+.lp-intro { color: var(--muted); max-width: 62ch; margin-top: 22px; }
+/* У героєвому блоці лендінгу — по лівому краю без переносів (коротка подача,
+   де justify лишає завеликі проміжки й «рваний» вигляд). Обидва абзаци —
+   однакова ширина, тож праві краї збігаються. */
+.lp-hero .lp-sub, .lp-hero .lp-intro { text-align: left; hyphens: manual; }
 .lp-cta { display: flex; flex-wrap: wrap; gap: 12px; }
 .lp-btn {
   display: inline-flex; align-items: center; justify-content: center;
