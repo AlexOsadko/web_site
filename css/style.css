@@ -482,12 +482,12 @@ p.body-reveal,
 .about-list .d { color: var(--muted); font-size: .9rem; }
 
 /* ===== Послуги ===== */
-.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
 .card {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 30px 26px;
+  padding: 34px 34px;
   transition: transform .25s, box-shadow .25s, border-color .25s;
 }
 .card:hover { transform: translateY(-6px); box-shadow: var(--shadow); border-color: var(--blue2); }
@@ -502,7 +502,7 @@ p.body-reveal,
   transition: transform .3s cubic-bezier(.2,.7,.3,1);
 }
 .card h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 9px; }
-.card p { color: var(--muted); font-size: .93rem; text-align: justify; text-align-last: left; hyphens: manual; }
+.card p { color: var(--muted); font-size: .95rem; line-height: 1.6; }
 
 /* ===== Статті ===== */
 .articles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
