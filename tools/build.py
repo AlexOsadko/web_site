@@ -618,7 +618,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=72">
+  <link rel="stylesheet" href="../css/style.css?v=73">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -782,7 +782,7 @@ def render_catalog(arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=72">
+  <link rel="stylesheet" href="../css/style.css?v=73">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -939,7 +939,7 @@ def render_hub(cat, arts):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=72">
+  <link rel="stylesheet" href="../css/style.css?v=73">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1154,7 +1154,7 @@ LANDING_PAGE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=72">
+  <link rel="stylesheet" href="../css/style.css?v=73">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script type="application/ld+json">{jsonld}</script>
@@ -1330,7 +1330,7 @@ PAGE_SHELL = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,800&family=Inter:wght@300;400;500&display=swap"></noscript>
-  <link rel="stylesheet" href="../css/style.css?v=72">
+  <link rel="stylesheet" href="../css/style.css?v=73">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=14"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1381,10 +1381,47 @@ PAGE_SHELL = """<!DOCTYPE html>
   }, { threshold: 0.12 });
   document.querySelectorAll('.body-reveal, .reveal').forEach(el => io.observe(el));
 </script>
-
+{extra}
 </body>
 </html>
 """
+
+# Обробник форми заявки + Cloudflare Turnstile — той самий механізм, що на
+# головній (релей у Telegram із поштовим fallback). Вставляється лише на
+# сторінку «Контакти», де є форма.
+CONTACT_SCRIPTS = """<script>
+  // NOTIFY_ENDPOINT — релей (Cloudflare Worker), що надсилає заявку в Telegram.
+  const NOTIFY_ENDPOINT = "https://osadko-relay.espir3.workers.dev";
+  const formStart = Date.now();
+  function submitLead(form, okId, source) {
+    if (form.elements['company'] && form.elements['company'].value) return; // honeypot
+    if (Date.now() - formStart < 2000) return;                              // часова пастка
+    const name = form.elements['name'] ? form.elements['name'].value.trim() : '';
+    const phone = form.elements['phone'] ? form.elements['phone'].value.trim() : '';
+    const message = form.elements['message'] ? form.elements['message'].value.trim() : '';
+    const tf = form.querySelector('[name="cf-turnstile-response"]');
+    const token = tf ? tf.value : '';
+    const ok = document.getElementById(okId);
+    const showOk = () => { form.reset(); if (ok) ok.style.display = 'block'; if (window.turnstile) turnstile.reset(); if (window.osadkoConversion) window.osadkoConversion(); };
+    const mailFallback = () => {
+      const body = 'Джерело: ' + source + '\\nІмʼя: ' + name + '\\nТелефон: ' + phone +
+        (message ? '\\nПитання: ' + message : '');
+      window.location.href = 'mailto:adv.osadko@gmail.com?subject=' +
+        encodeURIComponent(source) + '&body=' + encodeURIComponent(body);
+    };
+    if (NOTIFY_ENDPOINT) {
+      fetch(NOTIFY_ENDPOINT, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, message, source, page: location.href, token })
+      }).then(r => { if (!r.ok) throw new Error('bad'); return r; }).then(showOk).catch(mailFallback);
+    } else { mailFallback(); }
+  }
+  const leadForm = document.getElementById('leadForm');
+  if (leadForm) leadForm.addEventListener('submit', (e) => {
+    e.preventDefault(); submitLead(leadForm, 'formOk', 'Заявка на консультацію (Контакти)');
+  });
+</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>"""
 
 SERVICE_ICON = {
     "rozluchennia": "💍", "st-130-kupap": "🚗", "kryminalnyi-zahyst": "🛡️",
@@ -1454,7 +1491,7 @@ def render_services_index(landings):
              "трудові спори, спадщина, спори з ТЦК. Детально по кожному напряму.")
             .replace("{url}", url).replace("{ogimg}", BASE_URL + "assets/og-image.jpg")
             .replace("{jsonld}", f'<script type="application/ld+json">{jsonld}</script>')
-            .replace("{main}", main).replace("{fab}", FAB_HTML))
+            .replace("{main}", main).replace("{fab}", FAB_HTML).replace("{extra}", ""))
 
 
 def render_contacts():
@@ -1469,31 +1506,50 @@ def render_contacts():
     }, ensure_ascii=False)
     main = (
         '<main id="main" class="lp">\n'
-        '  <section class="lp-hero"><div class="container">\n'
+        '  <section class="lp-hero lp-hero-tight"><div class="container">\n'
         '    <h1>Контакти</h1>\n'
         '    <p class="lp-sub">Зателефонуйте або напишіть у зручний месенджер — відповім у '
         'найкоротший термін. Перша консультація безкоштовна.</p>\n'
-        '    <div class="social-row">\n'
+        '  </div></section>\n'
+        '  <section class="section" style="padding-top:8px"><div class="container">\n'
+        '    <div class="contacts-grid">\n'
+        '      <div class="contacts-card reveal">\n'
+        '        <h2 class="section-title">Обговоримо вашу справу</h2>\n'
+        '        <p>Залиште заявку — відповім у найкоротший термін (у середньому за 15 хвилин) '
+        'і запропоную зручний час. Перша консультація безкоштовна.</p>\n'
+        '        <form class="lead-form" id="leadForm">\n'
+        '          <label>Ваше ім\'я\n'
+        '            <input name="name" type="text" required placeholder="Ім\'я" autocomplete="name">\n'
+        '          </label>\n'
+        '          <label>Телефон\n'
+        '            <input name="phone" type="tel" required placeholder="+38 (0__) ___-__-__" inputmode="tel" autocomplete="tel">\n'
+        '          </label>\n'
+        '          <label>Коротко про ситуацію\n'
+        '            <textarea name="message" placeholder="Опишіть ваше питання"></textarea>\n'
+        '          </label>\n'
+        '          <input type="text" name="company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">\n'
+        '          <div class="cf-turnstile" data-sitekey="0x4AAAAAAD1Dx9AvRT4v-VoQ" data-theme="dark" data-size="compact"></div>\n'
+        '          <button class="btn btn-primary" type="submit">Замовити консультацію</button>\n'
+        '          <div class="form-ok" id="formOk">Дякую! Заявку надіслано — зв\'яжуся найближчим часом.</div>\n'
+        '        </form>\n'
+        '      </div>\n'
+        '      <div class="contact-lines reveal">\n' + CONTACT_LINES + '\n      </div>\n'
+        '    </div>\n'
+        '    <div class="social-row" style="margin-top:28px">\n'
         '      <a class="social-btn sb-call" href="tel:+380934664443"><span class="dot"></span>Зателефонувати</a>\n'
         '      <a class="social-btn sb-tg" href="https://t.me/adv_osadko" target="_blank" rel="noopener"><span class="dot"></span>Telegram</a>\n'
         '      <a class="social-btn sb-wa" href="https://wa.me/380934664443" target="_blank" rel="noopener"><span class="dot"></span>WhatsApp</a>\n'
         '      <a class="social-btn sb-vb" href="viber://chat?number=%2B380934664443"><span class="dot"></span>Viber</a>\n'
         '    </div>\n'
         '  </div></section>\n'
-        '  <section class="lp-section container">\n'
-        '    <div class="contact-lines">\n' + CONTACT_LINES + '\n    </div>\n'
-        '    <p class="section-sub" style="margin-top:28px">Зручніше залишити заявку? '
-        'Скористайтеся <a href="../#contacts">формою на головній</a> — опишіть ситуацію, '
-        'і я запропоную зручний час.</p>\n'
-        '  </section>\n'
         '</main>')
     return (PAGE_SHELL
             .replace("{title}", "Контакти").replace("{desc}",
-             "Контакти адвоката Олександра Осадька: телефон, Telegram, WhatsApp, Viber, "
-             "e-mail, адреса офісу в Києві та графік роботи.")
+             "Контакти адвоката Олександра Осадька: залиште заявку у формі, телефон, "
+             "Telegram, WhatsApp, Viber, e-mail, адреса офісу в Києві та графік роботи.")
             .replace("{url}", url).replace("{ogimg}", BASE_URL + "assets/og-image.jpg")
             .replace("{jsonld}", f'<script type="application/ld+json">{jsonld}</script>')
-            .replace("{main}", main).replace("{fab}", FAB_HTML))
+            .replace("{main}", main).replace("{fab}", FAB_HTML).replace("{extra}", CONTACT_SCRIPTS))
 
 
 # ---------- ГОЛОВНИЙ ПРОХІД ----------

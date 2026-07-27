@@ -820,6 +820,8 @@ a.card:hover .more span { transform: translateX(5px); }
 :root[data-theme="dark"] .lp-hero {
   background: linear-gradient(180deg, rgba(30,80,230,.12), transparent);
 }
+.lp-hero-tight { padding-bottom: 20px; border-bottom: 0; }
+.lp-hero-tight .lp-sub { margin-bottom: 0; }
 .lp-hero h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); text-wrap: balance; margin-bottom: 14px; }
 .lp-sub { font-size: 1.15rem; color: var(--text); max-width: 60ch; margin-bottom: 24px; }
 .lp-intro { color: var(--muted); max-width: 65ch; margin-top: 22px; }
