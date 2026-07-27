@@ -457,6 +457,7 @@ p.body-reveal,
   .hero-lead,
   .lp-sub,
   .lp-intro,
+  .card p,
   p.body-reveal,
   .faq details p,
   .article-note,
@@ -501,7 +502,7 @@ p.body-reveal,
   transition: transform .3s cubic-bezier(.2,.7,.3,1);
 }
 .card h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 9px; }
-.card p { color: var(--muted); font-size: .93rem; }
+.card p { color: var(--muted); font-size: .93rem; text-align: justify; text-align-last: left; hyphens: manual; }
 
 /* ===== Статті ===== */
 .articles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
