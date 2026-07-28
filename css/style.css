@@ -755,17 +755,18 @@ a.card:hover .more span { transform: translateX(5px); }
 /* ===== Поява при скролі ===== */
 .reveal { opacity: 0; }
 .reveal.in { animation: revealIn .7s cubic-bezier(.2,.7,.3,1) both; }
-@keyframes revealIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes revealIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
-/* Каскадна (stagger) поява дочірніх елементів у невеликих сітках і списках —
-   картки й пункти зʼявляються один за одним, а не всі разом. */
-:is(.cards, .articles, .lp-benefits, .lp-situations, .lp-steps) > .reveal.in { animation-duration: .6s; }
-:is(.cards, .articles, .lp-benefits, .lp-situations, .lp-steps) > .reveal:nth-child(2) { animation-delay: .06s; }
-:is(.cards, .articles, .lp-benefits, .lp-situations, .lp-steps) > .reveal:nth-child(3) { animation-delay: .12s; }
-:is(.cards, .articles, .lp-benefits, .lp-situations, .lp-steps) > .reveal:nth-child(4) { animation-delay: .18s; }
-:is(.cards, .articles, .lp-benefits, .lp-situations, .lp-steps) > .reveal:nth-child(5) { animation-delay: .24s; }
-:is(.cards, .articles, .lp-benefits, .lp-situations, .lp-steps) > .reveal:nth-child(6) { animation-delay: .30s; }
-:is(.cards, .articles, .lp-benefits, .lp-situations, .lp-steps) > .reveal:nth-child(n+7) { animation-delay: .34s; }
+/* Каскадна (stagger) поява карток у сітках — зʼявляються одна за одною.
+   Лише сітки карток; вертикальні списки (кроки, ситуації) без stagger, щоб
+   текст не «стрибав» під час появи. */
+:is(.cards, .articles, .lp-benefits) > .reveal.in { animation-duration: .55s; }
+:is(.cards, .articles, .lp-benefits) > .reveal:nth-child(2) { animation-delay: .06s; }
+:is(.cards, .articles, .lp-benefits) > .reveal:nth-child(3) { animation-delay: .12s; }
+:is(.cards, .articles, .lp-benefits) > .reveal:nth-child(4) { animation-delay: .18s; }
+:is(.cards, .articles, .lp-benefits) > .reveal:nth-child(5) { animation-delay: .24s; }
+:is(.cards, .articles, .lp-benefits) > .reveal:nth-child(6) { animation-delay: .30s; }
+:is(.cards, .articles, .lp-benefits) > .reveal:nth-child(n+7) { animation-delay: .34s; }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; }
   .reveal.in { animation: none; }
