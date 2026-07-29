@@ -292,6 +292,21 @@ def esc(s):
     return html.escape(s)
 
 
+# Максимальна довжина <title>, за якою Google обрізає сніпет у видачі (~60 симв.).
+TITLE_MAX = 60
+BRAND_SUFFIX = " — адвокат Осадько"   # 18 симв.; коротший за повне ім'я, щоб не різати ключі
+
+
+def seo_title(base):
+    """Заголовок вкладки/сніпета: ключова частина спереду, короткий бренд-суфікс —
+    лише якщо разом не перевищує ~60 символів. Інакше залишаємо чистий заголовок,
+    щоб ключова фраза не обрізалася у видачі (обрізаний ключ = гірший CTR і позиція)."""
+    base = base.strip()
+    if len(base) + len(BRAND_SUFFIX) <= TITLE_MAX:
+        return esc(base + BRAND_SUFFIX)
+    return esc(base)
+
+
 def plural_uk(n, forms):
     """forms = (one, few, many): 1 стаття / 2 статті / 5 статей."""
     n = abs(int(n))
@@ -694,7 +709,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>document.documentElement.classList.add('js')</script>
   <script defer src="../assets/ga.js?v=5"></script>
-  <title>{title} — адвокат Олександр Осадько</title>
+  <title>{titletag}</title>
   <meta name="description" content="{desc}">
   <meta name="keywords" content="{kw}">
   <link rel="canonical" href="{url}">
@@ -814,6 +829,7 @@ def render_article(a, allmeta, seealso_map=None):
     body = blocks_to_html(full_blocks)
     kw = f"{a['title'].lower()}, адвокат, юрист, {KW_BASE[a['cat']]}, Україна, консультація адвоката"
     repl = {
+        "{titletag}": seo_title(a["title"]),
         "{title}": esc(a["title"]), "{desc}": esc(a["desc"]), "{kw}": esc(kw),
         "{url}": ART_BASE_URL + a["slug"] + ".html", "{jsonld}": build_jsonld(a, faq),
         "{cat}": a["cat"], "{catname}": CATS[a["cat"]], "{crumb}": esc(a["title"]),
@@ -1020,7 +1036,7 @@ def render_hub(cat, arts):
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script defer src="../assets/ga.js?v=5"></script>
-  <title>{esc(CATS[cat])} — статті адвоката Олександра Осадька</title>
+  <title>{esc(CATS[cat])} — адвокат Осадько</title>
   <meta name="description" content="{esc(CAT_DESC[cat])}">
   <meta name="keywords" content="{esc(KW_BASE[cat])}, адвокат, юрист, Україна">
   <link rel="canonical" href="{url}">
@@ -1242,7 +1258,7 @@ LANDING_PAGE = """<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>document.documentElement.classList.add('js')</script>
   <script defer src="../assets/ga.js?v=5"></script>
-  <title>{title} — адвокат Олександр Осадько</title>
+  <title>{titletag}</title>
   <meta name="description" content="{desc}">
   <link rel="canonical" href="{url}">
   <meta name="robots" content="index, follow">
@@ -1394,6 +1410,7 @@ def render_landing(l):
             f'<a href="../articles/{rel["slug"]}.html">{esc(rel["title"])}</a>.') if rel else \
            'Ця сторінка має загальний інформаційний характер і не є юридичною консультацією.'
     repl = {
+        "{titletag}": seo_title(l["title"]),
         "{title}": esc(l["title"]), "{desc}": esc(l["desc"]),
         "{url}": POSLUGY_BASE_URL + l["slug"] + ".html",
         "{ogimg}": BASE_URL + "assets/og-image.jpg",
@@ -1422,7 +1439,7 @@ PAGE_SHELL = """<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>document.documentElement.classList.add('js')</script>
   <script defer src="../assets/ga.js?v=5"></script>
-  <title>{title} — адвокат Олександр Осадько</title>
+  <title>{titletag}</title>
   <meta name="description" content="{desc}">
   <link rel="canonical" href="{url}">
   <meta name="robots" content="index, follow">
@@ -1598,6 +1615,7 @@ def render_services_index(landings):
         '  </section>\n'
         '</main>')
     return (PAGE_SHELL
+            .replace("{titletag}", esc("Послуги адвоката у Києві — Олександр Осадько"))
             .replace("{title}", "Послуги адвоката").replace("{desc}",
              "Послуги адвоката Олександра Осадька: розлучення, ДТП, кримінальний захист, "
              "трудові спори, спадщина, спори з ТЦК. Детально по кожному напряму.")
@@ -1653,6 +1671,7 @@ def render_contacts():
         '  </div></section>\n'
         '</main>')
     return (PAGE_SHELL
+            .replace("{titletag}", esc("Контакти — адвокат Олександр Осадько у Києві"))
             .replace("{title}", "Контакти").replace("{desc}",
              "Контакти адвоката Олександра Осадька: залиште заявку у формі, телефон, "
              "Telegram, WhatsApp, Viber, e-mail, адреса офісу в Києві та графік роботи.")
