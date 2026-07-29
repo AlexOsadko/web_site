@@ -81,6 +81,22 @@ CAT_NOTE = {
 }
 NOTE_LINK = '<a href="../#contacts">зв\'яжіться зі мною</a>'
 
+# Прив'язка тематичної категорії до профільного лендінгу послуги. Дає кожній
+# статті контекстне посилання на «грошову» сторінку, а лендінгам — сотні
+# вхідних посилань зі статей. Анкор варіюється за категорією (природніший
+# профіль посилань), але веде на релевантний лендінг. Категорії без чіткого
+# профільного лендінгу (labor, admin) залишаються без такого посилання.
+LANDING_FOR_CAT = {
+    "civil":    ("tsyvilne-pravo", "стягнення боргів і цивільних спорів"),
+    "family":   ("rozluchennia", "розлучення та стягнення аліментів"),
+    "criminal": ("kryminalnyi-zahyst", "кримінального захисту"),
+    "military": ("tck", "спорів із ТЦК та питань мобілізації"),
+    "social":   ("pensiine-sotsialne", "пенсійних і соціальних спорів"),
+    "realty":   ("tsyvilne-pravo", "цивільних і майнових спорів"),
+    "business": ("tsyvilne-pravo", "цивільних і договірних спорів"),
+    "process":  ("tsyvilne-pravo", "ведення справ у суді"),
+}
+
 # Описи категорій для тематичних сторінок-хабів.
 CAT_DESC = {
     "civil": "Борги, розписки, договори, відшкодування шкоди та захист прав споживачів. Пояснюю, як стягнути борг, скласти претензію й відстояти свої інтереси в цивільних спорах.",
@@ -406,7 +422,7 @@ def autolink_blocks(blocks, cur_slug, valid_slugs):
 
 def closing_blocks(cat, h1):
     topic = h1[0].lower() + h1[1:]
-    return [
+    blocks = [
         {"type": "h2", "text": "Чим може допомогти адвокат"},
         {"type": "p", "text": f"Питання, як-от «{topic.rstrip('.')}», рідко бувають типовими: "
                               f"{CAT_NOTE[cat]} Адвокат Олександр Осадько проаналізує вашу ситуацію, "
@@ -415,6 +431,13 @@ def closing_blocks(cat, h1):
                               f"підвищує шанси на результат. Щоб отримати пораду саме для вашого випадку, "
                               + NOTE_LINK + "."},
     ]
+    lp = LANDING_FOR_CAT.get(cat)
+    if lp:
+        slug, phrase = lp
+        blocks.append({"type": "p", "text":
+            f'Ця тема належить до напряму <a href="../poslugy/{slug}.html">{phrase}</a> — '
+            f'там докладніше про те, з чим я допомагаю та як відбувається робота у таких справах.'})
+    return blocks
 
 
 def build_faq_html(faq):
@@ -448,7 +471,11 @@ def build_auto_anchors(arts):
     for a in arts:
         if a["slug"] in covered:
             continue
-        phrase = re.split(r"[:—–(]", a["h1"].lower())[0].strip(" .,:;")
+        # Беремо провідну частину заголовка (до двокрапки/тире/дужки/коми) та
+        # прибираємо лапки-«ялинки» й друкарські лапки, інакше морфопатерн шукав
+        # би їх буквально в тексті й ніколи не збігався (напр. «Декретна» відпустка).
+        phrase = re.split(r"[:,—–(]", a["h1"].lower())[0]
+        phrase = re.sub(r"[«»“”\"]", "", phrase).strip(" .,:;")
         words = phrase.split()[:4]
         if words and words[0] in AUTO_ANCHOR_STOP:
             words = words[1:]
@@ -519,6 +546,63 @@ def build_inline_seealso(cur_slug, cat, allmeta, n=3):
         return None
     return {"type": "seealso",
             "items": [{"slug": a["slug"], "title": a["title"]} for a in pick]}
+
+
+def build_all_seealso(allmeta, n=4, lam=0.4, floor=3):
+    """Глобальний, збалансований підбір інлайн-блоків «Читайте також» для всіх
+    статей одразу. Замість жадібного вибору топ-N за релевантністю (через що
+    «хабові» статті збирали майже всі посилання, а вузькі лишалися сиротами)
+    застосовуємо штраф за вже накопичені вхідні посилання (lam) і гарантуємо
+    кожній статті мінімум `floor` контекстних вхідних посилань. Результат:
+    жодних сиріт, але релевантні хаби все одно отримують більше посилань.
+    Повертає dict slug -> блок seealso."""
+    kw = {a["slug"]: _kw(a) for a in allmeta}
+    cat = {a["slug"]: a["cat"] for a in allmeta}
+    title = {a["slug"]: a["title"] for a in allmeta}
+    slugs = [a["slug"] for a in allmeta]
+
+    def rel(s, t):
+        return len(kw[s] & kw[t]) + (1 if cat[s] == cat[t] else 0)
+
+    inbound = {s: 0 for s in slugs}
+    picks = {}
+    for s in slugs:
+        scored = sorted((t for t in slugs if t != s),
+                        key=lambda t: (-(rel(s, t) - lam * inbound[t]), t))
+        chosen = scored[:n]
+        picks[s] = chosen
+        for t in chosen:
+            inbound[t] += 1
+
+    # Гарантія мінімуму: «сироти» довставляємо в найрелевантніші статті,
+    # витісняючи там найслабше посилання (але не забираючи нижче floor).
+    for t in slugs:
+        guard = 0
+        while inbound[t] < floor and guard < 80:
+            guard += 1
+            cands = sorted((s for s in slugs if s != t and t not in picks[s]),
+                           key=lambda s: -rel(s, t))
+            placed = False
+            for s in cands:
+                worst = max(picks[s], key=lambda x: (inbound[x], -rel(s, x)))
+                if inbound[worst] <= floor:
+                    continue
+                picks[s].remove(worst)
+                inbound[worst] -= 1
+                picks[s].append(t)
+                inbound[t] += 1
+                placed = True
+                break
+            if not placed:
+                break
+
+    result = {}
+    for s in slugs:
+        # Впорядковуємо остаточний список за релевантністю для акуратного вигляду.
+        ordered = sorted(picks[s], key=lambda t: (-rel(s, t), title[t]))
+        result[s] = {"type": "seealso",
+                     "items": [{"slug": t, "title": title[t]} for t in ordered]}
+    return result
 
 
 def inject_seealso(blocks, seealso):
@@ -707,10 +791,12 @@ ARTICLE_PAGE = """<!DOCTYPE html>
 """
 
 
-def render_article(a, allmeta):
+def render_article(a, allmeta, seealso_map=None):
     faq = a.get("faq", [])
     valid = {x["slug"] for x in allmeta}
-    body_blocks = inject_seealso(a["blocks"], build_inline_seealso(a["slug"], a["cat"], allmeta))
+    seealso = (seealso_map.get(a["slug"]) if seealso_map is not None
+               else build_inline_seealso(a["slug"], a["cat"], allmeta))
+    body_blocks = inject_seealso(a["blocks"], seealso)
     full_blocks = autolink_blocks(body_blocks, a["slug"], valid) + closing_blocks(a["cat"], a["h1"])
     body = blocks_to_html(full_blocks)
     kw = f"{a['title'].lower()}, адвокат, юрист, {KW_BASE[a['cat']]}, Україна, консультація адвоката"
@@ -1568,9 +1654,10 @@ def main():
     arts = load_articles()
     n = len(arts)
     auto_anchors = build_auto_anchors(arts)
+    seealso_map = build_all_seealso(arts)
 
     for a in arts:
-        page = render_article(a, arts)
+        page = render_article(a, arts, seealso_map)
         with open(os.path.join(ART, a["slug"] + ".html"), "w", encoding="utf-8") as f:
             f.write(page)
 
