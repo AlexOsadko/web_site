@@ -18,7 +18,7 @@
 Використання:
     python3 tools/build.py
 """
-import os, re, json, glob, html
+import os, re, json, glob, html, zlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONTENT = os.path.join(ROOT, "content", "articles")
@@ -420,7 +420,20 @@ def autolink_blocks(blocks, cur_slug, valid_slugs):
     return out
 
 
-def closing_blocks(cat, h1):
+# Кілька формулювань посилання на профільний лендінг. Обираються детерміновано
+# за slug (щоб не було дослівного повтору того самого речення на сотнях сторінок —
+# інакше однаковий «хвіст» виглядав би шаблонно й спамно). Усі варіанти
+# граматично узгоджені з анкором у родовому відмінку («напряму {link}»).
+LANDING_CTA_TEMPLATES = [
+    'Ця тема належить до напряму {link} — там докладніше про те, з чим я допомагаю та як відбувається робота у таких справах.',
+    'Це питання — частина ширшого напряму {link}, у межах якого я супроводжую клієнтів від консультації до результату.',
+    'Такі справи я веду в межах напряму {link}: на сторінці послуги описано підхід, етапи роботи й типові ситуації.',
+    'Це один із випадків, з якими я працюю в межах напряму {link} — деталі про порядок роботи є на сторінці послуги.',
+    'Докладніше про мій підхід до напряму {link} та про те, як будується робота, — на сторінці відповідної послуги.',
+]
+
+
+def closing_blocks(cat, h1, slug=""):
     topic = h1[0].lower() + h1[1:]
     blocks = [
         {"type": "h2", "text": "Чим може допомогти адвокат"},
@@ -433,10 +446,10 @@ def closing_blocks(cat, h1):
     ]
     lp = LANDING_FOR_CAT.get(cat)
     if lp:
-        slug, phrase = lp
-        blocks.append({"type": "p", "text":
-            f'Ця тема належить до напряму <a href="../poslugy/{slug}.html">{phrase}</a> — '
-            f'там докладніше про те, з чим я допомагаю та як відбувається робота у таких справах.'})
+        target, phrase = lp
+        link = f'<a href="../poslugy/{target}.html">{phrase}</a>'
+        tpl = LANDING_CTA_TEMPLATES[zlib.crc32(slug.encode("utf-8")) % len(LANDING_CTA_TEMPLATES)]
+        blocks.append({"type": "p", "text": tpl.format(link=link)})
     return blocks
 
 
@@ -797,7 +810,7 @@ def render_article(a, allmeta, seealso_map=None):
     seealso = (seealso_map.get(a["slug"]) if seealso_map is not None
                else build_inline_seealso(a["slug"], a["cat"], allmeta))
     body_blocks = inject_seealso(a["blocks"], seealso)
-    full_blocks = autolink_blocks(body_blocks, a["slug"], valid) + closing_blocks(a["cat"], a["h1"])
+    full_blocks = autolink_blocks(body_blocks, a["slug"], valid) + closing_blocks(a["cat"], a["h1"], a["slug"])
     body = blocks_to_html(full_blocks)
     kw = f"{a['title'].lower()}, адвокат, юрист, {KW_BASE[a['cat']]}, Україна, консультація адвоката"
     repl = {
