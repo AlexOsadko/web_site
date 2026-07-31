@@ -844,6 +844,47 @@ def render_article(a, allmeta, seealso_map=None):
     return page
 
 
+# ---------- СТОРІНКА-РЕДИРЕКТ (дубль → канонічна стаття) ----------
+# Дублі-транслітерації (напр. zmina-tsilovoho-/zmina-cilovoho-) шкодять SEO:
+# Google бачить дві сторінки, що конкурують за той самий запит. Дубль позначається
+# у своєму JSON полем "redirect_to": "<slug-канонічної>", і білдер рендерить на його
+# місці сторінку-редирект: rel=canonical + noindex + миттєвий meta refresh + JS на
+# канонічну. Це еквівалент 301 для статики GitHub Pages — старі URL і зовнішні
+# посилання не ламаються, а вся вага консолідується на одній сторінці.
+REDIRECT_PAGE = """<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  <link rel="canonical" href="{target_abs}">
+  <meta name="robots" content="noindex, follow">
+  <meta http-equiv="refresh" content="0; url={target_rel}">
+  <script>location.replace("{target_rel}");</script>
+  <style>body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;max-width:32rem;margin:20vh auto;padding:0 1.25rem;text-align:center;color:#1a1a1a;line-height:1.6}a{color:#0a58ca}</style>
+</head>
+<body>
+  <p>Цю статтю об'єднано з актуальною версією.</p>
+  <p><a href="{target_rel}">Перейти до статті «{target_title}»</a></p>
+</body>
+</html>
+"""
+
+
+def render_redirect(a, target_title):
+    slug = a["redirect_to"]
+    repl = {
+        "{title}": esc(a.get("title", target_title)),
+        "{target_abs}": ART_BASE_URL + slug + ".html",
+        "{target_rel}": slug + ".html",
+        "{target_title}": esc(target_title),
+    }
+    page = REDIRECT_PAGE
+    for k, v in repl.items():
+        page = page.replace(k, v)
+    return page
+
+
 # ---------- КАТАЛОГ articles/index.html ----------
 def render_catalog(arts):
     n = len(arts)
@@ -1683,7 +1724,17 @@ def render_contacts():
 # ---------- ГОЛОВНИЙ ПРОХІД ----------
 def main():
     os.makedirs(ART, exist_ok=True)
-    arts = load_articles()
+    all_arts = load_articles()
+    # Дублі-транслітерації позначені полем "redirect_to" — вони не входять до
+    # переліків, sitemap, лічильника та внутрішніх посилань; на їхньому місці
+    # рендериться сторінка-редирект на канонічну статтю (див. render_redirect).
+    redirects = [a for a in all_arts if a.get("redirect_to")]
+    arts = [a for a in all_arts if not a.get("redirect_to")]
+    live_slugs = {a["slug"]: a for a in arts}
+    for r in redirects:
+        tgt = r.get("redirect_to")
+        if tgt not in live_slugs:
+            raise ValueError(f"{r['slug']}: redirect_to='{tgt}' не вказує на наявну канонічну статтю")
     n = len(arts)
     auto_anchors = build_auto_anchors(arts)
     seealso_map = build_all_seealso(arts)
@@ -1691,6 +1742,12 @@ def main():
     for a in arts:
         page = render_article(a, arts, seealso_map)
         with open(os.path.join(ART, a["slug"] + ".html"), "w", encoding="utf-8") as f:
+            f.write(page)
+
+    # Сторінки-редиректи для дублів (301-еквівалент на статиці).
+    for r in redirects:
+        page = render_redirect(r, live_slugs[r["redirect_to"]]["title"])
+        with open(os.path.join(ART, r["slug"] + ".html"), "w", encoding="utf-8") as f:
             f.write(page)
 
     with open(os.path.join(ART, "index.html"), "w", encoding="utf-8") as f:
@@ -1721,7 +1778,7 @@ def main():
     write_robots()
 
     missing_slug = [s for s in FEATURED if s not in {a["slug"] for a in arts}]
-    print(f"Побудовано статей: {n}; тематичних хабів: {len(hubs)}; лендінгів послуг: {len(landings)}")
+    print(f"Побудовано статей: {n}; тематичних хабів: {len(hubs)}; лендінгів послуг: {len(landings)}; редиректів-дублів: {len(redirects)}")
     print(f"Авто-анкорів згенеровано: {auto_anchors}; усього анкорів: {len(LINK_TERMS)}")
     print(f"Оновлено лічильник на головній: секція={c1}, кнопка={c2}")
     if missing_slug:
