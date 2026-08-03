@@ -426,22 +426,20 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 /* Однорідна сітка кнопок: усі однакової ширини, вирівняні по ширині форми. */
 .lead-cta-contacts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px; max-width: 470px;
 }
 .cbtn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 12px 10px; border-radius: 10px;
-  font-size: .9rem; font-weight: 600; line-height: 1;
-  color: #fff; text-decoration: none; min-width: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 13px 0; border-radius: 10px;
+  color: #fff; text-decoration: none;
   transition: transform .15s ease, filter .15s ease;
 }
-.cbtn span { overflow: hidden; text-overflow: ellipsis; }
 
 /* Контакти: перехід до форми консультації (сторінка /kontakty/ — довідкова). */
 .contacts-consult { margin-top: 14px; }
 .contacts-consult-btn { display: inline-flex; margin-top: 8px; }
-.cbtn svg { width: 18px; height: 18px; fill: currentColor; flex: 0 0 auto; }
+.cbtn svg { width: 22px; height: 22px; fill: currentColor; }
 .cbtn:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .cbtn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .cbtn-call { background: #1e50e6; }
