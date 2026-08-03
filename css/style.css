@@ -468,7 +468,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
   border-top: none;
   background: linear-gradient(180deg, var(--tint-warm), transparent 70%);
 }
-.section-head { margin-bottom: 32px; }
+.section-head { margin-bottom: 24px; }
 .section-kicker {
   display: inline-block;
   font-size: .78rem;
