@@ -832,7 +832,7 @@ a.card:hover .more span { transform: translateX(5px); }
   font-size: .85rem;
   font-weight: 500;
   color: var(--muted);
-  margin-bottom: 40px;
+  margin-bottom: 22px;
 }
 .back-link:hover { color: var(--blue); }
 .article-page .date {
@@ -1105,7 +1105,7 @@ a.card:hover .more span { transform: translateX(5px); }
 
 /* ===== Сторінка каталогу статей ===== */
 .catalog-hero {
-  padding: 72px 0 40px;
+  padding: 40px 0 24px;
   position: relative;
   overflow: hidden;
 }
