@@ -407,6 +407,24 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 .lead-form textarea { resize: vertical; min-height: 64px; }
 .lead-form button { margin-top: 4px; }
 .form-ok { display: none; color: #6ee7a0; font-size: .9rem; margin-top: 10px; }
+
+/* Inline-CTA із формою заявки в кінці статей та лендінгів. Темна картка, щоб
+   успадкована з головної стилістика .lead-form (світлий текст) читалась, а сам
+   блок візуально виділявся як заклик до дії. */
+.lead-cta { margin: 34px 0; }
+.lead-cta-inner {
+  background: #1b2a4a;
+  color: #fff;
+  border-radius: 16px;
+  padding: 28px 24px;
+  box-shadow: 0 10px 30px rgba(11, 31, 58, .16);
+}
+.lead-cta-inner h2 { color: #fff; margin: 0 0 8px; font-size: 1.32rem; }
+.lead-cta-sub { color: #c7d2e6; margin: 0 0 4px; font-size: .96rem; line-height: 1.55; }
+.lead-cta .lead-form { max-width: 470px; }
+.lead-cta-alt { margin-top: 14px; font-size: .9rem; color: #aeb9cc; }
+.lead-cta-alt a { color: #fff; font-weight: 600; white-space: nowrap; }
+@media (min-width: 640px) { .lead-cta-inner { padding: 32px 34px; } }
 .contacts-divider { color: #8b98ad; font-size: .85rem; margin: 20px 0 0; }
 
 /* ===== Секції ===== */

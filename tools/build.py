@@ -468,6 +468,46 @@ def closing_blocks(cat, h1, slug=""):
     return blocks
 
 
+# ---------- INLINE-ФОРМА ЗАЯВКИ (стаття / лендінг) ----------
+# Ловить лід прямо там, де читач дочитав і «дозрів», а не відправляє його на
+# головну. Той самий релей, що й форми на головній (див. assets/lead-form.js).
+LEAD_CTA = """  <section class="lead-cta" id="consult">
+    <div class="lead-cta-inner">
+      <h2>{heading}</h2>
+      <p class="lead-cta-sub">{sub}</p>
+      <form class="lead-form js-lead-form" data-source="{source}">
+        <label>Ваше ім'я
+          <input name="name" type="text" required placeholder="Ім'я" autocomplete="name">
+        </label>
+        <label>Телефон
+          <input name="phone" type="tel" required placeholder="+38 (0__) ___-__-__" inputmode="tel" autocomplete="tel">
+        </label>
+        <label>Коротко про ситуацію
+          <textarea name="message" placeholder="Опишіть ваше питання"></textarea>
+        </label>
+        <input type="text" name="company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn btn-primary" type="submit">Отримати консультацію</button>
+        <div class="form-ok">Дякую! Заявку надіслано — зв'яжуся найближчим часом.</div>
+      </form>
+      <p class="lead-cta-alt">Або одразу: <a href="tel:+380934664443">+38&nbsp;093&nbsp;466&nbsp;44&nbsp;43</a> · <a href="https://t.me/adv_osadko" target="_blank" rel="noopener">Telegram</a> · <a href="viber://chat?number=%2B380934664443">Viber</a></p>
+    </div>
+  </section>
+  <script defer src="../assets/lead-form.js?v=1"></script>"""
+
+
+def lead_cta_block(title, h1, kind="Стаття"):
+    # Тему беремо до двокрапки — щоб у заклику не тягнути хвіст «: підстави та…».
+    base = (h1 or title or "вашого питання").split(":")[0].strip()
+    topic = (base[0].lower() + base[1:]).rstrip(".") if base else "вашого питання"
+    heading = "Потрібна допомога у вашій ситуації?"
+    sub = (f"Тема «{esc(topic)}» майже завжди має нюанси. Опишіть коротко свій "
+           f"випадок — адвокат Олександр Осадько особисто вивчить його, чесно "
+           f"оцінить перспективи й підкаже наступні кроки.")
+    return (LEAD_CTA.replace("{heading}", heading)
+                    .replace("{sub}", sub)
+                    .replace("{source}", esc(f"{kind}: {title}")))
+
+
 def build_faq_html(faq):
     out = []
     for item in faq:
@@ -727,7 +767,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=98">
+  <link rel="stylesheet" href="../css/style.css?v=99">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -782,6 +822,8 @@ ARTICLE_PAGE = """<!DOCTYPE html>
     вашого випадку, <a href="../#contacts">зв'яжіться з адвокатом</a>.
   </p>
 
+{leadcta}
+
   <aside class="related">
     <h2>Читайте також</h2>
     <div class="related-grid">
@@ -833,6 +875,7 @@ def render_article(a, allmeta, seealso_map=None):
         "{ogimg}": BASE_URL + "assets/og-image.jpg",
         "{h1}": esc(a["h1"]), "{date}": DATE_LABEL, "{read}": str(reading_time(body)),
         "{body}": body, "{faq}": build_faq_html(faq), "{related}": build_related_html(a["slug"], a["cat"], allmeta),
+        "{leadcta}": lead_cta_block(a["title"], a["h1"]),
         "{fab}": FAB_HTML,
     }
     page = ARTICLE_PAGE
@@ -933,7 +976,7 @@ def render_catalog(arts):
   <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=98">
+  <link rel="stylesheet" href="../css/style.css?v=99">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1089,7 +1132,7 @@ def render_hub(cat, arts):
   <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=98">
+  <link rel="stylesheet" href="../css/style.css?v=99">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1307,7 +1350,7 @@ LANDING_PAGE = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=98">
+  <link rel="stylesheet" href="../css/style.css?v=99">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1384,6 +1427,8 @@ LANDING_PAGE = """<!DOCTYPE html>
       <p class="lp-more">{more}</p>
     </div>
   </section>
+
+{leadcta}
 </main>
 
 {fab}
@@ -1449,6 +1494,7 @@ def render_landing(l):
         "{final_title}": esc(l.get("final_title", "Готові допомогти")),
         "{final_text}": esc(l["final_text"]), "{more}": more,
         "{cta}": LANDING_CTA, "{fab}": FAB_HTML,
+        "{leadcta}": lead_cta_block(l["title"], l["h1"], kind="Послуга"),
     }
     page = LANDING_PAGE
     for k, v in repl.items():
@@ -1483,7 +1529,7 @@ PAGE_SHELL = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=98">
+  <link rel="stylesheet" href="../css/style.css?v=99">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
