@@ -1457,7 +1457,16 @@ a.card:hover .more span { transform: translateX(5px); }
   .mcta { transition: none; }
 }
 
-/* Секція «Консультація» на головній: 2 картки (зліва — інтро, справа — форма). */
-.contacts-grid--split { align-items: start; }
+/* Секція «Консультація»: ОДНА картка з двома колонками (інтро | форма). */
+.contacts-card--split { padding: 40px 44px; }
+.contacts-split { display: grid; grid-template-columns: 1fr 1fr; gap: 0; align-items: start; }
+.contacts-split-intro { padding-right: 44px; }
+.contacts-split-form { padding-left: 44px; border-left: 1px solid rgba(255,255,255,.09); }
 .contacts-form-title { color: #fff; margin: 0 0 4px; font-size: 1.12rem; }
-.contacts-form-card .lead-form { margin-top: 14px; }
+.contacts-split-form .lead-form { margin-top: 14px; }
+@media (max-width: 860px) {
+  .contacts-card--split { padding: 26px 22px; }
+  .contacts-split { grid-template-columns: 1fr; }
+  .contacts-split-intro { padding-right: 0; margin-bottom: 26px; }
+  .contacts-split-form { padding-left: 0; border-left: 0; }
+}
