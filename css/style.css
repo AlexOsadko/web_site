@@ -421,25 +421,27 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 }
 .lead-cta-inner h2 { color: #fff; margin: 0 0 8px; font-size: 1.32rem; }
 .lead-cta-sub { color: #c7d2e6; margin: 0 0 4px; font-size: .96rem; line-height: 1.55; }
-.lead-cta .lead-form { max-width: 470px; }
+.lead-cta .lead-form { max-width: none; }
 .lead-cta-or { margin: 18px 0 10px; font-size: .9rem; color: #aeb9cc; }
 /* Однорідна сітка кнопок: усі однакової ширини, вирівняні по ширині форми. */
+/* Кнопки контактів: сітка 2×2 з підписами, вирівняна по ширині форми. */
 .lead-cta-contacts {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px; max-width: 470px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
 }
 .cbtn {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 13px 0; border-radius: 10px;
-  color: #fff; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 10px; border-radius: 10px;
+  font-size: .92rem; font-weight: 600; line-height: 1;
+  color: #fff; text-decoration: none; min-width: 0;
   transition: transform .15s ease, filter .15s ease;
 }
 
 /* Контакти: перехід до форми консультації (сторінка /kontakty/ — довідкова). */
 .contacts-consult { margin-top: 14px; }
 .contacts-consult-btn { display: inline-flex; margin-top: 8px; }
-.cbtn svg { width: 22px; height: 22px; fill: currentColor; }
+.cbtn svg { width: 18px; height: 18px; fill: currentColor; flex: 0 0 auto; }
 .cbtn:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .cbtn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .cbtn-call { background: #1e50e6; }
