@@ -439,10 +439,13 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 }
 
 /* Контакти: перехід до форми консультації (сторінка /kontakty/ — довідкова). */
-/* /kontakty/ ліва картка: заповнити висоту, кнопка на всю ширину блока */
+/* /kontakty/ ліва картка: заповнити висоту, більший текст, кнопка на всю ширину */
 .contacts-grid > .contacts-card { display: flex; flex-direction: column; }
-.contacts-consult { margin-top: auto; }
-.contacts-consult-btn { display: flex; width: 100%; justify-content: center; margin-top: 10px; }
+.contacts-grid > .contacts-card .section-title { font-size: clamp(2rem, 4vw, 2.7rem); }
+.contacts-grid > .contacts-card p { font-size: 1.16rem; line-height: 1.75; margin-bottom: 26px; }
+.contacts-grid > .contacts-card .contacts-cta .lp-btn { padding: 15px 4px; font-size: 1rem; }
+.contacts-consult { margin-top: auto; font-size: 1.12rem; line-height: 1.7; }
+.contacts-consult-btn { display: flex; width: 100%; justify-content: center; margin-top: 12px; padding-top: 17px; padding-bottom: 17px; font-size: 1.06rem; }
 .cbtn svg { width: 18px; height: 18px; fill: currentColor; flex: 0 0 auto; }
 .cbtn:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .cbtn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
