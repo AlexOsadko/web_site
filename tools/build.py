@@ -773,7 +773,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=108">
+  <link rel="stylesheet" href="../css/style.css?v=109">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -982,7 +982,7 @@ def render_catalog(arts):
   <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=108">
+  <link rel="stylesheet" href="../css/style.css?v=109">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1138,7 +1138,7 @@ def render_hub(cat, arts):
   <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=108">
+  <link rel="stylesheet" href="../css/style.css?v=109">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1356,7 +1356,7 @@ LANDING_PAGE = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=108">
+  <link rel="stylesheet" href="../css/style.css?v=109">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1535,7 +1535,7 @@ PAGE_SHELL = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=108">
+  <link rel="stylesheet" href="../css/style.css?v=109">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>

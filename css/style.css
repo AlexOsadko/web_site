@@ -439,8 +439,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 }
 
 /* Контакти: перехід до форми консультації (сторінка /kontakty/ — довідкова). */
-.contacts-consult { margin-top: 14px; }
-.contacts-consult-btn { display: inline-flex; margin-top: 8px; }
+/* /kontakty/ ліва картка: заповнити висоту, кнопка на всю ширину блока */
+.contacts-grid > .contacts-card { display: flex; flex-direction: column; }
+.contacts-consult { margin-top: auto; }
+.contacts-consult-btn { display: flex; width: 100%; justify-content: center; margin-top: 10px; }
 .cbtn svg { width: 18px; height: 18px; fill: currentColor; flex: 0 0 auto; }
 .cbtn:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .cbtn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
