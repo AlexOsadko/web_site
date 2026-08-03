@@ -423,14 +423,17 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 .lead-cta-sub { color: #c7d2e6; margin: 0 0 4px; font-size: .96rem; line-height: 1.55; }
 .lead-cta .lead-form { max-width: 470px; }
 .lead-cta-or { margin: 18px 0 10px; font-size: .9rem; color: #aeb9cc; }
-.lead-cta-contacts { display: flex; flex-wrap: wrap; gap: 10px; }
+.lead-cta-contacts { display: flex; flex-wrap: wrap; gap: 10px; max-width: 470px; }
 .cbtn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 9px 14px; border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 14px; border-radius: 10px;
   font-size: .9rem; font-weight: 600; line-height: 1;
   color: #fff; text-decoration: none;
   transition: transform .15s ease, filter .15s ease;
 }
+/* Звінок — компактна кнопка-іконка; месенджери рівномірно заповнюють ширину форми. */
+.cbtn-call { flex: 0 0 auto; }
+.cbtn-tg, .cbtn-wa, .cbtn-vb { flex: 1 1 0; min-width: 0; }
 .cbtn svg { width: 18px; height: 18px; fill: currentColor; flex: 0 0 auto; }
 .cbtn:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .cbtn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
