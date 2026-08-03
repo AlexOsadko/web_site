@@ -459,7 +459,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 .contacts-divider { color: #8b98ad; font-size: .85rem; margin: 20px 0 0; }
 
 /* ===== Секції ===== */
-.section { padding: 56px 0; border-top: 1px solid var(--line); }
+.section { padding: 44px 0; border-top: 1px solid var(--line); }
 .section.tint {
   border-top: none;
   background: linear-gradient(180deg, var(--tint), transparent 70%);
