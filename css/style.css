@@ -1491,3 +1491,9 @@ a.card:hover .more span { transform: translateX(5px); }
 .how-steps ol { list-style: none; counter-reset: step; margin: 0; padding: 0; display: grid; gap: 14px; }
 .how-steps li { position: relative; counter-increment: step; padding-left: 44px; min-height: 30px; display: flex; align-items: center; color: #cdd6e6; font-size: .98rem; line-height: 1.4; }
 .how-steps li::before { content: counter(step); position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border-radius: 50%; background: rgba(124,140,255,.18); color: #a9b6ff; font-weight: 700; font-size: .95rem; display: flex; align-items: center; justify-content: center; }
+
+/* Кнопки лівої (месенджери) і правої (відправка) колонок — на одній висоті. */
+.contacts-split-intro .contacts-cta { margin-top: auto; }
+.contacts-split-form { display: flex; flex-direction: column; }
+.contacts-split-form .lead-form { flex: 1; display: flex; flex-direction: column; }
+.contacts-split-form .lead-form .cf-turnstile { margin-top: auto; }
