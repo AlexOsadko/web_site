@@ -1456,3 +1456,8 @@ a.card:hover .more span { transform: translateX(5px); }
 @media (prefers-reduced-motion: reduce) {
   .mcta { transition: none; }
 }
+
+/* Секція «Консультація» на головній: 2 картки (зліва — інтро, справа — форма). */
+.contacts-grid--split { align-items: start; }
+.contacts-form-title { color: #fff; margin: 0 0 4px; font-size: 1.12rem; }
+.contacts-form-card .lead-form { margin-top: 14px; }
