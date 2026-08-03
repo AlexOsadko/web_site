@@ -1468,7 +1468,6 @@ a.card:hover .more span { transform: translateX(5px); }
 .contacts-card--split { padding: 40px 44px; }
 .contacts-split { display: grid; grid-template-columns: 1fr 1fr; gap: 0; align-items: stretch; }
 .contacts-split-intro { display: flex; flex-direction: column; }
-.contacts-split-intro .contacts-cta { margin-top: auto; }
 .contacts-split-intro { padding-right: 44px; }
 .contacts-split-form { padding-left: 44px; border-left: 1px solid rgba(255,255,255,.09); }
 .contacts-form-title { color: #fff; margin: 0 0 4px; font-size: 1.12rem; }
@@ -1481,8 +1480,8 @@ a.card:hover .more span { transform: translateX(5px); }
 }
 
 /* Список переваг у лівій колонці секції «Консультація». */
-.contacts-split-intro p { text-align: left; hyphens: manual; }
-.contacts-benefits { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 12px; }
+.contacts-split-intro p { text-align: left; hyphens: manual; margin-bottom: 8px; }
+.contacts-benefits { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 12px; }
 .contacts-benefits li { position: relative; padding-left: 30px; color: #cdd6e6; font-size: .98rem; line-height: 1.45; }
 .contacts-benefits li::before { content: ""; position: absolute; left: 0; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: rgba(124,140,255,.18); }
 .contacts-benefits li::after { content: ""; position: absolute; left: 6px; top: 7px; width: 5px; height: 9px; border: solid #7c8cff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
