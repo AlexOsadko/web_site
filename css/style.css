@@ -1464,7 +1464,9 @@ a.card:hover .more span { transform: translateX(5px); }
 
 /* Секція «Консультація»: ОДНА картка з двома колонками (інтро | форма). */
 .contacts-card--split { padding: 40px 44px; }
-.contacts-split { display: grid; grid-template-columns: 1fr 1fr; gap: 0; align-items: start; }
+.contacts-split { display: grid; grid-template-columns: 1fr 1fr; gap: 0; align-items: stretch; }
+.contacts-split-intro { display: flex; flex-direction: column; }
+.contacts-split-intro .contacts-cta { margin-top: auto; }
 .contacts-split-intro { padding-right: 44px; }
 .contacts-split-form { padding-left: 44px; border-left: 1px solid rgba(255,255,255,.09); }
 .contacts-form-title { color: #fff; margin: 0 0 4px; font-size: 1.12rem; }
