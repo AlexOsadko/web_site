@@ -556,7 +556,7 @@ p.body-reveal,
 .card .more { font-size: .9rem; }
 
 /* ===== Статті ===== */
-.articles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.articles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .article-card {
   background: var(--card);
   border: 1px solid var(--line);
@@ -826,7 +826,7 @@ a.card:hover .more span { transform: translateX(5px); }
 }
 
 /* ===== Сторінка статті ===== */
-.article-page { max-width: 720px; margin: 0 auto; padding: 64px 28px 96px; }
+.article-page { max-width: 720px; margin: 0 auto; padding: 64px 28px 72px; }
 .back-link {
   display: inline-block;
   font-size: .85rem;
@@ -1325,9 +1325,9 @@ a.card:hover .more span { transform: translateX(5px); }
 .faq details p { margin: 0 0 18px; color: var(--text); }
 
 /* Читайте також */
-.related { margin-top: 56px; padding-top: 8px; }
+.related { margin-top: 40px; padding-top: 8px; }
 .related h2 { font-size: 1.4rem; margin-bottom: 20px; }
-.related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .related-card {
   background: var(--card); border: 1px solid var(--line); border-radius: 14px;
   padding: 20px; color: var(--ink); transition: transform .2s, box-shadow .2s, border-color .2s;
