@@ -1495,8 +1495,12 @@ a.card:hover .more span { transform: translateX(5px); }
 /* Кнопки лівої (месенджери) і правої (відправка) колонок — на одній висоті.
    Ліворуч месенджери притиснуто донизу; праворуч поле «ситуація» розтягується,
    заповнюючи форму, тож Turnstile+кнопка стають унизу без розриву. */
-.contacts-split-intro .contacts-cta { margin-top: auto; }
+.contacts-split-intro .contacts-cta { margin-top: auto; margin-bottom: 0; }
 .contacts-split-form { display: flex; flex-direction: column; }
 .contacts-split-form .lead-form { flex: 1; display: flex; flex-direction: column; }
 .contacts-split-form .lead-form > label:last-of-type { flex: 1 1 auto; display: flex; flex-direction: column; gap: 5px; }
 .contacts-split-form .lead-form > label:last-of-type textarea { flex: 1 1 auto; min-height: 90px; resize: vertical; }
+
+/* Сторінка /kontakty/: секція одразу під шапкою — менші відступи, без верхньої лінії. */
+.section--contactpage { padding: 28px 0 40px; border-top: 0; }
+@media (max-width: 860px) { .section--contactpage { padding: 20px 0 32px; } }
