@@ -16,7 +16,7 @@ Turnkey-план «під ключ»: структура акаунта, клю�
 ### Кампанія: Сімейне право
 
 #### Група: Розлучення
-**Посадкова:** `https://osadko.online/articles/rozirvannya-shlyubu.html`  
+**Посадкова:** `https://osadko.online/poslugy/rozluchennia.html`  
 **UTM:** `?utm_source=google&utm_medium=cpc&utm_campaign=сімейне_право&utm_content=розлучення`
 
 **Ключові слова** (тип відповідності):
@@ -110,7 +110,7 @@ Turnkey-план «під ключ»: структура акаунта, клю�
 - Повне відшкодування збитків після ДТП. Супровід від автоюриста. Телефонуйте.  _(76)_
 
 #### Група: Позбавлення прав (ст. 130)
-**Посадкова:** `https://osadko.online/articles/pozbavlennya-prav.html`  
+**Посадкова:** `https://osadko.online/poslugy/st-130-kupap.html`  
 **UTM:** `?utm_source=google&utm_medium=cpc&utm_campaign=автоюрист__дтп&utm_content=позбавлення_прав_ст_130`
 
 **Ключові слова** (тип відповідності):
@@ -135,7 +135,7 @@ Turnkey-план «під ключ»: структура акаунта, клю�
 ### Кампанія: Кримінальний захист
 
 #### Група: Допит / обшук
-**Посадкова:** `https://osadko.online/articles/pershyi-dopyt.html`  
+**Посадкова:** `https://osadko.online/poslugy/kryminalnyi-zahyst.html`  
 **UTM:** `?utm_source=google&utm_medium=cpc&utm_campaign=кримінальний_захист&utm_content=допит__обшук`
 
 **Ключові слова** (тип відповідності):
@@ -158,7 +158,7 @@ Turnkey-план «під ключ»: структура акаунта, клю�
 - Кримінальний адвокат: супровід на допиті й обшуку. Телефонуйте будь-коли.  _(73)_
 
 #### Група: Запобіжний захід
-**Посадкова:** `https://osadko.online/articles/zapobizhnyi-zahid.html`  
+**Посадкова:** `https://osadko.online/poslugy/kryminalnyi-zahyst.html`  
 **UTM:** `?utm_source=google&utm_medium=cpc&utm_campaign=кримінальний_захист&utm_content=запобіжний_захід`
 
 **Ключові слова** (тип відповідності):
@@ -255,7 +255,7 @@ Turnkey-план «під ключ»: структура акаунта, клю�
 > ⚠️ Чутлива тематика: суворо дотримуйтесь рекламних політик Google та законодавства; уникайте обіцянок «уникнути мобілізації». Акцент — на законному оскарженні та відстрочках.
 
 #### Група: Оскарження рішень ТЦК
-**Посадкова:** `https://osadko.online/articles/oskarzhennia-tck.html`  
+**Посадкова:** `https://osadko.online/poslugy/tck.html`  
 **UTM:** `?utm_source=google&utm_medium=cpc&utm_campaign=мобілізація__тцк&utm_content=оскарження_рішень_тцк`
 
 **Ключові слова** (тип відповідності):
@@ -277,7 +277,7 @@ Turnkey-план «під ключ»: структура акаунта, клю�
 - Вважаєте дії ТЦК неправомірними? Адвокат оцінить ситуацію й допоможе. Телефонуйте.  _(82)_
 
 #### Група: Відстрочка від мобілізації
-**Посадкова:** `https://osadko.online/articles/vidstrochka-mobilizatsiya.html`  
+**Посадкова:** `https://osadko.online/poslugy/tck.html`  
 **UTM:** `?utm_source=google&utm_medium=cpc&utm_campaign=мобілізація__тцк&utm_content=відстрочка_від_мобілізації`
 
 **Ключові слова** (тип відповідності):
@@ -317,10 +317,10 @@ Turnkey-план «під ключ»: структура акаунта, клю�
 
 ## Розширення оголошень
 **Додаткові посилання (sitelinks):**
-- Послуги → `https://osadko.online/#services`  _(7 симв.)_
-- Статті → `https://osadko.online/articles/index.html`  _(6 симв.)_
-- Зразки документів → `https://osadko.online/zrazky/index.html`  _(17 симв.)_
-- Контакти → `https://osadko.online/#contacts`  _(8 симв.)_
+- Послуги → `https://osadko.online/poslugy/`  _(7 симв.)_
+- Статті → `https://osadko.online/articles/`  _(6 симв.)_
+- Зразки документів → `https://osadko.online/zrazky/`  _(17 симв.)_
+- Контакти → `https://osadko.online/kontakty/`  _(8 симв.)_
 
 **Уточнення (callouts):**
 - Досвідчений адвокат  _(19 симв.)_
@@ -350,9 +350,25 @@ utm_source=google&utm_medium=cpc&utm_campaign={кампанія}&utm_content={г
 - Через 2–4 тижні перегляньте звіт пошукових запитів: додайте нові мінус-слова, підсильте групи, що дають звернення, і приберіть неефективні ключові.
 - Конкретні суми ставок/бюджету залежать від регіону й аукціону — визначайте їх за фактичними даними кабінета, а не наперед.
 
+## Реальні адреси розділів (перевірено — усі сторінки існують)
+> ⚠️ Google Ads відхиляє оголошення з посиланням на неіснуючу сторінку. Усі URL нижче звірено з реальною структурою сайту — використовуйте лише їх.
+
+**Дедиковані посадкові лендінги послуг** (`/poslugy/`) — пріоритетні для реклами:
+- Розлучення / сімейне → `https://osadko.online/poslugy/rozluchennia.html`
+- Кримінальний захист → `https://osadko.online/poslugy/kryminalnyi-zahyst.html`
+- Позбавлення прав (ст. 130) → `https://osadko.online/poslugy/st-130-kupap.html`
+- Мобілізація / ТЦК → `https://osadko.online/poslugy/tck.html`
+- Цивільне право → `https://osadko.online/poslugy/tsyvilne-pravo.html`
+- Пенсійне / соціальне → `https://osadko.online/poslugy/pensiine-sotsialne.html`
+
+**Розділи сайту (для sitelinks):** `/poslugy/` · `/articles/` · `/zrazky/` · `/kontakty/` · `/privacy/`
+**Якорі головної:** `/#services` · `/#about` · `/#contacts`
+
+**Статті-посадкові** (використовуються там, де немає дедикованого LP; усі існують): `/articles/alimenty-na-dytynu.html`, `/articles/podil-maina-podruzhzhya.html`, `/articles/strahove-vidshkoduvannya.html`, `/articles/nezakonne-zvilnennya.html`, `/articles/nevyplata-zarplaty.html`, `/articles/spadschyna-pryynyaty.html`.
+
 ## Що можу доробити далі
-- Окремі **посадкові лендінги під кожну послугу** (зараз реклама веде на статті/хаби — конверсійні LP дадуть кращий результат).
-- Розширити списки ключових і мінус-слів, додати ще групи оголошень.
+- Дедиковані LP вже підключено для сімейних, кримінальних, ст. 130 і ТЦК-груп; за потреби — додати окремі LP під ДТП-відшкодування, трудові спори та спадщину (зараз ведуть на відповідні статті).
+- Розширити списки ключових і мінус-слів, додати ще групи оголошень (є готові LP «Цивільне право» і «Пенсійне/соціальне» без кампаній).
 - Підготувати варіанти оголошень під A/B-тест.
 
 ---
