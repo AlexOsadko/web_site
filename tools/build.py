@@ -622,7 +622,7 @@ def build_inline_seealso(cur_slug, cat, allmeta, n=3):
             "items": [{"slug": a["slug"], "title": a["title"]} for a in pick]}
 
 
-def build_all_seealso(allmeta, n=4, lam=0.4, floor=3):
+def build_all_seealso(allmeta, n=5, lam=0.4, floor=4):
     """Глобальний, збалансований підбір інлайн-блоків «Читайте також» для всіх
     статей одразу. Замість жадібного вибору топ-N за релевантністю (через що
     «хабові» статті збирали майже всі посилання, а вузькі лишалися сиротами)
