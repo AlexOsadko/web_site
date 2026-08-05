@@ -327,6 +327,51 @@ def reading_time(body_html):
 
 
 # ---------- ЗАВАНТАЖЕННЯ ДАНИХ ----------
+RATES_PATH = os.path.join(ROOT, "content", "rates.json")
+_RATES = None
+_RATE_TOKEN = re.compile(r"\{\{r:([a-z0-9_]+)\}\}")
+
+
+def _load_rates():
+    """Єдине джерело мінливих сум/ставок — content/rates.json."""
+    global _RATES
+    if _RATES is None:
+        _RATES = {}
+        if os.path.exists(RATES_PATH):
+            with open(RATES_PATH, encoding="utf-8") as f:
+                raw = json.load(f)
+            _RATES = {k: v["value"] for k, v in raw.items()
+                      if not k.startswith("_") and isinstance(v, dict) and "value" in v}
+    return _RATES
+
+
+def _sub_rates(text):
+    """Підставляє токени {{r:КЛЮЧ}} значеннями з rates.json. Невідомий ключ — помилка збірки."""
+    rates = _load_rates()
+
+    def repl(m):
+        k = m.group(1)
+        if k not in rates:
+            raise ValueError(f"Невідомий токен ставки {{{{r:{k}}}}} — додайте ключ у content/rates.json")
+        return rates[k]
+
+    return _RATE_TOKEN.sub(repl, text)
+
+
+def _apply_rates(a):
+    for b in a.get("blocks", []):
+        if "text" in b:
+            b["text"] = _sub_rates(b["text"])
+        if "items" in b:
+            b["items"] = [_sub_rates(i) for i in b["items"]]
+    for f in a.get("faq", []):
+        if "q" in f:
+            f["q"] = _sub_rates(f["q"])
+        if "a" in f:
+            f["a"] = _sub_rates(f["a"])
+    return a
+
+
 def load_articles():
     arts = []
     for path in glob.glob(os.path.join(CONTENT, "*.json")):
@@ -335,6 +380,7 @@ def load_articles():
         a.setdefault("order", 10_000)
         if a["cat"] not in CATS:
             raise ValueError(f"{path}: невідома категорія '{a['cat']}'")
+        _apply_rates(a)
         arts.append(a)
     # Стабільний, детермінований порядок: спочатку за полем order, потім за slug.
     arts.sort(key=lambda a: (a["order"], a["slug"]))
