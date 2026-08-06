@@ -1244,6 +1244,12 @@ a.card:hover .more span { transform: translateX(5px); }
 .cat-filter button:hover { color: var(--ink); border-color: var(--blue2); }
 .cat-filter button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
 
+.sort-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-top: 10px; }
+.sort-label { color: var(--faint); font-size: .85rem; white-space: nowrap; }
+.sort-filter { margin: 0; }
+.sort-filter button { font-size: .82rem; padding: 7px 15px; }
+.flat-grid { margin-top: 8px; }
+
 .catalog { padding: 32px 0 60px; }
 .cat-group { margin-bottom: 56px; }
 .cat-group-head {

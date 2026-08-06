@@ -819,7 +819,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=130">
+  <link rel="stylesheet" href="../css/style.css?v=131">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -987,7 +987,8 @@ def render_catalog(arts):
             continue
         cards = []
         for a in items:
-            cards.append(f'''      <a class="mini-card reveal" href="{a['slug']}.html">
+            _date = a.get("date_published") or a.get("date_modified") or ""
+            cards.append(f'''      <a class="mini-card reveal" href="{a['slug']}.html" data-cat="{cat}" data-date="{_date}" data-pop="{a.get('_pop', 0)}" data-title="{esc(a['title'].lower())}">
         <span class="cat cat-{cat}">{esc(SHORT_CAT[cat])}</span>
         <h3>{esc(a['title'])}</h3>
         <p>{esc(a['desc'])}</p>
@@ -1028,7 +1029,7 @@ def render_catalog(arts):
   <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=130">
+  <link rel="stylesheet" href="../css/style.css?v=131">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1069,12 +1070,23 @@ def render_catalog(arts):
       <div class="cat-filter" id="filter">
 {chr(10).join(filter_btns)}
       </div>
+      <div class="sort-bar">
+        <span class="sort-label">Сортувати:</span>
+        <div class="cat-filter sort-filter" id="sort" role="group" aria-label="Сортування статей">
+          <button class="active" data-s="topic">За темами</button>
+          <button data-s="new">Спершу нові</button>
+          <button data-s="old">Спершу давні</button>
+          <button data-s="pop">Популярні</button>
+          <button data-s="az">А–Я</button>
+        </div>
+      </div>
     </div>
   </section>
 
   <section class="catalog">
     <div class="container" id="groups">
 {chr(10).join(groups_html)}
+      <div class="cat-grid flat-grid" id="flatGrid" hidden></div>
       <p class="no-results" id="noResults" hidden>За вашим запитом нічого не знайдено. Спробуйте інші слова або оберіть тему вище.</p>
     </div>
   </section>
@@ -1094,26 +1106,50 @@ def render_catalog(arts):
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
-  // Фільтр за категоріями + живий пошук
+  // Фільтр за категоріями + живий пошук + сортування
   const q = document.getElementById('q');
   const btns = document.querySelectorAll('#filter button');
+  const sortBtns = document.querySelectorAll('#sort button');
   const groups = document.querySelectorAll('#groups .cat-group');
+  const flat = document.getElementById('flatGrid');
   const noRes = document.getElementById('noResults');
+  const cards = Array.prototype.slice.call(document.querySelectorAll('.mini-card'));
+  cards.forEach(c => {{ c._home = c.parentElement; }});
   let activeCat = 'all';
+  let sortMode = 'topic';
+  const uk = (a, b) => a.localeCompare(b, 'uk');
+  const cmp = {{
+    new: (a, b) => (b.dataset.date).localeCompare(a.dataset.date) || uk(a.dataset.title, b.dataset.title),
+    old: (a, b) => (a.dataset.date).localeCompare(b.dataset.date) || uk(a.dataset.title, b.dataset.title),
+    pop: (a, b) => (+b.dataset.pop) - (+a.dataset.pop) || uk(a.dataset.title, b.dataset.title),
+    az:  (a, b) => uk(a.dataset.title, b.dataset.title),
+  }};
+  function layout() {{
+    if (sortMode === 'topic') {{
+      cards.forEach(c => {{ if (c.parentElement !== c._home) c._home.appendChild(c); }});
+      flat.hidden = true;
+    }} else {{
+      cards.slice().sort(cmp[sortMode]).forEach(c => flat.appendChild(c));
+      flat.hidden = false;
+      groups.forEach(g => {{ g.style.display = 'none'; }});
+    }}
+    apply();
+  }}
   function apply() {{
     const term = (q.value || '').trim().toLowerCase();
     let total = 0;
-    groups.forEach(g => {{
-      const catOk = (activeCat === 'all' || g.dataset.cat === activeCat);
-      let shown = 0;
-      g.querySelectorAll('.mini-card').forEach(card => {{
-        const vis = catOk && (term === '' || card.textContent.toLowerCase().includes(term));
-        card.style.display = vis ? '' : 'none';
-        if (vis) {{ card.classList.add('in'); shown++; }}
-      }});
-      g.style.display = shown ? '' : 'none';
-      total += shown;
+    cards.forEach(card => {{
+      const catOk = (activeCat === 'all' || card.dataset.cat === activeCat);
+      const vis = catOk && (term === '' || card.textContent.toLowerCase().includes(term));
+      card.style.display = vis ? '' : 'none';
+      if (vis) {{ card.classList.add('in'); total++; }}
     }});
+    if (sortMode === 'topic') {{
+      groups.forEach(g => {{
+        const shown = Array.prototype.some.call(g.querySelectorAll('.mini-card'), c => c.style.display !== 'none');
+        g.style.display = shown ? '' : 'none';
+      }});
+    }}
     noRes.hidden = total !== 0;
   }}
   btns.forEach(b => b.addEventListener('click', () => {{
@@ -1121,6 +1157,12 @@ def render_catalog(arts):
     b.classList.add('active');
     activeCat = b.dataset.f;
     apply();
+  }}));
+  sortBtns.forEach(b => b.addEventListener('click', () => {{
+    sortBtns.forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    sortMode = b.dataset.s;
+    layout();
   }}));
   q.addEventListener('input', apply);
   // Поява при скролі
@@ -1184,7 +1226,7 @@ def render_hub(cat, arts):
   <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=130">
+  <link rel="stylesheet" href="../css/style.css?v=131">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1402,7 +1444,7 @@ LANDING_PAGE = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=130">
+  <link rel="stylesheet" href="../css/style.css?v=131">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1581,7 +1623,7 @@ PAGE_SHELL = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=130">
+  <link rel="stylesheet" href="../css/style.css?v=131">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=20"></script>
@@ -1818,6 +1860,15 @@ def main():
     n = len(arts)
     auto_anchors = build_auto_anchors(arts)
     seealso_map = build_all_seealso(arts)
+
+    # Популярність як build-time сигнал: кількість вхідних внутрішніх посилань
+    # (наскільки центральною є тема). Використовується для сортування в каталозі.
+    _inbound = {}
+    for _blk in seealso_map.values():
+        for _it in _blk["items"]:
+            _inbound[_it["slug"]] = _inbound.get(_it["slug"], 0) + 1
+    for a in arts:
+        a["_pop"] = _inbound.get(a["slug"], 0)
 
     for a in arts:
         page = render_article(a, arts, seealso_map)
