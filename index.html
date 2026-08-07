@@ -24,9 +24,9 @@
   <link rel="icon" type="image/png" href="assets/logo-mark.png">
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="preload" as="image" href="assets/photo.jpg" fetchpriority="high">
-  <link rel="stylesheet" href="css/style.css?v=130">
+  <link rel="stylesheet" href="css/style.css?v=132">
   <script defer src="assets/header-scroll.js?v=15"></script>
-  <script defer src="assets/callback-popup.js?v=20"></script>
+  <script defer src="assets/callback-popup.js?v=21"></script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -626,7 +626,27 @@
     upd();
   })();
 </script>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script>
+  /* Ліниве завантаження Cloudflare Turnstile (~68 КБ): не вантажимо на старті —
+     лише коли користувач починає взаємодіяти або наближається до форми контактів.
+     Так звільняємо смугу для LCP-зображення, не ламаючи капчу у формах. */
+  (function () {
+    var loaded = false;
+    function loadTurnstile() {
+      if (loaded) return; loaded = true;
+      var s = document.createElement('script');
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      s.async = true; s.defer = true;
+      document.head.appendChild(s);
+    }
+    window.loadTurnstile = loadTurnstile;
+    // Вантажимо капчу на першій же взаємодії користувача — це завжди після
+    // першого рендера (LCP), але задовго до того, як він дійде до форми.
+    ['pointerdown', 'touchstart', 'keydown', 'scroll', 'focusin'].forEach(function (ev) {
+      window.addEventListener(ev, loadTurnstile, { once: true, passive: true });
+    });
+  })();
+</script>
 
 </body>
 </html>

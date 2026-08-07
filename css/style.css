@@ -1359,7 +1359,9 @@ a.card:hover .more span { transform: translateX(5px); }
 .hero-text > .hero-lead    { animation-delay: .27s; }
 .hero-text > .hero-actions { animation-delay: .39s; }
 .hero-visual               { animation-delay: .22s; }
-@keyframes heroIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+/* LCP: hero-елементи не згасають з opacity:0 (Lighthouse інакше фіксує LCP пізно) —
+   лишається лише легкий слайд угору, а фото й H1 малюються одразу. */
+@keyframes heroIn { from { transform: translateY(18px); } to { transform: none; } }
 
 /* Картки послуг: оживання кольорової іконки при наведенні */
 .card:hover .ic { transform: scale(1.1) rotate(-5deg); }

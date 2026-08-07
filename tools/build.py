@@ -819,10 +819,10 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=131">
+  <link rel="stylesheet" href="../css/style.css?v=132">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
-  <script defer src="../assets/callback-popup.js?v=20"></script>
+  <script defer src="../assets/callback-popup.js?v=21"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
@@ -1029,10 +1029,10 @@ def render_catalog(arts):
   <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=131">
+  <link rel="stylesheet" href="../css/style.css?v=132">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
-  <script defer src="../assets/callback-popup.js?v=20"></script>
+  <script defer src="../assets/callback-popup.js?v=21"></script>
   <script type="application/ld+json">{{"@context":"https://schema.org","@type":"CollectionPage","name":"Статті адвоката Олександра Осадька","description":"Юридичні статті простою мовою: борги, сімейне, трудове, кримінальне право, ДТП, нерухомість, бізнес.","url":"{ART_BASE_URL}","inLanguage":"uk","isPartOf":{{"@type":"WebSite","name":"Адвокат Олександр Осадько","url":"{BASE_URL}"}}}}</script>
 </head>
 <body>
@@ -1226,10 +1226,10 @@ def render_hub(cat, arts):
   <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=131">
+  <link rel="stylesheet" href="../css/style.css?v=132">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
-  <script defer src="../assets/callback-popup.js?v=20"></script>
+  <script defer src="../assets/callback-popup.js?v=21"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
@@ -1444,10 +1444,10 @@ LANDING_PAGE = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=131">
+  <link rel="stylesheet" href="../css/style.css?v=132">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
-  <script defer src="../assets/callback-popup.js?v=20"></script>
+  <script defer src="../assets/callback-popup.js?v=21"></script>
   <script type="application/ld+json">{jsonld}</script>
 </head>
 <body>
@@ -1623,10 +1623,10 @@ PAGE_SHELL = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=131">
+  <link rel="stylesheet" href="../css/style.css?v=132">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
-  <script defer src="../assets/callback-popup.js?v=20"></script>
+  <script defer src="../assets/callback-popup.js?v=21"></script>
   {jsonld}
 </head>
 <body>
@@ -1715,7 +1715,27 @@ CONTACT_SCRIPTS = """<script>
     e.preventDefault(); submitLead(leadForm, 'formOk', 'Заявка на консультацію (Контакти)');
   });
 </script>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>"""
+<script>
+  /* Ліниве завантаження Cloudflare Turnstile (~68 КБ): не вантажимо на старті —
+     лише коли користувач починає взаємодіяти або наближається до форми контактів.
+     Так звільняємо смугу для LCP-зображення, не ламаючи капчу у формах. */
+  (function () {
+    var loaded = false;
+    function loadTurnstile() {
+      if (loaded) return; loaded = true;
+      var s = document.createElement('script');
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      s.async = true; s.defer = true;
+      document.head.appendChild(s);
+    }
+    window.loadTurnstile = loadTurnstile;
+    // Вантажимо капчу на першій же взаємодії користувача — це завжди після
+    // першого рендера (LCP), але задовго до того, як він дійде до форми.
+    ['pointerdown', 'touchstart', 'keydown', 'scroll', 'focusin'].forEach(function (ev) {
+      window.addEventListener(ev, loadTurnstile, { once: true, passive: true });
+    });
+  })();
+</script>"""
 
 SERVICE_ICON = {
     "rozluchennia": "💍", "st-130-kupap": "🚗", "kryminalnyi-zahyst": "🛡️",

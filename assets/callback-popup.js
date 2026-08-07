@@ -11,8 +11,10 @@
   var NOTIFY_ENDPOINT = "https://osadko-relay.espir3.workers.dev";  // Cloudflare Worker (relay → Telegram)
   var TS_SITEKEY = "0x4AAAAAAD1Dx9AvRT4v-VoQ";  // Turnstile Site Key (публічний)
 
-  // Підвантажуємо скрипт Turnstile, якщо його ще немає на сторінці.
-  if (!document.querySelector('script[src*="turnstile/v0/api.js"]')) {
+  // Turnstile вантажимо ліниво — лише коли відкривається вікно (не на старті),
+  // щоб не забирати смугу в LCP-зображення при завантаженні сторінки.
+  function loadTS() {
+    if (window.turnstile || document.querySelector('script[src*="turnstile/v0/api.js"]')) return;
     var _ts = document.createElement("script");
     _ts.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
     _ts.async = true; _ts.defer = true;
@@ -67,6 +69,7 @@
   function renderTS() {
     var holder = modal.querySelector(".cb-ts");
     if (!holder) return;
+    loadTS();
     ensureTS(function () {
       if (tsWidgetId !== null) { window.turnstile.reset(tsWidgetId); tsToken = ""; return; }
       tsWidgetId = window.turnstile.render(holder, {
