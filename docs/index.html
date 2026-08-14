@@ -274,12 +274,15 @@ function hryvniaWords(amount){
 function bytesToB64u(b){var s="";for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
 function textToB64u(t){return bytesToB64u(new TextEncoder().encode(t));}
 function makePayLink(amount, recipientKey){
-  var text=[String(amount), recipientKey===DEFAULT_LAWYER?"":recipientKey, "", ""].join("\n");
+  var arr=[String(amount), recipientKey===DEFAULT_LAWYER?"":recipientKey, "", ""];
+  while(arr.length>1 && arr[arr.length-1]==="") arr.pop();
+  var text=arr.join("\n");
+  var plain=location.origin+"/p/#c"+textToB64u(text);
   if(window.CompressionStream){
     var s=new Blob([new TextEncoder().encode(text)]).stream().pipeThrough(new CompressionStream("deflate-raw"));
-    return new Response(s).arrayBuffer().then(function(buf){return location.origin+"/p/#z"+bytesToB64u(new Uint8Array(buf));});
+    return new Response(s).arrayBuffer().then(function(buf){var comp=location.origin+"/p/#z"+bytesToB64u(new Uint8Array(buf));return comp.length<=plain.length?comp:plain;});
   }
-  return Promise.resolve(location.origin+"/p/#c"+textToB64u(text));
+  return Promise.resolve(plain);
 }
 
 /* ── esc ── */

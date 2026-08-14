@@ -186,19 +186,23 @@ function fmtAmount(a){
 }
 
 function makeLink(f){
-  var text=[
+  var arr=[
     f.amount,
     f.recipient===DEFAULTS.recipient ? "" : f.recipient,
     f.service.trim()===DEFAULTS.service ? "" : f.service.trim(),
     f.purpose.trim()===DEFAULTS.purpose ? "" : f.purpose.trim()
-  ].join("\n");
+  ];
+  while(arr.length>1 && arr[arr.length-1]==="") arr.pop();   /* прибрати зайві порожні поля */
+  var text=arr.join("\n");
+  var plain=location.origin+"/p/#c"+textToB64u(text);
   if(window.CompressionStream){
     var s=new Blob([new TextEncoder().encode(text)]).stream().pipeThrough(new CompressionStream("deflate-raw"));
     return new Response(s).arrayBuffer().then(function(buf){
-      return location.origin+"/p/#z"+bytesToB64u(new Uint8Array(buf));
+      var comp=location.origin+"/p/#z"+bytesToB64u(new Uint8Array(buf));
+      return comp.length<=plain.length ? comp : plain;   /* найкоротше з двох */
     });
   }
-  return Promise.resolve(location.origin+"/p/#c"+textToB64u(text));
+  return Promise.resolve(plain);
 }
 
 function buildMessage(service, amount, link){
