@@ -428,7 +428,7 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
         <span class="s-tag">редагується окремо</span>
       </div>
       <div class="s-body">
-        <p class="s-desc">Перелік правничої допомоги порожній — пункти вносяться під час заповнення: із каталогу (Додаток № 1) або вручну. Номери, перелік і вартість. Ці дані підставляються в Додаткову угоду та Акт. Додавайте або вилучайте пункти — документ підлаштується автоматично.</p>
+        <p class="s-desc">Перелік правничої допомоги порожній — пункти вносяться під час заповнення: із каталогу (Додаток № 1) або вручну. Номери, перелік і вартість. Ці дані підставляються в Додаткову угоду та Акт. Додавайте або вилучайте пункти — документ підлаштується автоматично. <b>Для Акта формулюйте позиції дієслівно й конкретно</b> (напр. «Складено відзив на позовну заяву», «Взято участь у судовому засіданні») — суди зменшують суми за абстрактні описи на кшталт «правовий аналіз ситуації»; номер справи додається автоматично з поля «Номер судової справи».</p>
 
         <div class="mini-h">Нумерація</div>
         <div class="grid" style="margin-bottom:18px">
@@ -446,6 +446,11 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
             <label for="f_inv_no">Обліковий номер рахунку<span class="req">*</span></label>
             <input type="text" id="f_inv_no" class="mono" data-num="invoice" value="001" placeholder="001" autocomplete="off">
             <div class="sub-hint">Номер рахунку-фактури, напр. 001, 002.</div>
+          </div>
+          <div class="field">
+            <label for="f_case">Номер судової справи <span style="font-weight:400;color:var(--muted)">(для Акта)</span></label>
+            <input type="text" id="f_case" class="mono" placeholder="напр. 910/1234/26" autocomplete="off">
+            <div class="sub-hint">Дописується до кожної позиції Акта: «…у справі № …». Критично для стягнення витрат на правничу допомогу (ст. 134 ГПК / 137 ЦПК / 134 КАС). Позасудові справи — лишіть порожнім.</div>
           </div>
         </div>
 
@@ -949,7 +954,7 @@ function renderServices(){
     row.innerHTML=`
       <div class="svc-num">${i+1}</div>
       <div class="svc-fields">
-        <textarea rows="1" placeholder="Опис послуги (напр. складання позовної заяви…)" aria-label="Послуга ${i+1}">${String(s.t).replace(/</g,"&lt;")}</textarea>
+        <textarea rows="1" placeholder="Дієслівно: напр. «Складено відзив на позовну заяву»" aria-label="Послуга ${i+1}">${String(s.t).replace(/</g,"&lt;")}</textarea>
         <select class="svc-unit-sel${s.unit?" filled":""}" aria-label="Одиниця обліку, пункт ${i+1}" title="Одиниця обліку за Додатком № 1 — потрапляє в окрему колонку угоди та акта">${unitOptions(s.unit)}</select>
         ${hourly?`<input type="text" class="svc-hrs mono" inputmode="decimal" placeholder="год." aria-label="Годин, пункт ${i+1}" value="${String(s.h).replace(/"/g,"&quot;")}">
         <input type="text" class="svc-amt mono" inputmode="decimal" placeholder="грн" aria-label="Гонорар, пункт ${i+1}" value="${String(s.a).replace(/"/g,"&quot;")}">
@@ -1697,6 +1702,13 @@ async function prepareDoc(){
   const rows=activeRows();
   const hourly=isHourly();
   const act=hourly ? actRows(rows) : rows;
+  /* Акт: до кожної позиції дописуємо № справи (якщо задано й ще не згадано) —
+     дієслівне формулювання + прив'язка до справи важливі для стягнення витрат
+     на правничу допомогу (ст. 134 ГПК / 137 ЦПК / 134 КАС). */
+  const caseNo=v("f_case");
+  const actNamed = caseNo
+    ? act.map(r=>({...r, t: /справ[аиіу]/i.test(r.t) ? r.t : r.t.replace(/[.\s]+$/,"")+" у справі № "+caseNo}))
+    : act;
   const costStr=v("f_cost");
 
   /* загальний обсяг часу — лише для погодинної моделі */
@@ -1715,7 +1727,7 @@ async function prepareDoc(){
     propor: $("#f_pay_propor") ? $("#f_pay_propor").checked : false,
     payText: v("f_pay_text"),
     rows: rows,
-    actRows: act,
+    actRows: actNamed,
     totalAgr: hourly ? fmtMoney(sumRows(rows)) : costStr,
     totalAct: hourly ? fmtMoney(sumRows(act))  : costStr,
     hoursText: hoursText,
@@ -1918,7 +1930,7 @@ function loadRegistry(){
 /* ---- знімок і відновлення стану форми ---- */
 const SNAP_IDS=["f_num","f_date","f_name","f_short","f_birth","f_addr","f_rnokpp","f_pass","f_basis_fop",
   "f_org","f_edrpou","f_repr_short","f_orgaddr","f_repr_pos","f_repr_pib","f_basis","f_repr_rnokpp",
-  "f_phone","f_email","f_term","f_agr_no","f_act_no","f_inv_no","f_cost","f_cost_words",
+  "f_phone","f_email","f_term","f_agr_no","f_act_no","f_case","f_inv_no","f_cost","f_cost_words",
   "f_rate","f_pay_preset","f_pay_adv","f_pay_d1","f_pay_d2","f_pay_dw","f_pay_day","f_pay_text"];
 function snapshot(){
   const o={v:1, ctype:clientType(), paymode:payMode(), fields:{},
