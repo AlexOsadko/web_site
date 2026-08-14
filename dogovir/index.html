@@ -236,6 +236,18 @@
 .sync-grid input{padding:9px 10px;border:1px solid var(--line,#d9d0c2);border-radius:8px;font-size:14px;font-family:inherit}
 .sync-status.err{color:#c0392b}
 @media(max-width:640px){.sync-grid{grid-template-columns:1fr}}
+/* ── адаптив: не дати сітці/навігації розпирати сторінку ── */
+.wrap>nav.rail,.wrap>main{min-width:0}
+input,select,textarea{max-width:100%;box-sizing:border-box}
+.field input,.field textarea,.svc-row textarea,.svc-fields input,.svc-fields select{min-width:0}
+@media (max-width:860px){
+  .rail ol{max-width:100%}
+  .cat-tabs,.cat-tools{max-width:100%;overflow-x:auto}
+}
+@media (max-width:480px){
+  .ctype-opt{flex:1 1 100%;min-width:0}
+  .reg-count{margin-left:0}
+}
 .reg-empty{padding:22px;text-align:center;color:var(--muted,#8a7f6d);font-size:14px;border:1px dashed var(--line,#d9d0c2);border-radius:10px}
 .reg-tablewrap{overflow-x:auto;border:1px solid var(--line,#d9d0c2);border-radius:10px}
 .reg-table{width:100%;border-collapse:collapse;font-size:13px}
