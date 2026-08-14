@@ -55,8 +55,8 @@ textarea{resize:vertical;min-height:84px;line-height:1.5;font-size:15px}
 .err.hidden{display:none}
 
 /* toolbar */
-.toolbar{position:sticky;top:0;z-index:20;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:10px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.toolbar .t-btn{border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:10px;padding:9px 13px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.toolbar{position:sticky;top:0;z-index:20;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:10px;margin-bottom:14px;display:flex;flex-wrap:nowrap;overflow-x:auto;gap:8px;align-items:center}
+.toolbar .t-btn{flex:none;white-space:nowrap;border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:10px;padding:9px 13px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
 .toolbar .t-btn:hover{background:var(--hover)}
 .toolbar .t-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
 .toolbar .sp{flex:1}
@@ -224,10 +224,10 @@ table.inv td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:
     <div class="toolbar noprint">
       <button class="t-btn" id="back">← Редагувати</button>
       <span class="sp"></span>
+      <button class="t-btn primary" id="print-all">Друк / PDF (усі)</button>
       <button class="t-btn" data-print="contract">Договір</button>
       <button class="t-btn" data-print="annex">Угода</button>
       <button class="t-btn" data-print="invoice">Рахунок</button>
-      <button class="t-btn primary" id="print-all">Друк / PDF (усі)</button>
     </div>
 
     <div class="pay-card noprint" id="pay-card">
