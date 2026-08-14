@@ -229,6 +229,13 @@
 .ctype-opt input{accent-color:var(--navy,#1f3864);margin:0}
 .reg-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 .reg-count{margin-left:auto;font-size:13px;color:var(--muted,#8a7f6d)}
+.sync-box{margin-top:16px;border:1px solid var(--line,#d9d0c2);border-radius:10px;padding:12px 14px;background:rgba(31,56,100,.03)}
+.sync-box>summary{cursor:pointer;font-weight:600;color:var(--navy,#1f3864);font-size:14px}
+.sync-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px}
+.sync-grid label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted,#8a7f6d)}
+.sync-grid input{padding:9px 10px;border:1px solid var(--line,#d9d0c2);border-radius:8px;font-size:14px;font-family:inherit}
+.sync-status.err{color:#c0392b}
+@media(max-width:640px){.sync-grid{grid-template-columns:1fr}}
 .reg-empty{padding:22px;text-align:center;color:var(--muted,#8a7f6d);font-size:14px;border:1px dashed var(--line,#d9d0c2);border-radius:10px}
 .reg-tablewrap{overflow-x:auto;border:1px solid var(--line,#d9d0c2);border-radius:10px}
 .reg-table{width:100%;border-collapse:collapse;font-size:13px}
@@ -656,6 +663,21 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
           </button>
           <span class="reg-count">Записів у реєстрі: <b id="reg_count">0</b></span>
         </div>
+
+        <details class="sync-box" id="sync_box">
+          <summary>☁ Синхронізація між пристроями (наскрізне шифрування)</summary>
+          <p class="s-desc" style="margin-top:10px">Реєстр шифрується у вашому браузері й зберігається у хмарі <b>лише в зашифрованому вигляді</b> — сервер не бачить даних клієнтів. Введіть <b>однакову парольну фразу</b> на кожному пристрої. Якщо фразу забути — дані не відновити (тримайте .xlsx-бекап).</p>
+          <div class="sync-grid">
+            <label>Адреса синхронізації<input id="sync_url" type="text" spellcheck="false" placeholder="https://…workers.dev/registry"></label>
+            <label>Токен доступу<input id="sync_token" type="password" autocomplete="off" placeholder="секрет із воркера"></label>
+            <label>Парольна фраза (ключ шифрування)<input id="sync_pass" type="password" autocomplete="off" placeholder="лише у вас"></label>
+          </div>
+          <div class="reg-actions" style="margin-top:10px">
+            <button class="btn btn-primary" id="sync_now" type="button">Синхронізувати зараз</button>
+            <button class="btn btn-ghost" id="sync_save" type="button">Зберегти на цьому пристрої</button>
+            <span class="reg-count sync-status" id="sync_status">Не налаштовано</span>
+          </div>
+        </details>
 
         <div class="reg-empty" id="reg_empty">Реєстр порожній. Сформуйте перший договір — і він з'явиться тут.</div>
         <div class="reg-tablewrap" id="reg_table" style="display:none">
@@ -1882,6 +1904,7 @@ function saveRegistry(){
       toast("Не вдалося зберегти реєстр у браузері (переповнено). Експортуйте .xlsx, щоб не втратити записи.", true);
     }
   }
+  if(typeof schedulePush==="function") schedulePush();
 }
 function loadRegistry(){
   try{
@@ -2082,6 +2105,86 @@ $("#reg_import").addEventListener("change",async ev=>{
   ev.target.value="";
 });
 
+/* ---------- синхронізація реєстру між пристроями (E2E-шифрування) ---------- */
+const SYNC_URL="osadko_dogovir_sync_url", SYNC_TOK="osadko_dogovir_sync_token", SYNC_PASS="osadko_dogovir_sync_pass";
+const SYNC_URL_DEFAULT="https://osadko-relay.espir3.workers.dev/registry";
+let pushTimer=null, suppressPush=false, syncReady=false;
+function lsGet(k){ try{return localStorage.getItem(k)||"";}catch(e){return "";} }
+function syncCfg(){ return { url: lsGet(SYNC_URL)||SYNC_URL_DEFAULT, token: lsGet(SYNC_TOK), pass: lsGet(SYNC_PASS) }; }
+function syncEnabled(){ const c=syncCfg(); return !!(c.url && c.token && c.pass); }
+function setSyncStatus(msg,err){ const e=$("#sync_status"); if(e){ e.textContent=msg; e.classList.toggle("err",!!err); } }
+function b64(buf){ const b=new Uint8Array(buf); let s="",CH=0x8000; for(let i=0;i<b.length;i+=CH) s+=String.fromCharCode.apply(null,b.subarray(i,i+CH)); return btoa(s); }
+function ub64(s){ return Uint8Array.from(atob(s),c=>c.charCodeAt(0)); }
+async function deriveKey(pass,salt){
+  const base=await crypto.subtle.importKey("raw",new TextEncoder().encode(pass),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:150000,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+async function encryptReg(obj,pass){
+  const salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(pass,salt);
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,new TextEncoder().encode(JSON.stringify(obj)));
+  return JSON.stringify({v:1,salt:b64(salt),iv:b64(iv),ct:b64(ct)});
+}
+async function decryptReg(blob,pass){
+  const o=JSON.parse(blob), key=await deriveKey(pass,ub64(o.salt));
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:ub64(o.iv)},key,ub64(o.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function mergeReg(a,b){
+  const m=new Map();
+  const add=e=>{ if(!e||!e.row) return; const k=regKey(e.row); const ex=m.get(k); if(!ex || (!ex.snap && e.snap)) m.set(k,e); };
+  (a||[]).forEach(add); (b||[]).forEach(add);
+  return Array.from(m.values());
+}
+async function pullRegistry(){
+  const c=syncCfg(); if(!(c.url && c.token)){ setSyncStatus("Заповніть адресу й токен",true); return; }
+  setSyncStatus("Синхронізація…");
+  try{
+    const res=await fetch(c.url,{headers:{"X-Registry-Token":c.token}});
+    if(!res.ok) throw new Error("сервер "+res.status);
+    const j=await res.json();
+    if(j.blob){
+      if(!c.pass){ setSyncStatus("Введіть парольну фразу для розшифрування",true); return; }
+      let cloud;
+      try{ cloud=await decryptReg(j.blob,c.pass); }
+      catch(e){ setSyncStatus("Невірна парольна фраза — не вдалося розшифрувати",true); return; }
+      if(Array.isArray(cloud)) registry=mergeReg(cloud,registry);
+    }
+    syncReady=true;                       // успішний стан — лише тепер дозволяємо вивантаження
+    suppressPush=true; renderRegistry(); suppressPush=false;
+    await pushRegistry(true);
+    setSyncStatus("Синхронізовано ✓ ("+registry.length+" зап.)");
+  }catch(err){ setSyncStatus("Помилка звʼязку: "+(err.message||err),true); }
+}
+async function pushRegistry(silent){
+  const c=syncCfg(); if(!(c.url && c.token && c.pass)) return;
+  try{
+    const blob=await encryptReg(registry,c.pass);
+    const res=await fetch(c.url,{method:"PUT",headers:{"X-Registry-Token":c.token,"Content-Type":"text/plain"},body:blob});
+    if(!res.ok) throw new Error("сервер "+res.status);
+    if(!silent) setSyncStatus("Синхронізовано ✓ ("+registry.length+" зап.)");
+  }catch(err){ setSyncStatus("Не вдалося вивантажити: "+(err.message||err),true); }
+}
+function schedulePush(){ if(!syncReady || suppressPush || !syncEnabled()) return; clearTimeout(pushTimer); pushTimer=setTimeout(()=>pushRegistry(false),1500); }
+function saveSyncCfg(){
+  try{
+    localStorage.setItem(SYNC_URL,($("#sync_url").value||"").trim());
+    localStorage.setItem(SYNC_TOK,($("#sync_token").value||"").trim());
+    localStorage.setItem(SYNC_PASS,$("#sync_pass").value||"");
+  }catch(e){}
+}
+function initSync(){
+  const c=syncCfg();
+  if($("#sync_url")) $("#sync_url").value=c.url;
+  if($("#sync_token")) $("#sync_token").value=c.token;
+  if($("#sync_pass")) $("#sync_pass").value=c.pass;
+  const save=$("#sync_save"), now=$("#sync_now");
+  if(save) save.addEventListener("click",()=>{ saveSyncCfg(); setSyncStatus(syncEnabled()?"Збережено ✓ — натисніть «Синхронізувати зараз»":"Збережено (заповніть усі три поля)"); });
+  if(now) now.addEventListener("click",async()=>{ saveSyncCfg(); await pullRegistry(); });
+  if(syncEnabled()){ setSyncStatus("Синхронізую…"); pullRegistry(); }
+  else setSyncStatus("Не налаштовано");
+}
+
 /* ---------- логотип: фолбек, якщо сайт недоступний ---------- */
 (function(){
   const img=document.querySelector(".brand-logo"), fb=$("#seal_fb");
@@ -2114,5 +2217,6 @@ applyClientType();
 applyPayMode();
 loadRegistry();
 renderRegistry();
+initSync();
 updateRecap();
 </script>
