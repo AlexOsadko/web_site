@@ -12,6 +12,7 @@
   --bg:#dce2f0; --card:#ffffff; --ink:#0b1f3a; --muted:#5a6b82; --faint:#8a97a8;
   --line:#e4e8f4; --blue:#1e50e6; --green:#1f9d55;
   --field:#f4f7fc; --hover:#eef2fb;
+  --tg:#2aabee; --wa:#25d366; --vb:#7360f2;
   --shadow:0 1px 2px rgba(11,31,58,.06),0 8px 24px rgba(11,31,58,.06);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
@@ -30,7 +31,7 @@ body{background:var(--bg);color:var(--ink);
   font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   line-height:1.5;-webkit-font-smoothing:antialiased;
   padding:env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 24px)}
-.wrap{max-width:440px;margin:0 auto;padding:18px 16px 0}
+.wrap{max-width:460px;margin:0 auto;padding:18px 16px 0}
 .brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);
   font-weight:600;font-size:15px;margin-bottom:16px}
 .brand img{width:30px;height:30px;border-radius:7px}
@@ -41,28 +42,41 @@ h1{font-size:20px;margin:0 0 4px}
 label{display:block;font-size:12px;letter-spacing:.05em;text-transform:uppercase;
   color:var(--faint);font-weight:700;margin:0 0 6px}
 .f{margin-bottom:16px}
-input,select{width:100%;background:var(--field);border:1px solid var(--line);
+input,select,textarea{width:100%;background:var(--field);border:1px solid var(--line);
   border-radius:12px;padding:13px 14px;font-size:16px;color:var(--ink);
   font-family:inherit;-webkit-appearance:none;appearance:none}
-input:focus,select:focus{outline:2.5px solid var(--blue);outline-offset:1px;border-color:transparent}
+input:focus,select:focus,textarea:focus{outline:2.5px solid var(--blue);outline-offset:1px;border-color:transparent}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%235a6b82' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 12px center;padding-right:40px}
+textarea{resize:vertical;min-height:150px;line-height:1.55;font-size:15px}
 .btn{width:100%;background:var(--blue);color:#fff;border:0;border-radius:13px;
   padding:15px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;
   transition:filter .12s,transform .04s}
 .btn:hover{filter:brightness(1.06)}
 .btn:active{transform:scale(.99)}
+.btn.secondary{background:var(--green);margin-top:12px}
 .result{margin-top:4px}
 .result.hidden{display:none}
-.link-box{display:flex;gap:8px;align-items:stretch;margin-top:8px}
+.share{display:flex;gap:9px;margin-top:12px}
+.share a{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+  text-decoration:none;font-weight:700;font-size:14px;color:#fff;
+  padding:12px 6px;border-radius:12px;transition:filter .12s}
+.share a:hover{filter:brightness(1.07)}
+.share .tg{background:var(--tg)} .share .wa{background:var(--wa)} .share .vb{background:var(--vb)}
+.share svg{width:18px;height:18px;fill:currentColor;flex:none}
+details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;color:var(--muted);font-size:14px;font-weight:600;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";color:var(--faint)}
+details[open] summary::before{content:"▾ "}
+.link-box{display:flex;gap:8px;align-items:stretch;margin-top:10px}
 .link-box input{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
 .cp{flex:none;background:var(--field);border:1px solid var(--line);border-radius:11px;
   width:48px;display:grid;place-items:center;cursor:pointer;color:var(--muted);font-size:18px}
 .cp:hover{background:var(--hover);color:var(--blue)}
-.actions{display:flex;gap:10px;margin-top:10px}
-.actions a{flex:1;text-align:center;text-decoration:none;font-weight:600;font-size:14.5px;
-  padding:11px;border-radius:11px;border:1px solid var(--line);color:var(--blue);background:var(--field)}
-.hint{color:var(--faint);font-size:12.5px;margin-top:10px;line-height:1.5}
+.open-row{margin-top:10px}
+.open-row a{display:inline-block;text-decoration:none;font-weight:600;font-size:14px;color:var(--blue)}
+.hint{color:var(--faint);font-size:12.5px;margin-top:12px;line-height:1.5}
 .err{color:#c0392b;font-size:13.5px;margin-top:8px;font-weight:600}
 .err.hidden{display:none}
 :focus-visible{outline:2.5px solid var(--blue);outline-offset:2px}
@@ -79,7 +93,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <a class="brand" href="/"><img src="/assets/logo-mark.png" alt=""> Адвокат Осадько</a>
   <div class="card">
     <h1>Посилання на оплату</h1>
-    <p class="sub">Заповніть — отримаєте посилання для клієнта. Дані рахунку зашиваються у фрагмент <code>#</code> і на сервер не йдуть.</p>
+    <p class="sub">Заповніть — отримаєте готове повідомлення з посиланням для клієнта. Дані рахунку зашиваються у фрагмент <code>#</code> і на сервер не йдуть.</p>
 
     <div class="f">
       <label for="amount">Сума, ₴</label>
@@ -98,18 +112,32 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <input id="purpose" type="text" autocomplete="off">
     </div>
 
-    <button class="btn" id="make" type="button">Створити посилання</button>
+    <button class="btn" id="make" type="button">Створити повідомлення</button>
     <div class="err hidden" id="err"></div>
 
     <div class="result hidden" id="result">
-      <div class="link-box">
-        <input id="link" type="text" readonly>
-        <button class="cp" id="copy" type="button" aria-label="Скопіювати посилання">⧉</button>
+      <div class="f" style="margin-top:18px;margin-bottom:0">
+        <label for="message">Повідомлення для клієнта</label>
+        <textarea id="message" spellcheck="false"></textarea>
       </div>
-      <div class="actions">
-        <a id="open" href="#" target="_blank" rel="noopener">Відкрити ↗</a>
+      <button class="btn secondary" id="copy-msg" type="button">Копіювати повідомлення</button>
+
+      <div class="share">
+        <a class="tg" id="sh-tg" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M9.8 15.6 9.6 19c.4 0 .6-.2.8-.4l1.9-1.8 3.9 2.9c.7.4 1.2.2 1.4-.7l2.6-12.1c.3-1.1-.4-1.6-1.1-1.3L2.4 9.9c-1.1.4-1.1 1-.2 1.3l4.3 1.3 9.9-6.2c.5-.3.9-.1.5.2z"/></svg>Telegram</a>
+        <a class="wa" id="sh-wa" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.8 4.9-1.3A10 10 0 1 0 12 2zm5.8 14.1c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.5-1.2-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.1.1.3 0 .5l-.4.5-.3.3c-.1.1-.3.3-.1.5.1.3.7 1.1 1.4 1.8.9.8 1.7 1 2 1.2.2.1.4.1.5-.1l.7-.8c.2-.2.3-.2.6-.1l1.9.9c.3.1.4.2.5.3.1.2.1.8-.1 1.4z"/></svg>WhatsApp</a>
+        <a class="vb" id="sh-vb"><svg viewBox="0 0 24 24"><path d="M12 2C7 2 3 5.3 3 9.4c0 2.3 1.2 4.3 3.1 5.6v3.4l2.9-1.6c1 .3 2 .4 3 .4 5 0 9-3.3 9-7.6S17 2 12 2zm4.9 10.9c-.2.5-.9 1-1.4 1.1-.4.1-.8.2-2.8-.6-2.3-1-3.8-3.3-3.9-3.4-.1-.2-.9-1.2-.9-2.3s.6-1.6.8-1.9c.2-.2.4-.3.6-.3h.4c.2 0 .3.1.5.5l.6 1.5c.1.2 0 .4-.1.5l-.3.4c-.1.1-.2.3-.1.4.1.3.6.9 1.1 1.4.7.6 1.3.8 1.5.9.2.1.3.1.5-.1l.5-.6c.2-.2.3-.2.5-.1l1.4.7c.3.1.4.2.4.3.1.2.1.6-.1 1z"/></svg>Viber</a>
       </div>
-      <p class="hint">Скопійоване посилання надішліть клієнту в месенджер. Він відкриє його на телефоні й обере свій банк.</p>
+
+      <details>
+        <summary>Тільки посилання</summary>
+        <div class="link-box">
+          <input id="link" type="text" readonly>
+          <button class="cp" id="copy" type="button" aria-label="Скопіювати посилання">⧉</button>
+        </div>
+        <div class="open-row"><a id="open" href="#" target="_blank" rel="noopener">Відкрити сторінку оплати ↗</a></div>
+      </details>
+
+      <p class="hint">Натисніть «Копіювати повідомлення» і вставте в чат клієнту — або скористайтесь кнопкою месенджера. Клієнт відкриє посилання на телефоні й обере свій банк.</p>
     </div>
   </div>
 </div>
@@ -133,6 +161,7 @@ var DEFAULTS = {
   service: "Юридична консультація",
   purpose: "Сплата за юридичні послуги без ПДВ"
 };
+var SIGNATURE = "З повагою, Адвокат Олександр Осадько";
 
 function bytesToB64u(bytes){var b="";for(var i=0;i<bytes.length;i++)b+=String.fromCharCode(bytes[i]);
   return btoa(b).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
@@ -149,15 +178,20 @@ function textToB64u(str){return bytesToB64u(new TextEncoder().encode(str));}
   document.getElementById("purpose").value=DEFAULTS.purpose;
 })();
 
+/* сума для тексту: розділювач розрядів, без .00 для цілих */
+function fmtAmount(a){
+  var n=parseFloat(a), s=(n%1===0)?String(Math.round(n)):n.toFixed(2), p=s.split(".");
+  p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g," ");
+  return p.join(".");
+}
+
 function makeLink(f){
-  /* порожній рядок = значення за замовчуванням → коротше посилання */
   var text=[
     f.amount,
     f.recipient===DEFAULTS.recipient ? "" : f.recipient,
     f.service.trim()===DEFAULTS.service ? "" : f.service.trim(),
     f.purpose.trim()===DEFAULTS.purpose ? "" : f.purpose.trim()
   ].join("\n");
-
   if(window.CompressionStream){
     var s=new Blob([new TextEncoder().encode(text)]).stream().pipeThrough(new CompressionStream("deflate-raw"));
     return new Response(s).arrayBuffer().then(function(buf){
@@ -167,15 +201,21 @@ function makeLink(f){
   return Promise.resolve(location.origin+"/pay/#c"+textToB64u(text));
 }
 
+function buildMessage(service, amount, link){
+  return "Добрий день! Надсилаємо рахунок на оплату — " + service + ", " + fmtAmount(amount) + " грн.\n" +
+         "Оплатити зручно за посиланням (картка або банківський застосунок):\n" +
+         link + "\n\n" + SIGNATURE;
+}
+
 var toastTimer=null;
 function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
   clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove("show");},1400);}
-function copy(text){
+function copy(text,label){
   if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(function(){toast("Скопійовано");},function(){fb(text);});
-  }else{fb(text);}
-  function fb(t){var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";
-    document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("Скопійовано");}catch(e){}document.body.removeChild(ta);}
+    navigator.clipboard.writeText(text).then(function(){toast(label||"Скопійовано");},function(){fb(text,label);});
+  }else{fb(text,label);}
+  function fb(t,l){var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";
+    document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast(l||"Скопійовано");}catch(e){}document.body.removeChild(ta);}
 }
 
 function showErr(msg){var e=document.getElementById("err");e.textContent=msg;e.classList.remove("hidden");
@@ -191,19 +231,31 @@ document.getElementById("make").addEventListener("click",function(){
   var f={
     amount:amount,
     recipient:document.getElementById("recipient").value,
-    service:document.getElementById("service").value,
+    service:document.getElementById("service").value.trim()||DEFAULTS.service,
     purpose:document.getElementById("purpose").value
   };
   makeLink(f).then(function(url){
+    var message=buildMessage(f.service, amount, url);
+    document.getElementById("message").value=message;
     document.getElementById("link").value=url;
     document.getElementById("open").href=url;
+
+    /* месенджери */
+    document.getElementById("sh-tg").href="https://t.me/share/url?url="+encodeURIComponent(url)+
+      "&text="+encodeURIComponent("Добрий день! Рахунок на оплату — "+f.service+", "+fmtAmount(amount)+" грн. Оплата за посиланням:\n\n"+SIGNATURE);
+    document.getElementById("sh-wa").href="https://wa.me/?text="+encodeURIComponent(message);
+    document.getElementById("sh-vb").href="viber://forward?text="+encodeURIComponent(message);
+
     document.getElementById("result").classList.remove("hidden");
-    copy(url);
+    document.getElementById("result").scrollIntoView({behavior:"smooth",block:"nearest"});
   });
 });
 
+document.getElementById("copy-msg").addEventListener("click",function(){
+  copy(document.getElementById("message").value,"Повідомлення скопійовано");
+});
 document.getElementById("copy").addEventListener("click",function(){
-  copy(document.getElementById("link").value);
+  copy(document.getElementById("link").value,"Посилання скопійовано");
 });
 </script>
 </body>
