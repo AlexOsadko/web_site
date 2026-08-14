@@ -96,6 +96,19 @@ table.inv td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:
 .inv-total b{font-size:15px}
 .inv-words{font-size:12px;margin-top:8px;font-style:italic}
 .inv-foot{font-size:11px;color:#555;margin-top:14px;border-top:1px solid #ddd;padding-top:8px}
+/* invoice — LEGIUS-style */
+.inv2{font-size:12.5px}
+.inv2 .top{font-size:12px;color:#333;margin-bottom:10px}
+.inv2 h2{text-align:left;text-transform:none;font-size:16px;margin:6px 0 10px}
+.inv2 .req{line-height:1.55;margin-bottom:14px}
+.inv2 table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}
+.inv2 th,.inv2 td{border:1px solid #333;padding:7px 9px;text-align:left;vertical-align:top}
+.inv2 th{background:#eee;font-weight:700}
+.inv2 td.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.inv2 .total{margin-top:12px;font-size:13px}
+.inv2 .total b{font-size:15px}
+.inv2 .words{font-style:italic}
+.inv2 .sign{margin-top:30px}
 
 .hidden{display:none!important}
 #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(14px);background:var(--ink);color:var(--card);padding:10px 18px;border-radius:11px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:60}
@@ -214,6 +227,7 @@ var RECIPIENTS = {
     short: "Осадько Олександр Олексійович",
     iban: "UA893220010000026006330098695",
     bank: "АТ «УНІВЕРСАЛ БАНК»",
+    mfo: "322001",
     taxId: "3336210592",
     phone: "+380934664443",
     email: "osadko.lawyer@gmail.com",
@@ -391,26 +405,39 @@ function renderAnnex(d){
     </div>`;
 }
 
+function invInitials(short){var p=short.trim().split(/\s+/);return p[0]+" "+(p[1]?p[1].charAt(0)+".":"")+(p[2]?p[2].charAt(0)+".":"");}
+function dateWordsPlain(v){var d=v?new Date(v):new Date();return d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear()+" р.";}
+function fmtSum(a){var n=parseFloat(a);if(n%1===0)return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g," ");return fmt(a);}
 function renderInvoice(d){
-  var L=d.L, sum=d.invsum||d.fee||"0";
+  var L=d.L, sum=d.invsum||d.fee||"0", dv=document.getElementById("docdate").value, dShort=dateShort(dv);
+  var client="<b>"+esc(d.cname||"—")+"</b><br>"+
+    (d.caddr?"Зареєстрован"+d.gsuf+" за адресою: "+esc(d.caddr)+"<br>":"")+
+    (d.ctax?"РНОКПП: "+esc(d.ctax)+"<br>":"")+
+    (d.cphone?"Засоби зв'язку: "+esc(d.cphone)+"<br>":"")+
+    (d.cemail?"Електронна пошта: "+esc(d.cemail):"");
+  var purpose="Сплата за юридичні послуги, на підставі Додаткової угоди № "+esc(d.annexNo)+" від "+dShort+" до Договору № "+esc(d.contractNo)+" від "+dShort;
   return `
-    <div class="inv-head">
-      <div class="inv-brand">АДВОКАТ ОСАДЬКО<small>Правова допомога</small></div>
-      <div class="inv-no"><div class="n">Рахунок-фактура № ${esc(d.invNo)}</div><div class="d">від ${dateShort(document.getElementById("docdate").value)}</div></div>
+  <div class="inv2">
+    <div class="top">Тел.: ${esc(L.phone)} · Ел. пошта: ${esc(L.email)}</div>
+    <h2>Рахунок-фактура ${esc(d.invNo)}</h2>
+    <div class="req">
+      ${esc(L.short)}<br>
+      Реєстраційний номер облікової картки платника податків: ${esc(L.taxId)}<br>
+      Банківські реквізити:<br>
+      IBAN: ${esc(L.iban)}<br>
+      ${esc(L.bank)}${L.mfo?"<br>МФО "+esc(L.mfo):""}
     </div>
-    <div class="inv-parties">
-      <div><div class="k">Виконавець</div>${esc(L.name)}<br>РНОКПП ${esc(L.taxId)}<br>IBAN ${esc(L.iban)}<br>${esc(L.bank)}<br>тел. ${esc(L.phone)}</div>
-      <div><div class="k">Замовник</div>${esc(d.cname)||"—"}${d.ctax?"<br>РНОКПП "+esc(d.ctax):""}${d.caddr?"<br>"+esc(d.caddr):""}</div>
-    </div>
-    <table class="inv">
-      <thead><tr><th style="width:34px">№</th><th>Найменування послуги</th><th style="width:110px">Сума, грн</th></tr></thead>
-      <tbody>
-        <tr><td class="num">1</td><td>Правова (правнича) допомога згідно з Договором № ${esc(d.contractNo)}${d.subject?": "+esc(d.subject):""}</td><td class="num">${fmt(sum)}</td></tr>
-      </tbody>
+    <table>
+      <thead><tr><th style="width:120px">Дата</th><th>Кому</th><th style="width:130px">Адреса доставки</th></tr></thead>
+      <tbody><tr><td>${dateWordsPlain(dv)}</td><td>${client}</td><td>Див. адресу одержувача</td></tr></tbody>
     </table>
-    <div class="inv-total">Разом до сплати: <b>${fmt(sum)} грн</b></div>
-    <div class="inv-words">Усього на суму: ${hryvniaWords(sum)}.</div>
-    <div class="inv-foot">Без ПДВ. Оплата: перерахуванням на IBAN Виконавця. Призначення платежу: «Сплата за юридичні послуги без ПДВ, згідно з рахунком № ${esc(d.invNo)}».</div>`;
+    <table>
+      <thead><tr><th style="width:40px">№ п/п</th><th>Призначення платежу</th><th style="width:66px">Кількість</th><th style="width:86px">Сума, грн</th></tr></thead>
+      <tbody><tr><td style="text-align:center">1</td><td>${purpose}</td><td style="text-align:center">1</td><td class="num">${fmtSum(sum)}</td></tr></tbody>
+    </table>
+    <div class="total">Загальна сума: <b>${fmtSum(sum)}</b><br><span class="words">(${hryvniaWords(sum).toLowerCase()})</span></div>
+    <div class="sign">Виписав: &nbsp;__________________&nbsp; ${invInitials(L.short)}</div>
+  </div>`;
 }
 
 /* ── генерація ── */
