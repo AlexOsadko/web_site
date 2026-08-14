@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Конструктор документів — Адвокат Осадько</title>
+<link rel="icon" type="image/png" href="/assets/logo-mark.png">
+<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+:root{
+  --bg:#dce2f0; --card:#ffffff; --ink:#0b1f3a; --muted:#5a6b82; --faint:#8a97a8;
+  --line:#e4e8f4; --blue:#1e50e6; --green:#1f9d55; --accent:#b5451f;
+  --field:#f4f7fc; --hover:#eef2fb;
+  --shadow:0 1px 2px rgba(11,31,58,.06),0 8px 24px rgba(11,31,58,.06);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#25324c; --card:#33456a; --ink:#f2f6fd; --muted:#b4c2d9; --faint:#8fa0bd;
+  --line:#46597d; --blue:#6f8dff; --green:#4ade80; --accent:#e2764f; --field:#2b3b5c; --hover:#3d4f75;
+  --shadow:0 1px 2px rgba(0,0,0,.2),0 8px 24px rgba(0,0,0,.28);
+}}
+:root[data-theme="dark"]{
+  --bg:#25324c; --card:#33456a; --ink:#f2f6fd; --muted:#b4c2d9; --faint:#8fa0bd;
+  --line:#46597d; --blue:#6f8dff; --green:#4ade80; --accent:#e2764f; --field:#2b3b5c; --hover:#3d4f75;
+  --shadow:0 1px 2px rgba(0,0,0,.2),0 8px 24px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 40px}
+.head{text-align:center;margin-bottom:18px}
+.head .logo{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);font-weight:700}
+.head .logo img{width:34px;height:34px;border-radius:8px}
+.head .kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-top:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:22px;margin-bottom:14px}
+.sec-t{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);font-weight:700;margin:18px 0 10px;border-top:1px solid var(--line);padding-top:16px}
+.sec-t:first-child{border-top:0;padding-top:0;margin-top:0}
+label{display:block;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--faint);font-weight:700;margin:0 0 5px}
+.f{margin-bottom:14px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+input,select,textarea{width:100%;background:var(--field);border:1px solid var(--line);border-radius:11px;padding:12px 13px;font-size:16px;color:var(--ink);font-family:inherit;-webkit-appearance:none;appearance:none}
+input:focus,select:focus,textarea:focus{outline:2.5px solid var(--blue);outline-offset:1px;border-color:transparent}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%235a6b82' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:38px}
+textarea{resize:vertical;min-height:84px;line-height:1.5;font-size:15px}
+.hintline{color:var(--faint);font-size:12px;margin:-8px 0 0}
+.auto{color:var(--muted);font-size:13px;margin:2px 0 0}
+.auto b{color:var(--blue)}
+.btn{width:100%;background:var(--blue);color:#fff;border:0;border-radius:12px;padding:15px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:filter .12s,transform .04s}
+.btn:hover{filter:brightness(1.06)}.btn:active{transform:scale(.99)}
+.err{color:#c0392b;font-size:13.5px;margin-top:10px;font-weight:600}
+.err.hidden{display:none}
+
+/* toolbar */
+.toolbar{position:sticky;top:0;z-index:20;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:10px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toolbar .t-btn{border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:10px;padding:9px 13px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.toolbar .t-btn:hover{background:var(--hover)}
+.toolbar .t-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.toolbar .sp{flex:1}
+
+/* pay card */
+.pay-card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+.pay-card h3{margin:0 0 4px;font-size:16px}
+.pay-card p{margin:0 0 12px;color:var(--muted);font-size:13.5px}
+.pay-card textarea{min-height:120px;font-size:14px}
+.pay-card .btn{background:var(--green);margin-top:10px}
+
+/* documents */
+.documents{display:flex;flex-direction:column;gap:20px}
+.document{background:#fff;color:#111;border-radius:8px;box-shadow:var(--shadow);
+  padding:26px 30px;font-family:"PT Serif","Times New Roman",Georgia,serif;font-size:13px;line-height:1.5}
+.document h2{font-size:15px;text-align:center;margin:0 0 4px;text-transform:uppercase;letter-spacing:.01em}
+.document .place{display:flex;justify-content:space-between;font-size:12.5px;margin:10px 0 16px}
+.document h3{font-size:13px;margin:16px 0 6px;font-weight:700}
+.document p{margin:6px 0;text-align:justify}
+.document .clause{margin:5px 0;text-align:justify}
+.document .sign{display:flex;justify-content:space-between;gap:30px;margin-top:26px;font-size:12.5px}
+.document .sign .col{width:48%}
+.document .sign .line{border-top:1px solid #111;margin-top:34px;padding-top:3px;font-size:11px;color:#333}
+.document .muted{color:#555}
+/* invoice */
+.inv-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0b1f3a;padding-bottom:12px;margin-bottom:16px}
+.inv-brand{font-weight:800;font-size:20px;letter-spacing:.14em;font-family:system-ui,sans-serif;color:#0b1f3a}
+.inv-brand small{display:block;font-size:10px;letter-spacing:.1em;font-weight:600;color:#5a6b82;margin-top:3px}
+.inv-no{text-align:right;font-family:system-ui,sans-serif}
+.inv-no .n{font-weight:800;font-size:16px;color:#0b1f3a}
+.inv-no .d{font-size:12px;color:#555}
+.inv-parties{display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:12px;margin-bottom:14px}
+.inv-parties .k{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#777;font-weight:700;margin-bottom:3px}
+table.inv{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}
+table.inv th,table.inv td{border:1px solid #bbb;padding:8px 10px;text-align:left}
+table.inv th{background:#f0f3fa;font-family:system-ui,sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+table.inv td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.inv-total{text-align:right;font-size:13px;margin-top:6px}
+.inv-total b{font-size:15px}
+.inv-words{font-size:12px;margin-top:8px;font-style:italic}
+.inv-foot{font-size:11px;color:#555;margin-top:14px;border-top:1px solid #ddd;padding-top:8px}
+
+.hidden{display:none!important}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(14px);background:var(--ink);color:var(--card);padding:10px 18px;border-radius:11px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:60}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+:focus-visible{outline:2.5px solid var(--blue);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ── PRINT ── */
+@media print{
+  @page{size:A4;margin:16mm 15mm}
+  body{background:#fff}
+  .app,.toolbar,.pay-card,.head,.noprint{display:none!important}
+  .wrap{max-width:none;padding:0;margin:0}
+  .documents{display:block}
+  .document{box-shadow:none;border-radius:0;padding:0;margin:0;font-size:12px;page-break-after:always}
+  .document:last-child{page-break-after:auto}
+  body.only-contract .document:not(#doc-contract){display:none}
+  body.only-annex .document:not(#doc-annex){display:none}
+  body.only-invoice .document:not(#doc-invoice){display:none}
+  body.only-contract #doc-contract,body.only-annex #doc-annex,body.only-invoice #doc-invoice{page-break-after:auto}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ====== FORM (screen only) ====== -->
+  <div class="app" id="app">
+    <div class="head">
+      <a class="logo" href="/"><img src="/assets/logo-mark.png" alt=""> Адвокат Осадько</a>
+      <div class="kicker">Конструктор документів</div>
+    </div>
+
+    <div class="card">
+      <div class="sec-t">Виконавець і номери</div>
+      <div class="f">
+        <label for="lawyer">Виконавець (адвокат)</label>
+        <select id="lawyer"></select>
+      </div>
+      <div class="row2">
+        <div class="f"><label for="docdate">Дата документів</label><input id="docdate" type="date"></div>
+        <div class="f"><label for="dayno">№ договору за день</label><input id="dayno" type="number" min="1" value="1"></div>
+      </div>
+      <div class="row2">
+        <div class="f"><label for="annexno">№ угоди / додатка</label><input id="annexno" type="number" min="1" value="1"></div>
+        <div class="f"><label for="invno">№ рахунку</label><input id="invno" type="text" value="0001"></div>
+      </div>
+      <p class="auto" id="contract-preview">Номер договору: <b>—</b></p>
+
+      <div class="sec-t">Клієнт</div>
+      <div class="f"><label for="cname">ПІБ (повністю)</label><input id="cname" type="text" placeholder="Прізвище Ім'я По батькові"></div>
+      <div class="row2">
+        <div class="f"><label for="csex">Стать</label><select id="csex"><option>Чоловіча</option><option>Жіноча</option></select></div>
+        <div class="f"><label for="cbirth">Дата народження</label><input id="cbirth" type="date"></div>
+      </div>
+      <div class="f"><label for="caddr">Зареєстрований(-а) за адресою <span style="text-transform:none;color:var(--faint)">(необов'язково)</span></label><input id="caddr" type="text" placeholder="індекс, місто, вулиця, будинок, квартира"></div>
+      <div class="row2">
+        <div class="f"><label for="ctax">РНОКПП</label><input id="ctax" type="text" inputmode="numeric" placeholder="10 цифр"></div>
+        <div class="f"><label for="cphone">Засоби зв'язку <span style="text-transform:none;color:var(--faint)">(необов.)</span></label><input id="cphone" type="text" placeholder="+380…"></div>
+      </div>
+      <div class="f"><label for="cemail">Електронна пошта <span style="text-transform:none;color:var(--faint)">(необов.)</span></label><input id="cemail" type="email" placeholder="client@email.com"></div>
+
+      <div class="sec-t">Умови</div>
+      <div class="f">
+        <label for="subject">Предмет: правнича допомога з питань…</label>
+        <textarea id="subject" placeholder="напр.: підготовки та супроводу позовної заяви про стягнення аліментів, представництва інтересів у суді першої інстанції"></textarea>
+        <p class="hintline">Підставиться у п. 1.1 договору після слів «…з наступних питань:».</p>
+      </div>
+      <div class="row2">
+        <div class="f"><label for="fee">Гонорар, грн</label><input id="fee" type="text" inputmode="decimal" placeholder="напр. 15000"></div>
+        <div class="f"><label for="invsum">Сума рахунку, грн</label><input id="invsum" type="text" inputmode="decimal" placeholder="= гонорару"></div>
+      </div>
+      <p class="hintline">Порядок оплати: 100% гонорару впродовж 5 днів з моменту підписання.</p>
+
+      <button class="btn" id="make" type="button" style="margin-top:16px">Сформувати документи</button>
+      <div class="err hidden" id="err"></div>
+      <p class="hintline" style="margin-top:12px">Формуються договір, додаткова угода та рахунок-фактура. Дані нікуди не надсилаються — усе формується у вашому браузері.</p>
+    </div>
+  </div>
+
+  <!-- ====== OUTPUT (after generate) ====== -->
+  <div id="output" class="hidden">
+    <div class="toolbar noprint">
+      <button class="t-btn" id="back">← Редагувати</button>
+      <span class="sp"></span>
+      <button class="t-btn" data-print="contract">Договір</button>
+      <button class="t-btn" data-print="annex">Угода</button>
+      <button class="t-btn" data-print="invoice">Рахунок</button>
+      <button class="t-btn primary" id="print-all">Друк / PDF (усі)</button>
+    </div>
+
+    <div class="pay-card noprint" id="pay-card">
+      <h3>Посилання на оплату рахунку</h3>
+      <p>Готове повідомлення з посиланням — надішліть клієнту після підписання.</p>
+      <textarea id="pay-msg" spellcheck="false"></textarea>
+      <button class="btn" id="copy-pay" type="button">Копіювати повідомлення про оплату</button>
+    </div>
+
+    <div class="documents" id="documents">
+      <section class="document" id="doc-contract"></section>
+      <section class="document" id="doc-annex"></section>
+      <section class="document" id="doc-invoice"></section>
+    </div>
+  </div>
+
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ── Довідник виконавців (дублюється у /pay/) ── */
+var RECIPIENTS = {
+  fop: {
+    name: "ФОП Осадько Олександр Олексійович",
+    short: "Осадько Олександр Олексійович",
+    iban: "UA893220010000026006330098695",
+    bank: "АТ «УНІВЕРСАЛ БАНК»",
+    taxId: "3336210592",
+    phone: "+380934664443",
+    email: "osadko.lawyer@gmail.com",
+    cert: "№ ____ від __.__.____",
+    address: "м. Київ"
+  }
+};
+var DEFAULT_LAWYER = "fop";
+var PAY_DEFAULTS = { service:"Юридична консультація", purpose:"Сплата за юридичні послуги без ПДВ" };
+var SIGNATURE = "З повагою, Адвокат Олександр Осадько";
+
+var MONTHS = ["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"];
+
+/* ── init ── */
+(function(){
+  var sel=document.getElementById("lawyer");
+  Object.keys(RECIPIENTS).forEach(function(k){var o=document.createElement("option");o.value=k;o.textContent=RECIPIENTS[k].short;sel.appendChild(o);});
+  sel.value=DEFAULT_LAWYER;
+  var today=new Date(); document.getElementById("docdate").value=today.toISOString().slice(0,10);
+  updateContractNo();
+  ["docdate","dayno"].forEach(function(id){document.getElementById(id).addEventListener("input",updateContractNo);});
+})();
+
+function pad2(n){return String(n).padStart(2,"0");}
+function contractNo(){
+  var d=new Date(document.getElementById("docdate").value||Date.now());
+  var day=document.getElementById("dayno").value||"1";
+  return pad2(d.getDate())+pad2(d.getMonth()+1)+"-"+day+"/"+String(d.getFullYear()).slice(-2);
+}
+function updateContractNo(){document.getElementById("contract-preview").innerHTML="Номер договору: <b>№ "+contractNo()+"</b>";}
+function dateLong(){var d=new Date(document.getElementById("docdate").value||Date.now());
+  return "«"+pad2(d.getDate())+"» "+MONTHS[d.getMonth()]+" "+d.getFullYear()+" року";}
+function dateShort(v){if(!v)return "____________";var d=new Date(v);return pad2(d.getDate())+"."+pad2(d.getMonth()+1)+"."+d.getFullYear();}
+
+/* ── гроші ── */
+function fmt(a){var n=parseFloat(a),s=n.toFixed(2).split(".");s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g," ");return s.join(".");}
+function plural(n,f){var a=n%100,b=n%10;if(a>10&&a<20)return f[2];if(b===1)return f[0];if(b>=2&&b<=4)return f[1];return f[2];}
+function numWords(num,femUnits){
+  num=Math.floor(num); if(num===0)return "нуль";
+  var ones=[["","один","два","три","чотири","п'ять","шість","сім","вісім","дев'ять"],["","одна","дві","три","чотири","п'ять","шість","сім","вісім","дев'ять"]];
+  var teens=["десять","одинадцять","дванадцять","тринадцять","чотирнадцять","п'ятнадцять","шістнадцять","сімнадцять","вісімнадцять","дев'ятнадцять"];
+  var tens=["","","двадцять","тридцять","сорок","п'ятдесят","шістдесят","сімдесят","вісімдесят","дев'яносто"];
+  var huns=["","сто","двісті","триста","чотириста","п'ятсот","шістсот","сімсот","вісімсот","дев'ятсот"];
+  function triad(n,fem){var r=[],h=Math.floor(n/100),t=Math.floor((n%100)/10),o=n%10;
+    if(h)r.push(huns[h]); if(t>1){r.push(tens[t]);if(o)r.push(ones[fem?1:0][o]);}else if(t===1){r.push(teens[o]);}else if(o){r.push(ones[fem?1:0][o]);} return r.join(" ");}
+  var groups=[{d:1000000,f:0,forms:["мільйон","мільйони","мільйонів"]},{d:1000,f:1,forms:["тисяча","тисячі","тисяч"]},{d:1,f:femUnits?1:0,forms:null}];
+  var parts=[],rem=num;
+  for(var i=0;i<groups.length;i++){var g=groups[i],c=Math.floor(rem/g.d);rem%=g.d;if(!c)continue;var w=triad(c,g.f);if(g.forms)w+=" "+plural(c,g.forms);parts.push(w);}
+  return parts.join(" ");
+}
+function hryvniaWords(amount){
+  var cents=Math.round(parseFloat(amount)*100),grn=Math.floor(cents/100),kop=cents%100;
+  var w=numWords(grn,true); w=w.charAt(0).toUpperCase()+w.slice(1);
+  return w+" "+plural(grn,["гривня","гривні","гривень"])+" "+pad2(kop)+" "+plural(kop,["копійка","копійки","копійок"]);
+}
+
+/* ── base64url + compress (для /pay/) ── */
+function bytesToB64u(b){var s="";for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
+function textToB64u(t){return bytesToB64u(new TextEncoder().encode(t));}
+function makePayLink(amount, recipientKey){
+  var text=[String(amount), recipientKey===DEFAULT_LAWYER?"":recipientKey, "", ""].join("\n");
+  if(window.CompressionStream){
+    var s=new Blob([new TextEncoder().encode(text)]).stream().pipeThrough(new CompressionStream("deflate-raw"));
+    return new Response(s).arrayBuffer().then(function(buf){return location.origin+"/p/#z"+bytesToB64u(new Uint8Array(buf));});
+  }
+  return Promise.resolve(location.origin+"/p/#c"+textToB64u(text));
+}
+
+/* ── esc ── */
+function esc(s){return String(s==null?"":s).replace(/[<>&]/g,function(c){return{"<":"&lt;",">":"&gt;","&":"&amp;"}[c];});}
+
+/* ── дані форми ── */
+function collect(){
+  var L=RECIPIENTS[document.getElementById("lawyer").value];
+  var sex=document.getElementById("csex").value;
+  var g=(sex==="Жіноча")?"а":"ий";
+  return {
+    L:L, sex:sex, gsuf:g,
+    contractNo:contractNo(),
+    annexNo:document.getElementById("annexno").value||"1",
+    invNo:document.getElementById("invno").value||"0001",
+    dateLong:dateLong(),
+    cname:document.getElementById("cname").value.trim(),
+    cbirth:dateShort(document.getElementById("cbirth").value),
+    caddr:document.getElementById("caddr").value.trim(),
+    ctax:document.getElementById("ctax").value.trim(),
+    cphone:document.getElementById("cphone").value.trim(),
+    cemail:document.getElementById("cemail").value.trim(),
+    subject:document.getElementById("subject").value.trim(),
+    fee:document.getElementById("fee").value.trim().replace(",","."),
+    invsum:(document.getElementById("invsum").value.trim()||document.getElementById("fee").value.trim()).replace(",",".")
+  };
+}
+
+/* ── шаблони ── */
+function renderContract(d){
+  var L=d.L;
+  var clientLine = esc(d.cname)+", "+d.cbirth+" року народження"
+    + (d.ctax?", реєстраційний номер облікової картки платника податків "+esc(d.ctax):"")
+    + (d.caddr?", зареєстрован"+d.gsuf+" за адресою: "+esc(d.caddr):"")
+    + ", надалі «Клієнт»";
+  return `
+    <h2>Договір № ${esc(d.contractNo)}<br>про надання правової допомоги</h2>
+    <div class="place"><span>м. Київ</span><span>${d.dateLong}</span></div>
+    <p>Адвокат ${esc(L.short)}, який здійснює адвокатську діяльність на підставі свідоцтва про право на заняття адвокатською діяльністю ${esc(L.cert)}, надалі «Адвокат», з однієї сторони, та ${clientLine}, з іншої сторони, а разом — «Сторони», уклали цей Договір про таке:</p>
+
+    <h3>1. Предмет договору</h3>
+    <p class="clause">1.1. Клієнт доручає, а Адвокат приймає на себе зобов'язання надати правову (правничу) допомогу з наступних питань: ${esc(d.subject||"________________________________________")}.</p>
+    <p class="clause">1.2. Конкретний обсяг, зміст, порядок і строки надання правової допомоги визначаються Сторонами у додаткових угодах до цього Договору, які є його невід'ємною частиною.</p>
+    <p class="clause">1.3. Правова допомога надається у формах, передбачених Законом України «Про адвокатуру та адвокатську діяльність».</p>
+
+    <h3>2. Права та обов'язки Сторін</h3>
+    <p class="clause">2.1. Адвокат зобов'язується: сумлінно та кваліфіковано надавати правову допомогу; дотримуватися вимог законодавства, Правил адвокатської етики; використовувати всі законні засоби для захисту прав та інтересів Клієнта; зберігати адвокатську таємницю; інформувати Клієнта про хід виконання доручення.</p>
+    <p class="clause">2.2. Адвокат має право: одержувати від Клієнта необхідні документи та інформацію; залучати за згодою Клієнта інших фахівців; відмовитися від доручення у випадках, передбачених законом.</p>
+    <p class="clause">2.3. Клієнт зобов'язується: своєчасно надавати достовірні документи, відомості та повноваження, необхідні для виконання доручення; сплатити гонорар у порядку та строки, встановлені цим Договором.</p>
+    <p class="clause">2.4. Клієнт має право отримувати інформацію про хід виконання доручення.</p>
+
+    <h3>3. Гонорар та порядок розрахунків</h3>
+    <p class="clause">3.1. За надання правової допомоги за цим Договором Клієнт сплачує Адвокату гонорар у розмірі ${d.fee?fmt(d.fee):"__________"} грн (${d.fee?hryvniaWords(d.fee):"________________"}).</p>
+    <p class="clause">3.2. Оплата гонорару здійснюється у розмірі 100% впродовж 5 (п'яти) днів з моменту підписання відповідної додаткової угоди, шляхом перерахування коштів на рахунок Адвоката, зазначений у розділі 8 цього Договору.</p>
+    <p class="clause">3.3. Гонорар є фіксованим і не залежить від результату розгляду справи. Фактичні витрати (судовий збір, послуги експертів тощо) сплачуються Клієнтом окремо.</p>
+
+    <h3>4. Конфіденційність. Адвокатська таємниця</h3>
+    <p class="clause">4.1. Будь-яка інформація, що стала відома Адвокату у зв'язку з виконанням цього Договору, є адвокатською таємницею та не підлягає розголошенню.</p>
+
+    <h3>5. Відповідальність Сторін</h3>
+    <p class="clause">5.1. За невиконання або неналежне виконання зобов'язань Сторони несуть відповідальність згідно з чинним законодавством України.</p>
+    <p class="clause">5.2. Адвокат не несе відповідальності за наслідки, спричинені наданням Клієнтом недостовірних відомостей чи документів.</p>
+
+    <h3>6. Строк дії, зміни та розірвання</h3>
+    <p class="clause">6.1. Договір набирає чинності з моменту підписання і діє до повного виконання Сторонами своїх зобов'язань.</p>
+    <p class="clause">6.2. Усі зміни та доповнення вносяться за письмовою згодою Сторін. Договір може бути розірваний у порядку, передбаченому законодавством.</p>
+    <p class="clause">6.3. Договір складено українською мовою у двох примірниках, що мають однакову юридичну силу, по одному для кожної зі Сторін.</p>
+
+    <h3>7. Реквізити та підписи Сторін</h3>
+    <div class="sign">
+      <div class="col">
+        <b>Адвокат</b><br>
+        ${esc(L.name)}<br>
+        РНОКПП ${esc(L.taxId)}<br>
+        IBAN ${esc(L.iban)}<br>
+        ${esc(L.bank)}<br>
+        тел. ${esc(L.phone)}<br>
+        ${esc(L.email)}
+        <div class="line">${esc(L.short)}</div>
+      </div>
+      <div class="col">
+        <b>Клієнт</b><br>
+        ${esc(d.cname)}<br>
+        ${d.ctax?"РНОКПП "+esc(d.ctax)+"<br>":""}
+        ${d.caddr?esc(d.caddr)+"<br>":""}
+        ${d.cphone?"тел. "+esc(d.cphone)+"<br>":""}
+        ${d.cemail?esc(d.cemail):""}
+        <div class="line">${esc(d.cname)}</div>
+      </div>
+    </div>`;
+}
+
+function renderAnnex(d){
+  return `
+    <h2>Додаткова угода № ${esc(d.annexNo)}<br>до Договору № ${esc(d.contractNo)} від ${d.dateLong}</h2>
+    <div class="place"><span>м. Київ</span><span>${d.dateLong}</span></div>
+    <p>Адвокат ${esc(d.L.short)} («Адвокат») та ${esc(d.cname)} («Клієнт»), уклали цю Додаткову угоду про таке:</p>
+    <p class="clause">1. На виконання п. 1.1 Договору Адвокат надає Клієнту правову допомогу з питань: ${esc(d.subject||"________________________________________")}.</p>
+    <p class="clause">2. Розмір гонорару за цією Додатковою угодою становить ${d.fee?fmt(d.fee):"__________"} грн (${d.fee?hryvniaWords(d.fee):"________________"}).</p>
+    <p class="clause">3. Клієнт сплачує гонорар у розмірі 100% впродовж 5 (п'яти) днів з моменту підписання цієї Додаткової угоди.</p>
+    <p class="clause">4. Ця Додаткова угода є невід'ємною частиною Договору № ${esc(d.contractNo)} та набирає чинності з моменту підписання.</p>
+    <p class="clause">5. В усьому іншому, що не передбачено цією Угодою, Сторони керуються Договором.</p>
+    <div class="sign">
+      <div class="col"><b>Адвокат</b><div class="line">${esc(d.L.short)}</div></div>
+      <div class="col"><b>Клієнт</b><div class="line">${esc(d.cname)}</div></div>
+    </div>`;
+}
+
+function renderInvoice(d){
+  var L=d.L, sum=d.invsum||d.fee||"0";
+  return `
+    <div class="inv-head">
+      <div class="inv-brand">АДВОКАТ ОСАДЬКО<small>Правова допомога</small></div>
+      <div class="inv-no"><div class="n">Рахунок-фактура № ${esc(d.invNo)}</div><div class="d">від ${dateShort(document.getElementById("docdate").value)}</div></div>
+    </div>
+    <div class="inv-parties">
+      <div><div class="k">Виконавець</div>${esc(L.name)}<br>РНОКПП ${esc(L.taxId)}<br>IBAN ${esc(L.iban)}<br>${esc(L.bank)}<br>тел. ${esc(L.phone)}</div>
+      <div><div class="k">Замовник</div>${esc(d.cname)||"—"}${d.ctax?"<br>РНОКПП "+esc(d.ctax):""}${d.caddr?"<br>"+esc(d.caddr):""}</div>
+    </div>
+    <table class="inv">
+      <thead><tr><th style="width:34px">№</th><th>Найменування послуги</th><th style="width:110px">Сума, грн</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td>Правова (правнича) допомога згідно з Договором № ${esc(d.contractNo)}${d.subject?": "+esc(d.subject):""}</td><td class="num">${fmt(sum)}</td></tr>
+      </tbody>
+    </table>
+    <div class="inv-total">Разом до сплати: <b>${fmt(sum)} грн</b></div>
+    <div class="inv-words">Усього на суму: ${hryvniaWords(sum)}.</div>
+    <div class="inv-foot">Без ПДВ. Оплата: перерахуванням на IBAN Виконавця. Призначення платежу: «Сплата за юридичні послуги без ПДВ, згідно з рахунком № ${esc(d.invNo)}».</div>`;
+}
+
+/* ── генерація ── */
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._tm);t._tm=setTimeout(function(){t.classList.remove("show");},1400);}
+function copy(text,label){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){toast(label);},function(){fb();});}else fb();
+  function fb(){var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast(label);}catch(e){}document.body.removeChild(ta);}
+}
+function showErr(m){var e=document.getElementById("err");e.textContent=m;e.classList.remove("hidden");}
+
+document.getElementById("make").addEventListener("click",function(){
+  document.getElementById("err").classList.add("hidden");
+  var d=collect();
+  if(!d.cname){showErr("Вкажіть ПІБ клієнта.");return;}
+  if(d.fee && !/^\d+(\.\d{1,2})?$/.test(d.fee)){showErr("Гонорар — некоректне число.");return;}
+  if(d.invsum && !/^\d+(\.\d{1,2})?$/.test(d.invsum)){showErr("Сума рахунку — некоректне число.");return;}
+
+  document.getElementById("doc-contract").innerHTML=renderContract(d);
+  document.getElementById("doc-annex").innerHTML=renderAnnex(d);
+  document.getElementById("doc-invoice").innerHTML=renderInvoice(d);
+
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("output").classList.remove("hidden");
+  window.scrollTo(0,0);
+
+  /* посилання на оплату */
+  var sum=d.invsum||d.fee;
+  var payCard=document.getElementById("pay-card");
+  if(sum && /^\d+(\.\d{1,2})?$/.test(sum) && parseFloat(sum)>0){
+    payCard.classList.remove("hidden");
+    makePayLink(sum, document.getElementById("lawyer").value).then(function(url){
+      var msg="Добрий день! Надсилаємо рахунок № "+d.invNo+" на оплату юридичних послуг — "+fmt(sum)+" грн.\n"+
+              "Оплатити зручно за посиланням (картка або банківський застосунок):\n"+url+"\n\n"+SIGNATURE;
+      document.getElementById("pay-msg").value=msg;
+    });
+  }else{ payCard.classList.add("hidden"); }
+});
+
+document.getElementById("back").addEventListener("click",function(){
+  document.getElementById("output").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  window.scrollTo(0,0);
+});
+document.getElementById("copy-pay").addEventListener("click",function(){copy(document.getElementById("pay-msg").value,"Скопійовано");});
+
+document.getElementById("print-all").addEventListener("click",function(){window.print();});
+Array.prototype.forEach.call(document.querySelectorAll("[data-print]"),function(b){
+  b.addEventListener("click",function(){
+    var cls="only-"+b.getAttribute("data-print");
+    document.body.classList.add(cls);
+    var clear=function(){document.body.classList.remove(cls);window.removeEventListener("afterprint",clear);};
+    window.addEventListener("afterprint",clear);
+    window.print();
+    setTimeout(clear,1000);
+  });
+});
+</script>
+</body>
+</html>

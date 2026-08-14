@@ -195,10 +195,10 @@ function makeLink(f){
   if(window.CompressionStream){
     var s=new Blob([new TextEncoder().encode(text)]).stream().pipeThrough(new CompressionStream("deflate-raw"));
     return new Response(s).arrayBuffer().then(function(buf){
-      return location.origin+"/pay/#z"+bytesToB64u(new Uint8Array(buf));
+      return location.origin+"/p/#z"+bytesToB64u(new Uint8Array(buf));
     });
   }
-  return Promise.resolve(location.origin+"/pay/#c"+textToB64u(text));
+  return Promise.resolve(location.origin+"/p/#c"+textToB64u(text));
 }
 
 function buildMessage(service, amount, link){
