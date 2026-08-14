@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Створити посилання на оплату</title>
+<link rel="icon" type="image/png" href="/assets/logo-mark.png">
+<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+:root{
+  --bg:#dce2f0; --card:#ffffff; --ink:#0b1f3a; --muted:#5a6b82; --faint:#8a97a8;
+  --line:#e4e8f4; --blue:#1e50e6; --green:#1f9d55;
+  --field:#f4f7fc; --hover:#eef2fb;
+  --shadow:0 1px 2px rgba(11,31,58,.06),0 8px 24px rgba(11,31,58,.06);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#25324c; --card:#33456a; --ink:#f2f6fd; --muted:#b4c2d9; --faint:#8fa0bd;
+  --line:#46597d; --blue:#6f8dff; --green:#4ade80; --field:#2b3b5c; --hover:#3d4f75;
+  --shadow:0 1px 2px rgba(0,0,0,.2),0 8px 24px rgba(0,0,0,.28);
+}}
+:root[data-theme="dark"]{
+  --bg:#25324c; --card:#33456a; --ink:#f2f6fd; --muted:#b4c2d9; --faint:#8fa0bd;
+  --line:#46597d; --blue:#6f8dff; --green:#4ade80; --field:#2b3b5c; --hover:#3d4f75;
+  --shadow:0 1px 2px rgba(0,0,0,.2),0 8px 24px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.5;-webkit-font-smoothing:antialiased;
+  padding:env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 24px)}
+.wrap{max-width:440px;margin:0 auto;padding:18px 16px 0}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);
+  font-weight:600;font-size:15px;margin-bottom:16px}
+.brand img{width:30px;height:30px;border-radius:7px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+  box-shadow:var(--shadow);padding:22px;margin-bottom:14px}
+h1{font-size:20px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+label{display:block;font-size:12px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--faint);font-weight:700;margin:0 0 6px}
+.f{margin-bottom:16px}
+input,select{width:100%;background:var(--field);border:1px solid var(--line);
+  border-radius:12px;padding:13px 14px;font-size:16px;color:var(--ink);
+  font-family:inherit;-webkit-appearance:none;appearance:none}
+input:focus,select:focus{outline:2.5px solid var(--blue);outline-offset:1px;border-color:transparent}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%235a6b82' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:40px}
+.btn{width:100%;background:var(--blue);color:#fff;border:0;border-radius:13px;
+  padding:15px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;
+  transition:filter .12s,transform .04s}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:scale(.99)}
+.result{margin-top:4px}
+.result.hidden{display:none}
+.link-box{display:flex;gap:8px;align-items:stretch;margin-top:8px}
+.link-box input{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.cp{flex:none;background:var(--field);border:1px solid var(--line);border-radius:11px;
+  width:48px;display:grid;place-items:center;cursor:pointer;color:var(--muted);font-size:18px}
+.cp:hover{background:var(--hover);color:var(--blue)}
+.actions{display:flex;gap:10px;margin-top:10px}
+.actions a{flex:1;text-align:center;text-decoration:none;font-weight:600;font-size:14.5px;
+  padding:11px;border-radius:11px;border:1px solid var(--line);color:var(--blue);background:var(--field)}
+.hint{color:var(--faint);font-size:12.5px;margin-top:10px;line-height:1.5}
+.err{color:#c0392b;font-size:13.5px;margin-top:8px;font-weight:600}
+.err.hidden{display:none}
+:focus-visible{outline:2.5px solid var(--blue);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 22px);
+  transform:translateX(-50%) translateY(14px);background:var(--ink);color:var(--card);
+  padding:10px 18px;border-radius:11px;font-size:14px;font-weight:600;opacity:0;
+  pointer-events:none;transition:opacity .18s,transform .18s;z-index:50}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="brand" href="/"><img src="/assets/logo-mark.png" alt=""> Адвокат Осадько</a>
+  <div class="card">
+    <h1>Посилання на оплату</h1>
+    <p class="sub">Заповніть — отримаєте посилання для клієнта. Дані рахунку зашиваються у фрагмент <code>#</code> і на сервер не йдуть.</p>
+
+    <div class="f">
+      <label for="amount">Сума, ₴</label>
+      <input id="amount" type="text" inputmode="decimal" placeholder="7000" autocomplete="off">
+    </div>
+    <div class="f">
+      <label for="recipient">Отримувач</label>
+      <select id="recipient"></select>
+    </div>
+    <div class="f">
+      <label for="service">Послуга</label>
+      <input id="service" type="text" autocomplete="off">
+    </div>
+    <div class="f">
+      <label for="purpose">Призначення платежу</label>
+      <input id="purpose" type="text" autocomplete="off">
+    </div>
+
+    <button class="btn" id="make" type="button">Створити посилання</button>
+    <div class="err hidden" id="err"></div>
+
+    <div class="result hidden" id="result">
+      <div class="link-box">
+        <input id="link" type="text" readonly>
+        <button class="cp" id="copy" type="button" aria-label="Скопіювати посилання">⧉</button>
+      </div>
+      <div class="actions">
+        <a id="open" href="#" target="_blank" rel="noopener">Відкрити ↗</a>
+      </div>
+      <p class="hint">Скопійоване посилання надішліть клієнту в месенджер. Він відкриє його на телефоні й обере свій банк.</p>
+    </div>
+  </div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ── Довідник отримувачів (дублюється у /pay/) ── */
+var RECIPIENTS = {
+  fop: {
+    name: "ФОП Осадько Олександр Олексійович",
+    iban: "UA893220010000026006330098695",
+    bank: "АТ «УНІВЕРСАЛ БАНК»",
+    taxId: "3336210592",
+    phone: "+380934664443"
+  }
+};
+var DEFAULTS = {
+  recipient: "fop",
+  service: "Юридична консультація",
+  purpose: "Сплата за юридичні послуги без ПДВ"
+};
+
+function bytesToB64u(bytes){var b="";for(var i=0;i<bytes.length;i++)b+=String.fromCharCode(bytes[i]);
+  return btoa(b).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
+function textToB64u(str){return bytesToB64u(new TextEncoder().encode(str));}
+
+/* заповнити випадайку отримувачів */
+(function(){
+  var sel=document.getElementById("recipient");
+  Object.keys(RECIPIENTS).forEach(function(key){
+    var o=document.createElement("option");o.value=key;o.textContent=RECIPIENTS[key].name;sel.appendChild(o);
+  });
+  sel.value=DEFAULTS.recipient;
+  document.getElementById("service").value=DEFAULTS.service;
+  document.getElementById("purpose").value=DEFAULTS.purpose;
+})();
+
+function makeLink(f){
+  /* порожній рядок = значення за замовчуванням → коротше посилання */
+  var text=[
+    f.amount,
+    f.recipient===DEFAULTS.recipient ? "" : f.recipient,
+    f.service.trim()===DEFAULTS.service ? "" : f.service.trim(),
+    f.purpose.trim()===DEFAULTS.purpose ? "" : f.purpose.trim()
+  ].join("\n");
+
+  if(window.CompressionStream){
+    var s=new Blob([new TextEncoder().encode(text)]).stream().pipeThrough(new CompressionStream("deflate-raw"));
+    return new Response(s).arrayBuffer().then(function(buf){
+      return location.origin+"/pay/#z"+bytesToB64u(new Uint8Array(buf));
+    });
+  }
+  return Promise.resolve(location.origin+"/pay/#c"+textToB64u(text));
+}
+
+var toastTimer=null;
+function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove("show");},1400);}
+function copy(text){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){toast("Скопійовано");},function(){fb(text);});
+  }else{fb(text);}
+  function fb(t){var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";
+    document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("Скопійовано");}catch(e){}document.body.removeChild(ta);}
+}
+
+function showErr(msg){var e=document.getElementById("err");e.textContent=msg;e.classList.remove("hidden");
+  document.getElementById("result").classList.add("hidden");}
+function clearErr(){document.getElementById("err").classList.add("hidden");}
+
+document.getElementById("make").addEventListener("click",function(){
+  clearErr();
+  var amount=document.getElementById("amount").value.trim().replace(",",".");
+  if(!/^\d+(\.\d{1,2})?$/.test(amount) || parseFloat(amount)<=0){
+    showErr("Вкажіть коректну суму, наприклад 7000 або 7000.50");return;
+  }
+  var f={
+    amount:amount,
+    recipient:document.getElementById("recipient").value,
+    service:document.getElementById("service").value,
+    purpose:document.getElementById("purpose").value
+  };
+  makeLink(f).then(function(url){
+    document.getElementById("link").value=url;
+    document.getElementById("open").href=url;
+    document.getElementById("result").classList.remove("hidden");
+    copy(url);
+  });
+});
+
+document.getElementById("copy").addEventListener("click",function(){
+  copy(document.getElementById("link").value);
+});
+</script>
+</body>
+</html>
