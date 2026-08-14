@@ -145,9 +145,16 @@ table.inv td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:
   body{background:#fff}
   .app,.toolbar,.pay-card,.head,.noprint{display:none!important}
   .wrap{max-width:none;padding:0;margin:0}
+  #output{max-width:none;margin:0}
   .documents{display:block}
-  .document{box-shadow:none;border-radius:0;padding:0;margin:0;font-size:12px;page-break-after:always}
+  .document{box-shadow:none;border-radius:0;padding:0;margin:0;font-size:12px;overflow:visible;page-break-after:always}
   .document:last-child{page-break-after:auto}
+  /* нерозривні блоки — не розривати між сторінками */
+  .document h3{break-after:avoid;page-break-after:avoid}
+  .document .clause{break-inside:avoid;page-break-inside:avoid}
+  .document .reqs{break-inside:avoid;page-break-inside:avoid}
+  .document .reqs .party{break-inside:avoid;page-break-inside:avoid}
+  .inv2 table,.inv2 tr,.inv2 .total{break-inside:avoid;page-break-inside:avoid}
   body.only-contract .document:not(#doc-contract){display:none}
   body.only-annex .document:not(#doc-annex){display:none}
   body.only-invoice .document:not(#doc-invoice){display:none}
