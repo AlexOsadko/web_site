@@ -431,7 +431,7 @@ function renderContract(d){
 
 function renderAnnex(d){
   var ds=dateShort(document.getElementById("docdate").value);
-  var feeStr = d.fee?fmtSum(d.fee)+" грн ("+hryvniaWords(d.fee).toLowerCase()+")":"__________ грн (___________________________________________)";
+  var feeStr = d.fee?fmtUAH(d.fee)+" грн ("+hryvniaWords(d.fee).toLowerCase()+")":"__________ грн (___________________________________________)";
   return `
     <h2>Додаткова угода № ${esc(d.annexNo)}<br>до Договору про надання правничої допомоги № ${esc(d.contractNo)} від ${ds}</h2>
     <div class="place"><span>м. Київ</span><span>${ds}</span></div>
@@ -461,6 +461,7 @@ function renderAnnex(d){
 function invInitials(short){var p=short.trim().split(/\s+/);return p[0]+" "+(p[1]?p[1].charAt(0)+".":"")+(p[2]?p[2].charAt(0)+".":"");}
 function dateWordsPlain(v){var d=v?new Date(v):new Date();return d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear()+" р.";}
 function fmtSum(a){var n=parseFloat(a);if(n%1===0)return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g," ");return fmt(a);}
+function fmtUAH(a){var p=parseFloat(a).toFixed(2).split(".");p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g," ");return p[0]+","+p[1];}
 function renderInvoice(d){
   var L=d.L, sum=d.invsum||d.fee||"0", dv=document.getElementById("docdate").value, dShort=dateShort(dv);
   var client="<b>"+esc(d.cname||"—")+"</b><br>"+
@@ -486,9 +487,9 @@ function renderInvoice(d){
     </table>
     <table>
       <thead><tr><th style="width:40px">№ п/п</th><th>Призначення платежу</th><th style="width:66px">Кількість</th><th style="width:86px">Сума, грн</th></tr></thead>
-      <tbody><tr><td style="text-align:center">1</td><td>${purpose}</td><td style="text-align:center">1</td><td class="num">${fmtSum(sum)}</td></tr></tbody>
+      <tbody><tr><td style="text-align:center">1</td><td>${purpose}</td><td style="text-align:center">1</td><td class="num">${fmtUAH(sum)}</td></tr></tbody>
     </table>
-    <div class="total">Загальна сума: <b>${fmtSum(sum)}</b><br><span class="words">(${hryvniaWords(sum).toLowerCase()})</span></div>
+    <div class="total">Загальна сума: <b>${fmtUAH(sum)}</b><br><span class="words">(${hryvniaWords(sum).toLowerCase()})</span></div>
     <div class="sign">Виписав: &nbsp;__________________&nbsp; ${invInitials(L.short)}</div>
   </div>`;
 }
