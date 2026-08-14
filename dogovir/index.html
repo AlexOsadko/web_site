@@ -471,6 +471,7 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
           <div class="ctype">
             <label class="ctype-opt on"><input type="radio" name="paymode" value="fixed" checked> Фіксована вартість</label>
             <label class="ctype-opt"><input type="radio" name="paymode" value="hourly"> Погодинна оплата</label>
+            <label class="ctype-opt"><input type="radio" name="paymode" value="probono"> Pro bono (безоплатно)</label>
           </div>
           <div class="sub-hint" id="paymode_hint"></div>
         </div>
@@ -541,7 +542,7 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
         </div>
 
         <!-- Спільні поля суми -->
-        <div class="cost-grid" style="margin-top:12px">
+        <div class="cost-grid" id="cost_fixed" style="margin-top:12px">
           <div class="field">
             <label for="f_cost">Сума, грн<span class="req">*</span><span class="auto-badge" id="cost_auto" style="display:none">авто</span></label>
             <input type="text" id="f_cost" class="mono" data-key="Вартість_послуг_грн" inputmode="decimal" placeholder="25 000,00" autocomplete="off">
@@ -554,6 +555,7 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
           </div>
         </div>
 
+        <div id="pay_order_block">
         <div class="divider"></div>
 
         <div class="mini-h">Порядок оплати гонорару</div>
@@ -601,6 +603,10 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
             Додати пункт про співмірність гонорару (ст. 30 ЗУ «Про адвокатуру…», ч. 4 ст. 126 ГПК / ч. 4 ст. 137 ЦПК)
           </label>
           <div class="sub-hint">«Сторони підтверджують, що зазначена вартість наданих послуг є співмірною із складністю справи, наданими послугами, їх обсягом і витраченим на них часом…»</div>
+        </div>
+        </div>
+        <div id="probono_note" class="sub-hint" style="display:none;margin-top:4px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.02)">
+          <b>Pro bono.</b> Правнича допомога надається безоплатно: у Додатковій угоді зазначається, що Адвокат не отримує гонорару, а порядок оплати й пункт про співмірність не додаються. Рахунок-фактура не формується, сума не потрібна.
         </div>
       </div>
     </section>
@@ -954,6 +960,7 @@ let shortEdited=false, wordsEdited=false, rateEdited=false, payEdited=false;
 
 function payMode(){ const r=document.querySelector('input[name="paymode"]:checked'); return r?r.value:"fixed"; }
 function isHourly(){ return payMode()==="hourly"; }
+function isProBono(){ return payMode()==="probono"; }
 function rateVal(){ const v=parseNum($("#f_rate").value); return (v&&v>0)?v:0; }
 
 /* ---------- render services ---------- */
@@ -1242,13 +1249,24 @@ $("#f_auto_calc").addEventListener("change",()=>{
 
 /* ---------- модель оплати ---------- */
 function applyPayMode(){
-  const hourly=isHourly();
+  const hourly=isHourly(), pb=isProBono();
   $("#cost_hourly").style.display = hourly ? "" : "none";
+  $("#cost_fixed").style.display = pb ? "none" : "";
+  $("#pay_order_block").style.display = pb ? "none" : "";
+  $("#probono_note").style.display = pb ? "" : "none";
   $$('input[name="paymode"]').forEach(r=>r.closest(".ctype-opt").classList.toggle("on",r.checked));
-  $("#paymode_hint").textContent = hourly
-    ? "У Додатковій угоді та Акті формується таблиця: № з/п · найменування послуги · витрачений час · гонорар · загальна сума."
-    : "У Додатковій угоді зазначається єдина фіксована сума, а перелік послуг подається списком.";
+  $("#paymode_hint").textContent = pb
+    ? "Правнича допомога надається безоплатно (pro bono): гонорар не нараховується, Рахунок-фактура не формується."
+    : (hourly
+      ? "У Додатковій угоді та Акті формується таблиця: № з/п · найменування послуги · витрачений час · гонорар · загальна сума."
+      : "У Додатковій угоді зазначається єдина фіксована сума, а перелік послуг подається списком.");
   if(hourly && !$("#f_rate").value.trim() && !rateEdited){ $("#f_rate").value=fmtMoney(RATE_DEFAULT); markFilled($("#f_rate")); }
+  /* Рахунок-фактура несумісний з pro bono — знімаємо позначку й блокуємо її */
+  const rah=$("#p_rahunok");
+  if(rah){
+    if(pb){ if(rah.checked){ rah.checked=false; rah.dispatchEvent(new Event("change",{bubbles:true})); } rah.disabled=true; const w=rah.closest(".ctype-opt"); if(w) w.style.opacity=".45"; }
+    else { rah.disabled=false; const w=rah.closest(".ctype-opt"); if(w) w.style.opacity=""; }
+  }
   updateRateHint();
   renderServices();
   syncTotals();
@@ -1356,14 +1374,16 @@ function missingFields(){
   const miss=[];
   requiredList().forEach(([id,lbl])=>{ if(!$("#"+id).value.trim()) miss.push(lbl); });
   if(services.filter(s=>String(s.t).trim()).length===0) miss.push("хоча б одна послуга");
-  if(isHourly()){
+  if(isProBono()){
+    /* безоплатно — сума, ставка й порядок оплати не потрібні */
+  }else if(isHourly()){
     if(!rateVal()) miss.push("ставка за годину");
     const sum=activeRows().reduce((x,r)=>x+(r.a||0),0);
     if(sum<=0) miss.push("гонорар у пунктах переліку");
   }else{
     if(!$("#f_cost").value.trim()) miss.push("сума");
   }
-  if(!$("#f_pay_text").value.trim()) miss.push("порядок оплати");
+  if(!isProBono() && !$("#f_pay_text").value.trim()) miss.push("порядок оплати");
   return miss;
 }
 function updateRecap(){
@@ -1371,8 +1391,12 @@ function updateRecap(){
   const rec=$("#recap");
   if(miss.length===0){
     const name=clientName()||"Клієнт";
-    const mode=isHourly()?"погодинна":"фіксована";
-    rec.innerHTML=`Готово до формування: договір №<b>${xmlEsc($("#f_num").value.trim())}</b> · <b>${xmlEsc(name)}</b> · ${services.filter(s=>String(s.t).trim()).length} послуг · оплата <b>${mode}</b> · <b>${xmlEsc($("#f_cost").value.trim())}</b> грн`;
+    const pb=isProBono();
+    const mode = pb ? "pro bono" : (isHourly()?"погодинна":"фіксована");
+    const nsvc = services.filter(s=>String(s.t).trim()).length;
+    rec.innerHTML = pb
+      ? `Готово до формування: договір №<b>${xmlEsc($("#f_num").value.trim())}</b> · <b>${xmlEsc(name)}</b> · ${nsvc} послуг · <b>pro bono</b> (безоплатно)`
+      : `Готово до формування: договір №<b>${xmlEsc($("#f_num").value.trim())}</b> · <b>${xmlEsc(name)}</b> · ${nsvc} послуг · оплата <b>${mode}</b> · <b>${xmlEsc($("#f_cost").value.trim())}</b> грн`;
   }else{
     rec.innerHTML=`Заповніть: ${miss.map(m=>xmlEsc(m)).join(", ")}.`;
   }
@@ -1659,7 +1683,18 @@ function fillTemplateXml(xml, D){
   xml=fillFeeTable(xml, D.actRows, D.totalAct);
 
   /* 3. пункт про вартість */
-  if(D.mode==="fixed"){
+  if(D.mode==="probono"){
+    /* Безоплатно: замість суми — пункт про pro bono; порядок оплати вилучаємо. */
+    xml=dropParagraph(xml,"«Ставка»");
+    xml=setRunText(xml,"«Вартість_послуг_прописом»",2,"");
+    xml=setRunText(xml,"«Вартість_послуг_прописом»",0, typographyText(
+      "Правнича (правова) допомога за цією Додатковою угодою надається Клієнту безоплатно (pro bono). "+
+      "Адвокат не отримує винагороди за надання правничої (правової) допомоги за цією Додатковою угодою. "+
+      "Клієнт відшкодовує лише фактичні витрати, безпосередньо пов'язані з наданням допомоги "+
+      "(судовий збір, витрати на експертизи, переклади тощо), за наявності та документального підтвердження таких витрат."));
+    xml=setRunText(xml,"«Вартість_послуг_прописом»",1,"");
+    xml=dropParagraph(xml,"«Порядок_оплати»");
+  }else if(D.mode==="fixed"){
     xml=dropParagraph(xml,"«Ставка»");
     xml=setRunText(xml,"«Вартість_послуг_прописом»",0,
       "Вартість правничої (правової) допомоги за цією Додатковою угодою встановлюється у фіксованому розмірі та складає: ");
@@ -1713,6 +1748,7 @@ async function prepareDoc(){
   const v = id => { const el=$("#"+id); return el ? el.value.trim() : ""; };
   const rows=activeRows();
   const hourly=isHourly();
+  const pb=isProBono();
   const act=hourly ? actRows(rows) : rows;
   /* Акт: до кожної позиції дописуємо № справи (якщо задано й ще не згадано) —
      дієслівне формулювання + прив'язка до справи важливі для стягнення витрат
@@ -1735,13 +1771,13 @@ async function prepareDoc(){
   const D={
     agrNo: v("f_agr_no")||"1",
     actNo: v("f_act_no")||"1",
-    mode: hourly ? "hourly" : "fixed",
-    propor: $("#f_pay_propor") ? $("#f_pay_propor").checked : false,
-    payText: v("f_pay_text"),
+    mode: pb ? "probono" : (hourly ? "hourly" : "fixed"),
+    propor: pb ? false : ($("#f_pay_propor") ? $("#f_pay_propor").checked : false),
+    payText: pb ? "" : v("f_pay_text"),
     rows: rows,
     actRows: actNamed,
-    totalAgr: hourly ? fmtMoney(sumRows(rows)) : costStr,
-    totalAct: hourly ? fmtMoney(sumRows(act))  : costStr,
+    totalAgr: pb ? "0,00" : (hourly ? fmtMoney(sumRows(rows)) : costStr),
+    totalAct: pb ? "0,00" : (hourly ? fmtMoney(sumRows(act))  : costStr),
     hoursText: hoursText,
     vals:{
       "Номер_договору":          v("f_num"),
@@ -1978,6 +2014,7 @@ function addRegistryRow(){
   const rows=activeRows();
   const hours=rows.reduce((x,r)=>x+(r.h||0),0);
   const hourly=isHourly();
+  const pb=isProBono();
   const row={
     "Дата укладення": fmtDate($("#f_date").value,true),
     "Номер договору": $("#f_num").value.trim(),
@@ -1992,14 +2029,14 @@ function addRegistryRow(){
     "Зміст додаткової угоди": hourly
       ? rows.map(r=>`${r.t}${r.unit?` (${r.unit})`:""}${r.h?` — ${fmtHours(r.h)} год.`:""}${r.a?` — ${r.aTxt} грн`:""}`).join("; ")
       : rows.map(r=>r.t).join("; "),
-    "Модель оплати": hourly ? "Погодинна" : "Фіксована",
+    "Модель оплати": pb ? "Pro bono (безоплатно)" : (hourly ? "Погодинна" : "Фіксована"),
     "Ставка, грн/год": hourly ? fmtMoney(rateVal()) : "",
     "Годин разом": hourly ? fmtHours(hours) : "",
     "№ акта": $("#f_act_no").value.trim()||"1",
-    "№ рахунку": $("#f_inv_no").value.trim()||"001",
-    "Сума, грн": $("#f_cost").value.trim(),
-    "Сума прописом": $("#f_cost_words").value.trim(),
-    "Порядок оплати": $("#f_pay_text").value.trim()
+    "№ рахунку": pb ? "" : ($("#f_inv_no").value.trim()||"001"),
+    "Сума, грн": pb ? "безоплатно" : $("#f_cost").value.trim(),
+    "Сума прописом": pb ? "" : $("#f_cost_words").value.trim(),
+    "Порядок оплати": pb ? "Pro bono — правнича допомога надається безоплатно" : $("#f_pay_text").value.trim()
   };
   registry.push({row, snap:snapshot()});
   renderRegistry();
