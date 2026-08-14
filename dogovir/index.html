@@ -1868,6 +1868,30 @@ const SNAP_SHEET="Дані для повторного формування";
 let registry=[];
 const regKey=r=>["Номер договору","Дата укладення","Клієнт"].map(k=>String(r[k]||"").trim()).join("|");
 
+/* ---- автозбереження реєстру у браузері (localStorage, під доменом сайту) ---- */
+const REG_LS_KEY="osadko_dogovir_registry_v1";
+function saveRegistry(){
+  try{
+    localStorage.setItem(REG_LS_KEY, JSON.stringify(registry));
+  }catch(err){
+    // ймовірно переповнено сховище — зберігаємо без знімків форми (компактніше)
+    try{
+      localStorage.setItem(REG_LS_KEY, JSON.stringify(registry.map(e=>({row:e.row, snap:null}))));
+      toast("Реєстр збережено, але без даних для повторного формування (замало місця у браузері). Раджу експортувати .xlsx.", true);
+    }catch(e2){
+      toast("Не вдалося зберегти реєстр у браузері (переповнено). Експортуйте .xlsx, щоб не втратити записи.", true);
+    }
+  }
+}
+function loadRegistry(){
+  try{
+    const raw=localStorage.getItem(REG_LS_KEY);
+    if(!raw) return;
+    const arr=JSON.parse(raw);
+    if(Array.isArray(arr)) registry=arr.filter(e=>e && e.row);
+  }catch(err){ /* пошкоджені дані — ігноруємо */ }
+}
+
 /* ---- знімок і відновлення стану форми ---- */
 const SNAP_IDS=["f_num","f_date","f_name","f_short","f_birth","f_addr","f_rnokpp","f_pass","f_basis_fop",
   "f_org","f_edrpou","f_repr_short","f_orgaddr","f_repr_pos","f_repr_pib","f_basis","f_repr_rnokpp",
@@ -1935,6 +1959,7 @@ function addRegistryRow(){
 }
 
 function renderRegistry(){
+  saveRegistry();
   $("#reg_count").textContent = registry.length;
   const empty=$("#reg_empty"), tbl=$("#reg_table"), tb=$("#reg_tbody");
   if(registry.length===0){ empty.style.display=""; tbl.style.display="none"; tb.innerHTML=""; return; }
@@ -2087,6 +2112,7 @@ window.addEventListener("load",()=>{
 applyDefaults();
 applyClientType();
 applyPayMode();
+loadRegistry();
 renderRegistry();
 updateRecap();
 </script>
