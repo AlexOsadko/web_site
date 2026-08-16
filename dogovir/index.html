@@ -1418,6 +1418,12 @@ fCost.addEventListener("input",()=>{
   }
 });
 fWords.addEventListener("input",()=>{ wordsEdited = fWords.value.trim()!=="" ; });
+// авто-форматування суми у вигляд «10 000,00» при виході з поля (лише фіксована модель)
+fCost.addEventListener("blur",()=>{
+  if(isHourly()) return;
+  const n=parseNum(fCost.value);
+  if(n!=null && n>0){ fCost.value=fmtMoney(n); markFilled(fCost); }
+});
 
 // date previews
 const fDate=$("#f_date"), fBirth=$("#f_birth");
@@ -1859,7 +1865,7 @@ async function prepareDoc(){
   const actNamed = caseNo
     ? act.map(r=>({...r, t: /справ[аиіу]/i.test(r.t) ? r.t : r.t.replace(/[.\s]+$/,"")+" у справі № "+caseNo}))
     : act;
-  const costStr=v("f_cost");
+  const costStr=(function(){ const c=parseNum(v("f_cost")); return (c!=null && c>0) ? fmtMoney(c) : v("f_cost"); })();
 
   /* загальний обсяг часу — лише для погодинної моделі */
   let hoursText="";
@@ -1989,7 +1995,7 @@ async function prepareDocFop(){
   const actNamed = caseNo
     ? act.map(r=>({...r, t: /справ[аиіу]/i.test(r.t) ? r.t : r.t.replace(/[.\s]+$/,"")+" у справі № "+caseNo}))
     : act;
-  const costStr=v("f_cost");
+  const costStr=(function(){ const c=parseNum(v("f_cost")); return (c!=null && c>0) ? fmtMoney(c) : v("f_cost"); })();
   const yur=t==="yur";
   const zamNazva = yur ? v("f_org") : v("f_name");
   const zamShort = yur ? (v("f_repr_short")||v("f_org")) : (shortName(fName.value)||v("f_name"));
