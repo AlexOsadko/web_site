@@ -1486,20 +1486,32 @@ const REQ_FIZ=[["f_name","ПІБ Клієнта"],["f_birth","дата наро�
 const REQ_FOP=[["f_name","ПІБ ФОП"],["f_addr","адреса"],["f_rnokpp","РНОКПП"]];
 const REQ_YUR=[["f_org","назва юр. особи"],["f_edrpou","ЄДРПОУ"],["f_orgaddr","місцезнаходження"],["f_repr_pos","посада представника"],["f_repr_pib","ПІБ представника"],["f_basis","підстава представництва"]];
 function requiredList(){ const t=clientType(); return REQ_COMMON.concat(t==="yur"?REQ_YUR:(t==="fop"?REQ_FOP:REQ_FIZ)); }
+/* які поля обов'язкові — залежить від обраних для завантаження частин:
+   послуги/сума/оплата потрібні лише коли позначено Додаткову угоду, Акт або Рахунок.
+   Сам договір (і Згода) їх не використовує. */
+function partReqs(){
+  const sel=selectedParts();
+  const has=id=>{ const i=PART_DEFS.findIndex(p=>p.id===id); return sel.includes(i); };
+  const needsSvc=has("p_dodatkova")||has("p_akt");
+  return { needsSvc, needsMoney: needsSvc||has("p_rahunok"), needsPay: has("p_dodatkova") };
+}
 function missingFields(){
   const miss=[];
   requiredList().forEach(([id,lbl])=>{ if(!$("#"+id).value.trim()) miss.push(lbl); });
-  if(services.filter(s=>String(s.t).trim()).length===0) miss.push("хоча б одна послуга");
-  if(isProBono()){
-    /* безоплатно — сума, ставка й порядок оплати не потрібні */
-  }else if(isHourly()){
-    if(!rateVal()) miss.push("ставка за годину");
-    const sum=activeRows().reduce((x,r)=>x+(r.a||0),0);
-    if(sum<=0) miss.push("гонорар у пунктах переліку");
-  }else{
-    if(!$("#f_cost").value.trim()) miss.push("сума");
+  const R=partReqs();
+  if(R.needsSvc && services.filter(s=>String(s.t).trim()).length===0) miss.push("хоча б одна послуга");
+  if(R.needsMoney){
+    if(isProBono()){
+      /* безоплатно — сума, ставка й порядок оплати не потрібні */
+    }else if(isHourly()){
+      if(!rateVal()) miss.push("ставка за годину");
+      const sum=activeRows().reduce((x,r)=>x+(r.a||0),0);
+      if(sum<=0) miss.push("гонорар у пунктах переліку");
+    }else{
+      if(!$("#f_cost").value.trim()) miss.push("сума");
+    }
   }
-  if(!isProBono() && !$("#f_pay_text").value.trim()) miss.push("порядок оплати");
+  if(R.needsPay && !isProBono() && !$("#f_pay_text").value.trim()) miss.push("порядок оплати");
   return miss;
 }
 function updateRecap(){
@@ -1507,12 +1519,17 @@ function updateRecap(){
   const rec=$("#recap");
   if(miss.length===0){
     const name=clientName()||"Клієнт";
+    const head=`договір №<b>${xmlEsc($("#f_num").value.trim())}</b> · <b>${xmlEsc(name)}</b>`;
+    if(!partReqs().needsMoney){
+      rec.innerHTML = `Готово до формування: ${head}`;
+    }else{
     const pb=isProBono();
     const mode = pb ? "pro bono" : (isHourly()?"погодинна":"фіксована");
     const nsvc = services.filter(s=>String(s.t).trim()).length;
     rec.innerHTML = pb
-      ? `Готово до формування: договір №<b>${xmlEsc($("#f_num").value.trim())}</b> · <b>${xmlEsc(name)}</b> · ${nsvc} послуг · <b>pro bono</b> (безоплатно)`
-      : `Готово до формування: договір №<b>${xmlEsc($("#f_num").value.trim())}</b> · <b>${xmlEsc(name)}</b> · ${nsvc} послуг · оплата <b>${mode}</b> · <b>${xmlEsc($("#f_cost").value.trim())}</b> грн`;
+      ? `Готово до формування: ${head} · ${nsvc} послуг · <b>pro bono</b> (безоплатно)`
+      : `Готово до формування: ${head} · ${nsvc} послуг · оплата <b>${mode}</b> · <b>${xmlEsc($("#f_cost").value.trim())}</b> грн`;
+    }
   }else{
     rec.innerHTML=`Заповніть: ${miss.map(m=>xmlEsc(m)).join(", ")}.`;
   }
