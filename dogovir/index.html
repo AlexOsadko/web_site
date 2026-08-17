@@ -432,8 +432,8 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
             <input type="email" id="f_email" data-key="Електронна_пошта" placeholder="client@example.com" autocomplete="off">
           </div>
           <div class="field col-2">
-            <label for="f_term">Строк дії договору<span class="hint">за замовчуванням — до кінця поточного року</span></label>
-            <input type="text" id="f_term" data-key="Строк_дії_договору" placeholder="напр. 31 грудня 2026 року або «до повного виконання зобов'язань»" autocomplete="off">
+            <label for="f_term">Строк дії договору <span class="auto-badge">авто</span><span class="hint">до кінця року, в якому укладено договір</span></label>
+            <input type="text" id="f_term" data-key="Строк_дії_договору" readonly autocomplete="off">
             <div class="sub-hint">Можна вказати дату або формулювання. У договорі: «…діє до <i>цього значення</i>, але у будь-якому випадку до повного виконання зобов'язань».</div>
           </div>
         </div>
@@ -1427,7 +1427,18 @@ fCost.addEventListener("blur",()=>{
 
 // date previews
 const fDate=$("#f_date"), fBirth=$("#f_birth");
-fDate.addEventListener("input",()=>{ $("#date_preview").textContent = fDate.value ? "У документі: "+fmtDate(fDate.value,true) : ""; });
+/* строк дії — завжди 31 грудня року, в якому укладено договір (з дати договору) */
+function syncTerm(){
+  const ft=$("#f_term"); if(!ft) return;
+  const iso=$("#f_date").value;
+  const y = /^\d{4}/.test(iso) ? iso.slice(0,4) : String(new Date().getFullYear());
+  ft.value = `31 грудня ${y} року`;
+  markFilled(ft);
+}
+fDate.addEventListener("input",()=>{
+  $("#date_preview").textContent = fDate.value ? "У документі: "+fmtDate(fDate.value,true) : "";
+  syncTerm();
+});
 fBirth.addEventListener("input",()=>{ $("#birth_preview").textContent = fBirth.value ? "У документі: "+fmtDate(fBirth.value,false)+" року народження" : ""; });
 
 /* ---------- тип клієнта ---------- */
@@ -2176,14 +2187,11 @@ updatePartsUI();
 function pad2(n){return String(n).padStart(2,"0");}
 function todayISO(){const d=new Date();return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;}
 function applyDefaults(){
-  const y=new Date().getFullYear();
   const fn=$("#f_num"); if(!fn.value.trim()){ fn.value="Б/Н"; markFilled(fn); }
   const fd=$("#f_date");
   if(!fd.value){ fd.value=todayISO(); markFilled(fd); }
   $("#date_preview").textContent = fd.value ? "У документі: "+fmtDate(fd.value,true) : "";
-  const ft=$("#f_term");
-  ft.placeholder=`напр. 31 грудня ${y} року або «до повного виконання зобов'язань»`;
-  if(!ft.value){ ft.value=`31 грудня ${y} року`; markFilled(ft); }
+  syncTerm();
   const fa=$("#f_agr_no"); if(!fa.value.trim()) fa.value="1"; markFilled(fa);
   const fk=$("#f_act_no"); if(!fk.value.trim()) fk.value="1"; markFilled(fk);
   const fi=$("#f_inv_no"); if(!fi.value.trim()) fi.value="001"; markFilled(fi);
