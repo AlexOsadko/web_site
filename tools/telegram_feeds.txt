@@ -3,8 +3,9 @@
 # scope (необов'язково): `general` — загальні новини (фільтруються: у канал
 # ідуть лише матеріали з правовим контекстом). Без scope = юридична стрічка
 # (публікується без фільтра). Рядки, що починаються з #, — коментарі.
-# Якщо якась стрічка не працює — воркфлоу напише про це в логах (Actions),
-# просто виправте або приберіть відповідний рядок.
+#
+# ПЕРЕВІРКА: Actions → «Перевірка стрічок (Telegram)» показує, скільки записів
+# читається з кожного джерела. Додавши нову стрічку — прожміть перевірку.
 
 # --- Ваші публікації із сайту (нові статті постяться в канал) ---
 Осадько · Статті | https://osadko.online/articles/feed.xml
@@ -13,17 +14,22 @@
 Українська правда | https://www.pravda.com.ua/rss/ | general
 УНІАН | https://rss.unian.net/site/news_ukr.rss | general
 Укрінформ | https://www.ukrinform.ua/rss/block-lastnews | general
-Суспільне | https://suspilne.media/rss/all.rss | general
 
 # --- Юридичні новини ---
-# Якщо якась стрічка позначена ⚠ у логах Actions — виправте адресу або приберіть рядок.
-Закон і Бізнес | https://zib.com.ua/ua/rss.xml
-ЛІГА:Закон (ЮрЛіга) | https://jurliga.ligazakon.net/ua/rss
-Судово-юридична газета | https://sud.ua/uk/rss
-Юридична газета | https://yur-gazeta.com/rss/
-Юридична практика (pravo.ua) | https://pravo.ua/feed/
-LexInform | https://lexinform.com.ua/feed/
 Протокол | https://protocol.ua/ua/rss/
-Ракурс | https://racurs.ua/feed/
-Українське право | https://ukrainepravo.com/rss/
-Юрліга — судова практика | https://jurliga.ligazakon.net/ua/rss/court
+LexInform | https://lexinform.com.ua/feed/
+
+# --- Тимчасово вимкнені стрічки ---------------------------------------------
+# Ці джерела не читаються з GitHub-раннерів: віддають анти-бот сторінку
+# датацентровим IP («not well-formed»), мають битий SSL-сертифікат або
+# помилку в самому фіді. Це не лагодиться заголовками. Можна періодично
+# пробувати знову (розкоментувати рядок і запустити «Перевірка стрічок»):
+# Суспільне | https://suspilne.media/rss/all.rss | general   # undefined entity у фіді
+# Закон і Бізнес | https://zib.com.ua/ua/rss.xml             # анти-бот сторінка
+# ЛІГА:Закон (ЮрЛіга) | https://jurliga.ligazakon.net/ua/rss # анти-бот сторінка
+# Судово-юридична газета | https://sud.ua/uk/rss            # анти-бот сторінка
+# Юридична газета | https://yur-gazeta.com/rss/             # битий SSL-сертифікат
+# Юридична практика (pravo.ua) | https://pravo.ua/feed/      # анти-бот сторінка
+# Ракурс | https://racurs.ua/feed/                          # анти-бот сторінка
+# Українське право | https://ukrainepravo.com/rss/          # анти-бот сторінка
+# Юрліга — судова практика | https://jurliga.ligazakon.net/ua/rss/court  # анти-бот сторінка
