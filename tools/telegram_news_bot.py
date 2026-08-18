@@ -70,6 +70,9 @@ ORIGINAL_AUTOPOST = os.environ.get("BOT_ORIGINAL_AUTOPOST", "").strip() in ("1",
 # часто (щоб швидко обробляти натискання кнопок «Опублікувати/Відхилити» під
 # чернетками), але новини/авторські пости виходять не частіше цього інтервалу.
 CONTENT_INTERVAL_MIN = int(os.environ.get("BOT_CONTENT_INTERVAL_MIN", "120") or "120")
+# Примусово згенерувати авторську чернетку цього запуску (ігнорує чергу й
+# інтервал) — для ручної кнопки «згенерувати чернетку зараз» у workflow.
+FORCE_ORIGINAL = os.environ.get("BOT_FORCE_ORIGINAL", "").strip() in ("1", "true", "yes")
 
 ORIGINAL_TYPES = [
     ("міф", "розвінчання поширеного юридичного міфу: спершу сам міф, тоді як є насправді"),
@@ -590,7 +593,7 @@ def main():
     # 2) Контент постимо не частіше, ніж CONTENT_INTERVAL_MIN (запуски бувають
     #    частими заради кнопок, але новини мають виходити в спокійному темпі).
     now = time.time()
-    if (now - float(st.get("last_content_ts", 0))) < CONTENT_INTERVAL_MIN * 60:
+    if not FORCE_ORIGINAL and (now - float(st.get("last_content_ts", 0))) < CONTENT_INTERVAL_MIN * 60:
         left = int(CONTENT_INTERVAL_MIN - (now - float(st.get("last_content_ts", 0))) / 60)
         print(f"Ще рано для нового контенту (лишилось ~{max(0, left)} хв). "
               "Кнопки оброблено, вихід.")
@@ -599,8 +602,9 @@ def main():
         return
 
     # чергування: кожен ORIGINAL_EVERY-й вихід — оригінальний (авторський) пост
+    # (BOT_FORCE_ORIGINAL змушує згенерувати чернетку цього запуску).
     seq = int(st.get("seq", 0))
-    if ORIGINAL_EVERY > 0 and (seq % ORIGINAL_EVERY == 0):
+    if FORCE_ORIGINAL or (ORIGINAL_EVERY > 0 and (seq % ORIGINAL_EVERY == 0)):
         o = generate_original(st)
         if o:
             if REVIEW_CHAT and not ORIGINAL_AUTOPOST:

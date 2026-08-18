@@ -21,6 +21,10 @@ on:
         description: "Тест без публікації (лише лог, стан не зберігається)"
         type: boolean
         default: false
+      force_original:
+        description: "Згенерувати авторську чернетку зараз (у чат перевірки з кнопками)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -65,6 +69,7 @@ jobs:
           BOT_CONTACT_URL: "https://osadko.online/kontakty/"
           BOT_CONTACT_LABEL: "⚖️ Консультація адвоката"
           BOT_DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '' }}
+          BOT_FORCE_ORIGINAL: ${{ github.event.inputs.force_original == 'true' && '1' || '' }}
         run: python3 tools/telegram_news_bot.py
 
       - name: Зберегти стан
