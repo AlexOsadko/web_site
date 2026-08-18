@@ -1,0 +1,23 @@
+name: Пробник RSS-адрес (Telegram)
+
+# Одноразовий підбір робочих адрес RSS для джерел, що віддавали 404.
+# Нічого не публікує — лише показує в логах, яка адреса повертає записи.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Встановити залежності
+        run: pip install -r tools/requirements-bot.txt
+      - name: Підібрати адреси
+        run: python3 tools/telegram_probe_feeds.py
