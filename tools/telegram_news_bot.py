@@ -219,22 +219,43 @@ def is_legal_relevant(title, desc):
     return any(k in text for k in LEGAL_HINTS)
 
 
+def _fetch_raw(url):
+    """Повертає сирі байти стрічки через urllib із браузерними заголовками."""
+    import urllib.request
+    req = urllib.request.Request(url, headers={"User-Agent": UA, **FEED_HEADERS})
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        return resp.read()
+
+
+def _sanitize_xml(raw):
+    """Лагодить типові дефекти фідів, на яких падає суворий XML-парсер:
+    сирі амперсанди (`&` не в межах сутності) і керуючі символи."""
+    try:
+        text = raw.decode("utf-8", "replace") if isinstance(raw, bytes) else str(raw)
+    except Exception:
+        return raw
+    text = re.sub(r"&(?!#?\w+;)", "&amp;", text)                 # голі &
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", text)     # керуючі символи
+    return text
+
+
 def fetch_feed(url):
-    """Читає RSS з браузерними заголовками. Якщо feedparser не впорався
-    (сайт віддав анти-бот HTML), пробуємо ще раз через urllib із повними
-    заголовками і згодовуємо feedparser вже сирі байти."""
+    """Читає RSS з браузерними заголовками. Якщо feedparser не впорався,
+    пробуємо: (1) сирі байти через urllib; (2) ті ж байти після санітизації
+    (лагодимо биті амперсанди/символи). Це рятує частину «not well-formed»."""
     fp = feedparser.parse(url, agent=UA, request_headers=dict(FEED_HEADERS))
-    if getattr(fp, "bozo", 0) and not fp.entries:
-        try:
-            import urllib.request
-            req = urllib.request.Request(url, headers={"User-Agent": UA, **FEED_HEADERS})
-            with urllib.request.urlopen(req, timeout=25) as resp:
-                raw = resp.read()
-            fp2 = feedparser.parse(raw)
-            if fp2.entries:
-                return fp2
-        except Exception:
-            pass
+    if not (getattr(fp, "bozo", 0) and not fp.entries):
+        return fp
+    try:
+        raw = _fetch_raw(url)
+    except Exception:
+        return fp
+    fp2 = feedparser.parse(raw)
+    if fp2.entries:
+        return fp2
+    fp3 = feedparser.parse(_sanitize_xml(raw))
+    if fp3.entries:
+        return fp3
     return fp
 
 

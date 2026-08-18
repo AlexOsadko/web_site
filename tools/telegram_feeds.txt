@@ -24,12 +24,12 @@ LexInform | https://lexinform.com.ua/feed/
 # датацентровим IP («not well-formed»), мають битий SSL-сертифікат або
 # помилку в самому фіді. Це не лагодиться заголовками. Можна періодично
 # пробувати знову (розкоментувати рядок і запустити «Перевірка стрічок»):
-# Суспільне | https://suspilne.media/rss/all.rss | general   # undefined entity у фіді
-# Закон і Бізнес | https://zib.com.ua/ua/rss.xml             # анти-бот сторінка
-# ЛІГА:Закон (ЮрЛіга) | https://jurliga.ligazakon.net/ua/rss # анти-бот сторінка
-# Судово-юридична газета | https://sud.ua/uk/rss            # анти-бот сторінка
-# Юридична газета | https://yur-gazeta.com/rss/             # битий SSL-сертифікат
-# Юридична практика (pravo.ua) | https://pravo.ua/feed/      # анти-бот сторінка
-# Ракурс | https://racurs.ua/feed/                          # анти-бот сторінка
-# Українське право | https://ukrainepravo.com/rss/          # анти-бот сторінка
-# Юрліга — судова практика | https://jurliga.ligazakon.net/ua/rss/court  # анти-бот сторінка
+Суспільне | https://suspilne.media/rss/all.rss | general
+Закон і Бізнес | https://zib.com.ua/ua/rss.xml
+ЛІГА:Закон (ЮрЛіга) | https://jurliga.ligazakon.net/ua/rss
+Судово-юридична газета | https://sud.ua/uk/rss
+Юридична газета | https://yur-gazeta.com/rss/
+Юридична практика (pravo.ua) | https://pravo.ua/feed/
+Ракурс | https://racurs.ua/feed/
+Українське право | https://ukrainepravo.com/rss/
+Юрліга — судова практика | https://jurliga.ligazakon.net/ua/rss/court
