@@ -9,9 +9,10 @@ name: Новини в Telegram
 
 on:
   schedule:
-    # 3–4 пости на тиждень (нд, пн, ср, пт о 09:00 UTC ≈ 12:00 Київ).
-    # Щоденні пости для юридичного каналу зайві — люди відписуються.
-    - cron: "0 9 * * 0,1,3,5"
+    # Будні о 09:00 UTC (≈12:00 Київ). Через чергування (BOT_ORIGINAL_EVERY=2)
+    # ≈ пів запусків — оригінальні пости (на перевірку), пів — новини в канал.
+    # Орієнтир на місяць: ~10 оригінальних + ~10–15 новин. Тюнінг — тут і в env.
+    - cron: "0 9 * * 1,2,3,4,5"
   workflow_dispatch:
     inputs:
       dry_run:
@@ -43,7 +44,13 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # AI-резюме простою мовою
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # AI-резюме + оригінальні пости
+          # Куди слати оригінальні пости на ПЕРЕВІРКУ (ваш Telegram id від
+          # @userinfobot; напишіть боту /start). Порожньо + autopost=0 → оригінали
+          # не публікуються. Щоб слати одразу в канал — BOT_ORIGINAL_AUTOPOST: "1".
+          TELEGRAM_REVIEW_CHAT: ${{ secrets.TELEGRAM_REVIEW_CHAT }}
+          BOT_ORIGINAL_EVERY: "2"      # кожен 2-й вихід — оригінальний пост
+          BOT_ORIGINAL_AUTOPOST: ""    # "1" = публікувати оригінали в канал без перевірки
           BOT_MAX_PER_RUN: "1"
           BOT_DAILY_MAX: "2"           # запобіжник (звичайно 1 пост за запуск)
           BOT_MAX_AGE_HOURS: "120"     # свіжість під рідший темп (нд/пн/ср/пт)

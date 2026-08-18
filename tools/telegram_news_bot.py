@@ -47,6 +47,29 @@ CONTACT_LABEL = os.environ.get("BOT_CONTACT_LABEL", "⚖️ Консультац
 # кнопку «до адвоката» показуємо не на кожному пості, а кожен N-й (правила
 # реклами адвокатської діяльності + модерація Telegram Ads). 0 = ніколи.
 CTA_EVERY = int(os.environ.get("BOT_CTA_EVERY", "4") or "4")
+
+# --- оригінальні (авторські) пости: міфи / помилки / інструкції / поради ---
+# Кожен ORIGINAL_EVERY-й запуск замість новини генерує оригінальний пост.
+ORIGINAL_EVERY = int(os.environ.get("BOT_ORIGINAL_EVERY", "2") or "2")
+# Куди йдуть оригінальні пости. За замовчуванням — на ПЕРЕВІРКУ у приватний чат
+# (id від @userinfobot; спершу напишіть боту /start). Це запобіжник: авторський
+# юридичний текст від імені адвоката краще прочитати перед публікацією.
+REVIEW_CHAT = os.environ.get("TELEGRAM_REVIEW_CHAT", "").strip()
+# Увімкніть, щоб публікувати оригінальні пости одразу в канал без перевірки.
+ORIGINAL_AUTOPOST = os.environ.get("BOT_ORIGINAL_AUTOPOST", "").strip() in ("1", "true", "yes")
+
+ORIGINAL_TYPES = [
+    ("міф", "розвінчання поширеного юридичного міфу: спершу сам міф, тоді як є насправді"),
+    ("помилка", "типова процесуальна помилка та чому вона має значення (без конкретної справи)"),
+    ("інструкція", "покрокова практична інструкція: що робити у типовій ситуації"),
+    ("порада", "коротка практична порада: на що звернути увагу, щоб не втратити право чи строк"),
+]
+ORIGINAL_AREAS = [
+    "сімейне право", "трудові спори", "кримінальні справи", "цивільні справи та борги",
+    "адміністративні спори з держорганами", "ДТП та автоправо", "нерухомість і спадщина",
+    "бізнес і господарські спори", "пенсійні та соціальні виплати",
+    "військове право та мобілізація", "захист прав споживачів", "судовий процес",
+]
 SHOW_PREVIEW = os.environ.get("BOT_SHOW_PREVIEW", "1").strip() not in ("0", "false", "no")
 DRY_RUN = os.environ.get("BOT_DRY_RUN", "").strip() in ("1", "true", "yes")
 
@@ -75,9 +98,11 @@ def load_state():
             st.setdefault("day", "")
             st.setdefault("count", 0)
             st.setdefault("total", 0)
+            st.setdefault("seq", 0)
+            st.setdefault("orig_recent", [])
             return st
     except Exception:
-        return {"seen": [], "day": "", "count": 0, "total": 0}
+        return {"seen": [], "day": "", "count": 0, "total": 0, "seq": 0, "orig_recent": []}
 
 
 def save_state(st):
@@ -192,7 +217,37 @@ def summarize(title, desc, source):
     return None
 
 
+def _send(text, chat, with_cta=False):
+    """Низькорівнева відправка повідомлення в заданий чат."""
+    if DRY_RUN:
+        print("[DRY] →", chat, "| кнопка:", CONTACT_LABEL if with_cta else "—",
+              "|", text.split("\n")[0][:70])
+        return True
+    api = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    params = {
+        "chat_id": chat,
+        "text": text,
+        "parse_mode": "HTML",
+        "disable_web_page_preview": "false" if SHOW_PREVIEW else "true",
+    }
+    if with_cta and CONTACT_URL:
+        params["reply_markup"] = json.dumps(
+            {"inline_keyboard": [[{"text": CONTACT_LABEL, "url": CONTACT_URL}]]},
+            ensure_ascii=False)
+    data = urllib.parse.urlencode(params).encode()
+    try:
+        with urllib.request.urlopen(api, data=data, timeout=30) as r:
+            return bool(json.load(r).get("ok"))
+    except urllib.error.HTTPError as e:
+        print("Telegram HTTP error:", e.code, e.read().decode("utf-8", "ignore")[:300])
+        return False
+    except Exception as e:
+        print("Telegram error:", e)
+        return False
+
+
 def tg_send(item):
+    """Пост-новина / стаття (з AI-резюме та посиланням на джерело)."""
     own = "osadko.online" in (item.get("link") or "")   # власна стаття із сайту
     head = "✍️" if own else "📰"
     cta = "Читати статтю" if own else "Читати джерело"
@@ -211,32 +266,75 @@ def tg_send(item):
     if src:
         msg += f" · <i>{esc(src)}</i>"
     msg += "\n\n" + " ".join(classify(item["title"], item["desc"]))
-    with_cta = bool(item.get("_cta")) and CONTACT_URL
-    if DRY_RUN:
-        print("[DRY] postnu:", item["title"][:70], "| кнопка:", CONTACT_LABEL if with_cta else "—")
-        return True
-    api = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    params = {
-        "chat_id": CHANNEL,
-        "text": msg,
-        "parse_mode": "HTML",
-        "disable_web_page_preview": "false" if SHOW_PREVIEW else "true",
-    }
-    if with_cta:
-        params["reply_markup"] = json.dumps(
-            {"inline_keyboard": [[{"text": CONTACT_LABEL, "url": CONTACT_URL}]]},
-            ensure_ascii=False)
-    data = urllib.parse.urlencode(params).encode()
+    return _send(msg, CHANNEL, with_cta=bool(item.get("_cta")))
+
+
+ORIGINAL_SYS = (
+    "Ти — автор українського Telegram-каналу «Про право простою мовою» (веде адвокат). "
+    "Пишеш ОДИН оригінальний освітній пост заданого типу у заданій сфері права.\n"
+    "СТИЛЬ:\n"
+    "• Перший рядок — сильний заголовок, зрозумілий ще до «розгорнути».\n"
+    "• 600–1200 символів. Абзаци по 2–3 речення. Проста, дружня мова, без канцеляриту.\n"
+    "• Емодзі — лише як маркери списку за потреби, не як прикраса. Жодних стін тексту.\n"
+    "• Останній рядок природно підводить до думки, що з деталями допоможе адвокат — "
+    "БЕЗ прямого «телефонуйте зараз».\n"
+    "ОБМЕЖЕННЯ (критично):\n"
+    "• Не вигадуй конкретних номерів статей, точних строків, сум чи назв органів. Якщо "
+    "згадуєш норму — загально («закон передбачає…»), без цифр, у яких не впевнений. Пиши "
+    "про загальні принципи й типові ситуації, а не про конкретну впізнавану справу.\n"
+    "• НЕ обіцяй результату, без статистики виграшів і порівнянь адвокатів; дух — "
+    "«показую, як це працює», а не «гарантую».\n"
+    "Поверни ЛИШЕ JSON без markdown: "
+    '{"headline": "заголовок (перший рядок)", '
+    '"body": "тіло поста без заголовка; абзаци розділяй \\n\\n", '
+    '"tags": ["#рубрика", "#рубрика2"]}'
+)
+
+
+def generate_original(st):
+    """Генерує оригінальний пост (міф/помилка/інструкція/порада) або None."""
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        print("Немає ANTHROPIC_API_KEY — оригінальний пост не згенеровано.")
+        return None
+    seq = int(st.get("seq", 0))
+    t_name, t_desc = ORIGINAL_TYPES[seq % len(ORIGINAL_TYPES)]
+    area = ORIGINAL_AREAS[(seq // len(ORIGINAL_TYPES)) % len(ORIGINAL_AREAS)]
+    recent = st.get("orig_recent", [])
+    avoid = "; ".join(recent[-8:]) if recent else "—"
+    user = (f"Тип поста: {t_name} — {t_desc}\nСфера права: {area}\n"
+            f"Уникай тем, близьких до нещодавніх: {avoid}\n"
+            "Обери конкретну вузьку тему в межах сфери і напиши пост.")
     try:
-        with urllib.request.urlopen(api, data=data, timeout=30) as r:
-            j = json.load(r)
-            return bool(j.get("ok"))
-    except urllib.error.HTTPError as e:
-        print("Telegram HTTP error:", e.code, e.read().decode("utf-8", "ignore")[:300])
-        return False
-    except Exception as e:
-        print("Telegram error:", e)
-        return False
+        import anthropic
+        client = anthropic.Anthropic()
+        r = client.messages.create(model=SUMMARY_MODEL, max_tokens=1300,
+                                    system=ORIGINAL_SYS,
+                                    messages=[{"role": "user", "content": user}])
+        text = "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
+        m = re.search(r"\{.*\}", text, re.S)
+        if not m:
+            return None
+        d = json.loads(m.group(0))
+        if not d.get("headline") or not d.get("body"):
+            return None
+        tags = [str(x) for x in (d.get("tags") or []) if str(x).startswith("#")][:2]
+        return {"type": t_name, "area": area,
+                "headline": str(d["headline"]).strip(),
+                "body": str(d["body"]).strip(), "tags": tags}
+    except Exception as ex:
+        print("original gen error:", ex)
+        return None
+
+
+def post_original(o, chat, with_cta=False, review=False):
+    msg = f"<b>{esc(o['headline'])}</b>\n\n{esc(o['body'])}"
+    if o.get("tags"):
+        msg += "\n\n" + " ".join(o["tags"])
+    if review:
+        msg = ("🧪 <b>ЧЕРНЕТКА — перевірте перед публікацією.</b> Якщо ок — "
+               "перешліть у канал.\n"
+               f"<i>тип: {esc(o['type'])} · {esc(o['area'])}</i>\n\n") + msg
+    return _send(msg, chat, with_cta=with_cta)
 
 
 def entry_id(e):
@@ -257,6 +355,39 @@ def main():
     if st.get("day") != d:
         st["day"] = d
         st["count"] = 0
+
+    # чергування: кожен ORIGINAL_EVERY-й вихід — оригінальний (авторський) пост
+    seq = int(st.get("seq", 0))
+    if ORIGINAL_EVERY > 0 and (seq % ORIGINAL_EVERY == 0):
+        o = generate_original(st)
+        if o:
+            if REVIEW_CHAT and not ORIGINAL_AUTOPOST:
+                ok, tgt = post_original(o, REVIEW_CHAT, with_cta=False, review=True), "перевірка"
+            elif ORIGINAL_AUTOPOST:
+                total = int(st.get("total", 0))
+                cta = CTA_EVERY > 0 and ((total + 1) % CTA_EVERY == 0)
+                ok, tgt = post_original(o, CHANNEL, with_cta=cta), "канал"
+                if ok and not DRY_RUN:
+                    st["total"] = total + 1
+            else:
+                print("Оригінальний пост згенеровано, але не задано TELEGRAM_REVIEW_CHAT "
+                      "і BOT_ORIGINAL_AUTOPOST=0 — нічого не публікую.")
+                if not DRY_RUN:
+                    save_state(st)
+                return
+            if ok:
+                print(f"Оригінальний пост → {tgt}: {o['headline'][:60]}")
+                if not DRY_RUN:
+                    rec = st.get("orig_recent", [])
+                    rec.append(f"{o['type']}:{o['headline'][:40]}")
+                    st["orig_recent"] = rec[-20:]
+                    st["seq"] = seq + 1
+                    save_state(st)
+                return
+            print("Оригінальний пост не відправлено — публікую новину цього запуску.")
+        else:
+            print("Оригінальний пост не готовий — публікую новину цього запуску.")
+
     remaining_day = max(0, DAILY_MAX - int(st.get("count", 0)))
     print(f"Добовий ліміт: {st['count']}/{DAILY_MAX} (лишилось {remaining_day}).")
     if remaining_day <= 0:
@@ -313,6 +444,7 @@ def main():
             st["seen"].append(c["id"])
             st["count"] = int(st.get("count", 0)) + 1
             st["total"] = total + 1
+            st["seq"] = int(st.get("seq", 0)) + 1
             posted += 1
             time.sleep(3)
         elif ok and DRY_RUN:
