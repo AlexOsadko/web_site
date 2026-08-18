@@ -371,10 +371,10 @@ def main():
                     st["total"] = total + 1
             else:
                 print("Оригінальний пост згенеровано, але не задано TELEGRAM_REVIEW_CHAT "
-                      "і BOT_ORIGINAL_AUTOPOST=0 — нічого не публікую.")
+                      "і BOT_ORIGINAL_AUTOPOST=0 — публікую новину цього запуску.")
+                # зрушуємо чергу, щоб не застрягнути на оригіналі й далі йшли новини
                 if not DRY_RUN:
-                    save_state(st)
-                return
+                    st["seq"] = seq + 1
             if ok:
                 print(f"Оригінальний пост → {tgt}: {o['headline'][:60]}")
                 if not DRY_RUN:
