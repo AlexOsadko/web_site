@@ -1,0 +1,23 @@
+name: Перевірка стрічок (Telegram)
+
+# Одноразова перевірка «здоров'я» RSS-стрічок. Нічого не публікує — лише
+# показує в логах, скільки записів читається з кожного джерела.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Встановити залежності
+        run: pip install -r tools/requirements-bot.txt
+      - name: Перевірити стрічки
+        run: python3 tools/telegram_check_feeds.py
