@@ -558,6 +558,10 @@ def register_with_worker(o):
             headers={"Content-Type": "application/json", "X-Auth-Token": WORKER_SECRET})
         with urllib.request.urlopen(req, timeout=30) as r:
             return bool(json.load(r).get("ok"))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", "ignore")[:300]
+        print(f"worker register HTTP {e.code}: {body}")
+        return False
     except Exception as e:
         print("worker register error:", e)
         return False

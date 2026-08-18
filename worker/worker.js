@@ -106,8 +106,12 @@ async function publishDraft(env, draft) {
 
 // Реєстрація нової чернетки від GitHub-бота (генерація через Anthropic там).
 async function handleRegister(request, env) {
-  if ((request.headers.get('X-Auth-Token') || '') !== env.AUTH_TOKEN) {
-    return new Response('forbidden', { status: 403 });
+  const got = request.headers.get('X-Auth-Token') || '';
+  if (got !== env.AUTH_TOKEN) {
+    // діагностика (не розкриваємо самі токени, лише довжини)
+    const info = `register auth mismatch: got_len=${got.length} expected_len=${(env.AUTH_TOKEN || '').length} expected_set=${!!env.AUTH_TOKEN}`;
+    console.log(info);
+    return new Response(info, { status: 403 });
   }
   const o = await request.json();
   const pid = String(Date.now()) + Math.floor(Math.random() * 1000);
@@ -204,7 +208,7 @@ export default {
       // вебхук Telegram (за бажанням — з перевіркою secret_token)
       if (env.WEBHOOK_SECRET &&
           request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== env.WEBHOOK_SECRET) {
-        return new Response('forbidden', { status: 403 });
+        return new Response('forbidden: webhook secret mismatch (path=' + url.pathname + ')', { status: 403 });
       }
       let update;
       try { update = await request.json(); } catch { return new Response('bad', { status: 400 }); }
