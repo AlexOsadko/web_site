@@ -73,6 +73,8 @@ CONTENT_INTERVAL_MIN = int(os.environ.get("BOT_CONTENT_INTERVAL_MIN", "120") or 
 # Примусово згенерувати авторську чернетку цього запуску (ігнорує чергу й
 # інтервал) — для ручної кнопки «згенерувати чернетку зараз» у workflow.
 FORCE_ORIGINAL = os.environ.get("BOT_FORCE_ORIGINAL", "").strip() in ("1", "true", "yes")
+# Скільки авторських чернеток згенерувати за примусовий запуск (наперед).
+FORCE_COUNT = int(os.environ.get("BOT_FORCE_ORIGINAL_COUNT", "1") or "1")
 
 ORIGINAL_TYPES = [
     ("міф", "розвінчання поширеного юридичного міфу: спершу сам міф, тоді як є насправді"),
@@ -728,10 +730,47 @@ def main():
             save_state(st)
         return
 
-    # чергування: кожен ORIGINAL_EVERY-й вихід — оригінальний (авторський) пост
-    # (BOT_FORCE_ORIGINAL змушує згенерувати чернетку цього запуску).
     seq = int(st.get("seq", 0))
-    if FORCE_ORIGINAL or (ORIGINAL_EVERY > 0 and (seq % ORIGINAL_EVERY == 0)):
+
+    # Примусова генерація кількох авторських чернеток наперед (workflow:
+    # force_original + force_count). Усі йдуть у чат перевірки з кнопками.
+    if FORCE_ORIGINAL:
+        made = 0
+        for _ in range(max(1, FORCE_COUNT)):
+            o = generate_original(st)
+            if not o:
+                break
+            seqv = int(st.get("seq", 0))
+            if REVIEW_CHAT and not ORIGINAL_AUTOPOST:
+                ok, tgt = send_review_draft(o, st), "перевірка"
+            elif ORIGINAL_AUTOPOST:
+                total = int(st.get("total", 0))
+                cta = CTA_EVERY > 0 and ((total + 1) % CTA_EVERY == 0)
+                ok, tgt = post_original(o, CHANNEL, with_cta=cta), "канал"
+                if ok and not DRY_RUN:
+                    st["total"] = total + 1
+            else:
+                print("Немає TELEGRAM_REVIEW_CHAT і BOT_ORIGINAL_AUTOPOST=0 — "
+                      "нікуди слати чернетку.")
+                break
+            if not ok:
+                break
+            print(f"Чернетка [{made + 1}] → {tgt}: {o['headline'][:60]}")
+            if not DRY_RUN:
+                rec = st.get("orig_recent", [])
+                rec.append(f"{o['type']}:{o['headline'][:40]}")
+                st["orig_recent"] = rec[-20:]
+                st["seq"] = seqv + 1
+            made += 1
+        if made and not DRY_RUN:
+            st["last_content_ts"] = now
+        print(f"Згенеровано авторських чернеток: {made}.")
+        if not DRY_RUN:
+            save_state(st)
+        return
+
+    # чергування: кожен ORIGINAL_EVERY-й вихід — оригінальний (авторський) пост
+    if ORIGINAL_EVERY > 0 and (seq % ORIGINAL_EVERY == 0):
         o = generate_original(st)
         if o:
             if REVIEW_CHAT and not ORIGINAL_AUTOPOST:
