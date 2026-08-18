@@ -94,9 +94,15 @@ TYPE_TAGS = {
 }
 SHOW_PREVIEW = os.environ.get("BOT_SHOW_PREVIEW", "1").strip() not in ("0", "false", "no")
 DRY_RUN = os.environ.get("BOT_DRY_RUN", "").strip() in ("1", "true", "yes")
+# Фільтрувати ЗАГАЛЬНІ стрічки за правовою релевантністю (типово увімкнено).
+FILTER_GENERAL = os.environ.get("BOT_FILTER_GENERAL", "1").strip() not in ("0", "false", "no")
 
 
 def load_feeds():
+    """Повертає список (джерело, url, scope). scope: 'general' — загальні
+    новини (фільтруються за правовою релевантністю), інакше 'legal' — юридичні
+    стрічки (публікуються без фільтра). Третя колонка в рядку необов'язкова:
+    `Джерело | https://... | general`."""
     feeds = []
     if not os.path.exists(FEEDS_FILE):
         return feeds
@@ -105,10 +111,12 @@ def load_feeds():
         if not line or line.startswith("#"):
             continue
         if "|" in line:
-            cat, url = line.split("|", 1)
-            feeds.append((cat.strip(), url.strip()))
+            parts = [p.strip() for p in line.split("|")]
+            cat, url = parts[0], parts[1]
+            scope = parts[2].lower() if len(parts) > 2 and parts[2] else "legal"
+            feeds.append((cat, url, scope))
         else:
-            feeds.append(("Новини", line))
+            feeds.append(("Новини", line, "legal"))
     return feeds
 
 
@@ -180,6 +188,26 @@ def classify(title, desc):
         if len(tags) >= MAX_TAGS:
             break
     return tags or ["#новини"]
+
+
+# Фільтр правової релевантності для ЗАГАЛЬНИХ стрічок: новина потрапляє в канал
+# лише якщо в заголовку/описі є правовий контекст. Юридичні стрічки й ваші
+# статті проходять без фільтра. Ширший за TOPIC_TAGS, щоб ловити правові теми.
+LEGAL_HINTS = (
+    "суд", "закон", "право", "адвокат", "юрист", "прокур", "поліці", "кодекс",
+    "кримінал", "позов", "апеляц", "касац", "верховн суд", "конституційн",
+    "вирок", "штраф", "санкці", "норматив", "постанов", "указ", "мін'юст",
+    "міністерство юстиц", "законопроєкт", "законопроект", "рада ухвалила",
+    "набува", "набира", "правоохорон", "слідств", "підозр", "обвинувач",
+    "алімент", "спадщин", "розлуч", "звільнен", "трудов", "податк", "мобіліз",
+    "тцк", "виконавч провадж", "нотаріус", "реєстрац", "ліценз", "оскарж",
+    "компенсац", "відшкодув", "договір", "спадкоєм", "субсиді", "пенсі",
+)
+
+
+def is_legal_relevant(title, desc):
+    text = (str(title) + " " + str(desc)).lower()
+    return any(k in text for k in LEGAL_HINTS)
 
 
 SUMMARY_SYS = (
@@ -421,7 +449,8 @@ def main():
 
     seen = set(st.get("seen", []))
     candidates = []
-    for source, url in feeds:
+    skipped_irrelevant = 0
+    for source, url, scope in feeds:
         try:
             fp = feedparser.parse(url, agent=UA)
             if getattr(fp, "bozo", 0) and not fp.entries:
@@ -440,14 +469,22 @@ def main():
                 # пропускаємо застарілі записи (за наявності дати)
                 if ts and (time.time() - ts) > MAX_AGE_HOURS * 3600:
                     continue
+                title = clean(getattr(e, "title", ""), 200)
+                desc = clean(getattr(e, "summary", ""), 300)
+                # ЗАГАЛЬНІ стрічки — лише правово релевантні новини (щоб канал
+                # лишався «про право», а не дублював загальну політику).
+                if FILTER_GENERAL and scope == "general" and not is_legal_relevant(title, desc):
+                    skipped_irrelevant += 1
+                    continue
                 candidates.append({
                     "id": eid, "ts": ts, "source": source,
-                    "title": clean(getattr(e, "title", ""), 200),
-                    "desc": clean(getattr(e, "summary", ""), 300),
+                    "title": title, "desc": desc,
                     "link": getattr(e, "link", "") or eid,
                 })
         except Exception as ex:
             print(f"⚠ помилка стрічки {source} — {url}: {ex}")
+    if skipped_irrelevant:
+        print(f"Відфільтровано загальних новин без правового контексту: {skipped_irrelevant}.")
 
     # найсвіжіші зверху
     candidates.sort(key=lambda c: c["ts"], reverse=True)
