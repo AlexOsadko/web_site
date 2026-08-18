@@ -41,6 +41,7 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # AI-резюме простою мовою
           BOT_MAX_PER_RUN: "1"
           BOT_DAILY_MAX: "15"
           BOT_SHOW_PREVIEW: "0"

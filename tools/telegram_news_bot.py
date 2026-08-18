@@ -38,6 +38,9 @@ DAILY_MAX = int(os.environ.get("BOT_DAILY_MAX", "15") or "15")
 # постимо лише свіже: записи, старші за MAX_AGE_HOURS, ігноруються (щоб не
 # «вивалити» весь архів стрічки/сайту при першому запуску)
 MAX_AGE_HOURS = int(os.environ.get("BOT_MAX_AGE_HOURS", "72") or "72")
+# AI-резюме простою мовою (потрібен ANTHROPIC_API_KEY). Якщо ключа немає або
+# виклик не вдався — постимо звичайний опис зі стрічки (fallback).
+SUMMARY_MODEL = os.environ.get("BOT_SUMMARY_MODEL", "claude-sonnet-5").strip()
 SHOW_PREVIEW = os.environ.get("BOT_SHOW_PREVIEW", "1").strip() not in ("0", "false", "no")
 DRY_RUN = os.environ.get("BOT_DRY_RUN", "").strip() in ("1", "true", "yes")
 
@@ -125,13 +128,60 @@ def classify(title, desc):
     return tags or ["#новини"]
 
 
+SUMMARY_SYS = (
+    "Ти — редактор українського Telegram-каналу «Про право простою мовою» для "
+    "звичайних людей без юридичної освіти. На основі заголовка й короткого опису "
+    "поясни суть простою, доступною мовою.\n"
+    "ПРАВИЛА:\n"
+    "• Не вигадуй фактів. Конкретні дати, суми, номери статей, назви органів "
+    "наводь лише якщо вони є у наданому тексті. Якщо даних мало — пиши узагальнено "
+    "й обережно, без вигадок.\n"
+    "• Пиши стисло, без канцеляриту, дружньо й зрозуміло, українською.\n"
+    "• Поверни ЛИШЕ JSON без коментарів і markdown:\n"
+    '{"about": "1–2 речення простими словами: про що це", '
+    '"impact": "1–2 речення: чому це важливо / що це означає для звичайної людини"}'
+)
+
+
+def summarize(title, desc, source):
+    """Повертає {'about','impact'} простою мовою або None (тоді — fallback на опис)."""
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return None
+    try:
+        import anthropic
+        client = anthropic.Anthropic()
+        r = client.messages.create(
+            model=SUMMARY_MODEL,
+            max_tokens=600,
+            system=SUMMARY_SYS,
+            messages=[{"role": "user",
+                       "content": f"Заголовок: {title}\nОпис: {desc}\nДжерело: {source}"}],
+        )
+        text = "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
+        m = re.search(r"\{.*\}", text, re.S)
+        if not m:
+            return None
+        data = json.loads(m.group(0))
+        if data.get("about"):
+            return {"about": str(data.get("about", "")).strip(),
+                    "impact": str(data.get("impact", "")).strip()}
+    except Exception as ex:
+        print("summary error:", ex)
+    return None
+
+
 def tg_send(item):
     own = "osadko.online" in (item.get("link") or "")   # власна стаття із сайту
     head = "✍️" if own else "📰"
     cta = "Читати статтю" if own else "Читати джерело"
     src = "Адвокат Осадько" if own else item["source"]
+    s = summarize(item["title"], item["desc"], src)
     msg = f"{head} <b>{esc(item['title'])}</b>"
-    if item["desc"]:
+    if s:
+        msg += f"\n\n{esc(s['about'])}"
+        if s.get("impact"):
+            msg += f"\n\n💡 <b>Що це означає для вас:</b> {esc(s['impact'])}"
+    elif item["desc"]:
         msg += f"\n\n{esc(item['desc'])}"
     msg += f"\n\n🔗 <a href=\"{esc(item['link'])}\">{cta}</a>"
     if src:
