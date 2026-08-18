@@ -29,7 +29,13 @@ STATE_DIR = os.path.join(ROOT, ".telegram-bot")
 STATE_FILE = os.path.join(STATE_DIR, "state.json")
 FEEDS_FILE = os.path.join(ROOT, "tools", "telegram_feeds.txt")
 SEEN_KEEP = 1200            # скільки останніх посилань пам'ятати (щоб не дублювати)
-UA = "Mozilla/5.0 (compatible; OsadkoNewsBot/1.0; +https://osadko.online)"
+# Браузерний User-Agent: частина сайтів віддає боту анти-бот HTML замість RSS
+# (звідси «not well-formed»). Зі звичайним браузерним UA стрічки читаються.
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+FEED_HEADERS = {"Accept": "application/rss+xml, application/atom+xml, "
+                          "application/xml;q=0.9, text/xml;q=0.9, */*;q=0.8",
+                "Accept-Language": "uk,en;q=0.8"}
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
 CHANNEL = os.environ.get("TELEGRAM_CHANNEL", "").strip()
@@ -210,6 +216,25 @@ def is_legal_relevant(title, desc):
     return any(k in text for k in LEGAL_HINTS)
 
 
+def fetch_feed(url):
+    """Читає RSS з браузерними заголовками. Якщо feedparser не впорався
+    (сайт віддав анти-бот HTML), пробуємо ще раз через urllib із повними
+    заголовками і згодовуємо feedparser вже сирі байти."""
+    fp = feedparser.parse(url, agent=UA, request_headers=dict(FEED_HEADERS))
+    if getattr(fp, "bozo", 0) and not fp.entries:
+        try:
+            import urllib.request
+            req = urllib.request.Request(url, headers={"User-Agent": UA, **FEED_HEADERS})
+            with urllib.request.urlopen(req, timeout=25) as resp:
+                raw = resp.read()
+            fp2 = feedparser.parse(raw)
+            if fp2.entries:
+                return fp2
+        except Exception:
+            pass
+    return fp
+
+
 SUMMARY_SYS = (
     "Ти — редактор українського Telegram-каналу «Про право простою мовою» для "
     "звичайних людей без юридичної освіти. Тема — будь-яка сфера права (сімейне, "
@@ -335,9 +360,9 @@ ORIGINAL_SYS = (
     "• НЕ обіцяй результату, без статистики виграшів і порівнянь адвокатів; дух — "
     "«показую, як це працює», а не «гарантую».\n"
     "У тексті НЕ став хештегів — рубрики додаються автоматично.\n"
-    "Поверни ЛИШЕ JSON без markdown: "
-    '{"headline": "заголовок (перший рядок)", '
-    '"body": "тіло поста без заголовка; абзаци розділяй \\n\\n"}'
+    "ФОРМАТ ВІДПОВІДІ (суворо): перший рядок — заголовок. Далі порожній рядок. "
+    "Далі — тіло поста (абзаци розділяй порожнім рядком). Жодних JSON, лапок-"
+    "огорток, markdown чи службових підписів — лише сам пост."
 )
 
 
@@ -357,21 +382,25 @@ def generate_original(st):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        r = client.messages.create(model=SUMMARY_MODEL, max_tokens=1300,
+        r = client.messages.create(model=SUMMARY_MODEL, max_tokens=2000,
                                     system=ORIGINAL_SYS,
                                     messages=[{"role": "user", "content": user}])
-        text = "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
-        m = re.search(r"\{.*\}", text, re.S)
-        if not m:
+        text = "".join(b.text for b in r.content if getattr(b, "type", "") == "text").strip()
+        if not text:
             return None
-        d = json.loads(m.group(0))
-        if not d.get("headline") or not d.get("body"):
+        # Формат plain-text: 1-й рядок — заголовок, далі порожній рядок і тіло.
+        # (Надійніше за JSON — не ламається на переносах рядків.)
+        parts = text.split("\n", 1)
+        headline = parts[0].strip().strip('"').strip("«»").lstrip("#").strip()
+        body = parts[1].strip() if len(parts) > 1 else ""
+        # прибрати зайві порожні рядки на початку тіла
+        body = re.sub(r"\n{3,}", "\n\n", body).strip()
+        if not headline or not body:
             return None
         # єдиний стиль хештегів (з підкресленнями): рубрика сфери + тип поста
         tags = [t for t in (AREA_TAGS.get(area), TYPE_TAGS.get(t_name)) if t]
         return {"type": t_name, "area": area,
-                "headline": str(d["headline"]).strip(),
-                "body": str(d["body"]).strip(), "tags": tags}
+                "headline": headline, "body": body, "tags": tags}
     except Exception as ex:
         print("original gen error:", ex)
         return None
@@ -452,7 +481,7 @@ def main():
     skipped_irrelevant = 0
     for source, url, scope in feeds:
         try:
-            fp = feedparser.parse(url, agent=UA)
+            fp = fetch_feed(url)
             if getattr(fp, "bozo", 0) and not fp.entries:
                 print(f"⚠ стрічка недоступна: {source} — {url} ({getattr(fp,'bozo_exception','')})")
                 continue
