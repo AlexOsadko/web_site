@@ -9,7 +9,9 @@ name: Новини в Telegram
 
 on:
   schedule:
-    - cron: "0 * * * *"        # щогодини
+    # 3–4 пости на тиждень (нд, пн, ср, пт о 09:00 UTC ≈ 12:00 Київ).
+    # Щоденні пости для юридичного каналу зайві — люди відписуються.
+    - cron: "0 9 * * 0,1,3,5"
   workflow_dispatch:
     inputs:
       dry_run:
@@ -43,7 +45,9 @@ jobs:
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # AI-резюме простою мовою
           BOT_MAX_PER_RUN: "1"
-          BOT_DAILY_MAX: "15"
+          BOT_DAILY_MAX: "2"           # запобіжник (звичайно 1 пост за запуск)
+          BOT_MAX_AGE_HOURS: "120"     # свіжість під рідший темп (нд/пн/ср/пт)
+          BOT_CTA_EVERY: "4"           # кнопку «до адвоката» показувати кожен 4-й пост
           BOT_SHOW_PREVIEW: "0"
           # Кнопка «Написати адвокату» під постом. Змініть на свій Telegram
           # (напр. https://t.me/your_username) чи Viber/WhatsApp за бажанням.
