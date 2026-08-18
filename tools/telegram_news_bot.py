@@ -133,21 +133,25 @@ def classify(title, desc):
 
 SUMMARY_SYS = (
     "Ти — редактор українського Telegram-каналу «Про право простою мовою» для "
-    "звичайних людей без юридичної освіти. На основі заголовка й короткого опису "
-    "поясни суть простою, доступною мовою.\n"
+    "звичайних людей без юридичної освіти. На основі заголовка й опису підготуй "
+    "розгорнутий, але зрозумілий розбір публікації.\n"
     "ПРАВИЛА:\n"
     "• Не вигадуй фактів. Конкретні дати, суми, номери статей, назви органів "
     "наводь лише якщо вони є у наданому тексті. Якщо даних мало — пиши узагальнено "
     "й обережно, без вигадок.\n"
-    "• Пиши стисло, без канцеляриту, дружньо й зрозуміло, українською.\n"
+    "• Простою, дружньою мовою, без канцеляриту, українською.\n"
+    "• Порада має бути ЗАГАЛЬНОЮ і безпечною (звернути увагу на строки, зберегти "
+    "документи, за потреби проконсультуватися з адвокатом) — без категоричних "
+    "тверджень про конкретну ситуацію читача.\n"
     "• Поверни ЛИШЕ JSON без коментарів і markdown:\n"
-    '{"about": "1–2 речення простими словами: про що це", '
-    '"impact": "1–2 речення: чому це важливо / що це означає для звичайної людини"}'
+    '{"about": "2–4 речення простими словами: що сталося і в чому суть", '
+    '"impact": "1–2 речення: кого це стосується і що змінюється для звичайної людини", '
+    '"advice": "1–2 речення: на що звернути увагу / що робити / коли варто звернутися до адвоката"}'
 )
 
 
 def summarize(title, desc, source):
-    """Повертає {'about','impact'} простою мовою або None (тоді — fallback на опис)."""
+    """Повертає {'about','impact','advice'} простою мовою або None (fallback на опис)."""
     if not os.environ.get("ANTHROPIC_API_KEY"):
         return None
     try:
@@ -155,7 +159,7 @@ def summarize(title, desc, source):
         client = anthropic.Anthropic()
         r = client.messages.create(
             model=SUMMARY_MODEL,
-            max_tokens=600,
+            max_tokens=900,
             system=SUMMARY_SYS,
             messages=[{"role": "user",
                        "content": f"Заголовок: {title}\nОпис: {desc}\nДжерело: {source}"}],
@@ -167,7 +171,8 @@ def summarize(title, desc, source):
         data = json.loads(m.group(0))
         if data.get("about"):
             return {"about": str(data.get("about", "")).strip(),
-                    "impact": str(data.get("impact", "")).strip()}
+                    "impact": str(data.get("impact", "")).strip(),
+                    "advice": str(data.get("advice", "")).strip()}
     except Exception as ex:
         print("summary error:", ex)
     return None
@@ -184,6 +189,8 @@ def tg_send(item):
         msg += f"\n\n{esc(s['about'])}"
         if s.get("impact"):
             msg += f"\n\n💡 <b>Що це означає для вас:</b> {esc(s['impact'])}"
+        if s.get("advice"):
+            msg += f"\n\n⚖️ <b>Порада:</b> {esc(s['advice'])}"
     elif item["desc"]:
         msg += f"\n\n{esc(item['desc'])}"
     msg += f"\n\n🔗 <a href=\"{esc(item['link'])}\">{cta}</a>"
