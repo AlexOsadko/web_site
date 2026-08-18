@@ -555,7 +555,11 @@ def register_with_worker(o):
                               "area": o["area"]}).encode()
         req = urllib.request.Request(
             WORKER_URL.rstrip("/") + "/register", data=payload,
-            headers={"Content-Type": "application/json", "X-Auth-Token": WORKER_SECRET})
+            headers={"Content-Type": "application/json", "X-Auth-Token": WORKER_SECRET,
+                     # браузерний UA — інакше захист Cloudflare (Bot Fight Mode)
+                     # блокує запит від GitHub з помилкою 1010 ще до воркера
+                     "User-Agent": UA,
+                     "Accept": "application/json, */*"})
         with urllib.request.urlopen(req, timeout=30) as r:
             return bool(json.load(r).get("ok"))
     except urllib.error.HTTPError as e:
