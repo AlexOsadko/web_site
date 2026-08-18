@@ -59,6 +59,11 @@ Actions → **«Новини в Telegram»** → **Run workflow**.
   - `BOT_DAILY_MAX` — постів на добу (типово `15`);
   - `BOT_SHOW_PREVIEW` — `0`, щоб вимкнути прев'ю посилань.
 - **Як часто перевіряти** — `cron` у тому ж файлі (типово щогодини).
+- **Кнопка «Написати адвокату»** під кожним постом — у workflow:
+  - `BOT_CONTACT_URL` — куди веде кнопка (типово сторінка контактів
+    `https://osadko.online/kontakty/`; можна поставити свій Telegram,
+    напр. `https://t.me/your_username`, або Viber/WhatsApp);
+  - `BOT_CONTACT_LABEL` — напис на кнопці.
 
 ## Як це працює
 

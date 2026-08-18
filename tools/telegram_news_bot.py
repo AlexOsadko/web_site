@@ -41,6 +41,9 @@ MAX_AGE_HOURS = int(os.environ.get("BOT_MAX_AGE_HOURS", "72") or "72")
 # AI-резюме простою мовою (потрібен ANTHROPIC_API_KEY). Якщо ключа немає або
 # виклик не вдався — постимо звичайний опис зі стрічки (fallback).
 SUMMARY_MODEL = os.environ.get("BOT_SUMMARY_MODEL", "claude-sonnet-5").strip()
+# кнопка «Написати адвокату» під кожним постом (inline-кнопка з посиланням)
+CONTACT_URL = os.environ.get("BOT_CONTACT_URL", "https://osadko.online/kontakty/").strip()
+CONTACT_LABEL = os.environ.get("BOT_CONTACT_LABEL", "⚖️ Консультація адвоката").strip()
 SHOW_PREVIEW = os.environ.get("BOT_SHOW_PREVIEW", "1").strip() not in ("0", "false", "no")
 DRY_RUN = os.environ.get("BOT_DRY_RUN", "").strip() in ("1", "true", "yes")
 
@@ -188,15 +191,20 @@ def tg_send(item):
         msg += f" · <i>{esc(src)}</i>"
     msg += "\n\n" + " ".join(classify(item["title"], item["desc"]))
     if DRY_RUN:
-        print("[DRY] postnu:", item["title"][:80])
+        print("[DRY] postnu:", item["title"][:80], "| кнопка:", CONTACT_LABEL, "→", CONTACT_URL)
         return True
     api = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    data = urllib.parse.urlencode({
+    params = {
         "chat_id": CHANNEL,
         "text": msg,
         "parse_mode": "HTML",
         "disable_web_page_preview": "false" if SHOW_PREVIEW else "true",
-    }).encode()
+    }
+    if CONTACT_URL:
+        params["reply_markup"] = json.dumps(
+            {"inline_keyboard": [[{"text": CONTACT_LABEL, "url": CONTACT_URL}]]},
+            ensure_ascii=False)
+    data = urllib.parse.urlencode(params).encode()
     try:
         with urllib.request.urlopen(api, data=data, timeout=30) as r:
             j = json.load(r)

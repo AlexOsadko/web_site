@@ -45,6 +45,10 @@ jobs:
           BOT_MAX_PER_RUN: "1"
           BOT_DAILY_MAX: "15"
           BOT_SHOW_PREVIEW: "0"
+          # Кнопка «Написати адвокату» під постом. Змініть на свій Telegram
+          # (напр. https://t.me/your_username) чи Viber/WhatsApp за бажанням.
+          BOT_CONTACT_URL: "https://osadko.online/kontakty/"
+          BOT_CONTACT_LABEL: "⚖️ Консультація адвоката"
           BOT_DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '' }}
         run: python3 tools/telegram_news_bot.py
 
