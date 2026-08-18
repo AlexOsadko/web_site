@@ -688,9 +688,13 @@ def process_approvals(st):
                         "text": "✏️ <b>Редагування…</b> Надішліть новий текст нижче.\n\n"
                                 + draft["text"]})
                 tg_call("sendMessage", {"chat_id": REVIEW_CHAT, "parse_mode": "HTML",
-                        "text": "✏️ Надішліть <b>виправлений текст поста</b> одним "
-                                "повідомленням: перший рядок — заголовок, далі — текст "
-                                "(хештеги додам сам). Щоб скасувати — /cancel."})
+                        "text": "✏️ Натисніть на текст нижче, щоб <b>скопіювати</b>, "
+                                "відредагуйте у полі вводу й надішліть назад одним "
+                                "повідомленням (1-й рядок — заголовок). Хештеги додам "
+                                "сам. Скасувати — /cancel."})
+                # поточний текст як «код» — Telegram дає кнопку «копіювати»
+                tg_call("sendMessage", {"chat_id": REVIEW_CHAT, "parse_mode": "HTML",
+                        "text": "<pre>" + esc(draft["headline"] + "\n\n" + draft["body"]) + "</pre>"})
                 handled += 1
             continue
 

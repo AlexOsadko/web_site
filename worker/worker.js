@@ -150,8 +150,10 @@ async function handleUpdate(update, env) {
       if (!draft) return tg(env, 'answerCallbackQuery', { callback_query_id: cq.id, text: 'Чернетку не знайдено.' });
       await env.KV.put('awaiting_edit', pid);
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id, text: 'Надішліть виправлений текст' });
-      if (chat && mid) await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, parse_mode: 'HTML', disable_web_page_preview: true, text: '✏️ <b>Редагування…</b> Надішліть новий текст нижче.\n\n' + draft.text });
-      await tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: '✏️ Надішліть <b>виправлений текст поста</b> одним повідомленням: перший рядок — заголовок, далі — текст (хештеги додам сам). Щоб скасувати — /cancel.' });
+      if (chat && mid) await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, parse_mode: 'HTML', disable_web_page_preview: true, text: '✏️ <b>Редагування…</b> Скопіюйте текст нижче, відредагуйте й надішліть назад.\n\n' + draft.text });
+      await tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: '✏️ Натисніть на текст нижче, щоб <b>скопіювати</b>, відредагуйте у полі вводу й надішліть назад одним повідомленням (1-й рядок — заголовок). Хештеги додам сам. Скасувати — /cancel.' });
+      // поточний текст як «код» — Telegram показує кнопку «копіювати» (один тап)
+      await tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: '<pre>' + esc(draft.headline + '\n\n' + draft.body) + '</pre>' });
     }
     return;
   }
