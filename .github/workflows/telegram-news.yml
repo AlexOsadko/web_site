@@ -59,6 +59,10 @@ jobs:
           # @userinfobot; напишіть боту /start). Порожньо + autopost=0 → оригінали
           # не публікуються. Щоб слати одразу в канал — BOT_ORIGINAL_AUTOPOST: "1".
           TELEGRAM_REVIEW_CHAT: ${{ secrets.TELEGRAM_REVIEW_CHAT }}
+          # Миттєві кнопки через Cloudflare Worker (вебхук). Якщо задано —
+          # чернетки реєструються у воркері, а бот не опитує getUpdates.
+          BOT_WORKER_URL: ${{ secrets.BOT_WORKER_URL }}
+          BOT_WORKER_SECRET: ${{ secrets.BOT_WORKER_SECRET }}
           BOT_ORIGINAL_EVERY: "10"     # кожен 10-й ОПУБЛІКОВАНИЙ пост — авторський (~3–4/тиждень)
           BOT_ORIGINAL_AUTOPOST: ""    # "1" = публікувати оригінали в канал без перевірки
           BOT_MAX_PER_RUN: "1"         # 1 пост за запуск

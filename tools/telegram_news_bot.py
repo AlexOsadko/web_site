@@ -64,6 +64,11 @@ ORIGINAL_EVERY = int(os.environ.get("BOT_ORIGINAL_EVERY", "2") or "2")
 # (id від @userinfobot; спершу напишіть боту /start). Це запобіжник: авторський
 # юридичний текст від імені адвоката краще прочитати перед публікацією.
 REVIEW_CHAT = os.environ.get("TELEGRAM_REVIEW_CHAT", "").strip()
+# Режим миттєвих кнопок через Cloudflare Worker (вебхук). Якщо задано BOT_WORKER_URL —
+# чернетки реєструються у воркері (він шле їх у чат перевірки й миттєво реагує на
+# кнопки), а бот НЕ опитує getUpdates (бо ввімкнено вебхук Telegram).
+WORKER_URL = os.environ.get("BOT_WORKER_URL", "").strip()
+WORKER_SECRET = os.environ.get("BOT_WORKER_SECRET", "").strip()
 # Увімкніть, щоб публікувати оригінальні пости одразу в канал без перевірки.
 ORIGINAL_AUTOPOST = os.environ.get("BOT_ORIGINAL_AUTOPOST", "").strip() in ("1", "true", "yes")
 # Мінімальний інтервал між ПУБЛІКАЦІЯМИ контенту (хв). Скрипт може запускатися
@@ -538,6 +543,34 @@ def send_review_draft(o, st):
     return ok
 
 
+def register_with_worker(o):
+    """Режим вебхука: реєструє чернетку у Cloudflare Worker, який сам надішле її
+    в чат перевірки з кнопками й миттєво реагуватиме на натискання."""
+    if DRY_RUN:
+        print("[DRY] чернетка → worker:", o["headline"][:60])
+        return True
+    try:
+        payload = json.dumps({"headline": o["headline"], "body": o["body"],
+                              "tags": o.get("tags", []), "type": o["type"],
+                              "area": o["area"]}).encode()
+        req = urllib.request.Request(
+            WORKER_URL.rstrip("/") + "/register", data=payload,
+            headers={"Content-Type": "application/json", "X-Auth-Token": WORKER_SECRET})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return bool(json.load(r).get("ok"))
+    except Exception as e:
+        print("worker register error:", e)
+        return False
+
+
+def deliver_draft(o, st):
+    """Доставляє чернетку на перевірку: через Worker (миттєві кнопки) або
+    напряму через бот (опитування getUpdates)."""
+    if WORKER_URL:
+        return register_with_worker(o)
+    return send_review_draft(o, st)
+
+
 def _bump_stat(st, key):
     stats = st.setdefault("stats", {"generated": 0, "published": 0,
                                     "edited": 0, "rejected": 0})
@@ -569,6 +602,8 @@ def process_approvals(st):
     """Опитує оновлення (getUpdates): натискання кнопок під чернетками
     (опублікувати / редагувати / відхилити), надісланий виправлений текст
     та команду /stats. Викликається щоразу — тому реакція швидка."""
+    if WORKER_URL:
+        return   # кнопки обробляє Cloudflare Worker (вебхук); getUpdates не чіпаємо
     if DRY_RUN or not TOKEN:
         return
     resp = tg_call("getUpdates", {"offset": int(st.get("update_offset", 0)),
@@ -742,7 +777,7 @@ def main():
                 break
             seqv = int(st.get("seq", 0))
             if REVIEW_CHAT and not ORIGINAL_AUTOPOST:
-                ok, tgt = send_review_draft(o, st), "перевірка"
+                ok, tgt = deliver_draft(o, st), "перевірка"
             elif ORIGINAL_AUTOPOST:
                 total = int(st.get("total", 0))
                 cta = CTA_EVERY > 0 and ((total + 1) % CTA_EVERY == 0)
@@ -775,7 +810,7 @@ def main():
         if o:
             if REVIEW_CHAT and not ORIGINAL_AUTOPOST:
                 # чернетка з кнопками [✅ Опублікувати] [🗑 Відхилити]
-                ok, tgt = send_review_draft(o, st), "перевірка"
+                ok, tgt = deliver_draft(o, st), "перевірка"
             elif ORIGINAL_AUTOPOST:
                 total = int(st.get("total", 0))
                 cta = CTA_EVERY > 0 and ((total + 1) % CTA_EVERY == 0)

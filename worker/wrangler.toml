@@ -1,0 +1,27 @@
+# Конфіг для деплою воркера через Wrangler CLI (за бажанням; можна й через
+# вебпанель Cloudflare — див. worker/README.md).
+#
+#   npm i -g wrangler
+#   wrangler login
+#   wrangler kv namespace create KV        # створить namespace, вставте id нижче
+#   wrangler secret put TELEGRAM_BOT_TOKEN
+#   wrangler secret put TELEGRAM_CHANNEL
+#   wrangler secret put REVIEW_CHAT
+#   wrangler secret put AUTH_TOKEN
+#   wrangler secret put WEBHOOK_SECRET     # опційно
+#   wrangler deploy
+
+name = "osadko-telegram-bot"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# Після `wrangler kv namespace create KV` підставте сюди отриманий id:
+kv_namespaces = [
+  { binding = "KV", id = "ВСТАВТЕ_KV_ID" }
+]
+
+# Незасекречені змінні (секрети додаються через `wrangler secret put`):
+[vars]
+CONTACT_URL = "https://osadko.online/kontakty/"
+CONTACT_LABEL = "⚖️ Консультація адвоката"
+CTA_EVERY = "6"
