@@ -149,11 +149,16 @@ def load_state():
             st.setdefault("pending", {})        # чернетки, що чекають рішення (кнопки)
             st.setdefault("update_offset", 0)   # offset для getUpdates
             st.setdefault("last_content_ts", 0)  # коли востаннє постили контент
+            st.setdefault("awaiting_edit", "")  # id чернетки, для якої чекаємо новий текст
+            st.setdefault("stats", {"generated": 0, "published": 0, "edited": 0, "rejected": 0})
+            st.setdefault("decisions", [])      # історія рішень (останні 100)
             return st
     except Exception:
         return {"seen": [], "day": "", "count": 0, "total": 0, "seq": 0,
                 "orig_recent": [], "pending": {}, "update_offset": 0,
-                "last_content_ts": 0}
+                "last_content_ts": 0, "awaiting_edit": "",
+                "stats": {"generated": 0, "published": 0, "edited": 0, "rejected": 0},
+                "decisions": []}
 
 
 def save_state(st):
@@ -473,32 +478,45 @@ def post_original(o, chat, with_cta=False, review=False):
     return _send(msg, chat, with_cta=with_cta)
 
 
-def send_review_draft(o, st):
-    """Надсилає чернетку в чат перевірки з кнопками
-    [✅ Опублікувати в канал] [🗑 Відхилити]. Зберігає чернетку в st['pending'],
-    щоб натискання кнопки (обробляється у process_approvals) опублікувало саме її."""
-    pid = str(int(time.time() * 1000))          # унікальний id чернетки
-    text = ("🧪 <b>ЧЕРНЕТКА — перевірте перед публікацією.</b>\n"
-            f"<i>тип: {esc(o['type'])} · {esc(o['area'])}</i>\n\n") + render_original(o)
-    if DRY_RUN:
-        print("[DRY] чернетка →", REVIEW_CHAT, "|", o["headline"][:60])
-        return True
-    kb = {"inline_keyboard": [[
-        {"text": "✅ Опублікувати в канал", "callback_data": f"pub:{pid}"},
-        {"text": "🗑 Відхилити", "callback_data": f"rej:{pid}"},
-    ]]}
+def _parse_post_text(text):
+    """Розбирає текст поста: 1-й рядок — заголовок, далі — тіло."""
+    text = (text or "").strip()
+    parts = text.split("\n", 1)
+    headline = parts[0].strip().strip('"').strip("«»").lstrip("#").strip()
+    body = parts[1].strip() if len(parts) > 1 else ""
+    body = re.sub(r"\n{3,}", "\n\n", body).strip()
+    return headline, body
+
+
+def _draft_keyboard(pid):
+    return {"inline_keyboard": [
+        [{"text": "✅ Опублікувати в канал", "callback_data": f"pub:{pid}"}],
+        [{"text": "✏️ Редагувати", "callback_data": f"edit:{pid}"},
+         {"text": "🗑 Відхилити", "callback_data": f"rej:{pid}"}],
+    ]}
+
+
+def _send_draft_message(draft, st, pid, header=""):
+    """Надсилає (чи повторно надсилає) повідомлення-чернетку з кнопками
+    [✅ Опублікувати] [✏️ Редагувати] [🗑 Відхилити] і оновлює запис у st['pending'].
+    draft — dict із headline/body/tags/type/area."""
+    body_text = render_original(draft)
+    text = (header + "🧪 <b>ЧЕРНЕТКА — перевірте перед публікацією.</b>\n"
+            f"<i>тип: {esc(draft['type'])} · {esc(draft['area'])}</i>\n\n") + body_text
     resp = tg_call("sendMessage", {
         "chat_id": REVIEW_CHAT, "text": text, "parse_mode": "HTML",
         "disable_web_page_preview": "true",
-        "reply_markup": json.dumps(kb, ensure_ascii=False),
+        "reply_markup": json.dumps(_draft_keyboard(pid), ensure_ascii=False),
     })
     if not (resp and resp.get("ok")):
         return False
     mid = resp["result"]["message_id"]
     pend = st.setdefault("pending", {})
-    pend[pid] = {"headline": o["headline"], "body": o["body"], "tags": o.get("tags", []),
-                 "type": o["type"], "area": o["area"],
-                 "review_chat": REVIEW_CHAT, "review_msg": mid, "text": render_original(o)}
+    rec = pend.get(pid, {})
+    rec.update({"headline": draft["headline"], "body": draft["body"],
+                "tags": draft.get("tags", []), "type": draft["type"], "area": draft["area"],
+                "review_chat": REVIEW_CHAT, "review_msg": mid, "text": body_text})
+    pend[pid] = rec
     # не даємо переліку розростатися нескінченно
     if len(pend) > 50:
         for k in sorted(pend)[:-50]:
@@ -506,10 +524,49 @@ def send_review_draft(o, st):
     return True
 
 
+def send_review_draft(o, st):
+    """Створює чернетку авторського поста у чаті перевірки (з кнопками)."""
+    pid = str(int(time.time() * 1000))          # унікальний id чернетки
+    if DRY_RUN:
+        print("[DRY] чернетка →", REVIEW_CHAT, "|", o["headline"][:60])
+        return True
+    ok = _send_draft_message(o, st, pid)
+    if ok:
+        _bump_stat(st, "generated")
+    return ok
+
+
+def _bump_stat(st, key):
+    stats = st.setdefault("stats", {"generated": 0, "published": 0,
+                                    "edited": 0, "rejected": 0})
+    stats[key] = stats.get(key, 0) + 1
+
+
+def _log_decision(st, action, draft):
+    log = st.setdefault("decisions", [])
+    log.append({"ts": int(time.time()), "action": action,
+                "type": draft.get("type", ""), "area": draft.get("area", ""),
+                "headline": (draft.get("headline", "") or "")[:80]})
+    st["decisions"] = log[-100:]      # тримаємо історію останніх 100 рішень
+
+
+def stats_text(st):
+    s = st.setdefault("stats", {"generated": 0, "published": 0,
+                                "edited": 0, "rejected": 0})
+    pend = len(st.get("pending", {}))
+    return ("📊 <b>Статистика авторських постів</b>\n"
+            f"• Згенеровано чернеток: {s.get('generated', 0)}\n"
+            f"• Опубліковано: {s.get('published', 0)}\n"
+            f"• Відредаговано: {s.get('edited', 0)}\n"
+            f"• Відхилено: {s.get('rejected', 0)}\n"
+            f"• Чекають рішення: {pend}\n"
+            f"• Новин у каналі (всього постів): {int(st.get('total', 0))}")
+
+
 def process_approvals(st):
-    """Опитує натискання кнопок під чернетками (getUpdates) і публікує /
-    відхиляє відповідні чернетки. Викликається щоразу — тому кнопки спрацьовують
-    швидко, навіть якщо новини виходять рідше."""
+    """Опитує оновлення (getUpdates): натискання кнопок під чернетками
+    (опублікувати / редагувати / відхилити), надісланий виправлений текст
+    та команду /stats. Викликається щоразу — тому реакція швидка."""
     if DRY_RUN or not TOKEN:
         return
     resp = tg_call("getUpdates", {"offset": int(st.get("update_offset", 0)),
@@ -524,48 +581,118 @@ def process_approvals(st):
     for upd in updates:
         st["update_offset"] = upd["update_id"] + 1
         cq = upd.get("callback_query")
-        if not cq:
-            continue
-        data = cq.get("data", "") or ""
-        msg = cq.get("message", {}) or {}
-        chat = (msg.get("chat") or {}).get("id")
-        mid = msg.get("message_id")
-        action, _, pid = data.partition(":")
-        draft = pend.get(pid)
-        if action == "pub":
-            if not draft:
-                tg_call("answerCallbackQuery", {"callback_query_id": cq["id"],
-                        "text": "Чернетку не знайдено (уже оброблена)."})
-                continue
-            total = int(st.get("total", 0))
-            cta = CTA_EVERY > 0 and ((total + 1) % CTA_EVERY == 0)
-            ok = _send(draft["text"], CHANNEL, with_cta=cta)
-            if ok:
-                st["total"] = total + 1
+        m = upd.get("message")
+
+        # --- натискання кнопок під чернеткою ---
+        if cq:
+            data = cq.get("data", "") or ""
+            msg = cq.get("message", {}) or {}
+            chat = (msg.get("chat") or {}).get("id")
+            mid = msg.get("message_id")
+            action, _, pid = data.partition(":")
+            draft = pend.get(pid)
+            if action == "pub":
+                if not draft:
+                    tg_call("answerCallbackQuery", {"callback_query_id": cq["id"],
+                            "text": "Чернетку не знайдено (уже оброблена)."})
+                    continue
+                total = int(st.get("total", 0))
+                cta = CTA_EVERY > 0 and ((total + 1) % CTA_EVERY == 0)
+                if _send(draft["text"], CHANNEL, with_cta=cta):
+                    st["total"] = total + 1
+                    _bump_stat(st, "published")
+                    _log_decision(st, "published", draft)
+                    pend.pop(pid, None)
+                    tg_call("answerCallbackQuery", {"callback_query_id": cq["id"],
+                            "text": "Опубліковано в канал ✅"})
+                    if chat and mid:
+                        tg_call("editMessageText", {
+                            "chat_id": chat, "message_id": mid, "parse_mode": "HTML",
+                            "disable_web_page_preview": "true",
+                            "text": "✅ <b>Опубліковано в канал</b>\n\n" + draft["text"]})
+                    handled += 1
+                else:
+                    tg_call("answerCallbackQuery", {"callback_query_id": cq["id"],
+                            "text": "Не вдалося опублікувати, спробуйте ще раз."})
+            elif action == "rej":
+                if draft:
+                    _bump_stat(st, "rejected")
+                    _log_decision(st, "rejected", draft)
                 pend.pop(pid, None)
                 tg_call("answerCallbackQuery", {"callback_query_id": cq["id"],
-                        "text": "Опубліковано в канал ✅"})
+                        "text": "Відхилено 🗑"})
+                if draft and chat and mid:
+                    tg_call("editMessageText", {
+                        "chat_id": chat, "message_id": mid, "parse_mode": "HTML",
+                        "disable_web_page_preview": "true",
+                        "text": "🗑 <b>Відхилено</b>\n\n" + draft["text"]})
+                handled += 1
+            elif action == "edit":
+                if not draft:
+                    tg_call("answerCallbackQuery", {"callback_query_id": cq["id"],
+                            "text": "Чернетку не знайдено (уже оброблена)."})
+                    continue
+                st["awaiting_edit"] = pid
+                tg_call("answerCallbackQuery", {"callback_query_id": cq["id"],
+                        "text": "Надішліть виправлений текст"})
+                # прибираємо кнопки зі старого повідомлення, щоб не плутатись
                 if chat and mid:
                     tg_call("editMessageText", {
                         "chat_id": chat, "message_id": mid, "parse_mode": "HTML",
                         "disable_web_page_preview": "true",
-                        "text": "✅ <b>Опубліковано в канал</b>\n\n" + draft["text"]})
+                        "text": "✏️ <b>Редагування…</b> Надішліть новий текст нижче.\n\n"
+                                + draft["text"]})
+                tg_call("sendMessage", {"chat_id": REVIEW_CHAT, "parse_mode": "HTML",
+                        "text": "✏️ Надішліть <b>виправлений текст поста</b> одним "
+                                "повідомленням: перший рядок — заголовок, далі — текст "
+                                "(хештеги додам сам). Щоб скасувати — /cancel."})
                 handled += 1
-            else:
-                tg_call("answerCallbackQuery", {"callback_query_id": cq["id"],
-                        "text": "Не вдалося опублікувати, спробуйте ще раз."})
-        elif action == "rej":
-            pend.pop(pid, None)
-            tg_call("answerCallbackQuery", {"callback_query_id": cq["id"],
-                    "text": "Відхилено 🗑"})
-            if draft and chat and mid:
-                tg_call("editMessageText", {
-                    "chat_id": chat, "message_id": mid, "parse_mode": "HTML",
-                    "disable_web_page_preview": "true",
-                    "text": "🗑 <b>Відхилено</b>\n\n" + draft["text"]})
-            handled += 1
+            continue
+
+        # --- звичайне повідомлення від вас (редагування / команди) ---
+        if m:
+            chat = (m.get("chat") or {}).get("id")
+            if str(chat) != str(REVIEW_CHAT):
+                continue
+            body = (m.get("text") or "").strip()
+            awaiting = st.get("awaiting_edit", "")
+            if awaiting:
+                if body.lower() in ("/cancel", "cancel", "скасувати"):
+                    draft = pend.get(awaiting)
+                    st["awaiting_edit"] = ""
+                    if draft:                       # повертаємо кнопки без змін
+                        _send_draft_message(draft, st, awaiting,
+                                            header="↩️ <b>Редагування скасовано.</b>\n\n")
+                    handled += 1
+                    continue
+                draft = pend.get(awaiting)
+                if not draft:
+                    st["awaiting_edit"] = ""
+                    tg_call("sendMessage", {"chat_id": REVIEW_CHAT,
+                            "text": "Чернетку не знайдено — редагування скасовано."})
+                    continue
+                headline, new_body = _parse_post_text(body)
+                if not headline or not new_body:
+                    tg_call("sendMessage", {"chat_id": REVIEW_CHAT,
+                            "text": "Потрібні заголовок (1-й рядок) і текст. "
+                                    "Надішліть ще раз або /cancel."})
+                    continue
+                draft["headline"] = headline
+                draft["body"] = new_body
+                st["awaiting_edit"] = ""
+                _bump_stat(st, "edited")
+                _log_decision(st, "edited", draft)
+                _send_draft_message(draft, st, awaiting,
+                                    header="✏️ <b>Оновлена чернетка.</b>\n\n")
+                handled += 1
+                continue
+            if body.lower() in ("/stats", "статистика"):
+                tg_call("sendMessage", {"chat_id": REVIEW_CHAT, "parse_mode": "HTML",
+                        "text": stats_text(st)})
+                handled += 1
+                continue
     if handled:
-        print(f"Оброблено натискань кнопок: {handled}.")
+        print(f"Оброблено подій керування: {handled}.")
 
 
 def entry_id(e):
