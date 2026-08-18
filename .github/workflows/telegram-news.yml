@@ -43,7 +43,7 @@ jobs:
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
           BOT_MAX_PER_RUN: "1"
           BOT_DAILY_MAX: "15"
-          BOT_SHOW_PREVIEW: "1"
+          BOT_SHOW_PREVIEW: "0"
           BOT_DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '' }}
         run: python3 tools/telegram_news_bot.py
 
