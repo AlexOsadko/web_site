@@ -14,22 +14,20 @@
 Українська правда | https://www.pravda.com.ua/rss/ | general
 УНІАН | https://rss.unian.net/site/news_ukr.rss | general
 Укрінформ | https://www.ukrinform.ua/rss/block-lastnews | general
+Суспільне | https://suspilne.media/rss/all.rss | general
 
 # --- Юридичні новини ---
+Судово-юридична газета | https://sud.ua/rss
 Протокол | https://protocol.ua/ua/rss/
+ЛІГА:Закон (ЮрЛіга) | https://jurliga.ligazakon.net/rss
 LexInform | https://lexinform.com.ua/feed/
 
 # --- Тимчасово вимкнені стрічки ---------------------------------------------
-# Ці джерела не читаються з GitHub-раннерів: віддають анти-бот сторінку
-# датацентровим IP («not well-formed»), мають битий SSL-сертифікат або
-# помилку в самому фіді. Це не лагодиться заголовками. Можна періодично
-# пробувати знову (розкоментувати рядок і запустити «Перевірка стрічок»):
-Суспільне | https://suspilne.media/rss/all.rss | general
-Закон і Бізнес | https://zib.com.ua/ua/rss.xml
-ЛІГА:Закон (ЮрЛіга) | https://jurliga.ligazakon.net/ua/rss
-Судово-юридична газета | https://sud.ua/uk/rss
-Юридична газета | https://yur-gazeta.com/rss/
-Юридична практика (pravo.ua) | https://pravo.ua/feed/
-Ракурс | https://racurs.ua/feed/
-Українське право | https://ukrainepravo.com/rss/
-Юрліга — судова практика | https://jurliga.ligazakon.net/ua/rss/court
+# Не читаються з GitHub-раннерів (перевірено пробником): неправильна/зникла
+# адреса (404), блок за IP (403), ліміт запитів (429) або битий SSL. Можна
+# періодично пробувати знову («Перевірка стрічок»):
+# Закон і Бізнес | https://zib.com.ua/ua/rss.xml            # 404 (адреси не знайдено)
+# Ракурс | https://racurs.ua/feed/                          # 404 (адреси не знайдено)
+# Юридична практика (pravo.ua) | https://pravo.ua/feed/      # 403 (блок за IP)
+# Українське право | https://ukrainepravo.com/rss/          # 429 (ліміт запитів)
+# Юридична газета | https://yur-gazeta.com/rss/             # битий SSL-сертифікат
