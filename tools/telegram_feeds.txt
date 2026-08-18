@@ -11,6 +11,14 @@
 Суспільне | https://suspilne.media/rss/all.rss
 
 # --- Юридичні новини ---
+# Якщо якась стрічка позначена ⚠ у логах Actions — виправте адресу або приберіть рядок.
 Закон і Бізнес | https://zib.com.ua/ua/rss.xml
-ЛІГА:Закон | https://jurliga.ligazakon.net/ua/rss
+ЛІГА:Закон (ЮрЛіга) | https://jurliga.ligazakon.net/ua/rss
 Судово-юридична газета | https://sud.ua/uk/rss
+Юридична газета | https://yur-gazeta.com/rss/
+Юридична практика (pravo.ua) | https://pravo.ua/feed/
+LexInform | https://lexinform.com.ua/feed/
+Протокол | https://protocol.ua/ua/rss/
+Ракурс | https://racurs.ua/feed/
+Українське право | https://ukrainepravo.com/rss/
+Юрліга — судова практика | https://jurliga.ligazakon.net/ua/rss/court
