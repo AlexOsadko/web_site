@@ -35,7 +35,10 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
 FEED_HEADERS = {"Accept": "application/rss+xml, application/atom+xml, "
                           "application/xml;q=0.9, text/xml;q=0.9, */*;q=0.8",
-                "Accept-Language": "uk,en;q=0.8"}
+                "Accept-Language": "uk,en;q=0.8",
+                # без стиснення: деякі сайти віддають brotli, який feedparser
+                # не розпаковує → «not well-formed». identity = сирий XML.
+                "Accept-Encoding": "identity"}
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
 CHANNEL = os.environ.get("TELEGRAM_CHANNEL", "").strip()
