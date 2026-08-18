@@ -66,6 +66,10 @@ ORIGINAL_EVERY = int(os.environ.get("BOT_ORIGINAL_EVERY", "2") or "2")
 REVIEW_CHAT = os.environ.get("TELEGRAM_REVIEW_CHAT", "").strip()
 # Увімкніть, щоб публікувати оригінальні пости одразу в канал без перевірки.
 ORIGINAL_AUTOPOST = os.environ.get("BOT_ORIGINAL_AUTOPOST", "").strip() in ("1", "true", "yes")
+# Мінімальний інтервал між ПУБЛІКАЦІЯМИ контенту (хв). Скрипт може запускатися
+# часто (щоб швидко обробляти натискання кнопок «Опублікувати/Відхилити» під
+# чернетками), але новини/авторські пости виходять не частіше цього інтервалу.
+CONTENT_INTERVAL_MIN = int(os.environ.get("BOT_CONTENT_INTERVAL_MIN", "120") or "120")
 
 ORIGINAL_TYPES = [
     ("міф", "розвінчання поширеного юридичного міфу: спершу сам міф, тоді як є насправді"),
@@ -139,9 +143,14 @@ def load_state():
             st.setdefault("total", 0)
             st.setdefault("seq", 0)
             st.setdefault("orig_recent", [])
+            st.setdefault("pending", {})        # чернетки, що чекають рішення (кнопки)
+            st.setdefault("update_offset", 0)   # offset для getUpdates
+            st.setdefault("last_content_ts", 0)  # коли востаннє постили контент
             return st
     except Exception:
-        return {"seen": [], "day": "", "count": 0, "total": 0, "seq": 0, "orig_recent": []}
+        return {"seen": [], "day": "", "count": 0, "total": 0, "seq": 0,
+                "orig_recent": [], "pending": {}, "update_offset": 0,
+                "last_content_ts": 0}
 
 
 def save_state(st):
@@ -345,6 +354,21 @@ def _send(text, chat, with_cta=False):
         return False
 
 
+def tg_call(method, params):
+    """Універсальний виклик Telegram Bot API. Повертає розпарсений JSON або None."""
+    api = f"https://api.telegram.org/bot{TOKEN}/{method}"
+    data = urllib.parse.urlencode(params).encode()
+    try:
+        with urllib.request.urlopen(api, data=data, timeout=30) as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        print(f"Telegram HTTP error ({method}):", e.code,
+              e.read().decode("utf-8", "ignore")[:300])
+    except Exception as e:
+        print(f"Telegram error ({method}):", e)
+    return None
+
+
 def tg_send(item):
     """Пост-новина / стаття (з AI-резюме та посиланням на джерело)."""
     own = "osadko.online" in (item.get("link") or "")   # власна стаття із сайту
@@ -430,15 +454,115 @@ def generate_original(st):
         return None
 
 
-def post_original(o, chat, with_cta=False, review=False):
+def render_original(o):
+    """Готовий текст авторського поста (заголовок + тіло + хештеги)."""
     msg = f"<b>{esc(o['headline'])}</b>\n\n{esc(o['body'])}"
     if o.get("tags"):
         msg += "\n\n" + " ".join(o["tags"])
+    return msg
+
+
+def post_original(o, chat, with_cta=False, review=False):
+    msg = render_original(o)
     if review:
-        msg = ("🧪 <b>ЧЕРНЕТКА — перевірте перед публікацією.</b> Якщо ок — "
-               "перешліть у канал.\n"
+        msg = ("🧪 <b>ЧЕРНЕТКА — перевірте перед публікацією.</b>\n"
                f"<i>тип: {esc(o['type'])} · {esc(o['area'])}</i>\n\n") + msg
     return _send(msg, chat, with_cta=with_cta)
+
+
+def send_review_draft(o, st):
+    """Надсилає чернетку в чат перевірки з кнопками
+    [✅ Опублікувати в канал] [🗑 Відхилити]. Зберігає чернетку в st['pending'],
+    щоб натискання кнопки (обробляється у process_approvals) опублікувало саме її."""
+    pid = str(int(time.time() * 1000))          # унікальний id чернетки
+    text = ("🧪 <b>ЧЕРНЕТКА — перевірте перед публікацією.</b>\n"
+            f"<i>тип: {esc(o['type'])} · {esc(o['area'])}</i>\n\n") + render_original(o)
+    if DRY_RUN:
+        print("[DRY] чернетка →", REVIEW_CHAT, "|", o["headline"][:60])
+        return True
+    kb = {"inline_keyboard": [[
+        {"text": "✅ Опублікувати в канал", "callback_data": f"pub:{pid}"},
+        {"text": "🗑 Відхилити", "callback_data": f"rej:{pid}"},
+    ]]}
+    resp = tg_call("sendMessage", {
+        "chat_id": REVIEW_CHAT, "text": text, "parse_mode": "HTML",
+        "disable_web_page_preview": "true",
+        "reply_markup": json.dumps(kb, ensure_ascii=False),
+    })
+    if not (resp and resp.get("ok")):
+        return False
+    mid = resp["result"]["message_id"]
+    pend = st.setdefault("pending", {})
+    pend[pid] = {"headline": o["headline"], "body": o["body"], "tags": o.get("tags", []),
+                 "type": o["type"], "area": o["area"],
+                 "review_chat": REVIEW_CHAT, "review_msg": mid, "text": render_original(o)}
+    # не даємо переліку розростатися нескінченно
+    if len(pend) > 50:
+        for k in sorted(pend)[:-50]:
+            pend.pop(k, None)
+    return True
+
+
+def process_approvals(st):
+    """Опитує натискання кнопок під чернетками (getUpdates) і публікує /
+    відхиляє відповідні чернетки. Викликається щоразу — тому кнопки спрацьовують
+    швидко, навіть якщо новини виходять рідше."""
+    if DRY_RUN or not TOKEN:
+        return
+    resp = tg_call("getUpdates", {"offset": int(st.get("update_offset", 0)),
+                                  "timeout": 0, "limit": 50})
+    if not (resp and resp.get("ok")):
+        return
+    updates = resp.get("result", [])
+    if not updates:
+        return
+    pend = st.setdefault("pending", {})
+    handled = 0
+    for upd in updates:
+        st["update_offset"] = upd["update_id"] + 1
+        cq = upd.get("callback_query")
+        if not cq:
+            continue
+        data = cq.get("data", "") or ""
+        msg = cq.get("message", {}) or {}
+        chat = (msg.get("chat") or {}).get("id")
+        mid = msg.get("message_id")
+        action, _, pid = data.partition(":")
+        draft = pend.get(pid)
+        if action == "pub":
+            if not draft:
+                tg_call("answerCallbackQuery", {"callback_query_id": cq["id"],
+                        "text": "Чернетку не знайдено (уже оброблена)."})
+                continue
+            total = int(st.get("total", 0))
+            cta = CTA_EVERY > 0 and ((total + 1) % CTA_EVERY == 0)
+            ok = _send(draft["text"], CHANNEL, with_cta=cta)
+            if ok:
+                st["total"] = total + 1
+                pend.pop(pid, None)
+                tg_call("answerCallbackQuery", {"callback_query_id": cq["id"],
+                        "text": "Опубліковано в канал ✅"})
+                if chat and mid:
+                    tg_call("editMessageText", {
+                        "chat_id": chat, "message_id": mid, "parse_mode": "HTML",
+                        "disable_web_page_preview": "true",
+                        "text": "✅ <b>Опубліковано в канал</b>\n\n" + draft["text"]})
+                handled += 1
+            else:
+                tg_call("answerCallbackQuery", {"callback_query_id": cq["id"],
+                        "text": "Не вдалося опублікувати, спробуйте ще раз."})
+        elif action == "rej":
+            pend.pop(pid, None)
+            tg_call("answerCallbackQuery", {"callback_query_id": cq["id"],
+                    "text": "Відхилено 🗑"})
+            if draft and chat and mid:
+                tg_call("editMessageText", {
+                    "chat_id": chat, "message_id": mid, "parse_mode": "HTML",
+                    "disable_web_page_preview": "true",
+                    "text": "🗑 <b>Відхилено</b>\n\n" + draft["text"]})
+            handled += 1
+    if handled:
+        print(f"Оброблено натискань кнопок: {handled}.")
 
 
 def entry_id(e):
@@ -460,13 +584,28 @@ def main():
         st["day"] = d
         st["count"] = 0
 
+    # 1) Спершу — обробка натискань кнопок під чернетками (швидко, щоразу).
+    process_approvals(st)
+
+    # 2) Контент постимо не частіше, ніж CONTENT_INTERVAL_MIN (запуски бувають
+    #    частими заради кнопок, але новини мають виходити в спокійному темпі).
+    now = time.time()
+    if (now - float(st.get("last_content_ts", 0))) < CONTENT_INTERVAL_MIN * 60:
+        left = int(CONTENT_INTERVAL_MIN - (now - float(st.get("last_content_ts", 0))) / 60)
+        print(f"Ще рано для нового контенту (лишилось ~{max(0, left)} хв). "
+              "Кнопки оброблено, вихід.")
+        if not DRY_RUN:
+            save_state(st)
+        return
+
     # чергування: кожен ORIGINAL_EVERY-й вихід — оригінальний (авторський) пост
     seq = int(st.get("seq", 0))
     if ORIGINAL_EVERY > 0 and (seq % ORIGINAL_EVERY == 0):
         o = generate_original(st)
         if o:
             if REVIEW_CHAT and not ORIGINAL_AUTOPOST:
-                ok, tgt = post_original(o, REVIEW_CHAT, with_cta=False, review=True), "перевірка"
+                # чернетка з кнопками [✅ Опублікувати] [🗑 Відхилити]
+                ok, tgt = send_review_draft(o, st), "перевірка"
             elif ORIGINAL_AUTOPOST:
                 total = int(st.get("total", 0))
                 cta = CTA_EVERY > 0 and ((total + 1) % CTA_EVERY == 0)
@@ -479,6 +618,7 @@ def main():
                 # зрушуємо чергу, щоб не застрягнути на оригіналі й далі йшли новини
                 if not DRY_RUN:
                     st["seq"] = seq + 1
+                ok = False
             if ok:
                 print(f"Оригінальний пост → {tgt}: {o['headline'][:60]}")
                 if not DRY_RUN:
@@ -486,6 +626,7 @@ def main():
                     rec.append(f"{o['type']}:{o['headline'][:40]}")
                     st["orig_recent"] = rec[-20:]
                     st["seq"] = seq + 1
+                    st["last_content_ts"] = now
                     save_state(st)
                 return
             print("Оригінальний пост не відправлено — публікую новину цього запуску.")
@@ -566,6 +707,8 @@ def main():
             print("Не вдалося опублікувати:", c["title"][:60])
 
     print(f"Опубліковано: {posted}. Разом за добу: {st['count']}/{DAILY_MAX}.")
+    if posted and not DRY_RUN:
+        st["last_content_ts"] = now   # відлік інтервалу до наступного контенту
     if not DRY_RUN:
         save_state(st)
 
