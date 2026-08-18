@@ -1,0 +1,35 @@
+name: Приклади чернеток (Telegram)
+
+# Одноразова генерація прикладів оригінальних постів (чернеток) для оцінки
+# якості. НІЧОГО не публікує в канал — лише друкує згенеровані пости в лог
+# Actions. Запуск вручну: Actions → «Приклади чернеток (Telegram)» → Run workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "Скільки чернеток згенерувати (1–8)"
+        type: string
+        default: "4"
+
+permissions:
+  contents: read
+
+jobs:
+  drafts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Встановити залежності
+        run: pip install -r tools/requirements-bot.txt
+
+      - name: Згенерувати чернетки
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SAMPLE_COUNT: ${{ github.event.inputs.count }}
+        run: python3 tools/telegram_sample_drafts.py
