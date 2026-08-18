@@ -1,0 +1,61 @@
+name: Новини в Telegram
+
+# Публікує новини (загальні + юридичні) у Telegram-канал.
+# Розклад — щогодини (UTC); за замовчуванням не більше 1 поста за запуск і
+# не більше 15 постів на добу (керується BOT_MAX_PER_RUN / BOT_DAILY_MAX).
+# Стан (уже опубліковані посилання) зберігається у .telegram-bot/state.json
+# і комітиться назад ботом. Такий коміт (через GITHUB_TOKEN) НЕ перезапускає
+# деплой сайту завдяки анти-рекурсії GitHub.
+
+on:
+  schedule:
+    - cron: "0 * * * *"        # щогодини
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Тест без публікації (лише лог, стан не зберігається)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: telegram-news
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Встановити залежності
+        run: pip install -r tools/requirements-bot.txt
+
+      - name: Опублікувати новини
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
+          BOT_MAX_PER_RUN: "1"
+          BOT_DAILY_MAX: "15"
+          BOT_SHOW_PREVIEW: "1"
+          BOT_DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '' }}
+        run: python3 tools/telegram_news_bot.py
+
+      - name: Зберегти стан
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          if [ -n "$(git status --porcelain .telegram-bot)" ]; then
+            git config user.name "osadko-news-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .telegram-bot
+            git commit -m "chore(news-bot): update state [skip ci]"
+            git push
+          else
+            echo "Стан не змінився — коміт не потрібен."
+          fi

@@ -1,0 +1,16 @@
+# Стрічки новин для Telegram-каналу.
+# Формат рядка:   Джерело | https://адреса-rss
+# Рядки, що починаються з #, — коментарі. Додавайте/видаляйте вільно.
+# Якщо якась стрічка не працює — воркфлоу напише про це в логах (Actions),
+# просто виправте або приберіть відповідний рядок.
+
+# --- Загальні новини України ---
+Українська правда | https://www.pravda.com.ua/rss/
+УНІАН | https://rss.unian.net/site/news_ukr.rss
+Укрінформ | https://www.ukrinform.ua/rss/block-lastnews
+Суспільне | https://suspilne.media/rss/all.rss
+
+# --- Юридичні новини ---
+Закон і Бізнес | https://zib.com.ua/ua/rss.xml
+ЛІГА:Закон | https://jurliga.ligazakon.net/ua/rss
+Судово-юридична газета | https://sud.ua/uk/rss
