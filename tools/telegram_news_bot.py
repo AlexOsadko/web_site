@@ -35,6 +35,9 @@ TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
 CHANNEL = os.environ.get("TELEGRAM_CHANNEL", "").strip()
 MAX_PER_RUN = int(os.environ.get("BOT_MAX_PER_RUN", "1") or "1")
 DAILY_MAX = int(os.environ.get("BOT_DAILY_MAX", "15") or "15")
+# постимо лише свіже: записи, старші за MAX_AGE_HOURS, ігноруються (щоб не
+# «вивалити» весь архів стрічки/сайту при першому запуску)
+MAX_AGE_HOURS = int(os.environ.get("BOT_MAX_AGE_HOURS", "72") or "72")
 SHOW_PREVIEW = os.environ.get("BOT_SHOW_PREVIEW", "1").strip() not in ("0", "false", "no")
 DRY_RUN = os.environ.get("BOT_DRY_RUN", "").strip() in ("1", "true", "yes")
 
@@ -123,12 +126,16 @@ def classify(title, desc):
 
 
 def tg_send(item):
-    msg = f"📰 <b>{esc(item['title'])}</b>"
+    own = "osadko.online" in (item.get("link") or "")   # власна стаття із сайту
+    head = "✍️" if own else "📰"
+    cta = "Читати статтю" if own else "Читати джерело"
+    src = "Адвокат Осадько" if own else item["source"]
+    msg = f"{head} <b>{esc(item['title'])}</b>"
     if item["desc"]:
         msg += f"\n\n{esc(item['desc'])}"
-    msg += f"\n\n🔗 <a href=\"{esc(item['link'])}\">Читати джерело</a>"
-    if item["source"]:
-        msg += f" · <i>{esc(item['source'])}</i>"
+    msg += f"\n\n🔗 <a href=\"{esc(item['link'])}\">{cta}</a>"
+    if src:
+        msg += f" · <i>{esc(src)}</i>"
     msg += "\n\n" + " ".join(classify(item["title"], item["desc"]))
     if DRY_RUN:
         print("[DRY] postnu:", item["title"][:80])
@@ -196,6 +203,9 @@ def main():
                     if getattr(e, k, None):
                         ts = time.mktime(getattr(e, k))
                         break
+                # пропускаємо застарілі записи (за наявності дати)
+                if ts and (time.time() - ts) > MAX_AGE_HOURS * 3600:
+                    continue
                 candidates.append({
                     "id": eid, "ts": ts, "source": source,
                     "title": clean(getattr(e, "title", ""), 200),

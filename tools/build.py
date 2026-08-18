@@ -1366,6 +1366,46 @@ def write_sitemap(arts, landings=None):
         f.write(xml)
 
 
+def write_feed(arts, limit=30):
+    """RSS-стрічка останніх статей (articles/feed.xml) — для підписок і
+    автопостингу в Telegram. Береться limit найсвіжіших за датою публікації."""
+    import datetime, email.utils
+    def rfc822(dstr):
+        try:
+            dt = datetime.datetime.strptime((dstr or "").strip(), "%Y-%m-%d")
+        except Exception:
+            dt = datetime.datetime.utcnow()
+        dt = dt.replace(hour=10, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=3)))
+        return email.utils.format_datetime(dt)
+    def esc(t):
+        return html.escape(t or "", quote=False)
+    items = sorted(arts, key=lambda a: a.get("date_published") or "", reverse=True)[:limit]
+    body = []
+    for a in items:
+        link = ART_BASE_URL + a["slug"] + ".html"
+        body.append(
+            "    <item>\n"
+            f"      <title>{esc(a.get('title',''))}</title>\n"
+            f"      <link>{link}</link>\n"
+            f"      <guid isPermaLink=\"true\">{link}</guid>\n"
+            f"      <description>{esc(a.get('desc',''))}</description>\n"
+            f"      <pubDate>{rfc822(a.get('date_published'))}</pubDate>\n"
+            "    </item>"
+        )
+    now = email.utils.format_datetime(datetime.datetime.now(datetime.timezone.utc))
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<rss version="2.0"><channel>\n'
+           '  <title>Адвокат Осадько — Статті</title>\n'
+           f'  <link>{ART_BASE_URL}</link>\n'
+           '  <description>Нові статті та роз’яснення адвоката Олександра Осадька</description>\n'
+           '  <language>uk</language>\n'
+           f'  <lastBuildDate>{now}</lastBuildDate>\n'
+           + "\n".join(body) + "\n"
+           '</channel></rss>\n')
+    with open(os.path.join(ROOT, "articles", "feed.xml"), "w", encoding="utf-8") as f:
+        f.write(xml)
+
+
 def write_robots():
     txt = ("User-agent: *\n"
            "Allow: /\n"
@@ -1926,6 +1966,7 @@ def main():
 
     c1, c2 = update_homepage_count(n)
     write_sitemap(arts, landings)
+    write_feed(arts)
     write_robots()
 
     missing_slug = [s for s in FEATURED if s not in {a["slug"] for a in arts}]
