@@ -151,9 +151,9 @@ async function handleUpdate(update, env) {
       await env.KV.put('awaiting_edit', pid);
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id, text: 'Надішліть виправлений текст' });
       if (chat && mid) await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, parse_mode: 'HTML', disable_web_page_preview: true, text: '✏️ <b>Редагування…</b> Скопіюйте текст нижче, відредагуйте й надішліть назад.\n\n' + draft.text });
-      await tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: '✏️ Натисніть на текст нижче, щоб <b>скопіювати</b>, відредагуйте у полі вводу й надішліть назад одним повідомленням (1-й рядок — заголовок). Хештеги додам сам. Скасувати — /cancel.' });
-      // поточний текст як «код» — Telegram показує кнопку «копіювати» (один тап)
-      await tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: '<pre>' + esc(draft.headline + '\n\n' + draft.body) + '</pre>' });
+      await tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: '✏️ Скопіюйте текст із наступного повідомлення (виділіть → копіювати), відредагуйте у полі вводу й надішліть назад одним повідомленням (1-й рядок — заголовок). Хештеги додам сам. Скасувати — /cancel.' });
+      // поточний текст звичайним повідомленням (копіювати виділенням)
+      await tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, text: draft.headline + '\n\n' + draft.body });
     }
     return;
   }
