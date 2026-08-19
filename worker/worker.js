@@ -55,6 +55,7 @@ function courtMenuKb() {
   return { inline_keyboard: [
     [{ text: '➕ Додати клієнта', callback_data: 'cadd' }],
     [{ text: '📋 Список / кількість', callback_data: 'clist' }],
+    [{ text: '👥 Справи клієнтів', callback_data: 'crepc' }],
     [{ text: '⚖️ Справи адвоката', callback_data: 'crep' }],
     [{ text: '🔄 Терміновий прогін зараз', callback_data: 'crun' }],
   ] };
@@ -65,8 +66,8 @@ function courtReplyKb() {
   return {
     keyboard: [
       [{ text: '➕ Додати клієнта' }],
-      [{ text: '📋 Список клієнтів' }, { text: '⚖️ Справи адвоката' }],
-      [{ text: '🔄 Терміновий прогін' }],
+      [{ text: '👥 Справи клієнтів' }, { text: '⚖️ Справи адвоката' }],
+      [{ text: '📋 Список клієнтів' }, { text: '🔄 Терміновий прогін' }],
     ],
     resize_keyboard: true,
     is_persistent: true,
@@ -103,28 +104,43 @@ async function urgentScan(env) {
   const code = await triggerScan(env);
   if (code === 204) {
     await env.KV.put('court_run_at', String(Date.now()));
-    return '🔄 Запущено терміновий прогін. Нові сповіщення про засідання та ' +
-      'оновлений список «Справи адвоката» зʼявляться за ~1 хвилину.';
+    return '🔄 Запущено терміновий прогін (клієнти + адвокат). Нові сповіщення про ' +
+      'засідання та оновлені списки «Справи клієнтів» / «Справи адвоката» — за ~1 хвилину.';
   }
   return `Не вдалося запустити прогін (код ${code}). Перевірте секрет GH_TOKEN.`;
 }
 
-async function showCourtReport(env) {
-  const rep = await env.KV.get('court_report', 'json');
+async function showCourtReport(env, kind = 'advocate') {
+  const isClients = kind === 'clients';
+  const title = isClients ? '👥 <b>Справи клієнтів' : '⚖️ <b>Справи адвоката';
+  const rep = await env.KV.get('court_report_' + kind, 'json');
   if (!rep || !rep.items || !rep.items.length) {
     return tg(env, 'sendMessage', {
       chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-      text: '⚖️ <b>Справи адвоката</b>\nПоки немає даних. Звіт оновлюється під час ' +
-        'планового прогону (тричі на день) — після першого прогону тут зʼявиться список.',
+      text: `${title}</b>\nПоки немає даних. Звіт оновлюється під час прогону ` +
+        '(планового або 🔄 термінового) — після нього тут зʼявиться список.',
       reply_markup: courtMenuKb(),
     });
   }
-  const lines = rep.items.slice(0, 50).map((it, i) =>
-    `${i + 1}. <b>${esc(it.number)}</b> · ${esc(it.date)}\n` +
-    `    ${esc(it.judge || '')}${it.judge ? ' · ' : ''}${esc(it.court || '')}`);
-  let txt = `⚖️ <b>Справи адвоката: ${rep.count}</b>\n` +
-    `<i>оновлено: ${esc(rep.updated || '')}</i>\n\n` + lines.join('\n');
-  if (rep.count > 50) txt += `\n\n… та ще ${rep.count - 50}.`;
+  let txt = `${title}: ${rep.count}</b>\n<i>оновлено: ${esc(rep.updated || '')}</i>\n`;
+  let shown = 0;
+  for (let i = 0; i < rep.items.length; i++) {
+    const it = rep.items[i];
+    let b = `\n<b>${i + 1}. № ${esc(it.number)}</b> · 📅 ${esc(it.date)}\n`;
+    if (isClients && it.matched) b += `    🔎 клієнт: <b>${esc(it.matched)}</b>\n`;
+    b += `    🏛 ${esc(it.court || '')}${it.courtroom ? ' · 🚪 ' + esc(it.courtroom) : ''}\n`;
+    const jf = [it.judge, it.forma].filter(Boolean).map(esc).join(' · ');
+    if (jf) b += `    👨‍⚖️ ${jf}\n`;
+    if (it.description) b += `    📋 ${esc(it.description)}\n`;
+    if (it.involved) b += `    👥 ${esc(it.involved)}\n`;
+    if (it.address) b += `    📍 ${esc(it.address)}\n`;
+    if (txt.length + b.length > 3800) {
+      txt += `\n… та ще ${rep.count - shown} (надто довгий список).`;
+      break;
+    }
+    txt += b;
+    shown++;
+  }
   return tg(env, 'sendMessage', {
     chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt,
     disable_web_page_preview: true, reply_markup: courtMenuKb(),
@@ -253,10 +269,11 @@ async function handleUpdate(update, env) {
     const [action, pid] = (cq.data || '').split(':');
 
     // --- меню бота відстеження судових справ ---
-    if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crun'].includes(action)) {
+    if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crun'].includes(action)) {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
       if (action === 'cmenu') return showCourtMenu(env);
-      if (action === 'crep') return showCourtReport(env);
+      if (action === 'crep') return showCourtReport(env, 'advocate');
+      if (action === 'crepc') return showCourtReport(env, 'clients');
       if (action === 'crun') {
         const txt = await urgentScan(env);
         return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt });
@@ -347,9 +364,13 @@ async function handleUpdate(update, env) {
       await env.KV.delete('court_await');
       return showCourtList(env);
     }
+    if (/^👥/.test(body) || /справи клієнт/i.test(body)) {
+      await env.KV.delete('court_await');
+      return showCourtReport(env, 'clients');
+    }
     if (/^⚖️/.test(body) || /справи адвоката/i.test(body)) {
       await env.KV.delete('court_await');
-      return showCourtReport(env);
+      return showCourtReport(env, 'advocate');
     }
     if (/^🔄/.test(body) || /терміновий/i.test(body)) {
       await env.KV.delete('court_await');
@@ -441,7 +462,8 @@ export default {
         return new Response('forbidden', { status: 403 });
       }
       let o; try { o = await request.json(); } catch { return new Response('bad', { status: 400 }); }
-      await env.KV.put('court_report', JSON.stringify(o));
+      const kind = (o.kind === 'clients') ? 'clients' : 'advocate';
+      await env.KV.put('court_report_' + kind, JSON.stringify(o));
       return Response.json({ ok: true });
     }
     if (request.method === 'POST') {

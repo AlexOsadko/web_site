@@ -74,11 +74,12 @@ WORKER_SECRET = (os.environ.get("COURT_WORKER_SECRET", "").strip()
 ADVOCATE_NAME = os.environ.get("COURT_ADVOCATE", "Осадько Олександр Олексійович").strip()
 
 
-def post_worker_report(items):
-    """Зберегти у Worker (KV) звіт «справи адвоката» для перегляду з меню."""
+def post_worker_report(items, kind="advocate"):
+    """Зберегти у Worker (KV) звіт (advocate|clients) для перегляду з меню."""
     if not (WORKER_URL and WORKER_SECRET):
         return
     payload = json.dumps({
+        "kind": kind,
         "updated": time.strftime("%d.%m.%Y %H:%M", time.gmtime(time.time() + 3 * 3600)),
         "count": len(items),
         "items": items[:200],
@@ -91,7 +92,27 @@ def post_worker_report(items):
         with urllib.request.urlopen(req, timeout=20) as r:
             r.read()
     except Exception as e:
-        print("Не вдалося зберегти звіт адвоката:", str(e)[:60])
+        print(f"Не вдалося зберегти звіт ({kind}):", str(e)[:60])
+
+
+def build_report(hits):
+    """Лише майбутні засідання, за датою, без дублів."""
+    today0 = time.mktime(time.strptime(time.strftime("%d.%m.%Y"), "%d.%m.%Y"))
+    uniq, seen_keys = [], set()
+    for it in hits:
+        ts = _hearing_ts(it.get("date"))
+        if ts is not None and ts < today0:
+            continue
+        k = (it.get("matched", ""), it.get("number", ""), it.get("date", ""), it.get("court", ""))
+        if k in seen_keys:
+            continue
+        seen_keys.add(k)
+        it["_ts"] = ts if ts is not None else 9e18
+        uniq.append(it)
+    uniq.sort(key=lambda x: x["_ts"])
+    for it in uniq:
+        it.pop("_ts", None)
+    return uniq
 
 
 def _hearing_ts(s):
@@ -515,6 +536,7 @@ def main():
     total_new = 0
     first_time = not seen  # перший запуск: фіксуємо поточні засідання
     advocate_hits = []     # окремий звіт «справи адвоката»
+    client_hits = []       # окремий звіт «справи клієнтів»
 
     for court in courts:
         url = csz_url_for(court)
@@ -528,6 +550,7 @@ def main():
         time.sleep(REQUEST_PAUSE)  # ввічлива пауза між судами
 
         # Окремо: справи, де фігурує сам адвокат (для перегляду з меню).
+        # Дані йдуть у приватне сховище (Worker KV), не в логи, тож детально.
         if ADVOCATE_NAME:
             for rec in records:
                 if name_matches(rec.get("involved", ""), [ADVOCATE_NAME]):
@@ -536,6 +559,11 @@ def main():
                         "number": rec.get("number", ""),
                         "date": rec.get("date", ""),
                         "judge": rec.get("judge", ""),
+                        "involved": rec.get("involved", ""),
+                        "description": rec.get("description", ""),
+                        "forma": rec.get("forma", ""),
+                        "courtroom": rec.get("courtroom", ""),
+                        "address": rec.get("add_address", ""),
                     })
         # ВАЖЛИВО: логи публічного репозиторію відкриті, тому сюди НЕ потрапляють
         # ПІБ, номери справ чи текст «сторін» — лише знеособлені лічильники.
@@ -544,6 +572,13 @@ def main():
             who = name_matches(rec.get("involved", ""), names)
             if who:
                 matches.append((rec, who))
+                client_hits.append({
+                    "court": court["name"], "matched": who,
+                    "number": rec.get("number", ""), "date": rec.get("date", ""),
+                    "judge": rec.get("judge", ""), "involved": rec.get("involved", ""),
+                    "description": rec.get("description", ""), "forma": rec.get("forma", ""),
+                    "courtroom": rec.get("courtroom", ""), "address": rec.get("add_address", ""),
+                })
         new_here = sum(1 for rec, _ in matches if rec_key(url, rec) not in seen)
         total_new += new_here
         print(f"[{court['name']}] засідань: {len(records)} · "
@@ -603,26 +638,16 @@ def main():
                 except Exception:
                     print("  Помилка надсилання сповіщення (статус).")
 
-    # Звіт «справи адвоката»: лише майбутні засідання, за датою, без дублів.
+    # Звіти «справи адвоката» і «справи клієнтів» (майбутні, за датою, без дублів).
     if ADVOCATE_NAME:
-        today0 = time.mktime(time.strptime(time.strftime("%d.%m.%Y"), "%d.%m.%Y"))
-        uniq, seen_keys = [], set()
-        for it in advocate_hits:
-            ts = _hearing_ts(it["date"])
-            if ts is not None and ts < today0:
-                continue
-            k = (it["number"], it["date"], it["court"])
-            if k in seen_keys:
-                continue
-            seen_keys.add(k)
-            it["_ts"] = ts if ts is not None else 9e18
-            uniq.append(it)
-        uniq.sort(key=lambda x: x["_ts"])
-        for it in uniq:
-            it.pop("_ts", None)
-        print(f"Справи адвоката (майбутні): {len(uniq)}")
+        adv = build_report(advocate_hits)
+        print(f"Справи адвоката (майбутні): {len(adv)}")
         if not DRY_RUN:
-            post_worker_report(uniq)
+            post_worker_report(adv, "advocate")
+    cli = build_report(client_hits)
+    print(f"Справи клієнтів (майбутні): {len(cli)}")
+    if not DRY_RUN:
+        post_worker_report(cli, "clients")
 
     st["last_run"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     if not DRY_RUN:
