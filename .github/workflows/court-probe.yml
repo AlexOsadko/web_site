@@ -10,6 +10,10 @@ on:
         description: "URL «Список справ призначених до розгляду» суду"
         type: string
         default: "https://sh.ki.court.gov.ua/sud2610/gromadyanam/csz"
+      court_id:
+        description: "Код суду для POST /new.php (напр. 2610). Порожньо = GET сторінки"
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -25,4 +29,5 @@ jobs:
       - name: Пробити сторінку
         env:
           PROBE_URL: ${{ github.event.inputs.url }}
+          COURT_ID: ${{ github.event.inputs.court_id }}
         run: python3 tools/court_probe.py

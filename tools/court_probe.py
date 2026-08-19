@@ -15,13 +15,18 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
 
 
-def fetch(url):
-    req = urllib.request.Request(url, headers={
+def fetch(url, data=None):
+    headers = {
         "User-Agent": UA,
         "Accept": "text/html,application/json,application/xhtml+xml,*/*;q=0.8",
         "Accept-Language": "uk,en;q=0.8",
         "X-Requested-With": "XMLHttpRequest",
-    })
+    }
+    body = None
+    if data is not None:
+        body = data.encode("utf-8")
+        headers["Content-Type"] = "application/x-www-form-urlencoded"
+    req = urllib.request.Request(url, data=body, headers=headers)
     with urllib.request.urlopen(req, timeout=35) as r:
         raw = r.read()
         ctype = r.headers.get("Content-Type", "")
@@ -40,8 +45,12 @@ def main():
         print("Не задано URL")
         sys.exit(1)
     print("URL:", url)
+    court_id = os.environ.get("COURT_ID", "").strip()
+    post = f"q_court_id={court_id}" if court_id else None
+    if post:
+        print("POST-дані:", post)
     try:
-        code, ctype, text = fetch(url)
+        code, ctype, text = fetch(url, data=post)
     except Exception as e:
         print("Помилка завантаження:", e)
         sys.exit(1)
