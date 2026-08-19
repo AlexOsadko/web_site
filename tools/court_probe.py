@@ -47,6 +47,26 @@ def main():
         sys.exit(1)
     print("HTTP:", code, "· Content-Type:", ctype, "· довжина:", len(text))
 
+    # Гілка для JS-файлу: показати, як будується запит списку справ
+    if url.lower().split("?")[0].endswith(".js"):
+        print("---- фрагменти JS навколо ключових токенів ----")
+        for tok in ("assig_ajax", "ajax", "csz", "gromadyanam",
+                    "listpersons", "list_auto", "sEcho", "iDisplay",
+                    "aaData", "aoColumns", "getJSON", "hash"):
+            i = 0
+            shown = 0
+            low = text.lower()
+            while shown < 3:
+                p = low.find(tok.lower(), i)
+                if p < 0:
+                    break
+                seg = text[max(0, p - 120): p + 220].replace("\n", " ")
+                print(f"  [{tok}] …{seg}…")
+                i = p + 1
+                shown += 1
+        print("ГОТОВО")
+        return
+
     stripped = text.lstrip()
     is_json = "json" in ctype.lower() or stripped[:1] in ("{", "[")
     if is_json:
