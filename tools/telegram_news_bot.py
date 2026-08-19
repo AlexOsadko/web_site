@@ -434,7 +434,7 @@ def tg_send(item):
     if s:
         msg += f"\n\n{esc(s['about'])}"
         if s.get("impact"):
-            msg += f"\n\n💡 <b>Що це означає для вас:</b> {esc(s['impact'])}"
+            msg += f"\n\n💡 <b>Чому це важливо:</b> {esc(s['impact'])}"
         if s.get("advice"):
             msg += f"\n\n⚖️ <b>Порада:</b> {esc(s['advice'])}"
     elif item["desc"] and is_ukrainian(item["desc"]):
