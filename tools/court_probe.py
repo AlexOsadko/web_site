@@ -78,6 +78,14 @@ def main():
     for s in set(re.findall(r'(?:src|href|data-url|url)\s*[:=]\s*["\']([^"\']+)["\']', text)):
         if any(k in s.lower() for k in ("csz", "json", "ajax", "list", "auto_cases", "getdata")):
             print("  ", s)
+    print("---- рядки JS з конфігурацією DataTables/ajax ----")
+    for ln in text.splitlines():
+        low = ln.lower()
+        if any(k in low for k in ("sajaxsource", "ajax", '"url"', "url:", ".php", "assig",
+                                  "datatable", "csz", "serverside", "processing")):
+            s = ln.strip()
+            if s and len(s) < 400:
+                print("  |", s)
     idx = text.lower().find("<table")
     if idx >= 0:
         print("---- ВІКНО HTML ----")
