@@ -83,6 +83,12 @@ FORCE_COUNT = int(os.environ.get("BOT_FORCE_ORIGINAL_COUNT", "1") or "1")
 # Примусово опублікувати НОВИНУ цього запуску (обходить інтервал і чергу
 # авторських) — для кнопки «опублікувати новину зараз» у workflow.
 FORCE_NEWS = os.environ.get("BOT_FORCE_NEWS", "").strip() in ("1", "true", "yes")
+# «Режим наповнення»: до моменту BOT_FILL_UNTIL (epoch, сек) новини виходять
+# частіше (менший інтервал, більший добовий ліміт). Після — самі повертаються
+# до звичайного темпу. Так наповнення на N годин не потребує ручного відкату.
+FILL_UNTIL = int(os.environ.get("BOT_FILL_UNTIL", "0") or "0")
+FILL_INTERVAL_MIN = int(os.environ.get("BOT_FILL_INTERVAL_MIN", "20") or "20")
+FILL_DAILY_MAX = int(os.environ.get("BOT_FILL_DAILY_MAX", "60") or "60")
 
 ORIGINAL_TYPES = [
     ("міф", "розвінчання поширеного юридичного міфу: спершу сам міф, тоді як є насправді"),
@@ -772,8 +778,15 @@ def main():
     # 2) Контент постимо не частіше, ніж CONTENT_INTERVAL_MIN (запуски бувають
     #    частими заради кнопок, але новини мають виходити в спокійному темпі).
     now = time.time()
-    if not FORCE_ORIGINAL and not FORCE_NEWS and (now - float(st.get("last_content_ts", 0))) < CONTENT_INTERVAL_MIN * 60:
-        left = int(CONTENT_INTERVAL_MIN - (now - float(st.get("last_content_ts", 0))) / 60)
+    # режим наповнення (до FILL_UNTIL) — менший інтервал і більший добовий ліміт
+    fill = FILL_UNTIL > 0 and now < FILL_UNTIL
+    interval_min = FILL_INTERVAL_MIN if fill else CONTENT_INTERVAL_MIN
+    daily_max = FILL_DAILY_MAX if fill else DAILY_MAX
+    if fill:
+        print(f"Режим наповнення: інтервал {interval_min} хв, ліміт {daily_max}/добу "
+              f"(до кінця вікна ~{int((FILL_UNTIL - now) / 3600)} год).")
+    if not FORCE_ORIGINAL and not FORCE_NEWS and (now - float(st.get("last_content_ts", 0))) < interval_min * 60:
+        left = int(interval_min - (now - float(st.get("last_content_ts", 0))) / 60)
         print(f"Ще рано для нового контенту (лишилось ~{max(0, left)} хв). "
               "Кнопки оброблено, вихід.")
         if not DRY_RUN:
@@ -854,8 +867,8 @@ def main():
         else:
             print("Оригінальний пост не готовий — публікую новину цього запуску.")
 
-    remaining_day = max(0, DAILY_MAX - int(st.get("count", 0)))
-    print(f"Добовий ліміт: {st['count']}/{DAILY_MAX} (лишилось {remaining_day}).")
+    remaining_day = max(0, daily_max - int(st.get("count", 0)))
+    print(f"Добовий ліміт: {st['count']}/{daily_max} (лишилось {remaining_day}).")
     if remaining_day <= 0:
         print("Добовий ліміт вичерпано — нічого не постимо.")
         if not DRY_RUN:
@@ -927,7 +940,7 @@ def main():
         else:
             print("Не вдалося опублікувати:", c["title"][:60])
 
-    print(f"Опубліковано: {posted}. Разом за добу: {st['count']}/{DAILY_MAX}.")
+    print(f"Опубліковано: {posted}. Разом за добу: {st['count']}/{daily_max}.")
     if posted and not DRY_RUN:
         st["last_content_ts"] = now   # відлік інтервалу до наступного контенту
     if not DRY_RUN:
