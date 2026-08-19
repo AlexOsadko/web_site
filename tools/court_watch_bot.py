@@ -59,7 +59,10 @@ def load_config():
                 url = (c.get("url") or "").strip()
                 if url:
                     courts.append({"name": (c.get("name") or url).strip(),
-                                   "url": url})
+                                   "url": url,
+                                   # необов'язково: сторінка автопризначень суду
+                                   # («Призначено склад суду») — експериментально
+                                   "auto_url": (c.get("auto_url") or "").strip()})
             return names, courts
         except Exception as e:
             print("COURT_WATCH — некоректний JSON:", e)
@@ -301,6 +304,16 @@ def rec_key(court_url, rec):
     return hashlib.sha1(base.encode("utf-8")).hexdigest()[:16]
 
 
+def auto_key(court_url, rec):
+    base = "auto|" + "|".join([
+        court_url,
+        (rec.get("number") or "").strip(),
+        (rec.get("panel_date") or "").strip(),
+        (rec.get("judge") or "").strip(),
+    ])
+    return hashlib.sha1(base.encode("utf-8")).hexdigest()[:16]
+
+
 # ─────────────────────────────── Telegram ────────────────────────────
 def tg_send(text):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -341,6 +354,29 @@ def build_message(court_name, rec, matched):
         lines.append(f"🚪 Зал/каб.: {esc(rec['courtroom'])}")
     if rec.get("add_address"):
         lines.append(f"📍 Адреса: {esc(rec['add_address'])}")
+    lines.append("")
+    lines.append(f"🔎 Знайдено за: <i>{esc(matched)}</i>")
+    return "\n".join(lines)
+
+
+def build_status_message(court_name, rec, matched):
+    """Повідомлення про автоматичний розподіл справи («Призначено склад суду»)."""
+    lines = [
+        "🧩 <b>Судова справа — призначено склад суду</b>",
+        "",
+        f"📁 Справа: <b>{esc(rec.get('number'))}</b>",
+    ]
+    if rec.get("judge"):
+        lines.append(f"👨‍⚖️ Склад суду: {esc(rec['judge'])}")
+    if rec.get("panel_date"):
+        lines.append(f"📅 Дата визначення складу: <b>{esc(rec['panel_date'])}</b>")
+    if rec.get("reg_date"):
+        lines.append(f"🗓 Дата реєстрації: {esc(rec['reg_date'])}")
+    lines.append(f"🏛 Суд: {esc(court_name)}")
+    if rec.get("involved"):
+        lines.append(f"👥 Сторони: {esc(rec['involved'])}")
+    if rec.get("description"):
+        lines.append(f"📋 Суть: {esc(rec['description'])}")
     lines.append("")
     lines.append(f"🔎 Знайдено за: <i>{esc(matched)}</i>")
     return "\n".join(lines)
@@ -406,6 +442,38 @@ def main():
         if sent >= MAX_ALERTS:
             print("  Досягнуто ліміту сповіщень за запуск — решта наступного разу.")
             break
+
+        # ── (Експериментально) автопризначення «Призначено склад суду» ──
+        # Джерело — /post_test2.php суду. Наразі багато судів віддають
+        # server-side лише інтерактивному браузеру (повертають 'error'), тож
+        # це БЕЗПЕЧНО пропускається й НЕ впливає на відстеження засідань.
+        auto_url = court.get("auto_url")
+        if auto_url:
+            try:
+                arecs = fetch_auto_retry(auto_url)
+            except Exception as e:
+                print(f"[{court['name']}] автопризначення недоступні "
+                      f"(пропущено): {str(e)[:60]}")
+                arecs = []
+            amatches = [(r, w) for r in arecs
+                        if (w := name_matches(r.get("involved", ""), names))]
+            anew = sum(1 for r, _ in amatches if auto_key(auto_url, r) not in seen)
+            total_new += anew
+            if arecs:
+                print(f"[{court['name']}] автопризначень: {len(arecs)} · "
+                      f"збігів: {len(amatches)} · нових: {anew}")
+            for rec, who in amatches:
+                key = auto_key(auto_url, rec)
+                if key in seen or DRY_RUN or sent >= MAX_ALERTS:
+                    continue
+                try:
+                    res = tg_send(build_status_message(court["name"], rec, who))
+                    if res.get("ok"):
+                        seen[key] = 1
+                        sent += 1
+                        time.sleep(0.5)
+                except Exception:
+                    print("  Помилка надсилання сповіщення (статус).")
 
     st["last_run"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     if not DRY_RUN:
