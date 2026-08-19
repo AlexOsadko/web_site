@@ -134,6 +134,114 @@ def fetch_court_retry(csz_url, tries=4):
     raise last
 
 
+# ───────────── автопризначення справ («Призначено склад суду») ─────────
+_TAG = re.compile(r"<[^>]+>")
+_AUTO_COLS = ("number", "reg_date", "judge", "involved", "description",
+              "panel_date")  # порядок стовпців таблиці #bank
+
+
+def _strip(cell):
+    return re.sub(r"\s+", " ", _TAG.sub(" ", str(cell or ""))).strip()
+
+
+def _dt_params(start, length, sid, cspec, searchable=(0, 0, 1, 1, 0, 0)):
+    n = len(searchable)
+    p = [("sEcho", "1"), ("iColumns", str(n)), ("sColumns", ""),
+         ("iDisplayStart", str(start)), ("iDisplayLength", str(length))]
+    for i in range(n):
+        p.append((f"mDataProp_{i}", str(i)))
+    p += [("sSearch", ""), ("bRegex", "false")]
+    for i in range(n):
+        p.append((f"sSearch_{i}", ""))
+        p.append((f"bRegex_{i}", "false"))
+        p.append((f"bSearchable_{i}", "true" if searchable[i] else "false"))
+    p.append(("iSortingCols", "0"))
+    for i in range(n):
+        p.append((f"bSortable_{i}", "false"))
+    # додаткові параметри з fnServerParams b(a)
+    p += [("q_ver", "arbitr"), ("date", "~"), ("sid", sid), ("cspec", cspec)]
+    return p
+
+
+def fetch_auto(list_auto_url):
+    """«Список автопризначенних справ» → POST /post_test2.php (DataTables,
+    server-side). Повертає list словників з ключами _AUTO_COLS."""
+    parts = urllib.parse.urlsplit(list_auto_url)
+    origin = f"{parts.scheme}://{parts.netloc}"
+    endpoint = origin + "/post_test2.php"
+    jar = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+    # Крок 1 — сторінка (cookie + значення sid/cspec)
+    r1 = urllib.request.Request(list_auto_url, headers={
+        "User-Agent": UA,
+        "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+        "Accept-Language": "uk,en;q=0.8",
+    })
+    with opener.open(r1, timeout=40) as resp:
+        html = resp.read().decode("cp1251", "replace")
+    sid = ""
+    m = re.search(r'id=["\']ust["\'][^>]*>(.*?)<', html, re.S)
+    if m:
+        sid = _strip(m.group(1))
+    cspec = ""
+    m = re.search(r'id=["\']cspec["\'][^>]*>(.*?)<', html, re.S)
+    if m:
+        cspec = _strip(m.group(1))
+
+    def one(start, length):
+        body = urllib.parse.urlencode(_dt_params(start, length, sid, cspec)).encode()
+        r2 = urllib.request.Request(endpoint, data=body, headers={
+            "User-Agent": UA,
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Accept-Language": "uk,en;q=0.8",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "X-Requested-With": "XMLHttpRequest",
+            "Origin": origin,
+            "Referer": list_auto_url,
+        })
+        with opener.open(r2, timeout=40) as resp:
+            raw = resp.read()
+            ct = resp.headers.get("Content-Type", "")
+            enc = "utf-8" if "utf-8" in ct.lower() else "cp1251"
+            txt = raw.decode(enc, "replace").strip()
+        if txt[:1] != "{":
+            raise RuntimeError(f"неочікувана відповідь: {txt[:80]!r}")
+        return json.loads(txt)
+
+    out = []
+    first = one(0, 1000)
+    total = int(first.get("iTotalDisplayRecords") or first.get("iTotalRecords") or 0)
+    rows = first.get("aaData", []) or []
+    out.extend(rows)
+    # За потреби добираємо решту сторінок (запобіжник — до 30 сторінок)
+    page = 0
+    while len(out) < total and rows and page < 30:
+        page += 1
+        nxt = one(len(out), 1000)
+        rows = nxt.get("aaData", []) or []
+        if not rows:
+            break
+        out.extend(rows)
+    result = []
+    for row in out:
+        rec = {_AUTO_COLS[i]: _strip(row[i]) for i in range(min(len(row), len(_AUTO_COLS)))}
+        result.append(rec)
+    return result
+
+
+def fetch_auto_retry(list_auto_url, tries=4):
+    delay = 2
+    last = None
+    for _ in range(tries):
+        try:
+            return fetch_auto(list_auto_url)
+        except Exception as e:
+            last = e
+            time.sleep(delay)
+            delay = min(delay * 2, 16)
+    raise last
+
+
 # ───────────────────────────── збіг ПІБ ──────────────────────────────
 def _norm(s):
     return re.sub(r"\s+", " ", (s or "")).strip().casefold()

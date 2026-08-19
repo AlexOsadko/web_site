@@ -22,6 +22,10 @@ on:
         description: "Сесійний режим: GET сторінки CSZ + POST /new.php з cookie (URL = сторінка CSZ)"
         type: boolean
         default: false
+      auto:
+        description: "AUTO: перевірити fetch_auto() /post_test2.php (URL = сторінка list_auto_cases)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -40,4 +44,5 @@ jobs:
           COURT_ID: ${{ github.event.inputs.court_id }}
           COURT_IDS: ${{ github.event.inputs.court_ids }}
           SESS: ${{ github.event.inputs.sess == 'true' && '1' || '' }}
+          AUTO: ${{ github.event.inputs.auto == 'true' && '1' || '' }}
         run: python3 tools/court_probe.py

@@ -90,6 +90,27 @@ def main():
         sys.exit(1)
     print("URL:", url)
 
+    # Режим AUTO: перевірити fetch_auto() бота (endpoint /post_test2.php)
+    if os.environ.get("AUTO", "").strip():
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "cwb", os.path.join(os.path.dirname(__file__), "court_watch_bot.py"))
+        cwb = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cwb)
+        try:
+            recs = cwb.fetch_auto(url)
+        except Exception as e:
+            print("fetch_auto помилка:", e); sys.exit(1)
+        print("Автопризначень отримано:", len(recs))
+        # У публічні логи — лише знеособлені поля (номер, суддя, дати)
+        for r in recs[:2]:
+            print("  №", r.get("number"), "· суддя:", r.get("judge"),
+                  "· реєстр.:", r.get("reg_date"),
+                  "· склад визн.:", r.get("panel_date"),
+                  "· сторони(символів):", len(r.get("involved", "")))
+        print("ГОТОВО")
+        return
+
     # Сесійний режим: GET сторінки CSZ + POST /new.php з cookie і Referer
     if os.environ.get("SESS", "").strip():
         import json as _json
