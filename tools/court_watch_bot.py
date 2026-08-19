@@ -62,6 +62,20 @@ DRY_RUN = os.environ.get("COURT_DRY_RUN", "").strip() in ("1", "true", "True")
 MAX_ALERTS = int(os.environ.get("COURT_MAX_ALERTS", "25") or "25")
 # Пауза між запитами до court.gov.ua (щоб не навантажувати сервер і не блокуватись)
 REQUEST_PAUSE = float(os.environ.get("COURT_REQUEST_PAUSE", "1.0") or "1.0")
+# За скільки днів до засідання нагадувати (типово 3, 2, 1; 0 = у день засідання)
+REMIND_DAYS = sorted({int(x) for x in re.findall(r"\d+",
+                     os.environ.get("COURT_REMIND_DAYS", "3,2,1"))}, reverse=True)
+
+
+def _day_word(n):
+    n = abs(int(n))
+    if n == 0:
+        return "сьогодні"
+    if n % 10 == 1 and n % 100 != 11:
+        return f"за {n} день"
+    if n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14):
+        return f"за {n} дні"
+    return f"за {n} днів"
 
 # Cloudflare Worker — приватне сховище списку ПІБ (керується з Telegram-меню).
 WORKER_URL = (os.environ.get("COURT_WORKER_URL", "").strip()
@@ -490,6 +504,26 @@ def build_message(court_name, rec, matched):
     return "\n".join(lines)
 
 
+def build_reminder(rec, offset):
+    who = rec.get("matched") or (ADVOCATE_NAME if rec.get("_adv") else "")
+    lines = [
+        f"⏰ <b>Нагадування: засідання {esc(_day_word(offset))}</b>",
+        "",
+        f"📁 Справа: <b>{esc(rec.get('number'))}</b>",
+        f"📅 Дата/час: <b>{esc(rec.get('date'))}</b>",
+    ]
+    if rec.get("judge"):
+        lines.append(f"👨‍⚖️ Суддя: {esc(rec['judge'])}")
+    if rec.get("court"):
+        lines.append(f"🏛 Суд: {esc(rec['court'])}")
+    if rec.get("involved"):
+        lines.append(f"👥 Сторони: {esc(rec['involved'])}")
+    if who:
+        lines.append("")
+        lines.append(f"🔎 {esc(who)}")
+    return "\n".join(lines)
+
+
 def build_status_message(court_name, rec, matched):
     """Повідомлення про автоматичний розподіл справи («Призначено склад суду»)."""
     lines = [
@@ -658,6 +692,40 @@ def main():
     print(f"Справи клієнтів (майбутні): {len(cli)}")
     if not DRY_RUN:
         post_worker_report(cli, "clients")
+
+    # ── Нагадування за 3-2-1 день до засідання ──
+    if REMIND_DAYS:
+        today0 = time.mktime(time.strptime(time.strftime("%d.%m.%Y"), "%d.%m.%Y"))
+        for a in adv if ADVOCATE_NAME else []:
+            a["_adv"] = True
+        uniq = {}
+        for rec in cli + (adv if ADVOCATE_NAME else []):
+            uniq.setdefault((rec.get("number"), rec.get("date")), rec)
+        reminded = 0
+        for rec in uniq.values():
+            ts = _hearing_ts(rec.get("date"))
+            if ts is None:
+                continue
+            offset = int(round((ts - today0) / 86400))
+            if offset not in REMIND_DAYS:
+                continue
+            key = hashlib.sha1(
+                f"rmd|{rec.get('number')}|{rec.get('date')}|{offset}".encode()
+            ).hexdigest()[:16]
+            if key in seen:
+                continue
+            if DRY_RUN or sent >= MAX_ALERTS:
+                continue
+            try:
+                res = tg_send(build_reminder(rec, offset))
+                if res.get("ok"):
+                    seen[key] = 1
+                    sent += 1
+                    reminded += 1
+                    time.sleep(0.5)
+            except Exception:
+                print("  Помилка надсилання нагадування.")
+        print(f"Нагадувань надіслано: {reminded}")
 
     st["last_run"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     if not DRY_RUN:
