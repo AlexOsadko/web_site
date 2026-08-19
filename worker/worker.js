@@ -60,6 +60,20 @@ function courtMenuKb() {
   ] };
 }
 
+// Постійна клавіатура-меню, закріплена біля поля вводу.
+function courtReplyKb() {
+  return {
+    keyboard: [
+      [{ text: '➕ Додати клієнта' }],
+      [{ text: '📋 Список клієнтів' }, { text: '⚖️ Справи адвоката' }],
+      [{ text: '🔄 Терміновий прогін' }],
+    ],
+    resize_keyboard: true,
+    is_persistent: true,
+    input_field_placeholder: 'Оберіть дію в меню нижче…',
+  };
+}
+
 // Запуск GitHub Action «Відстеження судових справ» на вимогу (workflow_dispatch).
 async function triggerScan(env) {
   const repo = env.GH_REPO || 'AlexOsadko/web_site';
@@ -74,6 +88,25 @@ async function triggerScan(env) {
         'Content-Type': 'application/json',
       }, body: JSON.stringify({ ref: 'main', inputs: { dry_run: false } }) });
   return r.status; // 204 = прийнято
+}
+
+// Текст-результат запуску термінового прогону (для кнопки й меню).
+async function urgentScan(env) {
+  if (!env.GH_TOKEN) {
+    return '⚠️ Терміновий прогін не налаштовано: додайте у воркер секрет ' +
+      'GH_TOKEN. Планові прогони тричі на день працюють як звичайно.';
+  }
+  const last = parseInt((await env.KV.get('court_run_at')) || '0', 10);
+  if (Date.now() - last < 90000) {
+    return '⏳ Прогін уже запущено щойно — зачекайте ~1 хв на результат.';
+  }
+  const code = await triggerScan(env);
+  if (code === 204) {
+    await env.KV.put('court_run_at', String(Date.now()));
+    return '🔄 Запущено терміновий прогін. Нові сповіщення про засідання та ' +
+      'оновлений список «Справи адвоката» зʼявляться за ~1 хвилину.';
+  }
+  return `Не вдалося запустити прогін (код ${code}). Перевірте секрет GH_TOKEN.`;
 }
 
 async function showCourtReport(env) {
@@ -100,11 +133,12 @@ async function showCourtReport(env) {
 
 async function showCourtMenu(env, prefix = '') {
   const arr = await getNames(env);
+  // Закріплюємо меню-клавіатуру біля поля вводу + дублюємо кнопки в повідомленні.
   await tg(env, 'sendMessage', {
     chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-    text: prefix + '⚖️ <b>Клієнти під наглядом (суд)</b>\nУсього прізвищ: <b>' +
-      arr.length + '</b>\n\nОберіть дію:',
-    reply_markup: courtMenuKb(),
+    text: prefix + '⚖️ <b>Меню суду</b> закріплено внизу ⬇️\nКлієнтів під наглядом: <b>' +
+      arr.length + '</b>',
+    reply_markup: courtReplyKb(),
   });
 }
 
@@ -224,29 +258,8 @@ async function handleUpdate(update, env) {
       if (action === 'cmenu') return showCourtMenu(env);
       if (action === 'crep') return showCourtReport(env);
       if (action === 'crun') {
-        if (!env.GH_TOKEN) {
-          return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-            text: '⚠️ Терміновий прогін не налаштовано: додайте у воркер секрет ' +
-              '<b>GH_TOKEN</b> (див. інструкцію). Плановий прогін працює як звичайно.',
-            reply_markup: courtMenuKb() });
-        }
-        const last = parseInt((await env.KV.get('court_run_at')) || '0', 10);
-        if (Date.now() - last < 90000) {
-          return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
-            text: '⏳ Прогін уже запущено щойно — зачекайте ~1 хв на результат.',
-            reply_markup: courtMenuKb() });
-        }
-        const code = await triggerScan(env);
-        if (code === 204) {
-          await env.KV.put('court_run_at', String(Date.now()));
-          return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-            text: '🔄 <b>Запущено терміновий прогін.</b> Нові сповіщення про засідання ' +
-              'та оновлений список «Справи адвоката» зʼявляться за ~1 хвилину.',
-            reply_markup: courtMenuKb() });
-        }
-        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
-          text: `Не вдалося запустити прогін (код ${code}). Перевірте секрет GH_TOKEN.`,
-          reply_markup: courtMenuKb() });
+        const txt = await urgentScan(env);
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt });
       }
       if (action === 'clist') return showCourtList(env);
       if (action === 'cadd') {
@@ -318,10 +331,30 @@ async function handleUpdate(update, env) {
       // інакше — нижче обробить скасування редагування новин
     }
 
-    // Виклик меню керування клієнтами
-    if (/^(\/menu|\/court|\/klienty|\/клієнти|\/клиенти|меню|клієнти)$/i.test(body)) {
+    // Виклик меню керування клієнтами (і закріплення клавіатури внизу)
+    if (/^(\/menu|\/court|\/start|\/klienty|\/клієнти|\/клиенти|меню|клієнти)$/i.test(body)) {
       await env.KV.delete('court_await');
       return showCourtMenu(env);
+    }
+
+    // Кнопки закріпленої клавіатури-меню (натискання = звичайне повідомлення)
+    if (/^➕/.test(body) || /^додати клієнта$/i.test(body)) {
+      await env.KV.put('court_await', 'add');
+      return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
+        text: "➕ Надішліть ПІБ клієнта (Прізвище Ім'я По-батькові). Скасувати — /cancel." });
+    }
+    if (/^📋/.test(body) || /^список/i.test(body)) {
+      await env.KV.delete('court_await');
+      return showCourtList(env);
+    }
+    if (/^⚖️/.test(body) || /справи адвоката/i.test(body)) {
+      await env.KV.delete('court_await');
+      return showCourtReport(env);
+    }
+    if (/^🔄/.test(body) || /терміновий/i.test(body)) {
+      await env.KV.delete('court_await');
+      const txt = await urgentScan(env);
+      return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt });
     }
 
     // Введення ПІБ для меню суду (додавання / зміна)
