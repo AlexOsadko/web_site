@@ -96,6 +96,14 @@ def main():
         import json as _json
         for cd in [c.strip() for c in codes.split(",") if c.strip()]:
             csz = f"https://court.gov.ua/sud{cd}/gromadyanam/csz"
+            title = ""
+            try:
+                _, _, page = fetch(csz)
+                mt = re.search(r"<title>(.*?)</title>", page, re.I | re.S)
+                if mt:
+                    title = re.sub(r"\s+", " ", mt.group(1)).strip()
+            except Exception:
+                pass
             try:
                 c, ct, tx = session_flow(csz)
                 s = tx.strip()
@@ -105,9 +113,9 @@ def main():
                     n = len(dd)
                     if dd:
                         first = dd[0].get("number", "")
-                print(f"  код {cd}: HTTP {c} · записів {n} · перший №{first}")
+                print(f"  код {cd}: HTTP {c} · записів {n} · перший №{first} · «{title}»")
             except Exception as e:
-                print(f"  код {cd}: помилка {str(e)[:70]}")
+                print(f"  код {cd}: помилка {str(e)[:70]} · «{title}»")
         print("ГОТОВО")
         return
 
