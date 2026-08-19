@@ -1512,3 +1512,33 @@ a.card:hover .more span { transform: translateX(5px); }
 /* Сторінка /kontakty/: секція одразу під шапкою — менші відступи, без верхньої лінії. */
 .section--contactpage { padding: 28px 0 40px; border-top: 0; }
 @media (max-width: 860px) { .section--contactpage { padding: 20px 0 32px; } }
+
+/* ===== Банер каналу «Про право простою мовою» (@pro100_law) ===== */
+.tgc-wrap { padding: 8px 0 44px; }
+.tgc {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 24px 28px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
+}
+.tgc-ic {
+  width: 56px; height: 56px; flex: none; border-radius: 16px;
+  display: grid; place-items: center; color: #fff;
+  background: linear-gradient(135deg, #2aabee, #229ed9);
+  box-shadow: 0 8px 20px rgba(34, 158, 217, .35);
+}
+.tgc-ic svg { width: 32px; height: 32px; }
+.tgc-txt { flex: 1 1 260px; }
+.tgc-txt h3 { margin: 0 0 5px; font-size: 1.16rem; font-weight: 700; color: var(--ink); }
+.tgc-txt p { margin: 0; color: var(--muted); font-size: .98rem; line-height: 1.5; }
+.tgc-btn {
+  flex: none; display: inline-flex; align-items: center; gap: 9px;
+  background: #229ed9; color: #fff; font-weight: 600; font-size: .98rem;
+  padding: 12px 22px; border-radius: 12px; text-decoration: none;
+  transition: transform .15s ease, background .15s ease;
+}
+.tgc-btn svg { width: 20px; height: 20px; }
+.tgc-btn:hover { background: #1b8ec2; transform: translateY(-1px); }
+@media (max-width: 560px) {
+  .tgc { padding: 20px; gap: 16px; }
+  .tgc-btn { width: 100%; justify-content: center; }
+}
