@@ -212,11 +212,13 @@ def main():
             s = ln.strip()
             if s and len(s) < 400:
                 print("  |", s)
-    # Повний блок навколо виклику assig_ajax.php (параметри запиту)
-    j = text.lower().find("assig_ajax")
-    if j >= 0:
-        print("---- ВІКНО навколо assig_ajax (± параметри) ----")
-        print(text[max(0, j - 1400): j + 1600])
+    # Вікна навколо ключових токенів (init DataTables теж буває в одному рядку)
+    for tok in ("assig_ajax", "sAjaxSource", "#bank", "fnServerData",
+                "bServerSide", "sServerMethod", ".dataTable("):
+        j = text.lower().find(tok.lower())
+        if j >= 0:
+            print(f"---- ВІКНО навколо {tok} ----")
+            print(text[max(0, j - 800): j + 1200].replace("\n", " "))
     idx = text.lower().find("<table")
     if idx >= 0:
         print("---- ВІКНО HTML ----")
