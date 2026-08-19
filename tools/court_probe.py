@@ -110,20 +110,69 @@ def main():
         # знайти input-и всередині форми з датами
         for m in re.finditer(r'<input[^>]*id=["\'](sdate|edate)["\'][^>]*>', html):
             print("  input:", m.group(0)[:160])
-        # Спробувати запит через бот
-        import importlib.util
-        spec = importlib.util.spec_from_file_location(
-            "cwb", os.path.join(os.path.dirname(__file__), "court_watch_bot.py"))
-        cwb = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(cwb)
-        try:
-            recs = cwb.fetch_auto(url)
-            print("Автопризначень отримано:", len(recs))
-            for r in recs[:2]:
-                print("  №", r.get("number"), "· суддя:", r.get("judge"),
-                      "· склад визн.:", r.get("panel_date"))
-        except Exception as e:
-            print("fetch_auto помилка:", e)
+        # Матриця варіантів запиту до /post_test2.php
+        import time as _t
+        endpoint = origin + "/post_test2.php"
+        m = re.search(r"/sud(\d{4})", url)
+        sid = "2604"
+        mm = re.search(r'id=["\']ust["\'][^>]*>(.*?)<', html, re.S)
+        if mm:
+            sid = mm.group(1).strip()
+
+        def dt_params(date_val, extra=None, q_ver="arbitr", cspec="0"):
+            n = 6
+            searchable = (0, 0, 1, 1, 0, 0)
+            p = [("sEcho", "1"), ("iColumns", str(n)), ("sColumns", ""),
+                 ("iDisplayStart", "0"), ("iDisplayLength", "100")]
+            for i in range(n):
+                p.append((f"mDataProp_{i}", str(i)))
+            p += [("sSearch", ""), ("bRegex", "false")]
+            for i in range(n):
+                p += [(f"sSearch_{i}", ""), (f"bRegex_{i}", "false"),
+                      (f"bSearchable_{i}", "true" if searchable[i] else "false")]
+            p.append(("iSortingCols", "0"))
+            for i in range(n):
+                p.append((f"bSortable_{i}", "false"))
+            p += [("q_ver", q_ver), ("date", date_val), ("sid", sid), ("cspec", cspec)]
+            if extra:
+                p += extra
+            return p
+
+        now = _t.time()
+        d1s = _t.strftime("%d.%m.%Y", _t.localtime(now - 120 * 86400))
+        d1e = _t.strftime("%d.%m.%Y", _t.localtime(now + 86400))
+        d2s = _t.strftime("%Y-%m-%d", _t.localtime(now - 120 * 86400))
+        d2e = _t.strftime("%Y-%m-%d", _t.localtime(now + 86400))
+        variants = [
+            ("dd.mm.yyyy", dt_params(f"{d1s}~{d1e}")),
+            ("yyyy-mm-dd", dt_params(f"{d2s}~{d2e}")),
+            ("dd.mm +q_court_id", dt_params(f"{d1s}~{d1e}", extra=[("q_court_id", sid)])),
+            ("dd.mm q_ver=empty", dt_params(f"{d1s}~{d1e}", q_ver="")),
+            ("dd.mm one-day", dt_params(f"{d1e}~{d1e}")),
+        ]
+        for label, params in variants:
+            body = urllib.parse.urlencode(params).encode()
+            r2 = urllib.request.Request(endpoint, data=body, headers={
+                "User-Agent": UA, "Accept": "application/json, text/javascript, */*; q=0.01",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "X-Requested-With": "XMLHttpRequest", "Origin": origin, "Referer": url})
+            try:
+                with opener.open(r2, timeout=40) as resp:
+                    raw = resp.read()
+                    ct = resp.headers.get("Content-Type", "")
+                    enc = "utf-8" if "utf-8" in ct.lower() else "cp1251"
+                    txt = raw.decode(enc, "replace")
+                head = txt[:70].replace("\n", " ")
+                jn = ""
+                if txt.strip()[:1] == "{":
+                    try:
+                        jd = __import__("json").loads(txt)
+                        jn = f" · iTotal={jd.get('iTotalRecords')} · aaData={len(jd.get('aaData', []))}"
+                    except Exception:
+                        pass
+                print(f"  [{label}] довж {len(txt)} · {head!r}{jn}")
+            except Exception as e:
+                print(f"  [{label}] помилка {e}")
         print("ГОТОВО")
         return
 
