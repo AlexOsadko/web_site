@@ -51,6 +51,10 @@ jobs:
           TELEGRAM_REVIEW_CHAT: ${{ secrets.TELEGRAM_REVIEW_CHAT }}
           COURT_ALERT_CHAT: ${{ secrets.COURT_ALERT_CHAT }}   # необов'язково; типово = REVIEW_CHAT
           COURT_WATCH: ${{ secrets.COURT_WATCH }}
+          # Список ПІБ, яким керуєте з Telegram-меню бота (зберігається приватно у
+          # Cloudflare Worker KV). Ті самі секрети, що й для миттєвих кнопок каналу.
+          BOT_WORKER_URL: ${{ secrets.BOT_WORKER_URL }}
+          BOT_WORKER_SECRET: ${{ secrets.BOT_WORKER_SECRET }}
           COURT_DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '' }}
         run: python3 tools/court_watch_bot.py
 

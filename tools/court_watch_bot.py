@@ -63,6 +63,28 @@ MAX_ALERTS = int(os.environ.get("COURT_MAX_ALERTS", "25") or "25")
 # Пауза між запитами до court.gov.ua (щоб не навантажувати сервер і не блокуватись)
 REQUEST_PAUSE = float(os.environ.get("COURT_REQUEST_PAUSE", "1.0") or "1.0")
 
+# Cloudflare Worker — приватне сховище списку ПІБ (керується з Telegram-меню).
+WORKER_URL = (os.environ.get("COURT_WORKER_URL", "").strip()
+              or os.environ.get("BOT_WORKER_URL", "").strip())
+WORKER_SECRET = (os.environ.get("COURT_WORKER_SECRET", "").strip()
+                 or os.environ.get("BOT_WORKER_SECRET", "").strip())
+
+
+def fetch_worker_names():
+    """ПІБ зі списку у Worker (KV). Керується з Telegram-меню бота."""
+    if not (WORKER_URL and WORKER_SECRET):
+        return []
+    try:
+        req = urllib.request.Request(
+            WORKER_URL.rstrip("/") + "/court_names",
+            headers={"X-Auth-Token": WORKER_SECRET, "User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            data = json.loads(r.read().decode("utf-8"))
+        return [n.strip() for n in data.get("names", []) if n.strip()]
+    except Exception as e:
+        print("Список ПІБ із Worker недоступний:", str(e)[:60])
+        return []
+
 
 # ─────────────────────────── конфігурація ────────────────────────────
 def load_registry():
@@ -431,11 +453,24 @@ def main():
     if not TOKEN and not DRY_RUN:
         print("Немає TELEGRAM_BOT_TOKEN"); sys.exit(1)
     names, courts = load_config()
+    # Додаємо ПІБ зі списку в Worker (керується з Telegram-меню бота)
+    wnames = fetch_worker_names()
+    if wnames:
+        low = {n.lower() for n in names}
+        added = 0
+        for n in wnames:
+            if n.lower() not in low:
+                names.append(n)
+                low.add(n.lower())
+                added += 1
+        print(f"Зі списку Telegram-меню: {len(wnames)} (нових: {added})")
     if not names:
-        print("Не задано жодного ПІБ (COURT_WATCH.names) — нічого відстежувати.")
+        print("Порожній список ПІБ (додайте через меню бота: /menu) — нічого відстежувати.")
         return
+    if not courts:  # список ПІБ є (напр. лише з меню) — беремо вбудований реєстр судів
+        courts = load_registry()
     if not courts:
-        print("Не задано жодного суду (COURT_WATCH.courts) — нічого відстежувати.")
+        print("Немає жодного суду (реєстр порожній) — нічого відстежувати.")
         return
     print(f"ПІБ під наглядом: {len(names)} · судів: {len(courts)} · "
           f"{'DRY-RUN' if DRY_RUN else 'бойовий'}")

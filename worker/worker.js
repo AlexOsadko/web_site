@@ -42,6 +42,53 @@ function draftKeyboard(pid) {
 async function getStats(env) {
   return (await env.KV.get('stats', 'json')) || { generated: 0, published: 0, edited: 0, rejected: 0 };
 }
+
+// Список ПІБ клієнтів для бота відстеження судових справ (приватно в KV).
+async function getNames(env) {
+  return (await env.KV.get('court_names', 'json')) || [];
+}
+async function putNames(env, arr) {
+  await env.KV.put('court_names', JSON.stringify(arr));
+}
+
+function courtMenuKb() {
+  return { inline_keyboard: [
+    [{ text: '➕ Додати клієнта', callback_data: 'cadd' }],
+    [{ text: '📋 Список / кількість', callback_data: 'clist' }],
+  ] };
+}
+
+async function showCourtMenu(env, prefix = '') {
+  const arr = await getNames(env);
+  await tg(env, 'sendMessage', {
+    chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+    text: prefix + '⚖️ <b>Клієнти під наглядом (суд)</b>\nУсього прізвищ: <b>' +
+      arr.length + '</b>\n\nОберіть дію:',
+    reply_markup: courtMenuKb(),
+  });
+}
+
+async function showCourtList(env) {
+  const arr = await getNames(env);
+  if (!arr.length) {
+    return tg(env, 'sendMessage', {
+      chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+      text: 'Список порожній. Натисніть «➕ Додати клієнта».',
+      reply_markup: courtMenuKb(),
+    });
+  }
+  const rows = arr.map((n, i) => [
+    { text: `✏️ ${i + 1}`, callback_data: `cedit:${i}` },
+    { text: `🗑 ${i + 1}`, callback_data: `cdel:${i}` },
+  ]);
+  rows.push([{ text: '➕ Додати', callback_data: 'cadd' }]);
+  const list = arr.map((n, i) => `${i + 1}. ${esc(n)}`).join('\n');
+  return tg(env, 'sendMessage', {
+    chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+    text: `📋 <b>Клієнти (${arr.length})</b>\n${list}\n\n✏️ — змінити · 🗑 — видалити:`,
+    reply_markup: { inline_keyboard: rows },
+  });
+}
 async function bump(env, key) {
   const s = await getStats(env);
   s[key] = (s[key] || 0) + 1;
@@ -130,6 +177,35 @@ async function handleUpdate(update, env) {
     const chat = msg.chat && msg.chat.id;
     const mid = msg.message_id;
     const [action, pid] = (cq.data || '').split(':');
+
+    // --- меню бота відстеження судових справ ---
+    if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel'].includes(action)) {
+      await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
+      if (action === 'cmenu') return showCourtMenu(env);
+      if (action === 'clist') return showCourtList(env);
+      if (action === 'cadd') {
+        await env.KV.put('court_await', 'add');
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
+          text: "➕ Надішліть ПІБ клієнта (Прізвище Ім'я По-батькові). Скасувати — /cancel." });
+      }
+      const arr = await getNames(env);
+      const idx = parseInt(pid, 10);
+      if (isNaN(idx) || idx < 0 || idx >= arr.length) return showCourtList(env);
+      if (action === 'cedit') {
+        await env.KV.put('court_await', 'edit:' + idx);
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+          text: `✏️ Поточне: «${esc(arr[idx])}»\nНадішліть нове ПІБ. Скасувати — /cancel.` });
+      }
+      if (action === 'cdel') {
+        const removed = arr.splice(idx, 1)[0];
+        await putNames(env, arr);
+        await tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+          text: `🗑 Видалено «${esc(removed)}». Залишилось: <b>${arr.length}</b>.` });
+        return showCourtList(env);
+      }
+      return;
+    }
+
     const draft = pid ? await env.KV.get(`draft:${pid}`, 'json') : null;
 
     if (action === 'pub') {
@@ -165,6 +241,52 @@ async function handleUpdate(update, env) {
     if (String(chat) !== String(env.REVIEW_CHAT)) return;
     const body = (m.text || '').trim();
     const awaiting = await env.KV.get('awaiting_edit');
+    const courtAwait = await env.KV.get('court_await');
+
+    // Скасування (діє і для меню суду, і для редагування новин)
+    if (/^(\/cancel|cancel|скасувати)$/i.test(body)) {
+      if (courtAwait) {
+        await env.KV.delete('court_await');
+        return showCourtMenu(env, '↩️ Скасовано.\n\n');
+      }
+      // інакше — нижче обробить скасування редагування новин
+    }
+
+    // Виклик меню керування клієнтами
+    if (/^(\/menu|\/court|\/klienty|\/клієнти|\/клиенти|меню|клієнти)$/i.test(body)) {
+      await env.KV.delete('court_await');
+      return showCourtMenu(env);
+    }
+
+    // Введення ПІБ для меню суду (додавання / зміна)
+    if (courtAwait) {
+      const name = body.replace(/\s+/g, ' ').trim();
+      if (name.length < 3 || name.startsWith('/')) {
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
+          text: "Надішліть ПІБ (мінімум Прізвище Ім'я) або /cancel." });
+      }
+      const arr = await getNames(env);
+      if (courtAwait === 'add') {
+        if (arr.some((n) => n.toLowerCase() === name.toLowerCase())) {
+          await env.KV.delete('court_await');
+          return showCourtMenu(env, `Таке прізвище вже є («${esc(name)}»).\n\n`);
+        }
+        arr.push(name);
+        await putNames(env, arr);
+        await env.KV.delete('court_await');
+        return showCourtMenu(env, `✅ Додано «${esc(name)}». Прізвищ: <b>${arr.length}</b>.\n\n`);
+      }
+      if (courtAwait.startsWith('edit:')) {
+        const idx = parseInt(courtAwait.slice(5), 10);
+        await env.KV.delete('court_await');
+        if (isNaN(idx) || idx < 0 || idx >= arr.length) return showCourtMenu(env);
+        const old = arr[idx];
+        arr[idx] = name;
+        await putNames(env, arr);
+        return showCourtMenu(env, `✏️ Змінено «${esc(old)}» → «${esc(name)}».\n\n`);
+      }
+      await env.KV.delete('court_await');
+    }
 
     if (awaiting) {
       const draft = await env.KV.get(`draft:${awaiting}`, 'json');
@@ -205,6 +327,14 @@ export default {
     const url = new URL(request.url);
     if (request.method === 'POST' && url.pathname === '/register') {
       return handleRegister(request, env);
+    }
+    // Список ПІБ для бота відстеження судових справ (за спільним секретом).
+    if (request.method === 'GET' && url.pathname === '/court_names') {
+      if ((request.headers.get('X-Auth-Token') || '') !== env.AUTH_TOKEN) {
+        return new Response('forbidden', { status: 403 });
+      }
+      const arr = (await env.KV.get('court_names', 'json')) || [];
+      return Response.json({ names: arr });
     }
     if (request.method === 'POST') {
       // вебхук Telegram (за бажанням — з перевіркою secret_token)
