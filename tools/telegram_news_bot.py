@@ -232,6 +232,18 @@ def classify(title, desc):
     return tags or ["#новини"]
 
 
+def is_ukrainian(text):
+    """Груба, але надійна евристика: якщо в тексті є суто російські літери
+    (ы/ъ/э/ё) і немає українських (і/ї/є/ґ) — це не українська."""
+    t = (text or "").lower()
+    ru = sum(t.count(c) for c in "ыъэё")
+    ua = sum(t.count(c) for c in "іїєґ")
+    return not (ru > 0 and ua == 0)
+
+
+HAS_AI = bool(os.environ.get("ANTHROPIC_API_KEY"))
+
+
 # Фільтр правової релевантності для ЗАГАЛЬНИХ стрічок: новина потрапляє в канал
 # лише якщо в заголовку/описі є правовий контекст. Юридичні стрічки й ваші
 # статті проходять без фільтра. Ширший за TOPIC_TAGS, щоб ловити правові теми.
@@ -314,8 +326,12 @@ SUMMARY_SYS = (
     "• Порада — загальна й безпечна (на що звернути увагу, строки, зберегти "
     "документи, за потреби — консультація), без категоричних тверджень про "
     "ситуацію читача.\n"
+    "МОВА: пиши ВИКЛЮЧНО українською. Якщо джерело іншою мовою (рос. тощо) — "
+    "переклади й перекажи українською; НЕ лишай неукраїнських слів/фраз.\n"
     "Поверни ЛИШЕ JSON без коментарів і markdown:\n"
-    '{"about": "2–4 речення: суть простими словами — що сталося і головне", '
+    '{"headline": "короткий заголовок УКРАЇНСЬКОЮ (до ~110 символів), за потреби '
+    'перекладений із мови джерела", '
+    '"about": "2–4 речення: суть простими словами — що сталося і головне", '
     '"impact": "1–2 речення: кого стосується і що змінюється для людини/сторони", '
     '"advice": "1–2 речення: практична порада — на що звернути увагу / що робити"}'
 )
@@ -341,7 +357,8 @@ def summarize(title, desc, source):
             return None
         data = json.loads(m.group(0))
         if data.get("about"):
-            return {"about": str(data.get("about", "")).strip(),
+            return {"headline": str(data.get("headline", "")).strip(),
+                    "about": str(data.get("about", "")).strip(),
                     "impact": str(data.get("impact", "")).strip(),
                     "advice": str(data.get("advice", "")).strip()}
     except Exception as ex:
@@ -400,14 +417,20 @@ def tg_send(item):
     cta = "Читати статтю" if own else "Читати джерело"
     src = "Адвокат Осадько" if own else item["source"]
     s = summarize(item["title"], item["desc"], src)
-    msg = f"{head} <b>{esc(item['title'])}</b>"
+    # заголовок — завжди українською: беремо український від AI, інакше оригінал
+    # (лише якщо він українською); неукраїномовний без AI-перекладу — не постимо
+    title = (s.get("headline") if s else "") or item["title"]
+    if not is_ukrainian(title):
+        print("Пропускаю неукраїномовну новину:", item["title"][:60])
+        return None   # позначимо як опрацьовану, щоб не пробувати знову
+    msg = f"{head} <b>{esc(title)}</b>"
     if s:
         msg += f"\n\n{esc(s['about'])}"
         if s.get("impact"):
             msg += f"\n\n💡 <b>Що це означає для вас:</b> {esc(s['impact'])}"
         if s.get("advice"):
             msg += f"\n\n⚖️ <b>Порада:</b> {esc(s['advice'])}"
-    elif item["desc"]:
+    elif item["desc"] and is_ukrainian(item["desc"]):
         msg += f"\n\n{esc(item['desc'])}"
     msg += f"\n\n🔗 <a href=\"{esc(item['link'])}\">{cta}</a>"
     if src:
@@ -917,27 +940,34 @@ def main():
     # найсвіжіші зверху
     candidates.sort(key=lambda c: c["ts"], reverse=True)
     limit = min(MAX_PER_RUN, remaining_day)
-    to_post = candidates[:limit]
-    print(f"Нових кандидатів: {len(candidates)}; постимо цього запуску: {len(to_post)}.")
+    print(f"Нових кандидатів: {len(candidates)}; ліміт цього запуску: {limit}.")
 
     posted = 0
-    for c in to_post:
+    for c in candidates:
+        if posted >= limit:
+            break
         if not c["title"]:
             continue
         total = int(st.get("total", 0))
         c["_cta"] = CTA_EVERY > 0 and ((total + 1) % CTA_EVERY == 0)
-        ok = tg_send(c)
-        if ok and not DRY_RUN:
-            seen.add(c["id"])
-            st["seen"].append(c["id"])
-            st["count"] = int(st.get("count", 0)) + 1
-            st["total"] = total + 1
-            st["seq"] = int(st.get("seq", 0)) + 1
-            posted += 1
-            time.sleep(3)
-        elif ok and DRY_RUN:
+        res = tg_send(c)
+        if res is None:
+            # неукраїномовна новина — позначаємо опрацьованою й пробуємо наступну
+            if not DRY_RUN:
+                seen.add(c["id"])
+                st["seen"].append(c["id"])
+            continue
+        if res:
+            if not DRY_RUN:
+                seen.add(c["id"])
+                st["seen"].append(c["id"])
+                st["count"] = int(st.get("count", 0)) + 1
+                st["total"] = total + 1
+                st["seq"] = int(st.get("seq", 0)) + 1
+                time.sleep(3)
             posted += 1
         else:
+            # збій відправки — НЕ позначаємо seen, спробуємо іншим разом
             print("Не вдалося опублікувати:", c["title"][:60])
 
     print(f"Опубліковано: {posted}. Разом за добу: {st['count']}/{daily_max}.")
