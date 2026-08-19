@@ -2,12 +2,13 @@
 "seen": [
 "https://www.ukrinform.ua/rubric-society/4155265-v-ukraini-zalisautsa-neidentifikovanimi-majze-17-tisac-til-policia.html",
 "https://sud.ua/ru/news/suspilstvo/369681-vyrvaly-telefon-iz-ruk-vin-zablokuietsia-iak-pratsiuie-nova-funktsiia-android",
-"https://www.ukrinform.ua/rubric-world/4155428-miznarodnij-kriminalnij-sud-sankcii-proti-spivrobitnikiv-pidrivaut-verhovenstvo-prava.html"
+"https://www.ukrinform.ua/rubric-world/4155428-miznarodnij-kriminalnij-sud-sankcii-proti-spivrobitnikiv-pidrivaut-verhovenstvo-prava.html",
+"https://www.ukrinform.ua/rubric-regions/4155435-na-zitomirsini-vijskovogo-u-szc-suditimut-za-administruvanna-viberkanalu-pro-patruli-tck.html"
 ],
 "day": "2026-08-19",
-"count": 3,
-"total": 4,
-"seq": 14,
+"count": 4,
+"total": 5,
+"seq": 15,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -102,7 +103,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787099585.376012,
+"last_content_ts": 1787099926.8841329,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
