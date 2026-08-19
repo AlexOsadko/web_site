@@ -56,7 +56,24 @@ function courtMenuKb() {
     [{ text: '➕ Додати клієнта', callback_data: 'cadd' }],
     [{ text: '📋 Список / кількість', callback_data: 'clist' }],
     [{ text: '⚖️ Справи адвоката', callback_data: 'crep' }],
+    [{ text: '🔄 Терміновий прогін зараз', callback_data: 'crun' }],
   ] };
+}
+
+// Запуск GitHub Action «Відстеження судових справ» на вимогу (workflow_dispatch).
+async function triggerScan(env) {
+  const repo = env.GH_REPO || 'AlexOsadko/web_site';
+  const wf = env.GH_WORKFLOW || 'court-watch.yml';
+  const r = await fetch(
+    `https://api.github.com/repos/${repo}/actions/workflows/${wf}/dispatches`,
+    { method: 'POST', headers: {
+        Authorization: `Bearer ${env.GH_TOKEN}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'osadko-court-bot',
+        'Content-Type': 'application/json',
+      }, body: JSON.stringify({ ref: 'main', inputs: { dry_run: false } }) });
+  return r.status; // 204 = прийнято
 }
 
 async function showCourtReport(env) {
@@ -202,10 +219,35 @@ async function handleUpdate(update, env) {
     const [action, pid] = (cq.data || '').split(':');
 
     // --- меню бота відстеження судових справ ---
-    if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep'].includes(action)) {
+    if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crun'].includes(action)) {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
       if (action === 'cmenu') return showCourtMenu(env);
       if (action === 'crep') return showCourtReport(env);
+      if (action === 'crun') {
+        if (!env.GH_TOKEN) {
+          return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+            text: '⚠️ Терміновий прогін не налаштовано: додайте у воркер секрет ' +
+              '<b>GH_TOKEN</b> (див. інструкцію). Плановий прогін працює як звичайно.',
+            reply_markup: courtMenuKb() });
+        }
+        const last = parseInt((await env.KV.get('court_run_at')) || '0', 10);
+        if (Date.now() - last < 90000) {
+          return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
+            text: '⏳ Прогін уже запущено щойно — зачекайте ~1 хв на результат.',
+            reply_markup: courtMenuKb() });
+        }
+        const code = await triggerScan(env);
+        if (code === 204) {
+          await env.KV.put('court_run_at', String(Date.now()));
+          return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+            text: '🔄 <b>Запущено терміновий прогін.</b> Нові сповіщення про засідання ' +
+              'та оновлений список «Справи адвоката» зʼявляться за ~1 хвилину.',
+            reply_markup: courtMenuKb() });
+        }
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
+          text: `Не вдалося запустити прогін (код ${code}). Перевірте секрет GH_TOKEN.`,
+          reply_markup: courtMenuKb() });
+      }
       if (action === 'clist') return showCourtList(env);
       if (action === 'cadd') {
         await env.KV.put('court_await', 'add');
