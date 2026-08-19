@@ -18,6 +18,10 @@ on:
         description: "Кілька кодів судів через кому — сканувати /new.php (напр. 2601,2603,2606)"
         type: string
         default: ""
+      sess:
+        description: "Сесійний режим: GET сторінки CSZ + POST /new.php з cookie (URL = сторінка CSZ)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -35,4 +39,5 @@ jobs:
           PROBE_URL: ${{ github.event.inputs.url }}
           COURT_ID: ${{ github.event.inputs.court_id }}
           COURT_IDS: ${{ github.event.inputs.court_ids }}
+          SESS: ${{ github.event.inputs.sess == 'true' && '1' || '' }}
         run: python3 tools/court_probe.py
