@@ -29,6 +29,10 @@ on:
         description: "Опублікувати новину в канал зараз (обходить інтервал 2 год)"
         type: boolean
         default: false
+      prefer_court:
+        description: "Віддати перевагу судовій практиці («Розбір рішення суду»)"
+        type: boolean
+        default: false
       force_count:
         description: "Скільки чернеток згенерувати (лише з force_original)"
         type: string
@@ -90,6 +94,7 @@ jobs:
           BOT_FORCE_ORIGINAL: ${{ github.event.inputs.force_original == 'true' && '1' || '' }}
           BOT_FORCE_ORIGINAL_COUNT: ${{ github.event.inputs.force_count || '1' }}
           BOT_FORCE_NEWS: ${{ github.event.inputs.force_news == 'true' && '1' || '' }}
+          BOT_PREFER_COURT: ${{ github.event.inputs.prefer_court == 'true' && '1' || '' }}
         run: python3 tools/telegram_news_bot.py
 
       - name: Зберегти стан

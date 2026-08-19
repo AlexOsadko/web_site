@@ -89,6 +89,9 @@ FORCE_NEWS = os.environ.get("BOT_FORCE_NEWS", "").strip() in ("1", "true", "yes"
 FILL_UNTIL = int(os.environ.get("BOT_FILL_UNTIL", "0") or "0")
 FILL_INTERVAL_MIN = int(os.environ.get("BOT_FILL_INTERVAL_MIN", "20") or "20")
 FILL_DAILY_MAX = int(os.environ.get("BOT_FILL_DAILY_MAX", "60") or "60")
+# Цього запуску віддати перевагу новинам ІЗ СУДОВОЇ ПРАКТИКИ (щоб опублікувати
+# «Розбір рішення суду»). Зручно для перевірки формату / кейсу на вимогу.
+PREFER_COURT = os.environ.get("BOT_PREFER_COURT", "").strip() in ("1", "true", "yes")
 
 ORIGINAL_TYPES = [
     ("міф", "розвінчання поширеного юридичного міфу: спершу сам міф, тоді як є насправді"),
@@ -1032,6 +1035,11 @@ def main():
 
     # найсвіжіші зверху
     candidates.sort(key=lambda c: c["ts"], reverse=True)
+    if PREFER_COURT:
+        # стабільно піднімаємо судову практику вгору (свіжість усередині груп збережено)
+        candidates.sort(key=lambda c: not is_court_practice(c["title"], c["desc"]))
+        n_court = sum(1 for c in candidates if is_court_practice(c["title"], c["desc"]))
+        print(f"Пріоритет судовій практиці: таких кандидатів {n_court}.")
     limit = min(MAX_PER_RUN, remaining_day)
     print(f"Нових кандидатів: {len(candidates)}; ліміт цього запуску: {limit}.")
 
