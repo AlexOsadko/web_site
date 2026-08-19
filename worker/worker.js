@@ -91,6 +91,23 @@ async function triggerScan(env) {
   return r.status; // 204 = прийнято
 }
 
+// Реєстрація команд бота (список у кнопці ☰ біля поля вводу) — лише для чату адвоката.
+async function setupCommands(env) {
+  const scope = { type: 'chat', chat_id: env.REVIEW_CHAT };
+  await tg(env, 'setMyCommands', { scope, commands: [
+    { command: 'menu', description: '⚖️ Меню суду' },
+    { command: 'clients', description: '👥 Справи клієнтів' },
+    { command: 'advocate', description: '⚖️ Справи адвоката' },
+    { command: 'list', description: '📋 Список клієнтів' },
+    { command: 'add', description: '➕ Додати клієнта' },
+    { command: 'restart', description: '🔄 Терміновий прогін' },
+    { command: 'start', description: '▶️ Старт / головне меню' },
+    { command: 'cancel', description: '↩️ Скасувати' },
+    { command: 'help', description: 'ℹ️ Довідка' },
+  ] });
+  await tg(env, 'setChatMenuButton', { chat_id: env.REVIEW_CHAT, menu_button: { type: 'commands' } });
+}
+
 // Текст-результат запуску термінового прогону (для кнопки й меню).
 async function urgentScan(env) {
   if (!env.GH_TOKEN) {
@@ -134,6 +151,43 @@ async function visibleReport(env, kind) {
   return { updated: rep ? rep.updated : '', visible, hiddenCount: hidden.length };
 }
 
+async function removeHiddenAt(env, kind, i) {
+  const a = await getHidden(env, kind);
+  if (i >= 0 && i < a.length) { a.splice(i, 1); await env.KV.put('court_hidden_' + kind, JSON.stringify(a)); }
+}
+
+// Перегляд прихованих справ — кожну можна повернути (♻️) окремо або всі одразу.
+async function showHidden(env, kind) {
+  const isClients = kind === 'clients';
+  const title = isClients ? '📂 <b>Приховані (клієнти)' : '📂 <b>Приховані (адвокат)';
+  const hidden = await getHidden(env, kind);
+  if (!hidden.length) {
+    return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+      text: `${title}</b>\nПорожньо.`,
+      reply_markup: { inline_keyboard: [[{ text: '↩️ Меню', callback_data: 'cmenu' }]] } });
+  }
+  const rep = await env.KV.get('court_report_' + kind, 'json');
+  const byKey = {};
+  ((rep && rep.items) || []).forEach((it) => { byKey[itemKey(it)] = it; });
+  let txt = `${title}: ${hidden.length}</b>\n<i>♻️ — повернути справу в список</i>\n`;
+  const rows = [];
+  let row = [];
+  for (let i = 0; i < hidden.length; i++) {
+    const it = byKey[hidden[i]];
+    const p = hidden[i].split('|');
+    txt += `\n${i + 1}. <b>№ ${esc(it ? it.number : p[0])}</b> · 📅 ${esc(it ? it.date : p[1])}\n` +
+      `    🏛 ${esc(it ? it.court : (p[2] || ''))}\n`;
+    row.push({ text: `♻️ ${i + 1}`, callback_data: `cunhide1:${kind}:${i}` });
+    if (row.length === 5) { rows.push(row); row = []; }
+    if (txt.length > 3600) { txt += '\n… список задовгий.'; break; }
+  }
+  if (row.length) rows.push(row);
+  rows.push([{ text: '♻️ Відновити всі', callback_data: `cunhide:${kind}` }]);
+  rows.push([{ text: '↩️ Меню', callback_data: 'cmenu' }]);
+  return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+    text: txt, disable_web_page_preview: true, reply_markup: { inline_keyboard: rows } });
+}
+
 async function showCourtReport(env, kind = 'advocate') {
   const isClients = kind === 'clients';
   const title = isClients ? '👥 <b>Справи клієнтів' : '⚖️ <b>Справи адвоката';
@@ -143,7 +197,7 @@ async function showCourtReport(env, kind = 'advocate') {
       ? `Усі справи приховано (${hiddenCount}). `
       : 'Поки немає даних. Звіт оновлюється під час прогону (планового або 🔄 термінового). ';
     const kb = hiddenCount
-      ? { inline_keyboard: [[{ text: `♻️ Відновити приховані (${hiddenCount})`, callback_data: `cunhide:${kind}` }], [{ text: '↩️ Меню', callback_data: 'cmenu' }]] }
+      ? { inline_keyboard: [[{ text: `📂 Приховані (${hiddenCount})`, callback_data: `chidden:${kind}` }], [{ text: '↩️ Меню', callback_data: 'cmenu' }]] }
       : courtMenuKb();
     return tg(env, 'sendMessage', {
       chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
@@ -176,7 +230,7 @@ async function showCourtReport(env, kind = 'advocate') {
     shown++;
   }
   if (row.length) rows.push(row);
-  if (hiddenCount) rows.push([{ text: `♻️ Відновити приховані (${hiddenCount})`, callback_data: `cunhide:${kind}` }]);
+  if (hiddenCount) rows.push([{ text: `📂 Приховані (${hiddenCount})`, callback_data: `chidden:${kind}` }]);
   rows.push([{ text: '↩️ Меню', callback_data: 'cmenu' }]);
   return tg(env, 'sendMessage', {
     chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt,
@@ -309,7 +363,7 @@ async function handleUpdate(update, env) {
 
     // --- меню бота відстеження судових справ ---
     if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crun',
-         'chide', 'cunhide'].includes(action)) {
+         'chide', 'cunhide', 'chidden', 'cunhide1'].includes(action)) {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
       if (action === 'cmenu') return showCourtMenu(env);
       if (action === 'crep') return showCourtReport(env, 'advocate');
@@ -321,6 +375,15 @@ async function handleUpdate(update, env) {
         const i = parseInt(parts[2], 10);
         if (!isNaN(i) && visible[i]) await addHidden(env, kind, itemKey(visible[i]));
         return showCourtReport(env, kind);
+      }
+      if (action === 'chidden') {
+        return showHidden(env, pid === 'clients' ? 'clients' : 'advocate');
+      }
+      if (action === 'cunhide1') {
+        const kind = pid === 'clients' ? 'clients' : 'advocate';
+        const i = parseInt(parts[2], 10);
+        if (!isNaN(i)) await removeHiddenAt(env, kind, i);
+        return showHidden(env, kind);
       }
       if (action === 'cunhide') {
         const kind = pid === 'clients' ? 'clients' : 'advocate';
@@ -401,31 +464,40 @@ async function handleUpdate(update, env) {
       // інакше — нижче обробить скасування редагування новин
     }
 
-    // Виклик меню керування клієнтами (і закріплення клавіатури внизу)
+    // Виклик меню + реєстрація команд бота (кнопка ☰ біля поля вводу)
     if (/^(\/menu|\/court|\/start|\/klienty|\/клієнти|\/клиенти|меню|клієнти)$/i.test(body)) {
       await env.KV.delete('court_await');
+      await setupCommands(env);
       return showCourtMenu(env);
+    }
+    if (/^(\/help|\/довідка|довідка)$/i.test(body)) {
+      return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+        text: 'ℹ️ <b>Команди бота (суд)</b>\n' +
+          '/menu — відкрити меню\n/clients — 👥 справи клієнтів\n' +
+          '/advocate — ⚖️ справи адвоката\n/list — 📋 список клієнтів\n' +
+          '/add — ➕ додати клієнта\n/restart — 🔄 терміновий прогін\n' +
+          '/cancel — ↩️ скасувати', reply_markup: courtReplyKb() });
     }
 
     // Кнопки закріпленої клавіатури-меню (натискання = звичайне повідомлення)
-    if (/^➕/.test(body) || /^додати клієнта$/i.test(body)) {
+    if (/^➕/.test(body) || /^(\/add|додати клієнта)$/i.test(body)) {
       await env.KV.put('court_await', 'add');
       return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
         text: "➕ Надішліть ПІБ клієнта (Прізвище Ім'я По-батькові). Скасувати — /cancel." });
     }
-    if (/^📋/.test(body) || /^список/i.test(body)) {
+    if (/^📋/.test(body) || /^(\/list|список)/i.test(body)) {
       await env.KV.delete('court_await');
       return showCourtList(env);
     }
-    if (/^👥/.test(body) || /справи клієнт/i.test(body)) {
+    if (/^👥/.test(body) || /^\/clients$/i.test(body) || /справи клієнт/i.test(body)) {
       await env.KV.delete('court_await');
       return showCourtReport(env, 'clients');
     }
-    if (/^⚖️/.test(body) || /справи адвоката/i.test(body)) {
+    if (/^⚖️/.test(body) || /^\/advocate$/i.test(body) || /справи адвоката/i.test(body)) {
       await env.KV.delete('court_await');
       return showCourtReport(env, 'advocate');
     }
-    if (/^🔄/.test(body) || /терміновий/i.test(body)) {
+    if (/^🔄/.test(body) || /^(\/run|\/restart|\/перезапуск)$/i.test(body) || /терміновий/i.test(body)) {
       await env.KV.delete('court_await');
       const txt = await urgentScan(env);
       return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt });

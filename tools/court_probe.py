@@ -97,9 +97,10 @@ def main():
         for cd in [c.strip() for c in codes.split(",") if c.strip()]:
             csz = f"https://court.gov.ua/sud{cd}/gromadyanam/csz"
             title = ""
-            try:
-                _, _, page = fetch(csz)
-                mt = re.search(r"<title>(.*?)</title>", page, re.I | re.S)
+            try:  # назва суду — з <title> або <meta description> головної сторінки
+                _, _, page = fetch(f"https://court.gov.ua/sud{cd}/")
+                mt = (re.search(r'name=["\']description["\'][^>]*content=["\']([^"\']+)', page, re.I)
+                      or re.search(r"<title>(.*?)</title>", page, re.I | re.S))
                 if mt:
                     title = re.sub(r"\s+", " ", mt.group(1)).strip()
             except Exception:
