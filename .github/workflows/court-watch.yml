@@ -1,0 +1,68 @@
+name: Відстеження судових справ
+
+# Перевіряє офіційні сторінки судів «Список справ, призначених до розгляду»
+# (court.gov.ua) і надсилає адвокату ПРИВАТНЕ сповіщення, коли засідання у справі
+# його клієнта (або його самого як захисника) призначено. У канал нічого не
+# публікується — адвокатська таємниця. Стан (щоб не дублювати) зберігається у
+# .court-bot/state.json і комітиться ботом з [skip ci].
+#
+# Налаштування — секрет COURT_WATCH (JSON):
+#   {
+#     "names": ["Осадько Олександр Олексійович"],
+#     "courts": [
+#       {"name":"Дніпровський р-н суд м. Києва",
+#        "url":"https://dn.ki.court.gov.ua/sud2604/gromadyanam/csz"}
+#     ]
+#   }
+# Порада: достатньо вказати ПІБ самого адвоката — його ім'я як «захисник/
+# представник» присутнє в усіх його справах, тож окремо перелічувати клієнтів
+# не обов'язково (і в секреті не зберігаються персональні дані клієнтів).
+
+on:
+  schedule:
+    # Тричі на день у робочий час Києва (07:00, 11:00, 15:00 UTC ≈ 10/14/18 Київ).
+    - cron: "0 7,11,15 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Тест без надсилання (лише лічильники збігів, стан не зберігається)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: court-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Перевірити призначення справ
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_REVIEW_CHAT: ${{ secrets.TELEGRAM_REVIEW_CHAT }}
+          COURT_ALERT_CHAT: ${{ secrets.COURT_ALERT_CHAT }}   # необов'язково; типово = REVIEW_CHAT
+          COURT_WATCH: ${{ secrets.COURT_WATCH }}
+          COURT_DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '' }}
+        run: python3 tools/court_watch_bot.py
+
+      - name: Зберегти стан
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          if [ -n "$(git status --porcelain .court-bot)" ]; then
+            git config user.name "osadko-court-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .court-bot
+            git commit -m "chore(court-bot): update state [skip ci]"
+            git push
+          else
+            echo "Стан не змінився — коміт не потрібен."
+          fi
