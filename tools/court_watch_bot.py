@@ -381,22 +381,32 @@ def fetch_auto_retry(list_auto_url, tries=4):
 
 # ───────────────────────────── збіг ПІБ ──────────────────────────────
 def _norm(s):
-    return re.sub(r"\s+", " ", (s or "")).strip().casefold()
+    s = (s or "")
+    # уніфікуємо різні апострофи, щоб «Солом'янський»/«Солом’янський» збігались
+    s = s.replace("’", "'").replace("ʼ", "'").replace("`", "'")
+    return re.sub(r"\s+", " ", s).strip().casefold()
 
 
 def name_matches(involved, names):
-    """Повертає ПІБ зі списку, що зустрічається в «сторонах», інакше None."""
+    """Повертає ПІБ зі списку, що зустрічається в «сторонах» СУЦІЛЬНИМ рядком і
+    як окремі слова (щоб «Коваль Кіра Вікторівна» не збігалось із «Ковальова…»
+    чи зі словами від різних осіб). Інакше None."""
     hay = _norm(involved)
     for nm in names:
         n = _norm(nm)
-        if not n:
+        if len(n) < 4:
             continue
-        if n in hay:
-            return nm
-        # Гнучкий збіг: усі слова ПІБ присутні (порядок/по-батькові не критичні)
-        toks = [t for t in n.split(" ") if len(t) > 1]
-        if len(toks) >= 2 and all(t in hay for t in toks):
-            return nm
+        start = 0
+        while True:
+            i = hay.find(n, start)
+            if i < 0:
+                break
+            before = hay[i - 1] if i > 0 else ""
+            after = hay[i + len(n)] if i + len(n) < len(hay) else ""
+            # межі слова: перед/після ПІБ не має бути літери (напр., «ковальова»)
+            if not before.isalpha() and not after.isalpha():
+                return nm
+            start = i + 1
     return None
 
 
