@@ -105,6 +105,16 @@ def main():
             print("  host:", h)
         suds = sorted(set(re.findall(r'/sud(\d{3,5})', text)))
         print("Кодів sudNNNN на сторінці:", len(suds), suds[:40])
+        # <option value=...>Назва суду</option> — можливий повний перелік судів
+        opts = re.findall(r'<option[^>]*value=["\']([^"\']+)["\'][^>]*>(.*?)</option>',
+                          text, re.I | re.S)
+        opts = [(v, re.sub(r"\s+", " ", t).strip()) for v, t in opts if v.strip()]
+        print("Всього <option>:", len(opts))
+        for v, t in opts[:15]:
+            print(f"    option value={v!r} → {t[:60]!r}")
+        # <select> елементи
+        for m in re.finditer(r'<select[^>]*>', text, re.I):
+            print("  select:", m.group(0)[:160])
         # Приклади повних href для розуміння формату
         hrefs = re.findall(r'href=["\']([^"\']+)["\']', text)
         sample = [h for h in hrefs if "court.gov.ua" in h or "/sud" in h][:25]
