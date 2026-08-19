@@ -90,8 +90,27 @@ def main():
         sys.exit(1)
     print("URL:", url)
 
-    # Режим AUTO: перевірити fetch_auto() бота (endpoint /post_test2.php)
+    # Режим AUTO: діагностика форми автопризначень + виклик /post_test2.php
     if os.environ.get("AUTO", "").strip():
+        import http.cookiejar as _cj
+        jar = _cj.CookieJar()
+        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+        parts = urllib.parse.urlsplit(url)
+        origin = f"{parts.scheme}://{parts.netloc}"
+        req = urllib.request.Request(url, headers={"User-Agent": UA,
+              "Accept": "text/html,*/*;q=0.8", "Accept-Language": "uk"})
+        with opener.open(req, timeout=40) as resp:
+            html = resp.read().decode("cp1251", "replace")
+        for fid in ("ust", "cspec"):
+            m = re.search(rf'id=["\']{fid}["\'][^>]*>(.*?)<', html, re.S)
+            print(f"  #{fid} текст:", repr((m.group(1).strip()[:60] if m else None)))
+        for fid in ("sdate", "edate", "srch"):
+            m = re.search(rf'id=["\']{fid}["\'][^>]*value=["\']([^"\']*)["\']', html)
+            print(f"  #{fid} value:", repr(m.group(1) if m else None))
+        # знайти input-и всередині форми з датами
+        for m in re.finditer(r'<input[^>]*id=["\'](sdate|edate)["\'][^>]*>', html):
+            print("  input:", m.group(0)[:160])
+        # Спробувати запит через бот
         import importlib.util
         spec = importlib.util.spec_from_file_location(
             "cwb", os.path.join(os.path.dirname(__file__), "court_watch_bot.py"))
@@ -99,15 +118,12 @@ def main():
         spec.loader.exec_module(cwb)
         try:
             recs = cwb.fetch_auto(url)
+            print("Автопризначень отримано:", len(recs))
+            for r in recs[:2]:
+                print("  №", r.get("number"), "· суддя:", r.get("judge"),
+                      "· склад визн.:", r.get("panel_date"))
         except Exception as e:
-            print("fetch_auto помилка:", e); sys.exit(1)
-        print("Автопризначень отримано:", len(recs))
-        # У публічні логи — лише знеособлені поля (номер, суддя, дати)
-        for r in recs[:2]:
-            print("  №", r.get("number"), "· суддя:", r.get("judge"),
-                  "· реєстр.:", r.get("reg_date"),
-                  "· склад визн.:", r.get("panel_date"),
-                  "· сторони(символів):", len(r.get("involved", "")))
+            print("fetch_auto помилка:", e)
         print("ГОТОВО")
         return
 
