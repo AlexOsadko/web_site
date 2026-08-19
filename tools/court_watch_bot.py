@@ -35,6 +35,22 @@ import urllib.parse
 import urllib.request
 
 STATE_PATH = ".court-bot/state.json"
+REGISTRY_PATH = os.path.join(os.path.dirname(__file__), "court_registry.json")
+
+# Єдиний домен, що віддає дані БУДЬ-ЯКОГО суду за кодом sudNNNN (перевірено:
+# GET /sudNNNN/gromadyanam/csz → сесія → POST /new.php повертає саме цей суд).
+MAIN_HOST = "https://court.gov.ua"
+
+
+def csz_url_for(court):
+    """CSZ-URL суду: за явним url або за 4-значним кодом через court.gov.ua."""
+    url = (court.get("url") or "").strip()
+    if url:
+        return url
+    code = str(court.get("code") or "").strip()
+    if code:
+        return f"{MAIN_HOST}/sud{code}/gromadyanam/csz"
+    return ""
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
@@ -44,11 +60,34 @@ CHAT = (os.environ.get("COURT_ALERT_CHAT", "").strip()
         or os.environ.get("TELEGRAM_REVIEW_CHAT", "").strip())
 DRY_RUN = os.environ.get("COURT_DRY_RUN", "").strip() in ("1", "true", "True")
 MAX_ALERTS = int(os.environ.get("COURT_MAX_ALERTS", "25") or "25")
+# Пауза між запитами до court.gov.ua (щоб не навантажувати сервер і не блокуватись)
+REQUEST_PAUSE = float(os.environ.get("COURT_REQUEST_PAUSE", "1.0") or "1.0")
 
 
 # ─────────────────────────── конфігурація ────────────────────────────
+def load_registry():
+    """Вбудований перелік судів (код + назва) — сканується, коли у COURT_WATCH
+    не задано власного списку `courts` (модель «перелік, що зростає»)."""
+    try:
+        with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        courts = data.get("courts", data) if isinstance(data, dict) else data
+        out = []
+        for c in courts:
+            code = str(c.get("code") or "").strip()
+            if code:
+                out.append({"name": (c.get("name") or f"суд {code}").strip(),
+                            "code": code,
+                            "auto_url": (c.get("auto_url") or "").strip()})
+        return out
+    except Exception as e:
+        print("Реєстр судів недоступний:", e)
+        return []
+
+
 def load_config():
-    """Повертає (names[list], courts[list of {name,url}])."""
+    """Повертає (names[list], courts[list]). Суд — це {name, code|url, auto_url}.
+    Якщо у COURT_WATCH немає `courts` — беремо вбудований реєстр (усі його суди)."""
     raw = os.environ.get("COURT_WATCH", "").strip()
     if raw:
         try:
@@ -56,13 +95,16 @@ def load_config():
             names = [n.strip() for n in cfg.get("names", []) if n.strip()]
             courts = []
             for c in cfg.get("courts", []):
-                url = (c.get("url") or "").strip()
-                if url:
-                    courts.append({"name": (c.get("name") or url).strip(),
-                                   "url": url,
-                                   # необов'язково: сторінка автопризначень суду
-                                   # («Призначено склад суду») — експериментально
-                                   "auto_url": (c.get("auto_url") or "").strip()})
+                entry = {"name": (c.get("name") or "").strip(),
+                         "url": (c.get("url") or "").strip(),
+                         "code": str(c.get("code") or "").strip(),
+                         "auto_url": (c.get("auto_url") or "").strip()}
+                if entry["url"] or entry["code"]:
+                    entry["name"] = entry["name"] or entry["url"] or f"суд {entry['code']}"
+                    courts.append(entry)
+            # Без явного списку судів — скануємо вбудований реєстр (якщо не вимкнено)
+            if not courts and cfg.get("use_registry", True):
+                courts = load_registry()
             return names, courts
         except Exception as e:
             print("COURT_WATCH — некоректний JSON:", e)
@@ -81,6 +123,8 @@ def load_config():
             courts.append({"name": nm.strip(), "url": url.strip()})
         else:
             courts.append({"name": line, "url": line})
+    if not courts and names:  # лише ПІБ у простих змінних → беремо реєстр
+        courts = load_registry()
     return names, courts
 
 
@@ -403,12 +447,15 @@ def main():
     first_time = not seen  # перший запуск: фіксуємо поточні засідання
 
     for court in courts:
-        url = court["url"]
+        url = csz_url_for(court)
+        if not url:
+            continue
         try:
             records = fetch_court_retry(url)
         except Exception as e:
             print(f"[{court['name']}] помилка завантаження: {e}")
             continue
+        time.sleep(REQUEST_PAUSE)  # ввічлива пауза між судами
         # ВАЖЛИВО: логи публічного репозиторію відкриті, тому сюди НЕ потрапляють
         # ПІБ, номери справ чи текст «сторін» — лише знеособлені лічильники.
         matches = []
