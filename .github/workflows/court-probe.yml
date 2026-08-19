@@ -30,6 +30,10 @@ on:
         description: "HARVEST: зібрати хости судів (court.gov.ua) зі сторінки-каталогу"
         type: boolean
         default: false
+      codes:
+        description: "CODES: коди судів через кому (напр. 2601,2606,2610) — перевірка court.gov.ua/sudNNNN"
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -50,4 +54,5 @@ jobs:
           SESS: ${{ github.event.inputs.sess == 'true' && '1' || '' }}
           AUTO: ${{ github.event.inputs.auto == 'true' && '1' || '' }}
           HARVEST: ${{ github.event.inputs.harvest == 'true' && '1' || '' }}
+          CODES: ${{ github.event.inputs.codes }}
         run: python3 tools/court_probe.py

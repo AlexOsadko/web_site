@@ -90,6 +90,27 @@ def main():
         sys.exit(1)
     print("URL:", url)
 
+    # Режим CODES: перевірити, що court.gov.ua/sud<code> віддає дані кожного суду
+    codes = os.environ.get("CODES", "").strip()
+    if codes:
+        import json as _json
+        for cd in [c.strip() for c in codes.split(",") if c.strip()]:
+            csz = f"https://court.gov.ua/sud{cd}/gromadyanam/csz"
+            try:
+                c, ct, tx = session_flow(csz)
+                s = tx.strip()
+                n, first = "—", ""
+                if s[:1] == "[":
+                    dd = _json.loads(s)
+                    n = len(dd)
+                    if dd:
+                        first = dd[0].get("number", "")
+                print(f"  код {cd}: HTTP {c} · записів {n} · перший №{first}")
+            except Exception as e:
+                print(f"  код {cd}: помилка {str(e)[:70]}")
+        print("ГОТОВО")
+        return
+
     # Режим HARVEST: зібрати посилання на сайти судів (домен + код sudNNNN)
     if os.environ.get("HARVEST", "").strip():
         try:
