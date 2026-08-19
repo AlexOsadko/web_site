@@ -108,8 +108,15 @@ def main():
         # Приклади повних href для розуміння формату
         hrefs = re.findall(r'href=["\']([^"\']+)["\']', text)
         sample = [h for h in hrefs if "court.gov.ua" in h or "/sud" in h][:25]
-        print("---- приклади href ----")
+        print("---- приклади href (суди) ----")
         for h in sample:
+            print("  ", h)
+        # Посилання на набори даних / файли
+        data_h = [h for h in hrefs if re.search(
+            r'(opendata|dataset|perelik|merezh|\.csv|\.json|\.xml|\.xlsx?|resource|/set/)',
+            h, re.I)]
+        print("---- посилання на дані/набори ----")
+        for h in dict.fromkeys(data_h[:40]):
             print("  ", h)
         print("ГОТОВО")
         return
