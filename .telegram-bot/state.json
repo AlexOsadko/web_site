@@ -1,9 +1,11 @@
 {
-"seen": [],
+"seen": [
+"https://www.ukrinform.ua/rubric-society/4155265-v-ukraini-zalisautsa-neidentifikovanimi-majze-17-tisac-til-policia.html"
+],
 "day": "2026-08-19",
-"count": 0,
-"total": 1,
-"seq": 11,
+"count": 1,
+"total": 2,
+"seq": 12,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -98,7 +100,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787096721.9002268,
+"last_content_ts": 1787098518.5196853,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
