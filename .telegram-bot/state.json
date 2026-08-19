@@ -16,12 +16,13 @@
 "https://www.ukrinform.ua/rubric-regions/4155572-policia-i-gur-identifikuvali-rosijskogo-oficera-akij-nakazav-rozstrilati-zitela-buci.html",
 "https://www.ukrinform.ua/rubric-polytics/4155585-rada-uhvalila-zakon-pro-pidvisenna-socgarantij-dla-simej-u-akih-e-osobi-z-invalidnistu.html",
 "https://sud.ua/ru/news/ukraine/369722-kupannia-sobaky-u-vodoimi-mozhe-zakinchytysia-shtrafom-de-diiut-zaborony-ta-skilky-dovedetsia-zaplatyty",
-"https://sud.ua/ru/news/sudova-praktyka/369708-viiskovoho-pensionera-iakoho-vyznaly-neprydatnym-cherez-tuberkuloz-oholosyly-v-rozshuk-sud-stav-na-bik-ttsk"
+"https://sud.ua/ru/news/sudova-praktyka/369708-viiskovoho-pensionera-iakoho-vyznaly-neprydatnym-cherez-tuberkuloz-oholosyly-v-rozshuk-sud-stav-na-bik-ttsk",
+"https://jurliga.ligazakon.net/news/245749_verkhovniy-sud-uzagalniv-klyuchov-pravov-visnovki-v-admnstrativnikh-sporakh-za-lipen-2026-roku"
 ],
 "day": "2026-08-19",
-"count": 17,
-"total": 18,
-"seq": 29,
+"count": 18,
+"total": 19,
+"seq": 30,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -117,7 +118,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787137832.9639535,
+"last_content_ts": 1787138778.8505747,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
