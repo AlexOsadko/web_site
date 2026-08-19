@@ -11,12 +11,13 @@
 "https://www.unian.ua/curiosities/yak-nazvati-sina-keltske-im-ya-pidkoryuye-svit-13474098.html",
 "https://www.ukrinform.ua/rubric-polytics/4155493-apelacia-vaks-pocala-rozglad-skargi-stefanisinoi.html",
 "https://sud.ua/ru/news/ukraine/369729-zitknuvsia-z-marshrutkoiu-i-vletiv-u-zupynku-u-kyievi-vnaslidok-dtp-zahynuly-dvi-zhinky-vodiia-zatrymaly",
-"https://suspilne.media/odesa/1382382-pidriv-pirotehniki-bila-budinku-odesita-pidozruut-u-huliganstvi/"
+"https://suspilne.media/odesa/1382382-pidriv-pirotehniki-bila-budinku-odesita-pidozruut-u-huliganstvi/",
+"https://suspilne.media/mykolaiv/1382472-pidkluciv-elektrodetonator-na-mikolaivsini-vnaslidok-vibuhu-travmuvavsa-colovik/"
 ],
 "day": "2026-08-19",
-"count": 12,
-"total": 13,
-"seq": 24,
+"count": 13,
+"total": 14,
+"seq": 25,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -112,7 +113,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787126763.8768063,
+"last_content_ts": 1787129569.9465027,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
