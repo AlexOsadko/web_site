@@ -18,11 +18,20 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 def fetch(url):
     req = urllib.request.Request(url, headers={
         "User-Agent": UA,
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept": "text/html,application/json,application/xhtml+xml,*/*;q=0.8",
         "Accept-Language": "uk,en;q=0.8",
+        "X-Requested-With": "XMLHttpRequest",
     })
     with urllib.request.urlopen(req, timeout=35) as r:
-        return r.getcode(), r.read().decode("utf-8", "replace")
+        raw = r.read()
+        ctype = r.headers.get("Content-Type", "")
+        # court.gov.ua віддає windows-1251 (якщо не вказано інше)
+        enc = "utf-8" if "utf-8" in ctype.lower() else "cp1251"
+        try:
+            text = raw.decode(enc, "replace")
+        except Exception:
+            text = raw.decode("cp1251", "replace")
+        return r.getcode(), ctype, text
 
 
 def main():
@@ -32,38 +41,47 @@ def main():
         sys.exit(1)
     print("URL:", url)
     try:
-        code, html = fetch(url)
+        code, ctype, text = fetch(url)
     except Exception as e:
         print("Помилка завантаження:", e)
         sys.exit(1)
-    print("HTTP:", code, "· довжина HTML:", len(html))
+    print("HTTP:", code, "· Content-Type:", ctype, "· довжина:", len(text))
 
-    markers = ["Сторони по справі", "Єдиний унікальний", "Склад суду",
-               "Форма судочинства", "Зал судових", "Суть позову",
-               "<table", "DataTables", "ajax", "json", "csz"]
-    for m in markers:
-        print(f"  містить {m!r}: {m.lower() in html.lower()}")
+    stripped = text.lstrip()
+    is_json = "json" in ctype.lower() or stripped[:1] in ("{", "[")
+    if is_json:
+        import json
+        try:
+            data = json.loads(text)
+        except Exception as e:
+            print("Не JSON:", e)
+            print(text[:1500]); return
+        print("Тип JSON:", type(data).__name__)
+        if isinstance(data, dict):
+            print("Ключі:", list(data.keys()))
+            rows = data.get("data") or data.get("aaData") or data.get("rows") or []
+        else:
+            rows = data
+        print("Рядків:", len(rows) if isinstance(rows, list) else "—")
+        if isinstance(rows, list) and rows:
+            print("---- ПЕРШІ 2 РЯДКИ ----")
+            print(json.dumps(rows[:2], ensure_ascii=False, indent=2)[:2500])
+        print("ГОТОВО")
+        return
 
-    cases = re.findall(r"\b\d+/\d+/\d\d\b", html)
-    print("схожих на номер справи:", len(cases), cases[:6])
-    print("<tr> у коді:", html.lower().count("<tr"))
-    print("<table> у коді:", html.lower().count("<table"))
-
-    idx = html.find("Сторони по справі")
-    if idx < 0:
-        idx = html.lower().find("<table")
-    if idx >= 0:
-        print("---- ВІКНО HTML навколо таблиці ----")
-        print(html[max(0, idx - 300): idx + 2600])
-    else:
-        b = html.lower().find("<body")
-        print("---- ПОЧАТОК BODY (таблиці не знайдено — можливо, AJAX) ----")
-        print(html[b: b + 2200] if b >= 0 else html[:2200])
-
+    # HTML-гілка
+    for m in ["Сторони по справі", "Єдиний унікальний", "Склад суду",
+              "Форма судочинства", "<table", "DataTables", "ajax", "json"]:
+        print(f"  містить {m!r}: {m.lower() in text.lower()}")
+    print("<tr>:", text.lower().count("<tr"), "· <table>:", text.lower().count("<table"))
     print("---- підозрілі посилання (можливий AJAX-ендпоінт) ----")
-    for s in set(re.findall(r'(?:src|href|data-url|url)\s*[:=]\s*["\']([^"\']+)["\']', html)):
-        if any(k in s.lower() for k in ("csz", "json", "ajax", "list", "getdata", "handler")):
+    for s in set(re.findall(r'(?:src|href|data-url|url)\s*[:=]\s*["\']([^"\']+)["\']', text)):
+        if any(k in s.lower() for k in ("csz", "json", "ajax", "list", "auto_cases", "getdata")):
             print("  ", s)
+    idx = text.lower().find("<table")
+    if idx >= 0:
+        print("---- ВІКНО HTML ----")
+        print(text[max(0, idx - 200): idx + 2400])
     print("ГОТОВО")
 
 
