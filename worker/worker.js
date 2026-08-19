@@ -55,7 +55,30 @@ function courtMenuKb() {
   return { inline_keyboard: [
     [{ text: '➕ Додати клієнта', callback_data: 'cadd' }],
     [{ text: '📋 Список / кількість', callback_data: 'clist' }],
+    [{ text: '⚖️ Справи адвоката', callback_data: 'crep' }],
   ] };
+}
+
+async function showCourtReport(env) {
+  const rep = await env.KV.get('court_report', 'json');
+  if (!rep || !rep.items || !rep.items.length) {
+    return tg(env, 'sendMessage', {
+      chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+      text: '⚖️ <b>Справи адвоката</b>\nПоки немає даних. Звіт оновлюється під час ' +
+        'планового прогону (тричі на день) — після першого прогону тут зʼявиться список.',
+      reply_markup: courtMenuKb(),
+    });
+  }
+  const lines = rep.items.slice(0, 50).map((it, i) =>
+    `${i + 1}. <b>${esc(it.number)}</b> · ${esc(it.date)}\n` +
+    `    ${esc(it.judge || '')}${it.judge ? ' · ' : ''}${esc(it.court || '')}`);
+  let txt = `⚖️ <b>Справи адвоката: ${rep.count}</b>\n` +
+    `<i>оновлено: ${esc(rep.updated || '')}</i>\n\n` + lines.join('\n');
+  if (rep.count > 50) txt += `\n\n… та ще ${rep.count - 50}.`;
+  return tg(env, 'sendMessage', {
+    chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt,
+    disable_web_page_preview: true, reply_markup: courtMenuKb(),
+  });
 }
 
 async function showCourtMenu(env, prefix = '') {
@@ -179,9 +202,10 @@ async function handleUpdate(update, env) {
     const [action, pid] = (cq.data || '').split(':');
 
     // --- меню бота відстеження судових справ ---
-    if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel'].includes(action)) {
+    if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep'].includes(action)) {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
       if (action === 'cmenu') return showCourtMenu(env);
+      if (action === 'crep') return showCourtReport(env);
       if (action === 'clist') return showCourtList(env);
       if (action === 'cadd') {
         await env.KV.put('court_await', 'add');
@@ -335,6 +359,15 @@ export default {
       }
       const arr = (await env.KV.get('court_names', 'json')) || [];
       return Response.json({ names: arr });
+    }
+    // Звіт «справи адвоката» від бота (зберігається для перегляду з меню).
+    if (request.method === 'POST' && url.pathname === '/court_report') {
+      if ((request.headers.get('X-Auth-Token') || '') !== env.AUTH_TOKEN) {
+        return new Response('forbidden', { status: 403 });
+      }
+      let o; try { o = await request.json(); } catch { return new Response('bad', { status: 400 }); }
+      await env.KV.put('court_report', JSON.stringify(o));
+      return Response.json({ ok: true });
     }
     if (request.method === 'POST') {
       // вебхук Telegram (за бажанням — з перевіркою secret_token)

@@ -70,6 +70,40 @@ WORKER_SECRET = (os.environ.get("COURT_WORKER_SECRET", "").strip()
                  or os.environ.get("BOT_WORKER_SECRET", "").strip())
 
 
+# Окремий перегляд справ самого адвоката (де він захисник/представник).
+ADVOCATE_NAME = os.environ.get("COURT_ADVOCATE", "Осадько Олександр Олексійович").strip()
+
+
+def post_worker_report(items):
+    """Зберегти у Worker (KV) звіт «справи адвоката» для перегляду з меню."""
+    if not (WORKER_URL and WORKER_SECRET):
+        return
+    payload = json.dumps({
+        "updated": time.strftime("%d.%m.%Y %H:%M", time.gmtime(time.time() + 3 * 3600)),
+        "count": len(items),
+        "items": items[:200],
+    }).encode("utf-8")
+    try:
+        req = urllib.request.Request(
+            WORKER_URL.rstrip("/") + "/court_report", data=payload,
+            headers={"X-Auth-Token": WORKER_SECRET, "Content-Type": "application/json",
+                     "User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            r.read()
+    except Exception as e:
+        print("Не вдалося зберегти звіт адвоката:", str(e)[:60])
+
+
+def _hearing_ts(s):
+    m = re.match(r"(\d{2})\.(\d{2})\.(\d{4})", (s or "").strip())
+    if not m:
+        return None
+    try:
+        return time.mktime(time.strptime(m.group(0), "%d.%m.%Y"))
+    except Exception:
+        return None
+
+
 def fetch_worker_names():
     """ПІБ зі списку у Worker (KV). Керується з Telegram-меню бота."""
     if not (WORKER_URL and WORKER_SECRET):
@@ -480,6 +514,7 @@ def main():
     sent = 0
     total_new = 0
     first_time = not seen  # перший запуск: фіксуємо поточні засідання
+    advocate_hits = []     # окремий звіт «справи адвоката»
 
     for court in courts:
         url = csz_url_for(court)
@@ -491,6 +526,17 @@ def main():
             print(f"[{court['name']}] помилка завантаження: {e}")
             continue
         time.sleep(REQUEST_PAUSE)  # ввічлива пауза між судами
+
+        # Окремо: справи, де фігурує сам адвокат (для перегляду з меню).
+        if ADVOCATE_NAME:
+            for rec in records:
+                if name_matches(rec.get("involved", ""), [ADVOCATE_NAME]):
+                    advocate_hits.append({
+                        "court": court["name"],
+                        "number": rec.get("number", ""),
+                        "date": rec.get("date", ""),
+                        "judge": rec.get("judge", ""),
+                    })
         # ВАЖЛИВО: логи публічного репозиторію відкриті, тому сюди НЕ потрапляють
         # ПІБ, номери справ чи текст «сторін» — лише знеособлені лічильники.
         matches = []
@@ -556,6 +602,27 @@ def main():
                         time.sleep(0.5)
                 except Exception:
                     print("  Помилка надсилання сповіщення (статус).")
+
+    # Звіт «справи адвоката»: лише майбутні засідання, за датою, без дублів.
+    if ADVOCATE_NAME:
+        today0 = time.mktime(time.strptime(time.strftime("%d.%m.%Y"), "%d.%m.%Y"))
+        uniq, seen_keys = [], set()
+        for it in advocate_hits:
+            ts = _hearing_ts(it["date"])
+            if ts is not None and ts < today0:
+                continue
+            k = (it["number"], it["date"], it["court"])
+            if k in seen_keys:
+                continue
+            seen_keys.add(k)
+            it["_ts"] = ts if ts is not None else 9e18
+            uniq.append(it)
+        uniq.sort(key=lambda x: x["_ts"])
+        for it in uniq:
+            it.pop("_ts", None)
+        print(f"Справи адвоката (майбутні): {len(uniq)}")
+        if not DRY_RUN:
+            post_worker_report(uniq)
 
     st["last_run"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     if not DRY_RUN:
