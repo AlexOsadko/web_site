@@ -25,6 +25,10 @@ on:
         description: "Згенерувати авторську чернетку зараз (у чат перевірки з кнопками)"
         type: boolean
         default: false
+      force_news:
+        description: "Опублікувати новину в канал зараз (обходить інтервал 2 год)"
+        type: boolean
+        default: false
       force_count:
         description: "Скільки чернеток згенерувати (лише з force_original)"
         type: string
@@ -79,6 +83,7 @@ jobs:
           BOT_DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '' }}
           BOT_FORCE_ORIGINAL: ${{ github.event.inputs.force_original == 'true' && '1' || '' }}
           BOT_FORCE_ORIGINAL_COUNT: ${{ github.event.inputs.force_count || '1' }}
+          BOT_FORCE_NEWS: ${{ github.event.inputs.force_news == 'true' && '1' || '' }}
         run: python3 tools/telegram_news_bot.py
 
       - name: Зберегти стан

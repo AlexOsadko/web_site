@@ -80,6 +80,9 @@ CONTENT_INTERVAL_MIN = int(os.environ.get("BOT_CONTENT_INTERVAL_MIN", "120") or 
 FORCE_ORIGINAL = os.environ.get("BOT_FORCE_ORIGINAL", "").strip() in ("1", "true", "yes")
 # Скільки авторських чернеток згенерувати за примусовий запуск (наперед).
 FORCE_COUNT = int(os.environ.get("BOT_FORCE_ORIGINAL_COUNT", "1") or "1")
+# Примусово опублікувати НОВИНУ цього запуску (обходить інтервал і чергу
+# авторських) — для кнопки «опублікувати новину зараз» у workflow.
+FORCE_NEWS = os.environ.get("BOT_FORCE_NEWS", "").strip() in ("1", "true", "yes")
 
 ORIGINAL_TYPES = [
     ("міф", "розвінчання поширеного юридичного міфу: спершу сам міф, тоді як є насправді"),
@@ -769,7 +772,7 @@ def main():
     # 2) Контент постимо не частіше, ніж CONTENT_INTERVAL_MIN (запуски бувають
     #    частими заради кнопок, але новини мають виходити в спокійному темпі).
     now = time.time()
-    if not FORCE_ORIGINAL and (now - float(st.get("last_content_ts", 0))) < CONTENT_INTERVAL_MIN * 60:
+    if not FORCE_ORIGINAL and not FORCE_NEWS and (now - float(st.get("last_content_ts", 0))) < CONTENT_INTERVAL_MIN * 60:
         left = int(CONTENT_INTERVAL_MIN - (now - float(st.get("last_content_ts", 0))) / 60)
         print(f"Ще рано для нового контенту (лишилось ~{max(0, left)} хв). "
               "Кнопки оброблено, вихід.")
@@ -817,7 +820,8 @@ def main():
         return
 
     # чергування: кожен ORIGINAL_EVERY-й вихід — оригінальний (авторський) пост
-    if ORIGINAL_EVERY > 0 and (seq % ORIGINAL_EVERY == 0):
+    # (FORCE_NEWS пропускає авторський цикл — публікуємо саме новину)
+    if not FORCE_NEWS and ORIGINAL_EVERY > 0 and (seq % ORIGINAL_EVERY == 0):
         o = generate_original(st)
         if o:
             if REVIEW_CHAT and not ORIGINAL_AUTOPOST:
