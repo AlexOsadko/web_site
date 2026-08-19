@@ -55,6 +55,7 @@ def main():
         print("Помилка завантаження:", e)
         sys.exit(1)
     print("HTTP:", code, "· Content-Type:", ctype, "· довжина:", len(text))
+    print("RAW[:400]:", repr(text[:400]))
 
     # Гілка для JS-файлу: показати, як будується запит списку справ
     if url.lower().split("?")[0].endswith(".js"):
