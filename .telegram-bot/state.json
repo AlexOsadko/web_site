@@ -13,12 +13,13 @@
 "https://sud.ua/ru/news/ukraine/369729-zitknuvsia-z-marshrutkoiu-i-vletiv-u-zupynku-u-kyievi-vnaslidok-dtp-zahynuly-dvi-zhinky-vodiia-zatrymaly",
 "https://suspilne.media/odesa/1382382-pidriv-pirotehniki-bila-budinku-odesita-pidozruut-u-huliganstvi/",
 "https://suspilne.media/mykolaiv/1382472-pidkluciv-elektrodetonator-na-mikolaivsini-vnaslidok-vibuhu-travmuvavsa-colovik/",
-"https://www.ukrinform.ua/rubric-regions/4155572-policia-i-gur-identifikuvali-rosijskogo-oficera-akij-nakazav-rozstrilati-zitela-buci.html"
+"https://www.ukrinform.ua/rubric-regions/4155572-policia-i-gur-identifikuvali-rosijskogo-oficera-akij-nakazav-rozstrilati-zitela-buci.html",
+"https://www.ukrinform.ua/rubric-polytics/4155585-rada-uhvalila-zakon-pro-pidvisenna-socgarantij-dla-simej-u-akih-e-osobi-z-invalidnistu.html"
 ],
 "day": "2026-08-19",
-"count": 14,
-"total": 15,
-"seq": 26,
+"count": 15,
+"total": 16,
+"seq": 27,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -114,7 +115,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787132235.301244,
+"last_content_ts": 1787133824.5308197,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
