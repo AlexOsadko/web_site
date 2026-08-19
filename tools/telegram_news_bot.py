@@ -373,6 +373,67 @@ def summarize(title, desc, source):
     return None
 
 
+# --- «Розбір судового рішення простою мовою» (як у практичних юрканалах, але
+#     простою мовою й лише на РЕАЛЬНОМУ матеріалі зі стрічок судової практики) ---
+COURT_HINTS = (
+    "верховний суд", "вс роз", "велика палата", "касаційн", "апеляційн суд",
+    "суд ухвалив", "суд вирішив", "суд задовольнив", "суд відмовив", "суд визнав",
+    "суд скасував", "залишив без змін", "постанова суду", "рішення суду",
+    "у справі №", "справа №", "оскарж", "позовн вимог", "спір щодо",
+    "судова практика", "правова позиція", "роз'яснив",
+)
+
+
+def is_court_practice(title, desc):
+    text = (str(title) + " " + str(desc)).lower()
+    return any(k in text for k in COURT_HINTS)
+
+
+CASE_SYS = (
+    "Ти — редактор українського Telegram-каналу «Про право простою мовою». Тобі "
+    "дають новину про СУДОВЕ РІШЕННЯ (реальна судова практика). Поясни її "
+    "звичайній людині без юридичної освіти у форматі короткого розбору.\n"
+    "СТИЛЬ: проста, дружня мова; спокійний, врівноважений тон, без залякування й "
+    "сленгу; стисло (орієнтир — до ~1000 символів разом).\n"
+    "ОБМЕЖЕННЯ: спирайся ЛИШЕ на надані заголовок/опис. НЕ вигадуй деталей справи, "
+    "номерів, сум, строків і покарань, яких немає в тексті — бракує даних, пиши "
+    "узагальнено. Пиши про ПРАВОВИЙ ПРИНЦИП і практичний висновок, а не про "
+    "впізнавані персоналії. Без обіцянок результату й порівнянь адвокатів. "
+    "Виключно українською (за потреби переклади).\n"
+    "Поверни ЛИШЕ JSON без markdown:\n"
+    '{"headline": "заголовок УКРАЇНСЬКОЮ (до ~110 символів)", '
+    '"situation": "1–3 речення: яка була ситуація/спір простими словами", '
+    '"ruling": "1–2 речення: що вирішив суд і головний правовий принцип", '
+    '"lesson": "1–2 речення: практичний урок для звичайної людини"}'
+)
+
+
+def summarize_case(title, desc, source):
+    """Розбір судового рішення: {'headline','situation','ruling','lesson'} або None."""
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return None
+    try:
+        import anthropic
+        client = anthropic.Anthropic()
+        r = client.messages.create(
+            model=SUMMARY_MODEL, max_tokens=900, system=CASE_SYS,
+            messages=[{"role": "user",
+                       "content": f"Заголовок: {title}\nОпис: {desc}\nДжерело: {source}"}])
+        text = "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
+        m = re.search(r"\{.*\}", text, re.S)
+        if not m:
+            return None
+        d = json.loads(m.group(0))
+        if d.get("situation") and d.get("ruling"):
+            return {"headline": str(d.get("headline", "")).strip(),
+                    "situation": str(d.get("situation", "")).strip(),
+                    "ruling": str(d.get("ruling", "")).strip(),
+                    "lesson": str(d.get("lesson", "")).strip()}
+    except Exception as ex:
+        print("case summary error:", ex)
+    return None
+
+
 def _send(text, chat, with_cta=False):
     """Низькорівнева відправка повідомлення в заданий чат."""
     if DRY_RUN:
@@ -420,9 +481,34 @@ def tg_call(method, params):
 def tg_send(item):
     """Пост-новина / стаття (з AI-резюме та посиланням на джерело)."""
     own = "osadko.online" in (item.get("link") or "")   # власна стаття із сайту
-    head = "✍️" if own else "📰"
     cta = "Читати статтю" if own else "Читати джерело"
     src = "Адвокат Осадько" if own else item["source"]
+
+    # РОЗБІР СУДОВОГО РІШЕННЯ — окремий формат для новин із судової практики
+    # (лише реальний матеріал зі стрічок; для власних статей — звичайний формат)
+    case = None
+    if not own and is_court_practice(item["title"], item["desc"]):
+        case = summarize_case(item["title"], item["desc"], src)
+    if case:
+        title = case.get("headline") or item["title"]
+        if not is_ukrainian(title):
+            print("Пропускаю неукраїномовну новину:", item["title"][:60])
+            return None
+        msg = f"⚖️ <b>Розбір рішення суду</b>\n\n<b>{esc(title)}</b>"
+        msg += f"\n\n{esc(case['situation'])}"
+        msg += f"\n\n⚖️ <b>Що вирішив суд:</b> {esc(case['ruling'])}"
+        if case.get("lesson"):
+            msg += f"\n\n💡 <b>Урок для вас:</b> {esc(case['lesson'])}"
+        msg += f"\n\n🔗 <a href=\"{esc(item['link'])}\">{cta}</a>"
+        if src:
+            msg += f" · <i>{esc(src)}</i>"
+        tags = classify(item["title"], item["desc"])
+        if "#судова_практика" not in tags:
+            tags = (["#судова_практика"] + tags)[:MAX_TAGS]
+        msg += "\n\n" + " ".join(tags)
+        return _send(msg, CHANNEL, with_cta=bool(item.get("_cta")))
+
+    head = "✍️" if own else "📰"
     s = summarize(item["title"], item["desc"], src)
     # заголовок — завжди українською: беремо український від AI, інакше оригінал
     # (лише якщо він українською); неукраїномовний без AI-перекладу — не постимо
