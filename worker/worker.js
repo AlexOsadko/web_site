@@ -145,12 +145,24 @@ async function clearHidden(env, kind) {
   await env.KV.delete('court_hidden_' + kind);
 }
 
-// Видимі справи звіту (з урахуванням прихованих).
+// Остаточно видалені справи — не показуються ні у списку, ні у «Прихованих»
+// (навіть якщо суд знову віддасть їх під час наступного прогону).
+async function getDeleted(env, kind) {
+  return (await env.KV.get('court_deleted_' + kind, 'json')) || [];
+}
+async function addDeleted(env, kind, key) {
+  const a = await getDeleted(env, kind);
+  if (!a.includes(key)) { a.push(key); await env.KV.put('court_deleted_' + kind, JSON.stringify(a)); }
+}
+
+// Видимі справи звіту (без прихованих і без остаточно видалених).
 async function visibleReport(env, kind) {
   const rep = await env.KV.get('court_report_' + kind, 'json');
   const items = (rep && rep.items) ? rep.items : [];
   const hidden = await getHidden(env, kind);
-  const visible = items.filter((it) => !hidden.includes(itemKey(it)));
+  const deleted = await getDeleted(env, kind);
+  const blocked = new Set([...hidden, ...deleted]);
+  const visible = items.filter((it) => !blocked.has(itemKey(it)));
   return { updated: rep ? rep.updated : '', visible, hiddenCount: hidden.length };
 }
 
@@ -172,20 +184,21 @@ async function showHidden(env, kind) {
   const rep = await env.KV.get('court_report_' + kind, 'json');
   const byKey = {};
   ((rep && rep.items) || []).forEach((it) => { byKey[itemKey(it)] = it; });
-  let txt = `${title}: ${hidden.length}</b>\n<i>♻️ — повернути справу в список</i>\n`;
+  let txt = `${title}: ${hidden.length}</b>\n<i>♻️ — повернути в список · 🗑 — видалити назавжди</i>\n`;
   const rows = [];
-  let row = [];
   for (let i = 0; i < hidden.length; i++) {
     const it = byKey[hidden[i]];
     const p = hidden[i].split('|');
     txt += `\n${i + 1}. <b>№ ${esc(it ? it.number : p[0])}</b> · 📅 ${esc(it ? it.date : p[1])}\n` +
       `    🏛 ${esc(it ? it.court : (p[2] || ''))}\n`;
-    row.push({ text: `♻️ ${i + 1}`, callback_data: `cunhide1:${kind}:${i}` });
-    if (row.length === 5) { rows.push(row); row = []; }
-    if (txt.length > 3600) { txt += '\n… список задовгий.'; break; }
+    rows.push([
+      { text: `♻️ ${i + 1}`, callback_data: `cunhide1:${kind}:${i}` },
+      { text: `🗑 ${i + 1}`, callback_data: `cpurge1:${kind}:${i}` },
+    ]);
+    if (txt.length > 3400) { txt += '\n… список задовгий.'; break; }
   }
-  if (row.length) rows.push(row);
   rows.push([{ text: '♻️ Відновити всі', callback_data: `cunhide:${kind}` }]);
+  rows.push([{ text: '🗑 Видалити всі назавжди', callback_data: `cpurge:${kind}` }]);
   rows.push([{ text: '↩️ Меню', callback_data: 'cmenu' }]);
   return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
     text: txt, disable_web_page_preview: true, reply_markup: { inline_keyboard: rows } });
@@ -372,7 +385,8 @@ async function handleUpdate(update, env) {
 
     // --- меню бота відстеження судових справ ---
     if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crun',
-         'chide', 'cunhide', 'chidden', 'cunhide1', 'crepp', 'cnoop'].includes(action)) {
+         'chide', 'cunhide', 'chidden', 'cunhide1', 'cpurge1', 'cpurge',
+         'crepp', 'cnoop'].includes(action)) {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
       if (action === 'cnoop') return;
       if (action === 'cmenu') return showCourtMenu(env);
@@ -404,6 +418,28 @@ async function handleUpdate(update, env) {
         const kind = pid === 'clients' ? 'clients' : 'advocate';
         await clearHidden(env, kind);
         return showCourtReport(env, kind);
+      }
+      // Видалити назавжди — прибрати з «Прихованих» і більше ніколи не показувати.
+      if (action === 'cpurge1') {
+        const kind = pid === 'clients' ? 'clients' : 'advocate';
+        const i = parseInt(parts[2], 10);
+        const hidden = await getHidden(env, kind);
+        if (!isNaN(i) && i >= 0 && i < hidden.length) {
+          await addDeleted(env, kind, hidden[i]);
+          await removeHiddenAt(env, kind, i);
+        }
+        return showHidden(env, kind);
+      }
+      if (action === 'cpurge') {
+        const kind = pid === 'clients' ? 'clients' : 'advocate';
+        const hidden = await getHidden(env, kind);
+        if (hidden.length) {
+          const del = await getDeleted(env, kind);
+          for (const k of hidden) if (!del.includes(k)) del.push(k);
+          await env.KV.put('court_deleted_' + kind, JSON.stringify(del));
+          await clearHidden(env, kind);
+        }
+        return showHidden(env, kind);
       }
       if (action === 'crun') {
         const txt = await urgentScan(env);
