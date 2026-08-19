@@ -144,7 +144,19 @@ def _strip(cell):
     return re.sub(r"\s+", " ", _TAG.sub(" ", str(cell or ""))).strip()
 
 
-def _dt_params(start, length, sid, cspec, searchable=(0, 0, 1, 1, 0, 0)):
+def _date_range(days_back):
+    """Повертає рядок 'DD.MM.YYYY~DD.MM.YYYY' від (сьогодні-days_back) до завтра."""
+    now = time.time()
+    start = time.strftime("%d.%m.%Y", time.localtime(now - days_back * 86400))
+    end = time.strftime("%d.%m.%Y", time.localtime(now + 86400))
+    return f"{start}~{end}"
+
+
+# Скільки днів назад дивитись автопризначення (стан визначення складу суду).
+AUTO_DAYS = int(os.environ.get("COURT_AUTO_DAYS", "120") or "120")
+
+
+def _dt_params(start, length, sid, cspec, date, searchable=(0, 0, 1, 1, 0, 0)):
     n = len(searchable)
     p = [("sEcho", "1"), ("iColumns", str(n)), ("sColumns", ""),
          ("iDisplayStart", str(start)), ("iDisplayLength", str(length))]
@@ -159,13 +171,14 @@ def _dt_params(start, length, sid, cspec, searchable=(0, 0, 1, 1, 0, 0)):
     for i in range(n):
         p.append((f"bSortable_{i}", "false"))
     # додаткові параметри з fnServerParams b(a)
-    p += [("q_ver", "arbitr"), ("date", "~"), ("sid", sid), ("cspec", cspec)]
+    p += [("q_ver", "arbitr"), ("date", date), ("sid", sid), ("cspec", cspec)]
     return p
 
 
-def fetch_auto(list_auto_url):
+def fetch_auto(list_auto_url, days_back=None):
     """«Список автопризначенних справ» → POST /post_test2.php (DataTables,
     server-side). Повертає list словників з ключами _AUTO_COLS."""
+    date = _date_range(days_back if days_back is not None else AUTO_DAYS)
     parts = urllib.parse.urlsplit(list_auto_url)
     origin = f"{parts.scheme}://{parts.netloc}"
     endpoint = origin + "/post_test2.php"
@@ -189,7 +202,7 @@ def fetch_auto(list_auto_url):
         cspec = _strip(m.group(1))
 
     def one(start, length):
-        body = urllib.parse.urlencode(_dt_params(start, length, sid, cspec)).encode()
+        body = urllib.parse.urlencode(_dt_params(start, length, sid, cspec, date)).encode()
         r2 = urllib.request.Request(endpoint, data=body, headers={
             "User-Agent": UA,
             "Accept": "application/json, text/javascript, */*; q=0.01",
