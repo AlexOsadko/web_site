@@ -90,6 +90,30 @@ def main():
         sys.exit(1)
     print("URL:", url)
 
+    # Режим HARVEST: зібрати посилання на сайти судів (домен + код sudNNNN)
+    if os.environ.get("HARVEST", "").strip():
+        try:
+            code, ctype, text = fetch(url)
+        except Exception as e:
+            print("Помилка:", e); sys.exit(1)
+        print("HTTP:", code, "· довжина:", len(text))
+        hosts = set()
+        for h in re.findall(r'https?://([a-z0-9-]+(?:\.[a-z0-9-]+)*\.court\.gov\.ua)', text, re.I):
+            hosts.add(h.lower())
+        print("Унікальних court.gov.ua хостів:", len(hosts))
+        for h in sorted(hosts)[:60]:
+            print("  host:", h)
+        suds = sorted(set(re.findall(r'/sud(\d{3,5})', text)))
+        print("Кодів sudNNNN на сторінці:", len(suds), suds[:40])
+        # Приклади повних href для розуміння формату
+        hrefs = re.findall(r'href=["\']([^"\']+)["\']', text)
+        sample = [h for h in hrefs if "court.gov.ua" in h or "/sud" in h][:25]
+        print("---- приклади href ----")
+        for h in sample:
+            print("  ", h)
+        print("ГОТОВО")
+        return
+
     # Режим AUTO: діагностика форми автопризначень + виклик /post_test2.php
     if os.environ.get("AUTO", "").strip():
         import http.cookiejar as _cj

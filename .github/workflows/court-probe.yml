@@ -26,6 +26,10 @@ on:
         description: "AUTO: перевірити fetch_auto() /post_test2.php (URL = сторінка list_auto_cases)"
         type: boolean
         default: false
+      harvest:
+        description: "HARVEST: зібрати хости судів (court.gov.ua) зі сторінки-каталогу"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -45,4 +49,5 @@ jobs:
           COURT_IDS: ${{ github.event.inputs.court_ids }}
           SESS: ${{ github.event.inputs.sess == 'true' && '1' || '' }}
           AUTO: ${{ github.event.inputs.auto == 'true' && '1' || '' }}
+          HARVEST: ${{ github.event.inputs.harvest == 'true' && '1' || '' }}
         run: python3 tools/court_probe.py
