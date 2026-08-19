@@ -45,6 +45,35 @@ def main():
         print("Не задано URL")
         sys.exit(1)
     print("URL:", url)
+
+    # Режим сканування кількох кодів судів: перевірити, чи /new.php глобальний
+    ids = os.environ.get("COURT_IDS", "").strip()
+    if ids:
+        import json as _json
+        for cid in [x.strip() for x in ids.split(",") if x.strip()]:
+            try:
+                c, ct, tx = fetch(url, data=f"q_court_id={cid}")
+            except Exception as e:
+                print(f"  код {cid}: помилка {e}")
+                continue
+            n = "—"
+            first = ""
+            s = tx.strip()
+            if s[:1] in ("[", "{"):
+                try:
+                    dd = _json.loads(s)
+                    if isinstance(dd, list):
+                        n = len(dd)
+                        if dd:
+                            first = _json.dumps(dd[0], ensure_ascii=False)[:300]
+                except Exception:
+                    pass
+            print(f"  код {cid}: HTTP {c} · довжина {len(tx)} · записів {n}")
+            if first:
+                print("     приклад:", first)
+        print("ГОТОВО")
+        return
+
     court_id = os.environ.get("COURT_ID", "").strip()
     post = f"q_court_id={court_id}" if court_id else None
     if post:

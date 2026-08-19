@@ -14,6 +14,10 @@ on:
         description: "Код суду для POST /new.php (напр. 2610). Порожньо = GET сторінки"
         type: string
         default: ""
+      court_ids:
+        description: "Кілька кодів судів через кому — сканувати /new.php (напр. 2601,2603,2606)"
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -30,4 +34,5 @@ jobs:
         env:
           PROBE_URL: ${{ github.event.inputs.url }}
           COURT_ID: ${{ github.event.inputs.court_id }}
+          COURT_IDS: ${{ github.event.inputs.court_ids }}
         run: python3 tools/court_probe.py
