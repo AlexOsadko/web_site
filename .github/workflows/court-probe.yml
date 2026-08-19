@@ -1,0 +1,28 @@
+name: Пробник суду (Список справ)
+
+# Одноразовий огляд структури сторінки «Список справ, призначених до розгляду»
+# суду — щоб написати парсер бота відстеження справ. Нічого не публікує.
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "URL «Список справ призначених до розгляду» суду"
+        type: string
+        default: "https://sh.ki.court.gov.ua/sud2610/gromadyanam/csz"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Пробити сторінку
+        env:
+          PROBE_URL: ${{ github.event.inputs.url }}
+        run: python3 tools/court_probe.py
