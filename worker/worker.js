@@ -110,22 +110,54 @@ async function urgentScan(env) {
   return `Не вдалося запустити прогін (код ${code}). Перевірте секрет GH_TOKEN.`;
 }
 
+// Приховані (видалені адвокатом) справи — не виводяться й надалі.
+function itemKey(it) {
+  return `${it.number || ''}|${it.date || ''}|${it.court || ''}`;
+}
+async function getHidden(env, kind) {
+  return (await env.KV.get('court_hidden_' + kind, 'json')) || [];
+}
+async function addHidden(env, kind, key) {
+  const a = await getHidden(env, kind);
+  if (!a.includes(key)) { a.push(key); await env.KV.put('court_hidden_' + kind, JSON.stringify(a)); }
+}
+async function clearHidden(env, kind) {
+  await env.KV.delete('court_hidden_' + kind);
+}
+
+// Видимі справи звіту (з урахуванням прихованих).
+async function visibleReport(env, kind) {
+  const rep = await env.KV.get('court_report_' + kind, 'json');
+  const items = (rep && rep.items) ? rep.items : [];
+  const hidden = await getHidden(env, kind);
+  const visible = items.filter((it) => !hidden.includes(itemKey(it)));
+  return { updated: rep ? rep.updated : '', visible, hiddenCount: hidden.length };
+}
+
 async function showCourtReport(env, kind = 'advocate') {
   const isClients = kind === 'clients';
   const title = isClients ? '👥 <b>Справи клієнтів' : '⚖️ <b>Справи адвоката';
-  const rep = await env.KV.get('court_report_' + kind, 'json');
-  if (!rep || !rep.items || !rep.items.length) {
+  const { updated, visible, hiddenCount } = await visibleReport(env, kind);
+  if (!visible.length) {
+    const extra = hiddenCount
+      ? `Усі справи приховано (${hiddenCount}). `
+      : 'Поки немає даних. Звіт оновлюється під час прогону (планового або 🔄 термінового). ';
+    const kb = hiddenCount
+      ? { inline_keyboard: [[{ text: `♻️ Відновити приховані (${hiddenCount})`, callback_data: `cunhide:${kind}` }], [{ text: '↩️ Меню', callback_data: 'cmenu' }]] }
+      : courtMenuKb();
     return tg(env, 'sendMessage', {
       chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-      text: `${title}</b>\nПоки немає даних. Звіт оновлюється під час прогону ` +
-        '(планового або 🔄 термінового) — після нього тут зʼявиться список.',
-      reply_markup: courtMenuKb(),
+      text: `${title}</b>\n${extra}`, reply_markup: kb,
     });
   }
-  let txt = `${title}: ${rep.count}</b>\n<i>оновлено: ${esc(rep.updated || '')}</i>\n`;
+  let txt = `${title}: ${visible.length}</b>` +
+    (hiddenCount ? ` <i>(приховано ${hiddenCount})</i>` : '') +
+    `\n<i>оновлено: ${esc(updated || '')}</i>\n`;
+  const rows = [];
+  let row = [];
   let shown = 0;
-  for (let i = 0; i < rep.items.length; i++) {
-    const it = rep.items[i];
+  for (let i = 0; i < visible.length; i++) {
+    const it = visible[i];
     let b = `\n<b>${i + 1}. № ${esc(it.number)}</b> · 📅 ${esc(it.date)}\n`;
     if (isClients && it.matched) b += `    🔎 клієнт: <b>${esc(it.matched)}</b>\n`;
     b += `    🏛 ${esc(it.court || '')}${it.courtroom ? ' · 🚪 ' + esc(it.courtroom) : ''}\n`;
@@ -134,16 +166,21 @@ async function showCourtReport(env, kind = 'advocate') {
     if (it.description) b += `    📋 ${esc(it.description)}\n`;
     if (it.involved) b += `    👥 ${esc(it.involved)}\n`;
     if (it.address) b += `    📍 ${esc(it.address)}\n`;
-    if (txt.length + b.length > 3800) {
-      txt += `\n… та ще ${rep.count - shown} (надто довгий список).`;
+    if (txt.length + b.length > 3600) {
+      txt += `\n… та ще ${visible.length - shown} (надто довгий список).`;
       break;
     }
     txt += b;
+    row.push({ text: `🗑 ${i + 1}`, callback_data: `chide:${kind}:${i}` });
+    if (row.length === 5) { rows.push(row); row = []; }
     shown++;
   }
+  if (row.length) rows.push(row);
+  if (hiddenCount) rows.push([{ text: `♻️ Відновити приховані (${hiddenCount})`, callback_data: `cunhide:${kind}` }]);
+  rows.push([{ text: '↩️ Меню', callback_data: 'cmenu' }]);
   return tg(env, 'sendMessage', {
     chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt,
-    disable_web_page_preview: true, reply_markup: courtMenuKb(),
+    disable_web_page_preview: true, reply_markup: { inline_keyboard: rows },
   });
 }
 
@@ -266,14 +303,30 @@ async function handleUpdate(update, env) {
     const msg = cq.message || {};
     const chat = msg.chat && msg.chat.id;
     const mid = msg.message_id;
-    const [action, pid] = (cq.data || '').split(':');
+    const parts = (cq.data || '').split(':');
+    const action = parts[0];
+    const pid = parts[1];
 
     // --- меню бота відстеження судових справ ---
-    if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crun'].includes(action)) {
+    if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crun',
+         'chide', 'cunhide'].includes(action)) {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
       if (action === 'cmenu') return showCourtMenu(env);
       if (action === 'crep') return showCourtReport(env, 'advocate');
       if (action === 'crepc') return showCourtReport(env, 'clients');
+      // Приховати / відновити справи у переглядах (не виводяться й надалі).
+      if (action === 'chide') {
+        const kind = pid === 'clients' ? 'clients' : 'advocate';
+        const { visible } = await visibleReport(env, kind);
+        const i = parseInt(parts[2], 10);
+        if (!isNaN(i) && visible[i]) await addHidden(env, kind, itemKey(visible[i]));
+        return showCourtReport(env, kind);
+      }
+      if (action === 'cunhide') {
+        const kind = pid === 'clients' ? 'clients' : 'advocate';
+        await clearHidden(env, kind);
+        return showCourtReport(env, kind);
+      }
       if (action === 'crun') {
         const txt = await urgentScan(env);
         return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt });
