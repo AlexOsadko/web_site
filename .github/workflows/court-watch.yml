@@ -61,18 +61,23 @@ jobs:
       - name: Зберегти стан
         if: ${{ github.event.inputs.dry_run != 'true' }}
         run: |
-          if [ -n "$(git status --porcelain .court-bot)" ]; then
-            git config user.name "osadko-court-bot"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add .court-bot
-            git commit -m "chore(court-bot): update state [skip ci]"
-            # Стійкий push: якщо гілка зрушила (інший коміт) — підтягнути й повторити.
-            for i in 1 2 3 4 5; do
-              if git push; then break; fi
-              echo "push відхилено — git pull --rebase і повтор ($i)…"
-              git pull --rebase --autostash origin main || true
-              sleep 3
-            done
-          else
+          if [ -z "$(git status --porcelain .court-bot)" ]; then
             echo "Стан не змінився — коміт не потрібен."
+            exit 0
           fi
+          git config user.name "osadko-court-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cp .court-bot/state.json /tmp/state.json
+          # Стійкий push без rebase: щоразу беремо свіжий origin/main і кладемо
+          # поверх лише наш файл стану (уникаємо конфліктів у detached HEAD).
+          for i in 1 2 3 4 5; do
+            git fetch -q origin main
+            git checkout -q -B _state origin/main
+            mkdir -p .court-bot
+            cp /tmp/state.json .court-bot/state.json
+            git add .court-bot/state.json
+            git commit -q -m "chore(court-bot): update state [skip ci]" || { echo "нема змін"; exit 0; }
+            if git push -q origin _state:main; then echo "стан збережено"; exit 0; fi
+            echo "push відхилено — повтор ($i)…"; sleep 3
+          done
+          echo "Не вдалося зберегти стан після кількох спроб (не критично)."
