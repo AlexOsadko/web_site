@@ -8,12 +8,13 @@
 "https://www.ukrinform.ua/rubric-regions/4155439-na-poltavsini-kerivniku-tancuvalnogo-ansamblu-ogolosili-pidozru-u-seksualnih-zlocinah-sodo-vihovanok.html",
 "https://www.ukrinform.ua/rubric-regions/4155448-na-zakarpatti-povidomili-pro-pidozri-se-patom-pracivnikam-tck.html",
 "https://sud.ua/ru/news/ukraine/369691-robota-v-polshchi-mozhe-dopomohty-vyity-na-pensiiu-v-ukraini-iak-zarakhuvaty-stazh",
-"https://www.unian.ua/curiosities/yak-nazvati-sina-keltske-im-ya-pidkoryuye-svit-13474098.html"
+"https://www.unian.ua/curiosities/yak-nazvati-sina-keltske-im-ya-pidkoryuye-svit-13474098.html",
+"https://www.ukrinform.ua/rubric-polytics/4155493-apelacia-vaks-pocala-rozglad-skargi-stefanisinoi.html"
 ],
 "day": "2026-08-19",
-"count": 9,
-"total": 10,
-"seq": 21,
+"count": 10,
+"total": 11,
+"seq": 22,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -109,7 +110,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787118724.1778574,
+"last_content_ts": 1787122204.8291154,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
