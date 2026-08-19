@@ -17,6 +17,9 @@
 const esc = (s = '') =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+// Обрізати задовге поле для показу (щоб повідомлення влазило в ліміт Telegram).
+const cut = (s, n) => { s = String(s || ''); return esc(s.length > n ? s.slice(0, n) + '…' : s); };
+
 async function tg(env, method, params) {
   const r = await fetch(
     `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/${method}`,
@@ -188,7 +191,7 @@ async function showHidden(env, kind) {
     text: txt, disable_web_page_preview: true, reply_markup: { inline_keyboard: rows } });
 }
 
-async function showCourtReport(env, kind = 'advocate') {
+async function showCourtReport(env, kind = 'advocate', page = 0) {
   const isClients = kind === 'clients';
   const title = isClients ? '👥 <b>Справи клієнтів' : '⚖️ <b>Справи адвоката';
   const { updated, visible, hiddenCount } = await visibleReport(env, kind);
@@ -204,32 +207,38 @@ async function showCourtReport(env, kind = 'advocate') {
       text: `${title}</b>\n${extra}`, reply_markup: kb,
     });
   }
+  const PER = 5;
+  const pages = Math.max(1, Math.ceil(visible.length / PER));
+  page = Math.min(Math.max(0, page | 0), pages - 1);
+  const startI = page * PER;
+  const slice = visible.slice(startI, startI + PER);
   let txt = `${title}: ${visible.length}</b>` +
     (hiddenCount ? ` <i>(приховано ${hiddenCount})</i>` : '') +
-    `\n<i>оновлено: ${esc(updated || '')}</i>\n`;
+    `\n<i>оновлено: ${esc(updated || '')}</i>` +
+    (pages > 1 ? ` · стор. ${page + 1}/${pages}` : '') + '\n';
   const rows = [];
   let row = [];
-  let shown = 0;
-  for (let i = 0; i < visible.length; i++) {
-    const it = visible[i];
-    let b = `\n<b>${i + 1}. № ${esc(it.number)}</b> · 📅 ${esc(it.date)}\n`;
-    if (isClients && it.matched) b += `    🔎 клієнт: <b>${esc(it.matched)}</b>\n`;
-    b += `    🏛 ${esc(it.court || '')}${it.courtroom ? ' · 🚪 ' + esc(it.courtroom) : ''}\n`;
+  slice.forEach((it, j) => {
+    const gi = startI + j;
+    txt += `\n<b>${gi + 1}. № ${esc(it.number)}</b> · 📅 ${esc(it.date)}\n`;
+    if (isClients && it.matched) txt += `    🔎 клієнт: <b>${esc(it.matched)}</b>\n`;
+    txt += `    🏛 ${cut(it.court, 90)}${it.courtroom ? ' · 🚪 ' + esc(it.courtroom) : ''}\n`;
     const jf = [it.judge, it.forma].filter(Boolean).map(esc).join(' · ');
-    if (jf) b += `    👨‍⚖️ ${jf}\n`;
-    if (it.description) b += `    📋 ${esc(it.description)}\n`;
-    if (it.involved) b += `    👥 ${esc(it.involved)}\n`;
-    if (it.address) b += `    📍 ${esc(it.address)}\n`;
-    if (txt.length + b.length > 3600) {
-      txt += `\n… та ще ${visible.length - shown} (надто довгий список).`;
-      break;
-    }
-    txt += b;
-    row.push({ text: `🗑 ${i + 1}`, callback_data: `chide:${kind}:${i}` });
+    if (jf) txt += `    👨‍⚖️ ${jf}\n`;
+    if (it.description) txt += `    📋 ${cut(it.description, 220)}\n`;
+    if (it.involved) txt += `    👥 ${cut(it.involved, 400)}\n`;
+    if (it.address) txt += `    📍 ${cut(it.address, 120)}\n`;
+    row.push({ text: `🗑 ${gi + 1}`, callback_data: `chide:${kind}:${gi}:${page}` });
     if (row.length === 5) { rows.push(row); row = []; }
-    shown++;
-  }
+  });
   if (row.length) rows.push(row);
+  if (pages > 1) {
+    const nav = [];
+    if (page > 0) nav.push({ text: '◀️ Назад', callback_data: `crepp:${kind}:${page - 1}` });
+    nav.push({ text: `${page + 1}/${pages}`, callback_data: 'cnoop' });
+    if (page < pages - 1) nav.push({ text: 'Далі ▶️', callback_data: `crepp:${kind}:${page + 1}` });
+    rows.push(nav);
+  }
   if (hiddenCount) rows.push([{ text: `📂 Приховані (${hiddenCount})`, callback_data: `chidden:${kind}` }]);
   rows.push([{ text: '↩️ Меню', callback_data: 'cmenu' }]);
   return tg(env, 'sendMessage', {
@@ -363,18 +372,24 @@ async function handleUpdate(update, env) {
 
     // --- меню бота відстеження судових справ ---
     if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crun',
-         'chide', 'cunhide', 'chidden', 'cunhide1'].includes(action)) {
+         'chide', 'cunhide', 'chidden', 'cunhide1', 'crepp', 'cnoop'].includes(action)) {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
+      if (action === 'cnoop') return;
       if (action === 'cmenu') return showCourtMenu(env);
-      if (action === 'crep') return showCourtReport(env, 'advocate');
-      if (action === 'crepc') return showCourtReport(env, 'clients');
+      if (action === 'crep') return showCourtReport(env, 'advocate', 0);
+      if (action === 'crepc') return showCourtReport(env, 'clients', 0);
+      if (action === 'crepp') {  // перегортання сторінок звіту
+        const kind = pid === 'clients' ? 'clients' : 'advocate';
+        return showCourtReport(env, kind, parseInt(parts[2], 10) || 0);
+      }
       // Приховати / відновити справи у переглядах (не виводяться й надалі).
       if (action === 'chide') {
         const kind = pid === 'clients' ? 'clients' : 'advocate';
         const { visible } = await visibleReport(env, kind);
         const i = parseInt(parts[2], 10);
+        const page = parseInt(parts[3], 10) || 0;
         if (!isNaN(i) && visible[i]) await addHidden(env, kind, itemKey(visible[i]));
-        return showCourtReport(env, kind);
+        return showCourtReport(env, kind, page);
       }
       if (action === 'chidden') {
         return showHidden(env, pid === 'clients' ? 'clients' : 'advocate');
