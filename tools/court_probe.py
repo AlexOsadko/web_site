@@ -110,6 +110,20 @@ def main():
         # знайти input-и всередині форми з датами
         for m in re.finditer(r'<input[^>]*id=["\'](sdate|edate)["\'][^>]*>', html):
             print("  input:", m.group(0)[:160])
+        # Повний inline-скрипт навколо post_test2 (шукаємо hash/додаткові поля)
+        pidx = html.find("post_test2")
+        if pidx >= 0:
+            seg = html[max(0, pidx - 2600): pidx + 900]
+            # прибрати юнікод-escape для читабельності
+            print("---- INLINE навколо post_test2 ----")
+            print(seg.replace("\n", " "))
+        # шукаємо будь-які згадки hash / token / csrf у html
+        for tok in ("hash", "token", "csrf", "post_test"):
+            for mm2 in re.finditer(re.escape(tok), html, re.I):
+                s = html[max(0, mm2.start() - 60): mm2.start() + 90].replace("\n", " ")
+                print(f"  [{tok}] …{s}…")
+                break
+
         # Матриця варіантів запиту до /post_test2.php
         import time as _t
         endpoint = origin + "/post_test2.php"
