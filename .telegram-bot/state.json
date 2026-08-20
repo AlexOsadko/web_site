@@ -20,12 +20,13 @@
 "https://jurliga.ligazakon.net/news/245749_verkhovniy-sud-uzagalniv-klyuchov-pravov-visnovki-v-admnstrativnikh-sporakh-za-lipen-2026-roku",
 "https://suspilne.media/mykolaiv/1382750-na-mikolaivsini-policiant-na-avto-zitknuvsa-z-motociklom-travmuvavsa-pidlitok/",
 "https://sud.ua/ru/news/sudova-praktyka/369829-ttsk-mobilizuvav-batka-iakyi-sam-vykhovuie-dvokh-ditei-chym-zavershylasia-sprava",
-"https://sud.ua/ru/news/sud-info/369853-holova-kas-vs-ihor-dashutin-sudova-praktyka-u-sferi-broniuvannia-vzhe-okreslyla-pevni-pravovi-oriientyry"
+"https://sud.ua/ru/news/sud-info/369853-holova-kas-vs-ihor-dashutin-sudova-praktyka-u-sferi-broniuvannia-vzhe-okreslyla-pevni-pravovi-oriientyry",
+"https://suspilne.media/lutsk/1383284-na-volini-viavili-neoblikovanu-derevinu-aku-vantazili-kranom-na-lisovoz/"
 ],
 "day": "2026-08-20",
-"count": 2,
-"total": 22,
-"seq": 34,
+"count": 3,
+"total": 23,
+"seq": 35,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -122,7 +123,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787215998.169535,
+"last_content_ts": 1787223766.1699772,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
