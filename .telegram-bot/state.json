@@ -19,12 +19,13 @@
 "https://sud.ua/ru/news/sudova-praktyka/369708-viiskovoho-pensionera-iakoho-vyznaly-neprydatnym-cherez-tuberkuloz-oholosyly-v-rozshuk-sud-stav-na-bik-ttsk",
 "https://jurliga.ligazakon.net/news/245749_verkhovniy-sud-uzagalniv-klyuchov-pravov-visnovki-v-admnstrativnikh-sporakh-za-lipen-2026-roku",
 "https://suspilne.media/mykolaiv/1382750-na-mikolaivsini-policiant-na-avto-zitknuvsa-z-motociklom-travmuvavsa-pidlitok/",
-"https://sud.ua/ru/news/sudova-praktyka/369829-ttsk-mobilizuvav-batka-iakyi-sam-vykhovuie-dvokh-ditei-chym-zavershylasia-sprava"
+"https://sud.ua/ru/news/sudova-praktyka/369829-ttsk-mobilizuvav-batka-iakyi-sam-vykhovuie-dvokh-ditei-chym-zavershylasia-sprava",
+"https://sud.ua/ru/news/sud-info/369853-holova-kas-vs-ihor-dashutin-sudova-praktyka-u-sferi-broniuvannia-vzhe-okreslyla-pevni-pravovi-oriientyry"
 ],
 "day": "2026-08-20",
-"count": 1,
-"total": 21,
-"seq": 33,
+"count": 2,
+"total": 22,
+"seq": 34,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -121,7 +122,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787207974.6910372,
+"last_content_ts": 1787215998.169535,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
