@@ -35,14 +35,16 @@
   gtag("config", ADS_ID);
 
   // Google Ads — тег другого акаунта (adv.osadko@gmail.com, 624-250-0421).
-  // Базовий тег для відстеження конверсій кампаній цього акаунта.
-  // Ярлик конверсії додамо, коли створимо конверсійну дію в цьому акаунті.
   gtag("config", "AW-18401189598");
+  // Ярлик конверсії «Запис на встречу» цього акаунта.
+  var CONV_LABEL2 = "AW-18401189598/Cj8ICMiJ_eQcEN69r8ZE";
 
   // Викликати В МОМЕНТ успішної заявки (не при завантаженні сторінки).
   // Consent Mode сам обере cookie/cookieless-режим за станом згоди.
+  // Конверсія надсилається в обидва акаунти Google Ads.
   window.osadkoConversion = function () {
     gtag("event", "conversion", { send_to: CONV_LABEL });
+    gtag("event", "conversion", { send_to: CONV_LABEL2 });
   };
 
   function grant() {
