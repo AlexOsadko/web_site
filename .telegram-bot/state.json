@@ -23,12 +23,13 @@
 "https://sud.ua/ru/news/sud-info/369853-holova-kas-vs-ihor-dashutin-sudova-praktyka-u-sferi-broniuvannia-vzhe-okreslyla-pevni-pravovi-oriientyry",
 "https://suspilne.media/lutsk/1383284-na-volini-viavili-neoblikovanu-derevinu-aku-vantazili-kranom-na-lisovoz/",
 "https://suspilne.media/chernihiv/1383698-vibuhotehniki-zneskodili-bojovi-castini-rosijskih-bezpilotnikiv-aki-zbili-u-cernigivskomu-ta-nizinskomu-rajonah/",
-"https://www.unian.ua/curiosities/yakiy-napiy-korisniy-dlya-sercya-cholovikiv-poradi-diyetologiv-13475562.html"
+"https://www.unian.ua/curiosities/yakiy-napiy-korisniy-dlya-sercya-cholovikiv-poradi-diyetologiv-13475562.html",
+"https://sud.ua/ru/news/ukraine/369905-vidstrochku-prodovzhat-avtomatychno-komu-ne-potribno-znovu-podavaty-dokumenty"
 ],
 "day": "2026-08-20",
-"count": 5,
-"total": 25,
-"seq": 37,
+"count": 6,
+"total": 26,
+"seq": 38,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -125,7 +126,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787242565.4872954,
+"last_content_ts": 1787250827.3251889,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
