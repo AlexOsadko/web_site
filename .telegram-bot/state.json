@@ -26,12 +26,13 @@
 "https://www.unian.ua/curiosities/yakiy-napiy-korisniy-dlya-sercya-cholovikiv-poradi-diyetologiv-13475562.html",
 "https://sud.ua/ru/news/ukraine/369905-vidstrochku-prodovzhat-avtomatychno-komu-ne-potribno-znovu-podavaty-dokumenty",
 "https://www.unian.ua/world/ataki-rf-na-nato-rumuniya-bilshe-ne-movchit-13476171.html",
-"https://suspilne.media/cherkasy/1384212-u-cerkasah-na-pisohidnomu-perehodi-zbili-zinku-policia-rozpocala-karnu-spravu/"
+"https://suspilne.media/cherkasy/1384212-u-cerkasah-na-pisohidnomu-perehodi-zbili-zinku-policia-rozpocala-karnu-spravu/",
+"https://www.ukrinform.ua/rubric-world/4156329-v-ispanii-vikrili-dvi-bandi-nelegalnih-pereviznikiv-aki-covnami-perepravlali-migrantiv-iz-seuti.html"
 ],
 "day": "2026-08-21",
-"count": 2,
-"total": 28,
-"seq": 41,
+"count": 3,
+"total": 29,
+"seq": 42,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -129,7 +130,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787310213.740442,
+"last_content_ts": 1787319964.1632366,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
