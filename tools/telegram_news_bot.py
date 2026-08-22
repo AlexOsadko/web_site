@@ -20,7 +20,7 @@
   BOT_SHOW_PREVIEW    — "0" щоб вимкнути прев'ю посилання (типово увімкнено)
   BOT_DRY_RUN         — "1" — лише лог, без публікації і без запису стану
 """
-import os, sys, re, json, html, time, datetime
+import os, sys, re, json, html, html.entities, time, datetime
 import urllib.request, urllib.parse, urllib.error
 import feedparser
 
@@ -285,15 +285,35 @@ def _fetch_raw(url):
         return resp.read()
 
 
+# XML знає лише ці 5 іменованих сутностей; решта (&nbsp; &mdash; &hellip; …) для
+# суворого XML-парсера — «undefined entity», через що падають деякі фіди.
+_XML_BUILTIN_ENTITIES = {"amp", "lt", "gt", "quot", "apos"}
+
+
+def _fix_named_entity(m):
+    name = m.group(1)
+    if name in _XML_BUILTIN_ENTITIES:
+        return m.group(0)                       # лишаємо валідні XML-сутності
+    cp = html.entities.name2codepoint.get(name)
+    if cp is not None:
+        return f"&#{cp};"                       # &nbsp; → &#160; (XML це приймає)
+    return "&amp;" + name + ";"                 # невідома назва — знешкоджуємо &
+
+
 def _sanitize_xml(raw):
     """Лагодить типові дефекти фідів, на яких падає суворий XML-парсер:
-    сирі амперсанди (`&` не в межах сутності) і керуючі символи."""
+    невизначені іменовані сутності (&nbsp; тощо), сирі амперсанди
+    (`&` не в межах сутності) і керуючі символи."""
     try:
         text = raw.decode("utf-8", "replace") if isinstance(raw, bytes) else str(raw)
     except Exception:
         return raw
-    text = re.sub(r"&(?!#?\w+;)", "&amp;", text)                 # голі &
-    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", text)     # керуючі символи
+    # 1) іменовані HTML-сутності → числові посилання (&#NNN;), зрозумілі XML
+    text = re.sub(r"&([A-Za-z][A-Za-z0-9]*);", _fix_named_entity, text)
+    # 2) голі амперсанди (не частина жодної сутності)
+    text = re.sub(r"&(?!#?\w+;)", "&amp;", text)
+    # 3) керуючі символи, недопустимі в XML 1.0
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", text)
     return text
 
 
