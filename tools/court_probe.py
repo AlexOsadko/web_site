@@ -120,6 +120,40 @@ def main():
         print("ГОТОВО")
         return
 
+    # Режим RANGE: швидко просканувати діапазон кодів sud<code> і зібрати назви
+    # (лише GET /sud<code>/, без сесійного потоку). Формат: "1000-1999".
+    rng = os.environ.get("RANGE", "").strip()
+    if rng:
+        import time as _t
+        m = re.match(r"(\d+)\s*-\s*(\d+)", rng)
+        if not m:
+            print("RANGE має бути напр. 1000-1999"); sys.exit(1)
+        lo, hi = int(m.group(1)), int(m.group(2))
+        hi = min(hi, lo + 1100)  # запобіжник: не більше ~1100 кодів за прогін
+        court_re = re.compile(
+            r"районний|міський|міськрайон|окружний|апеляц|господарськ|"
+            r"адміністрат|Верховний|Касаційний|Вищий|військов", re.I)
+        found = 0
+        for code in range(lo, hi + 1):
+            try:
+                c, ct, page = fetch(f"https://court.gov.ua/sud{code}/")
+            except Exception:
+                _t.sleep(0.05)
+                continue
+            if c != 200:
+                continue
+            name = ""
+            mt = (re.search(r'name=["\']description["\'][^>]*content=["\']([^"\']+)', page, re.I)
+                  or re.search(r"<title>(.*?)</title>", page, re.I | re.S))
+            if mt:
+                name = re.sub(r"\s+", " ", mt.group(1)).strip()
+            if name and court_re.search(name):
+                found += 1
+                print(f"{code}|{name}")
+            _t.sleep(0.08)
+        print(f"ГОТОВО (знайдено {found} у {lo}-{hi})")
+        return
+
     # Режим HARVEST: зібрати посилання на сайти судів (домен + код sudNNNN)
     if os.environ.get("HARVEST", "").strip():
         try:
