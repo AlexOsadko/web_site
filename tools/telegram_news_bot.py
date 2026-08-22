@@ -319,22 +319,23 @@ def _sanitize_xml(raw):
 
 
 def fetch_feed(url):
-    """Читає RSS з браузерними заголовками. Якщо feedparser не впорався,
-    пробуємо: (1) сирі байти через urllib; (2) ті ж байти після санітизації
-    (лагодимо биті амперсанди/символи). Це рятує частину «not well-formed»."""
-    fp = feedparser.parse(url, agent=UA, request_headers=dict(FEED_HEADERS))
-    if not (getattr(fp, "bozo", 0) and not fp.entries):
-        return fp
+    """Читає RSS, роблячи РІВНО ОДИН мережевий запит (важливо: деякі сайти,
+    напр. suspilne.media, блокують повторні запити 403/429 — тож не можна
+    качати ще раз лише щоб «полагодити» биту відповідь). Беремо сирі байти
+    самі, парсимо їх; якщо суворий XML спіткнувся (напр. на невизначеній
+    сутності &nbsp;) — парсимо ТІ САМІ байти після санітизації."""
     try:
         raw = _fetch_raw(url)
     except Exception:
+        # власний запит не вдався — хай спробує сам feedparser (він теж уміє HTTP)
+        return feedparser.parse(url, agent=UA, request_headers=dict(FEED_HEADERS))
+    fp = feedparser.parse(raw)
+    if fp.entries or not getattr(fp, "bozo", 0):
         return fp
-    fp2 = feedparser.parse(raw)
+    # фолбек на ТИХ САМИХ байтах (без нового запиту) — лагодимо сутності/символи
+    fp2 = feedparser.parse(_sanitize_xml(raw))
     if fp2.entries:
         return fp2
-    fp3 = feedparser.parse(_sanitize_xml(raw))
-    if fp3.entries:
-        return fp3
     return fp
 
 
