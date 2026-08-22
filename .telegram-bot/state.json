@@ -34,12 +34,13 @@
 "https://sud.ua/ru/news/ukraine/370084-u-kyievi-vstanovliat-pamiatnyk-ivanu-mazepi-volodymyr-zelenskyi-pidpysav-ukaz",
 "https://suspilne.media/mykolaiv/1384818-zaginuli-vodij-ta-pasazir-na-mikolaivsini-perekinuvsa-avtomobil/",
 "https://sud.ua/ru/news/sudova-praktyka/370087-orendar-prostrochyv-povernennia-kvartyry-vs-poiasnyv-za-iakyi-strok-mozhna-stiahnuty-podviinu-platu",
-"https://sud.ua/ru/news/suspilstvo/370054-pfu-poperedyv-pilhovykiv-cherez-tsi-zminy-mozhna-vtratyty-vyplaty"
+"https://sud.ua/ru/news/suspilstvo/370054-pfu-poperedyv-pilhovykiv-cherez-tsi-zminy-mozhna-vtratyty-vyplaty",
+"https://sud.ua/ru/news/ukraine/370089-v-odesi-zhinku-znaishly-mertvoiu-u-kvartyri-a-ii-spivmeshkanets-shche-kilka-dniv-prozhyv-iz-trupom-shcho-stalosia"
 ],
 "day": "2026-08-22",
-"count": 5,
-"total": 36,
-"seq": 49,
+"count": 6,
+"total": 37,
+"seq": 50,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -137,7 +138,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787412893.4090421,
+"last_content_ts": 1787420977.9802916,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
