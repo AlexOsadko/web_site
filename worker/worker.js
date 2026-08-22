@@ -219,7 +219,7 @@ function daysUntil(dateStr) {
 
 // Перелік справ, за якими надійдуть нагадування (найближчі засідання).
 // Кожну можна прибрати з нагадувань (🗑 — назавжди, як у «Прихованих»).
-async function showReminders(env) {
+async function showReminders(env, page = 0) {
   const list = [];
   for (const kind of ['clients', 'advocate']) {
     const { visible } = await visibleReport(env, kind);
@@ -244,51 +244,42 @@ async function showReminders(env) {
       text: '🔔 <b>Нагадування</b>\nНемає найближчих засідань. Перелік оновлюється під час прогону.',
       reply_markup: { inline_keyboard: [[{ text: '↩️ Меню', callback_data: 'cmenu' }]] } });
   }
-  const cap = Math.min(uniq.length, 12);
-  let txt = `🔔 <b>Найближчі засідання: ${uniq.length}</b>\n` +
-    `<i>ℹ️ — повна інформація · 🗑 — прибрати з нагадувань</i>\n`;
+  // Повна інформація по кожній справі одразу; довгий список — по сторінках.
+  const PER = 5;
+  const pages = Math.max(1, Math.ceil(uniq.length / PER));
+  page = Math.min(Math.max(0, page | 0), pages - 1);
+  const slice = uniq.slice(page * PER, page * PER + PER);
+  let txt = `🔔 <b>Найближчі засідання: ${uniq.length}</b>` +
+    (pages > 1 ? ` · стор. ${page + 1}/${pages}` : '') +
+    `\n<i>🗑 — прибрати справу з нагадувань</i>\n`;
   const kb = [];
-  for (let n = 0; n < cap; n++) {
-    const r = uniq[n];
+  slice.forEach((r) => {
+    const it = r.it;
     const mark = r.days <= 1 ? '🔴' : (r.days <= 3 ? '🟠' : '🗓');
     const when = r.days === 0 ? 'сьогодні' : (r.days === 1 ? 'завтра' : `за ${r.days} дн.`);
-    const tag = r.kind === 'clients' ? '👥' : '⚖️';
-    txt += `\n${mark} <b>${when}</b> · ${tag} № ${esc(r.it.number)}\n` +
-      `    📅 ${esc(r.it.date)} · 🏛 ${cut(r.it.court, 60)}\n`;
-    kb.push([
-      { text: `ℹ️ № ${(r.it.number || '').slice(0, 16)}`, callback_data: `creminfo:${r.kind}:${r.gi}` },
-      { text: '🗑', callback_data: `cremdel:${r.kind}:${r.gi}` },
-    ]);
+    const tag = r.kind === 'clients' ? '👥 клієнт' : '⚖️ адвокат';
+    txt += `\n${mark} <b>${when}</b> · № ${esc(it.number)}\n`;
+    txt += `    📅 ${esc(it.date)}\n`;
+    if (it.matched) txt += `    🔎 ${tag}: <b>${esc(it.matched)}</b>\n`;
+    txt += `    🏛 ${cut(it.court, 80)}${it.courtroom ? ' · 🚪 ' + esc(it.courtroom) : ''}\n`;
+    const jf = [it.judge, it.forma].filter(Boolean).map(esc).join(' · ');
+    if (jf) txt += `    👨‍⚖️ ${jf}\n`;
+    if (it.description) txt += `    📋 ${cut(it.description, 180)}\n`;
+    if (it.involved) txt += `    👥 ${cut(it.involved, 300)}\n`;
+    if (it.address) txt += `    📍 ${cut(it.address, 100)}\n`;
+    kb.push([{ text: `🗑 прибрати № ${(it.number || '').slice(0, 18)}`,
+              callback_data: `cremdel:${r.kind}:${r.gi}` }]);
+  });
+  if (pages > 1) {
+    const nav = [];
+    if (page > 0) nav.push({ text: '◀️ Назад', callback_data: `crempg:${page - 1}` });
+    nav.push({ text: `${page + 1}/${pages}`, callback_data: 'cnoop' });
+    if (page < pages - 1) nav.push({ text: 'Далі ▶️', callback_data: `crempg:${page + 1}` });
+    kb.push(nav);
   }
-  if (uniq.length > cap) txt += `\n… та ще ${uniq.length - cap}.`;
   kb.push([{ text: '↩️ Меню', callback_data: 'cmenu' }]);
   return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
     text: txt, disable_web_page_preview: true, reply_markup: { inline_keyboard: kb } });
-}
-
-// Повна інформація по одній справі (усі зібрані поля).
-async function showCaseInfo(env, kind, i) {
-  const { visible } = await visibleReport(env, kind);
-  const it = visible[i];
-  if (!it) return showReminders(env);
-  const d = daysUntil(it.date);
-  const when = d === null ? '' : (d < 0 ? 'минуле' : (d === 0 ? 'сьогодні' : (d === 1 ? 'завтра' : `за ${d} дн.`)));
-  let t = `📋 <b>Справа № ${esc(it.number)}</b>\n`;
-  if (it.date) t += `📅 <b>${esc(it.date)}</b>${when ? ' · ' + when : ''}\n`;
-  if (it.matched) t += `🔎 ${kind === 'clients' ? 'Клієнт' : 'Знайдено за'}: <b>${esc(it.matched)}</b>\n`;
-  if (it.court) t += `🏛 ${esc(it.court)}\n`;
-  if (it.courtroom) t += `🚪 Зал: ${esc(it.courtroom)}\n`;
-  if (it.judge) t += `👨‍⚖️ Суддя: ${esc(it.judge)}\n`;
-  if (it.forma) t += `⚖️ Форма: ${esc(it.forma)}\n`;
-  if (it.description) t += `📋 Суть: ${esc(it.description)}\n`;
-  if (it.involved) t += `👥 Сторони: ${esc(it.involved)}\n`;
-  if (it.address) t += `📍 ${esc(it.address)}\n`;
-  return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-    text: t, disable_web_page_preview: true,
-    reply_markup: { inline_keyboard: [
-      [{ text: '🗑 Прибрати з нагадувань', callback_data: `cremdel:${kind}:${i}` }],
-      [{ text: '↩️ До нагадувань', callback_data: 'crem' }],
-    ] } });
 }
 
 async function showCourtReport(env, kind = 'advocate', page = 0) {
@@ -473,7 +464,7 @@ async function handleUpdate(update, env) {
     // --- меню бота відстеження судових справ ---
     if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crun',
          'chide', 'cunhide', 'chidden', 'cunhide1', 'cpurge1', 'cpurge',
-         'crem', 'cremdel', 'creminfo', 'crepp', 'cnoop'].includes(action)) {
+         'crem', 'cremdel', 'crempg', 'crepp', 'cnoop'].includes(action)) {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
       if (action === 'cnoop') return;
       if (action === 'cmenu') return showCourtMenu(env);
@@ -528,11 +519,8 @@ async function handleUpdate(update, env) {
         }
         return showHidden(env, kind);
       }
-      if (action === 'crem') return showReminders(env);
-      if (action === 'creminfo') {
-        const kind = pid === 'clients' ? 'clients' : 'advocate';
-        return showCaseInfo(env, kind, parseInt(parts[2], 10));
-      }
+      if (action === 'crem') return showReminders(env, 0);
+      if (action === 'crempg') return showReminders(env, parseInt(pid, 10) || 0);
       // Прибрати справу з нагадувань назавжди (більше не показувати й не нагадувати).
       // Видаляємо в обох списках, бо справа буває і у «клієнтів», і в «адвоката».
       if (action === 'cremdel') {
