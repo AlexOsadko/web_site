@@ -740,15 +740,38 @@ export default {
         advocate: (await env.KV.get('court_deleted_advocate', 'json')) || [],
       });
     }
-    // Звіт «справи адвоката» від бота (зберігається для перегляду з меню).
+    // Звіт «справи адвоката/клієнтів» від бота (зберігається приватно для меню).
+    // Режим злиття (шардинг): якщо передано scanned[] — оновлюємо лише справи
+    // просканованих цього разу судів, решту зберігаємо (повне покриття за кілька
+    // прогонів). Без scanned — повна заміна (легасі).
     if (request.method === 'POST' && url.pathname === '/court_report') {
       if ((request.headers.get('X-Auth-Token') || '') !== env.AUTH_TOKEN) {
         return new Response('forbidden', { status: 403 });
       }
       let o; try { o = await request.json(); } catch { return new Response('bad', { status: 400 }); }
       const kind = (o.kind === 'clients') ? 'clients' : 'advocate';
-      await env.KV.put('court_report_' + kind, JSON.stringify(o));
-      return Response.json({ ok: true });
+      let items = Array.isArray(o.items) ? o.items : [];
+      if (Array.isArray(o.scanned) && o.scanned.length) {
+        const prev = (await env.KV.get('court_report_' + kind, 'json')) || { items: [] };
+        const scanned = new Set(o.scanned);
+        const kept = (prev.items || []).filter((it) => !scanned.has(it.court));
+        items = kept.concat(items);
+        // прибрати минулі засідання, щоб сховище не роздувалось
+        items = items.filter((it) => { const d = daysUntil(it.date); return d === null || d >= 0; });
+      }
+      await env.KV.put('court_report_' + kind, JSON.stringify({
+        kind, updated: o.updated || '', count: items.length, items: items.slice(0, 500),
+      }));
+      return Response.json({ ok: true, count: items.length });
+    }
+    // Накопичені справи (для розсилки нагадувань ботом під час шардингу).
+    if (request.method === 'GET' && url.pathname === '/court_cases') {
+      if ((request.headers.get('X-Auth-Token') || '') !== env.AUTH_TOKEN) {
+        return new Response('forbidden', { status: 403 });
+      }
+      const kind = (url.searchParams.get('kind') === 'clients') ? 'clients' : 'advocate';
+      const rep = (await env.KV.get('court_report_' + kind, 'json')) || { items: [] };
+      return Response.json({ items: rep.items || [] });
     }
     if (request.method === 'POST') {
       // вебхук Telegram (за бажанням — з перевіркою secret_token)

@@ -55,6 +55,10 @@ jobs:
           # Cloudflare Worker KV). Ті самі секрети, що й для миттєвих кнопок каналу.
           BOT_WORKER_URL: ${{ secrets.BOT_WORKER_URL }}
           BOT_WORKER_SECRET: ${{ secrets.BOT_WORKER_SECRET }}
+          # Шардинг: ~170 судів за прогін. 3 прогони/день = повний обхід усіх
+          # ~487 судів щодня. Курсор шарда зберігається у стані (шукає по всіх
+          # прізвищах — просто рознесено в часі, щоб не перевантажувати court.gov.ua).
+          COURT_SHARD_SIZE: "170"
           COURT_DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '' }}
         run: python3 tools/court_watch_bot.py
 

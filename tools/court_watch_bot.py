@@ -65,6 +65,9 @@ REQUEST_PAUSE = float(os.environ.get("COURT_REQUEST_PAUSE", "1.0") or "1.0")
 # За скільки днів до засідання нагадувати (типово 3, 2, 1; 0 = у день засідання)
 REMIND_DAYS = sorted({int(x) for x in re.findall(r"\d+",
                      os.environ.get("COURT_REMIND_DAYS", "3,2,1"))}, reverse=True)
+# Шардинг: скільки судів сканувати за один прогін (0 = усі). Решта — наступними
+# прогонами (курсор зберігається у стані). Повне покриття за N/шард прогонів.
+SHARD_SIZE = int(os.environ.get("COURT_SHARD_SIZE", "0") or "0")
 
 
 def _day_word(n):
@@ -88,16 +91,23 @@ WORKER_SECRET = (os.environ.get("COURT_WORKER_SECRET", "").strip()
 ADVOCATE_NAME = os.environ.get("COURT_ADVOCATE", "Осадько Олександр Олексійович").strip()
 
 
-def post_worker_report(items, kind="advocate"):
-    """Зберегти у Worker (KV) звіт (advocate|clients) для перегляду з меню."""
+def post_worker_report(items, kind="advocate", scanned=None):
+    """Зберегти у Worker (KV) звіт (advocate|clients) для перегляду з меню.
+
+    scanned — список назв судів, просканованих цього прогону (шардинг): Worker
+    оновить лише їхні справи, решту (з інших шардів) збереже.
+    """
     if not (WORKER_URL and WORKER_SECRET):
         return
-    payload = json.dumps({
+    body = {
         "kind": kind,
         "updated": time.strftime("%d.%m.%Y %H:%M", time.gmtime(time.time() + 3 * 3600)),
         "count": len(items),
-        "items": items[:200],
-    }).encode("utf-8")
+        "items": items[:300],
+    }
+    if scanned:
+        body["scanned"] = scanned
+    payload = json.dumps(body).encode("utf-8")
     try:
         req = urllib.request.Request(
             WORKER_URL.rstrip("/") + "/court_report", data=payload,
@@ -182,6 +192,21 @@ def fetch_worker_blocked():
 def _item_key(rec):
     return "{}|{}|{}".format(
         rec.get("number") or "", rec.get("date") or "", rec.get("court") or "")
+
+
+def fetch_worker_cases(kind="clients"):
+    """Накопичені справи з Worker (усі шарди) — для нагадувань під час шардингу."""
+    if not (WORKER_URL and WORKER_SECRET):
+        return []
+    try:
+        req = urllib.request.Request(
+            WORKER_URL.rstrip("/") + "/court_cases?kind=" + kind,
+            headers={"X-Auth-Token": WORKER_SECRET, "User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return (json.loads(r.read().decode("utf-8")).get("items") or [])
+    except Exception as e:
+        print("Накопичені справи з Worker недоступні:", str(e)[:60])
+        return []
 
 
 # ─────────────────────────── конфігурація ────────────────────────────
@@ -619,7 +644,22 @@ def main():
     advocate_hits = []     # окремий звіт «справи адвоката»
     client_hits = []       # окремий звіт «справи клієнтів»
 
-    for court in courts:
+    # Шардинг: цей прогін сканує лише частину судів (решта — наступними прогонами).
+    scanned_names = None
+    courts_to_scan = courts
+    if SHARD_SIZE > 0 and len(courts) > SHARD_SIZE:
+        cur = int(st.get("shard_cursor", 0)) % len(courts)
+        end = cur + SHARD_SIZE
+        courts_to_scan = courts[cur:end]
+        if end > len(courts):                      # перенос через кінець списку
+            courts_to_scan = courts_to_scan + courts[:end - len(courts)]
+        st["shard_cursor"] = end % len(courts)
+        scanned_names = [c["name"] for c in courts_to_scan]
+        print(f"Шард: {len(courts_to_scan)} судів (позиція {cur}), "
+              f"наступний курсор {st['shard_cursor']}; повне коло за "
+              f"{-(-len(courts)//SHARD_SIZE)} прогонів")
+
+    for court in courts_to_scan:
         url = csz_url_for(court)
         if not url:
             continue
@@ -720,15 +760,17 @@ def main():
                     print("  Помилка надсилання сповіщення (статус).")
 
     # Звіти «справи адвоката» і «справи клієнтів» (майбутні, за датою, без дублів).
+    # При шардингу Worker зливає лише справи просканованих судів (scanned_names).
+    adv = []
     if ADVOCATE_NAME:
         adv = build_report(advocate_hits)
-        print(f"Справи адвоката (майбутні): {len(adv)}")
+        print(f"Справи адвоката (цей шард): {len(adv)}")
         if not DRY_RUN:
-            post_worker_report(adv, "advocate")
+            post_worker_report(adv, "advocate", scanned=scanned_names)
     cli = build_report(client_hits)
-    print(f"Справи клієнтів (майбутні): {len(cli)}")
+    print(f"Справи клієнтів (цей шард): {len(cli)}")
     if not DRY_RUN:
-        post_worker_report(cli, "clients")
+        post_worker_report(cli, "clients", scanned=scanned_names)
 
     # ── Нагадування за 3-2-1 день до засідання ──
     if REMIND_DAYS:
@@ -736,10 +778,17 @@ def main():
         # Справи, які адвокат прибрав у боті (🗑 у «Нагадуваннях»/«Прихованих») —
         # по них нагадування більше не надсилаємо.
         blocked = fetch_worker_blocked()
-        for a in adv if ADVOCATE_NAME else []:
+        # При шардингу цей прогін бачив лише частину судів — тож для нагадувань
+        # беремо ПОВНИЙ накопичений перелік справ із Worker (усі шарди).
+        if scanned_names and not DRY_RUN:
+            rem_cli = fetch_worker_cases("clients")
+            rem_adv = fetch_worker_cases("advocate")
+        else:
+            rem_cli, rem_adv = cli, adv
+        for a in rem_adv:
             a["_adv"] = True
         uniq = {}
-        for rec in cli + (adv if ADVOCATE_NAME else []):
+        for rec in rem_cli + rem_adv:
             uniq.setdefault((rec.get("number"), rec.get("date")), rec)
         reminded = 0
         for rec in uniq.values():
