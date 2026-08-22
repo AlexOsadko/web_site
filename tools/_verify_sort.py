@@ -15,11 +15,13 @@ import urllib.request
 
 WORKER = os.environ.get("BOT_WORKER_URL", "").rstrip("/")
 SECRET = os.environ.get("BOT_WORKER_SECRET", "")
+UA = "Mozilla/5.0 (compatible; osadko-court-bot/1.0)"
 
 
 def fetch_cases(kind):
     req = urllib.request.Request(
-        f"{WORKER}/court_cases?kind={kind}", headers={"X-Auth-Token": SECRET})
+        f"{WORKER}/court_cases?kind={kind}",
+        headers={"X-Auth-Token": SECRET, "User-Agent": UA})
     with urllib.request.urlopen(req, timeout=20) as resp:
         data = json.loads(resp.read().decode("utf-8"))
     return data.get("items", [])
