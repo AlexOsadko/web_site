@@ -277,12 +277,23 @@ def is_legal_relevant(title, desc):
     return any(k in text for k in LEGAL_HINTS)
 
 
-def _fetch_raw(url):
-    """Повертає сирі байти стрічки через urllib із браузерними заголовками."""
+def _fetch_raw(url, tries=3):
+    """Повертає сирі байти стрічки через urllib із браузерними заголовками.
+    Деякі сайти (напр. suspilne.media) час від часу віддають 403/429 на
+    поодинокий запит — тож коротко повторюємо з паузою, поки не отримаємо
+    вміст. Це важливо, бо лише на власних байтах працює санітизація фідів."""
     import urllib.request
-    req = urllib.request.Request(url, headers={"User-Agent": UA, **FEED_HEADERS})
-    with urllib.request.urlopen(req, timeout=20) as resp:
-        return resp.read()
+    last = None
+    for i in range(max(1, tries)):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": UA, **FEED_HEADERS})
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                return resp.read()
+        except Exception as ex:
+            last = ex
+            if i + 1 < tries:
+                time.sleep(2 * (i + 1))          # 2с, 4с — перечікуємо тимчасовий блок
+    raise last
 
 
 # XML знає лише ці 5 іменованих сутностей; решта (&nbsp; &mdash; &hellip; …) для
