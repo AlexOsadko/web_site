@@ -94,6 +94,10 @@ FILL_DAILY_MAX = int(os.environ.get("BOT_FILL_DAILY_MAX", "60") or "60")
 PREFER_COURT = os.environ.get("BOT_PREFER_COURT", "").strip() in ("1", "true", "yes")
 
 ORIGINAL_TYPES = [
+    ("розбір норми", "аналітичний розбір важливого правового правила чи інституту простою мовою: "
+     "як воно працює, поширені непорозуміння й практичні висновки (без вигаданих реквізитів)"),
+    ("позиція судів", "оглядовий розбір усталеного підходу судів до поширеного питання: як зазвичай "
+     "вирішують такі спори і що це означає для людини (узагальнено, без конкретної впізнаваної справи)"),
     ("міф", "розвінчання поширеного юридичного міфу: спершу сам міф, тоді як є насправді"),
     ("помилка", "типова процесуальна помилка та чому вона має значення (без конкретної справи)"),
     ("інструкція", "покрокова практична інструкція: що робити у типовій ситуації"),
@@ -122,6 +126,8 @@ AREA_TAGS = {
     "судовий процес": "#судова_практика",
 }
 TYPE_TAGS = {
+    "розбір норми": "#законодавство",
+    "позиція судів": "#судова_практика",
     "міф": "#міф",
     "помилка": "#процесуальні_помилки",
     "інструкція": "#інструкція",
@@ -131,6 +137,9 @@ SHOW_PREVIEW = os.environ.get("BOT_SHOW_PREVIEW", "1").strip() not in ("0", "fal
 DRY_RUN = os.environ.get("BOT_DRY_RUN", "").strip() in ("1", "true", "yes")
 # Фільтрувати ЗАГАЛЬНІ стрічки за правовою релевантністю (типово увімкнено).
 FILTER_GENERAL = os.environ.get("BOT_FILTER_GENERAL", "1").strip() not in ("0", "false", "no")
+# Максимальна частка ЗАГАЛЬНИХ новин у каналі (решта — юридичні). 0.1 = ~10%.
+# 0 = взагалі без загальних (100% юридика).
+GENERAL_MAX_SHARE = float(os.environ.get("BOT_GENERAL_MAX_SHARE", "0.1") or "0.1")
 
 
 def load_feeds():
@@ -163,6 +172,7 @@ def load_state():
             st.setdefault("day", "")
             st.setdefault("count", 0)
             st.setdefault("total", 0)
+            st.setdefault("general", 0)   # скільки ЗАГАЛЬНИХ новин опубліковано (для частки)
             st.setdefault("seq", 0)
             st.setdefault("orig_recent", [])
             st.setdefault("pending", {})        # чернетки, що чекають рішення (кнопки)
@@ -173,7 +183,7 @@ def load_state():
             st.setdefault("decisions", [])      # історія рішень (останні 100)
             return st
     except Exception:
-        return {"seen": [], "day": "", "count": 0, "total": 0, "seq": 0,
+        return {"seen": [], "day": "", "count": 0, "total": 0, "general": 0, "seq": 0,
                 "orig_recent": [], "pending": {}, "update_offset": 0,
                 "last_content_ts": 0, "awaiting_edit": "",
                 "stats": {"generated": 0, "published": 0, "edited": 0, "rejected": 0},
@@ -1070,6 +1080,14 @@ def main():
         if not c["title"]:
             continue
         total = int(st.get("total", 0))
+        gen = int(st.get("general", 0))
+        is_general = c.get("scope", "legal") == "general"
+        # Тримаємо частку ЗАГАЛЬНИХ новин у межах GENERAL_MAX_SHARE (типово ~10%).
+        # Якщо публікація цієї загальної новини вивела б частку за ліміт —
+        # пропускаємо її (лишаємо на потім), щоб канал лишався про право.
+        if is_general and GENERAL_MAX_SHARE < 1.0:
+            if GENERAL_MAX_SHARE <= 0 or (gen + 1) / (total + 1) > GENERAL_MAX_SHARE:
+                continue
         c["_cta"] = CTA_EVERY > 0 and ((total + 1) % CTA_EVERY == 0)
         res = tg_send(c)
         if res is None:
@@ -1084,6 +1102,8 @@ def main():
                 st["seen"].append(c["id"])
                 st["count"] = int(st.get("count", 0)) + 1
                 st["total"] = total + 1
+                if is_general:
+                    st["general"] = gen + 1
                 st["seq"] = int(st.get("seq", 0)) + 1
                 time.sleep(3)
             posted += 1
