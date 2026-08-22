@@ -29,12 +29,13 @@
 "https://suspilne.media/cherkasy/1384212-u-cerkasah-na-pisohidnomu-perehodi-zbili-zinku-policia-rozpocala-karnu-spravu/",
 "https://www.ukrinform.ua/rubric-world/4156329-v-ispanii-vikrili-dvi-bandi-nelegalnih-pereviznikiv-aki-covnami-perepravlali-migrantiv-iz-seuti.html",
 "https://sud.ua/ru/news/ukraine/369994-ukrainskyi-sud-mozhe-distatysia-do-liudyny-za-kordonom-iak-pratsiuie-mizhnarodna-pravova-dopomoha",
-"https://sud.ua/ru/news/ukraine/370028-na-zakarpatti-holovu-lkk-zatrymaly-na-khabari-u-1000-dolariv-za-oformlennia-vidstrochky"
+"https://sud.ua/ru/news/ukraine/370028-na-zakarpatti-holovu-lkk-zatrymaly-na-khabari-u-1000-dolariv-za-oformlennia-vidstrochky",
+"https://sud.ua/ru/news/suspilstvo/370069-22-serpnia-iake-sohodni-sviato-ta-holovni-podii"
 ],
-"day": "2026-08-21",
-"count": 5,
-"total": 31,
-"seq": 44,
+"day": "2026-08-22",
+"count": 1,
+"total": 32,
+"seq": 45,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -132,7 +133,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787336186.041139,
+"last_content_ts": 1787380428.9122052,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
