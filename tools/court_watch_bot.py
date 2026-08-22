@@ -543,10 +543,18 @@ def build_reminder(rec, offset):
     ]
     if rec.get("judge"):
         lines.append(f"👨‍⚖️ Суддя: {esc(rec['judge'])}")
+    if rec.get("forma"):
+        lines.append(f"⚖️ Форма: {esc(rec['forma'])}")
     if rec.get("court"):
         lines.append(f"🏛 Суд: {esc(rec['court'])}")
+    if rec.get("courtroom"):
+        lines.append(f"🚪 Зал: {esc(rec['courtroom'])}")
+    if rec.get("address"):
+        lines.append(f"📍 Адреса: {esc(rec['address'])}")
     if rec.get("involved"):
         lines.append(f"👥 Сторони: {esc(rec['involved'])}")
+    if rec.get("description"):
+        lines.append(f"📋 Суть: {esc(rec['description'])}")
     if who:
         lines.append("")
         lines.append(f"🔎 {esc(who)}")
