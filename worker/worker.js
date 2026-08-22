@@ -60,6 +60,7 @@ function courtMenuKb() {
     [{ text: '📋 Список / кількість', callback_data: 'clist' }],
     [{ text: '👥 Справи клієнтів', callback_data: 'crepc' }],
     [{ text: '⚖️ Справи адвоката', callback_data: 'crep' }],
+    [{ text: '🔔 Нагадування', callback_data: 'crem' }],
     [{ text: '🔄 Терміновий прогін зараз', callback_data: 'crun' }],
   ] };
 }
@@ -70,7 +71,8 @@ function courtReplyKb() {
     keyboard: [
       [{ text: '➕ Додати клієнта' }],
       [{ text: '👥 Справи клієнтів' }, { text: '⚖️ Справи адвоката' }],
-      [{ text: '📋 Список клієнтів' }, { text: '🔄 Терміновий прогін' }],
+      [{ text: '🔔 Нагадування' }, { text: '📋 Список клієнтів' }],
+      [{ text: '🔄 Терміновий прогін' }],
     ],
     resize_keyboard: true,
     is_persistent: true,
@@ -101,6 +103,7 @@ async function setupCommands(env) {
     { command: 'menu', description: '⚖️ Меню суду' },
     { command: 'clients', description: '👥 Справи клієнтів' },
     { command: 'advocate', description: '⚖️ Справи адвоката' },
+    { command: 'reminders', description: '🔔 Нагадування' },
     { command: 'list', description: '📋 Список клієнтів' },
     { command: 'add', description: '➕ Додати клієнта' },
     { command: 'restart', description: '🔄 Терміновий прогін' },
@@ -202,6 +205,53 @@ async function showHidden(env, kind) {
   rows.push([{ text: '↩️ Меню', callback_data: 'cmenu' }]);
   return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
     text: txt, disable_web_page_preview: true, reply_markup: { inline_keyboard: rows } });
+}
+
+// Днів до засідання за рядком «дд.мм.рррр[ гг:хв]». null — дату не розпізнано.
+function daysUntil(dateStr) {
+  const m = /(\d{2})\.(\d{2})\.(\d{4})/.exec(dateStr || '');
+  if (!m) return null;
+  const target = new Date(+m[3], +m[2] - 1, +m[1]);
+  const now = new Date();
+  const t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((target - t0) / 86400000);
+}
+
+// Перелік справ, за якими надійдуть нагадування (найближчі засідання).
+// Кожну можна прибрати з нагадувань (🗑 — назавжди, як у «Прихованих»).
+async function showReminders(env) {
+  const list = [];
+  for (const kind of ['clients', 'advocate']) {
+    const { visible } = await visibleReport(env, kind);
+    visible.forEach((it, i) => {
+      const d = daysUntil(it.date);
+      if (d === null || d < 0) return;   // минулі/нерозпізнані — пропускаємо
+      list.push({ kind, gi: i, it, days: d });
+    });
+  }
+  list.sort((a, b) => a.days - b.days);
+  if (!list.length) {
+    return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+      text: '🔔 <b>Нагадування</b>\nНемає найближчих засідань. Перелік оновлюється під час прогону.',
+      reply_markup: { inline_keyboard: [[{ text: '↩️ Меню', callback_data: 'cmenu' }]] } });
+  }
+  const cap = Math.min(list.length, 15);
+  let txt = `🔔 <b>Найближчі засідання: ${list.length}</b>\n<i>🗑 — прибрати справу з нагадувань</i>\n`;
+  const kb = [];
+  for (let n = 0; n < cap; n++) {
+    const r = list[n];
+    const mark = r.days <= 1 ? '🔴' : (r.days <= 3 ? '🟠' : '🗓');
+    const when = r.days === 0 ? 'сьогодні' : (r.days === 1 ? 'завтра' : `за ${r.days} дн.`);
+    const tag = r.kind === 'clients' ? '👥' : '⚖️';
+    txt += `\n${mark} <b>${when}</b> · ${tag} № ${esc(r.it.number)}\n` +
+      `    📅 ${esc(r.it.date)} · 🏛 ${cut(r.it.court, 60)}\n`;
+    kb.push([{ text: `🗑 ${when} · № ${(r.it.number || '').slice(0, 18)}`,
+              callback_data: `cremdel:${r.kind}:${r.gi}` }]);
+  }
+  if (list.length > cap) txt += `\n… та ще ${list.length - cap}.`;
+  kb.push([{ text: '↩️ Меню', callback_data: 'cmenu' }]);
+  return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+    text: txt, disable_web_page_preview: true, reply_markup: { inline_keyboard: kb } });
 }
 
 async function showCourtReport(env, kind = 'advocate', page = 0) {
@@ -386,7 +436,7 @@ async function handleUpdate(update, env) {
     // --- меню бота відстеження судових справ ---
     if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crun',
          'chide', 'cunhide', 'chidden', 'cunhide1', 'cpurge1', 'cpurge',
-         'crepp', 'cnoop'].includes(action)) {
+         'crem', 'cremdel', 'crepp', 'cnoop'].includes(action)) {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
       if (action === 'cnoop') return;
       if (action === 'cmenu') return showCourtMenu(env);
@@ -440,6 +490,15 @@ async function handleUpdate(update, env) {
           await clearHidden(env, kind);
         }
         return showHidden(env, kind);
+      }
+      if (action === 'crem') return showReminders(env);
+      // Прибрати справу з нагадувань назавжди (більше не показувати й не нагадувати).
+      if (action === 'cremdel') {
+        const kind = pid === 'clients' ? 'clients' : 'advocate';
+        const i = parseInt(parts[2], 10);
+        const { visible } = await visibleReport(env, kind);
+        if (!isNaN(i) && visible[i]) await addDeleted(env, kind, itemKey(visible[i]));
+        return showReminders(env);
       }
       if (action === 'crun') {
         const txt = await urgentScan(env);
@@ -525,7 +584,8 @@ async function handleUpdate(update, env) {
       return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
         text: 'ℹ️ <b>Команди бота (суд)</b>\n' +
           '/menu — відкрити меню\n/clients — 👥 справи клієнтів\n' +
-          '/advocate — ⚖️ справи адвоката\n/list — 📋 список клієнтів\n' +
+          '/advocate — ⚖️ справи адвоката\n/reminders — 🔔 нагадування\n' +
+          '/list — 📋 список клієнтів\n' +
           '/add — ➕ додати клієнта\n/restart — 🔄 терміновий прогін\n' +
           '/cancel — ↩️ скасувати', reply_markup: courtReplyKb() });
     }
@@ -547,6 +607,10 @@ async function handleUpdate(update, env) {
     if (/^⚖️/.test(body) || /^\/advocate$/i.test(body) || /справи адвоката/i.test(body)) {
       await env.KV.delete('court_await');
       return showCourtReport(env, 'advocate');
+    }
+    if (/^🔔/.test(body) || /^(\/reminders|\/нагадування)$/i.test(body) || /нагадуванн/i.test(body)) {
+      await env.KV.delete('court_await');
+      return showReminders(env);
     }
     if (/^🔄/.test(body) || /^(\/run|\/restart|\/перезапуск)$/i.test(body) || /терміновий/i.test(body)) {
       await env.KV.delete('court_await');
@@ -631,6 +695,16 @@ export default {
       }
       const arr = (await env.KV.get('court_names', 'json')) || [];
       return Response.json({ names: arr });
+    }
+    // Видалені (назавжди) справи — щоб бот не надсилав по них нагадувань.
+    if (request.method === 'GET' && url.pathname === '/court_blocked') {
+      if ((request.headers.get('X-Auth-Token') || '') !== env.AUTH_TOKEN) {
+        return new Response('forbidden', { status: 403 });
+      }
+      return Response.json({
+        clients: (await env.KV.get('court_deleted_clients', 'json')) || [],
+        advocate: (await env.KV.get('court_deleted_advocate', 'json')) || [],
+      });
     }
     // Звіт «справи адвоката» від бота (зберігається для перегляду з меню).
     if (request.method === 'POST' && url.pathname === '/court_report') {

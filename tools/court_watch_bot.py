@@ -155,6 +155,35 @@ def fetch_worker_names():
         return []
 
 
+def fetch_worker_blocked():
+    """Справи, видалені адвокатом у боті (щоб не нагадувати по них).
+
+    Повертає множину ключів «номер|дата|суд» (як itemKey у Worker).
+    """
+    if not (WORKER_URL and WORKER_SECRET):
+        return set()
+    try:
+        req = urllib.request.Request(
+            WORKER_URL.rstrip("/") + "/court_blocked",
+            headers={"X-Auth-Token": WORKER_SECRET, "User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            data = json.loads(r.read().decode("utf-8"))
+        keys = set()
+        for kind in ("clients", "advocate"):
+            for k in data.get(kind, []) or []:
+                if isinstance(k, str):
+                    keys.add(k)
+        return keys
+    except Exception as e:
+        print("Список видалених справ із Worker недоступний:", str(e)[:60])
+        return set()
+
+
+def _item_key(rec):
+    return "{}|{}|{}".format(
+        rec.get("number") or "", rec.get("date") or "", rec.get("court") or "")
+
+
 # ─────────────────────────── конфігурація ────────────────────────────
 def load_registry():
     """Вбудований перелік судів (код + назва) — сканується, коли у COURT_WATCH
@@ -696,6 +725,9 @@ def main():
     # ── Нагадування за 3-2-1 день до засідання ──
     if REMIND_DAYS:
         today0 = time.mktime(time.strptime(time.strftime("%d.%m.%Y"), "%d.%m.%Y"))
+        # Справи, які адвокат прибрав у боті (🗑 у «Нагадуваннях»/«Прихованих») —
+        # по них нагадування більше не надсилаємо.
+        blocked = fetch_worker_blocked()
         for a in adv if ADVOCATE_NAME else []:
             a["_adv"] = True
         uniq = {}
@@ -703,6 +735,8 @@ def main():
             uniq.setdefault((rec.get("number"), rec.get("date")), rec)
         reminded = 0
         for rec in uniq.values():
+            if _item_key(rec) in blocked:
+                continue
             ts = _hearing_ts(rec.get("date"))
             if ts is None:
                 continue
