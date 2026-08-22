@@ -166,6 +166,10 @@ async function visibleReport(env, kind) {
   const deleted = await getDeleted(env, kind);
   const blocked = new Set([...hidden, ...deleted]);
   const visible = items.filter((it) => !blocked.has(itemKey(it)));
+  // Сортуємо за датою засідання: найближче майбутнє — вгорі; далі минулі
+  // (свіжіші вище); недатовані — в кінці. Порядок детермінований, тож індекси
+  // кнопок (🗑) лишаються коректними в усіх переглядах.
+  visible.sort(caseCmp);
   return { updated: rep ? rep.updated : '', visible, hiddenCount: hidden.length };
 }
 
@@ -215,6 +219,27 @@ function daysUntil(dateStr) {
   const now = new Date();
   const t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   return Math.round((target - t0) / 86400000);
+}
+
+// Час засідання (мс) за рядком «дд.мм.рррр[ гг:хв]» — з урахуванням години,
+// щоб у межах одного дня раніші засідання йшли вище. null — дату не розпізнано.
+function hearingTs(dateStr) {
+  const m = /(\d{2})\.(\d{2})\.(\d{4})(?:\D+(\d{1,2}):(\d{2}))?/.exec(dateStr || '');
+  if (!m) return null;
+  return new Date(+m[3], +m[2] - 1, +m[1], m[4] ? +m[4] : 0, m[5] ? +m[5] : 0).getTime();
+}
+
+// Порядок справ за датою засідання: найближче МАЙБУТНЄ (сьогодні або пізніше) —
+// вгорі за зростанням; далі МИНУЛІ засідання (свіжіші вище); НЕДАТОВАНІ — в кінці.
+function caseCmp(a, b) {
+  const da = daysUntil(a && a.date), db = daysUntil(b && b.date);
+  const ua = da !== null && da >= 0, ub = db !== null && db >= 0;  // майбутнє/сьогодні?
+  if (ua !== ub) return ua ? -1 : 1;                 // майбутні — вище за минулі/недатовані
+  const ta = hearingTs(a && a.date), tb = hearingTs(b && b.date);
+  if (ta === null && tb === null) return 0;
+  if (ta === null) return 1;                          // недатовані — в кінець групи
+  if (tb === null) return -1;
+  return ua ? (ta - tb) : (tb - ta);                  // майбутні: раніше вгору; минулі: свіжіше вгору
 }
 
 // Перелік справ, за якими надійдуть нагадування (найближчі засідання).
