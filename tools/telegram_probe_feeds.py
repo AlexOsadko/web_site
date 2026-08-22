@@ -39,6 +39,41 @@ CANDIDATES = {
         "https://jurliga.ligazakon.net/news/rss",
         "https://jurliga.ligazakon.net/aktualno/rss",
     ],
+    # --- Джерела законодавства (органи влади) ---
+    "Верховна Рада (rada.gov.ua)": [
+        "https://www.rada.gov.ua/news/rss",
+        "https://iportal.rada.gov.ua/news/rss",
+        "https://rada.gov.ua/rss",
+        "https://www.rada.gov.ua/rss/ovu",
+        "https://www.rada.gov.ua/news/rss/all",
+    ],
+    "Кабінет Міністрів (kmu.gov.ua)": [
+        "https://www.kmu.gov.ua/rss",
+        "https://www.kmu.gov.ua/rss/news",
+        "https://www.kmu.gov.ua/news/rss",
+        "https://www.kmu.gov.ua/timeline/rss",
+    ],
+    "Мінʼюст (minjust.gov.ua)": [
+        "https://minjust.gov.ua/rss",
+        "https://minjust.gov.ua/news/rss",
+        "https://minjust.gov.ua/feed",
+        "https://minjust.gov.ua/rss.xml",
+    ],
+    "Президент (president.gov.ua)": [
+        "https://www.president.gov.ua/rss/news.xml",
+        "https://www.president.gov.ua/news/rss",
+        "https://www.president.gov.ua/rss",
+    ],
+    "Судова влада (court.gov.ua)": [
+        "https://court.gov.ua/press/news/rss",
+        "https://court.gov.ua/rss",
+        "https://court.gov.ua/press/rss",
+    ],
+    "Опендатабот блог": [
+        "https://opendatabot.ua/blog/rss",
+        "https://opendatabot.ua/rss",
+        "https://opendatabot.ua/blog/feed",
+    ],
 }
 
 
