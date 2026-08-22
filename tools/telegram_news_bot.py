@@ -1024,7 +1024,7 @@ def main():
                     skipped_irrelevant += 1
                     continue
                 candidates.append({
-                    "id": eid, "ts": ts, "source": source,
+                    "id": eid, "ts": ts, "source": source, "scope": scope,
                     "title": title, "desc": desc,
                     "link": getattr(e, "link", "") or eid,
                 })
@@ -1033,13 +1033,33 @@ def main():
     if skipped_irrelevant:
         print(f"Відфільтровано загальних новин без правового контексту: {skipped_irrelevant}.")
 
-    # найсвіжіші зверху
-    candidates.sort(key=lambda c: c["ts"], reverse=True)
+    # Ручний перемикач «лише юридичне»: викидає загальні новини зовсім
+    # (лишає розбір судової практики й матеріали профільних юрстрічок).
     if PREFER_COURT:
-        # стабільно піднімаємо судову практику вгору (свіжість усередині груп збережено)
-        candidates.sort(key=lambda c: not is_court_practice(c["title"], c["desc"]))
-        n_court = sum(1 for c in candidates if is_court_practice(c["title"], c["desc"]))
-        print(f"Пріоритет судовій практиці: таких кандидатів {n_court}.")
+        before = len(candidates)
+        candidates = [c for c in candidates
+                      if c.get("scope", "legal") != "general"
+                      or is_court_practice(c["title"], c["desc"])]
+        print(f"PREFER_COURT: лишено лише юридичні ({len(candidates)} з {before}).")
+
+    # ПРІОРИТЕТ ЮРИДИЧНОГО КОНТЕНТУ (щоб канал був про право, а не загальні новини):
+    #   1) розбір судової практики,
+    #   2) матеріали з профільних юридичних стрічок (scope != general),
+    #   3) законодавчі зміни,
+    # і вже потім — за свіжістю. Загальні новини стають лише «добивкою», коли
+    # немає юридичних. (Раніше сортувалось лише за датою, тож загальні новини
+    # часто витісняли юридичні.)
+    def _prio(c):
+        court = is_court_practice(c["title"], c["desc"])
+        legal_feed = c.get("scope", "legal") != "general"
+        legisl = "#законодавство" in classify(c["title"], c["desc"])
+        return (0 if court else 1, 0 if legal_feed else 1,
+                0 if legisl else 1, -(c["ts"] or 0))
+    candidates.sort(key=_prio)
+    n_court = sum(1 for c in candidates if is_court_practice(c["title"], c["desc"]))
+    n_legal = sum(1 for c in candidates if c.get("scope", "legal") != "general")
+    print(f"Пріоритет юридичному: судова практика {n_court}, юрстрічки {n_legal} "
+          f"з {len(candidates)} кандидатів.")
     limit = min(MAX_PER_RUN, remaining_day)
     print(f"Нових кандидатів: {len(candidates)}; ліміт цього запуску: {limit}.")
 
