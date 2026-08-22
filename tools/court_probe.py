@@ -129,11 +129,11 @@ def main():
         if not m:
             print("RANGE має бути напр. 1000-1999"); sys.exit(1)
         lo, hi = int(m.group(1)), int(m.group(2))
-        hi = min(hi, lo + 1100)  # запобіжник: не більше ~1100 кодів за прогін
+        hi = min(hi, lo + 5200)  # запобіжник
         court_re = re.compile(
             r"районний|міський|міськрайон|окружний|апеляц|господарськ|"
             r"адміністрат|Верховний|Касаційний|Вищий|військов", re.I)
-        found = 0
+        found = []
         for code in range(lo, hi + 1):
             try:
                 c, ct, page = fetch(f"https://court.gov.ua/sud{code}/")
@@ -148,10 +148,15 @@ def main():
             if mt:
                 name = re.sub(r"\s+", " ", mt.group(1)).strip()
             if name and court_re.search(name):
-                found += 1
+                found.append(f"{code}|{name}")
                 print(f"{code}|{name}")
             _t.sleep(0.08)
-        print(f"ГОТОВО (знайдено {found} у {lo}-{hi})")
+        # Зберегти у файл (воркфлоу закомітить його в репозиторій).
+        outdir = "tools/_courts_harvest"
+        os.makedirs(outdir, exist_ok=True)
+        with open(f"{outdir}/{lo:04d}-{hi:04d}.txt", "w", encoding="utf-8") as f:
+            f.write("\n".join(found) + ("\n" if found else ""))
+        print(f"ГОТОВО (знайдено {len(found)} у {lo}-{hi})")
         return
 
     # Режим HARVEST: зібрати посилання на сайти судів (домен + код sudNNNN)

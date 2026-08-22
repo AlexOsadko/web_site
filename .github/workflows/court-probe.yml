@@ -40,7 +40,7 @@ on:
         default: ""
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   probe:
@@ -61,3 +61,22 @@ jobs:
           CODES: ${{ github.event.inputs.codes }}
           RANGE: ${{ github.event.inputs.range }}
         run: python3 tools/court_probe.py
+      - name: Зберегти зібрані суди
+        if: ${{ github.event.inputs.range != '' }}
+        run: |
+          if [ -z "$(git status --porcelain tools/_courts_harvest)" ]; then
+            echo "нема нових файлів"; exit 0
+          fi
+          git config user.name "osadko-court-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p /tmp/harv && cp tools/_courts_harvest/*.txt /tmp/harv/ 2>/dev/null || true
+          for i in 1 2 3 4 5 6; do
+            git fetch -q origin main
+            git checkout -q -B _h origin/main
+            mkdir -p tools/_courts_harvest
+            cp /tmp/harv/*.txt tools/_courts_harvest/ 2>/dev/null || true
+            git add tools/_courts_harvest
+            git commit -q -m "chore(court-probe): harvest [skip ci]" || { echo "нема змін"; exit 0; }
+            if git push -q origin _h:main; then echo "збережено"; exit 0; fi
+            echo "повтор $i"; sleep 3
+          done
