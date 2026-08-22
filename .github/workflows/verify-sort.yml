@@ -1,0 +1,25 @@
+name: Перевірка сортування
+
+# Тимчасовий workflow: підтверджує, що розгорнутий Worker віддає справи у
+# порядку від найближчого засідання. Друкує лише дати (без ПІБ/номерів).
+# Після перевірки — видаляється.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Перевірити порядок справ
+        env:
+          BOT_WORKER_URL: ${{ secrets.BOT_WORKER_URL }}
+          BOT_WORKER_SECRET: ${{ secrets.BOT_WORKER_SECRET }}
+        run: python3 tools/_verify_sort.py
