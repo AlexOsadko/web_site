@@ -303,7 +303,8 @@ def _fix_named_entity(m):
 def _sanitize_xml(raw):
     """Лагодить типові дефекти фідів, на яких падає суворий XML-парсер:
     невизначені іменовані сутності (&nbsp; тощо), сирі амперсанди
-    (`&` не в межах сутності) і керуючі символи."""
+    (`&` не в межах сутності) і керуючі символи. Повертає БАЙТИ у UTF-8 —
+    рядок із декларацією encoding="UTF-8" feedparser парсить ненадійно."""
     try:
         text = raw.decode("utf-8", "replace") if isinstance(raw, bytes) else str(raw)
     except Exception:
@@ -314,7 +315,7 @@ def _sanitize_xml(raw):
     text = re.sub(r"&(?!#?\w+;)", "&amp;", text)
     # 3) керуючі символи, недопустимі в XML 1.0
     text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", text)
-    return text
+    return text.encode("utf-8")
 
 
 def fetch_feed(url):
