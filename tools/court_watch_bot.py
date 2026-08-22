@@ -68,6 +68,9 @@ REMIND_DAYS = sorted({int(x) for x in re.findall(r"\d+",
 # Шардинг: скільки судів сканувати за один прогін (0 = усі). Решта — наступними
 # прогонами (курсор зберігається у стані). Повне покриття за N/шард прогонів.
 SHARD_SIZE = int(os.environ.get("COURT_SHARD_SIZE", "0") or "0")
+# Швидка відмова недоступних судів (щоб шард не «залипав»).
+FETCH_TIMEOUT = int(os.environ.get("COURT_FETCH_TIMEOUT", "12") or "12")
+FETCH_TRIES = int(os.environ.get("COURT_FETCH_TRIES", "2") or "2")
 
 
 def _day_word(n):
@@ -289,7 +292,7 @@ def fetch_court(csz_url):
         "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
         "Accept-Language": "uk,en;q=0.8",
     })
-    with opener.open(r1, timeout=40) as resp:
+    with opener.open(r1, timeout=FETCH_TIMEOUT) as resp:
         resp.read()
     # Крок 2 — POST /new.php з тим самим cookie й Referer
     body = urllib.parse.urlencode({"q_court_id": crt}).encode()
@@ -302,7 +305,7 @@ def fetch_court(csz_url):
         "Origin": origin,
         "Referer": csz_url,
     })
-    with opener.open(r2, timeout=40) as resp:
+    with opener.open(r2, timeout=FETCH_TIMEOUT) as resp:
         raw = resp.read()
         ctype = resp.headers.get("Content-Type", "")
         enc = "utf-8" if "utf-8" in ctype.lower() else "cp1251"
@@ -313,8 +316,12 @@ def fetch_court(csz_url):
     return data if isinstance(data, list) else data.get("data", [])
 
 
-def fetch_court_retry(csz_url, tries=4):
-    delay = 2
+def fetch_court_retry(csz_url, tries=None):
+    # Швидка відмова: багато судів релоковані/недоступні (ТОТ) — не можна на
+    # кожному «залипати» ретраями, бо шард стає нескінченним. Мало спроб,
+    # короткий таймаут; пропущений суд просканується наступного кола.
+    tries = tries if tries is not None else FETCH_TRIES
+    delay = 1
     last = None
     for _ in range(tries):
         try:
@@ -322,7 +329,7 @@ def fetch_court_retry(csz_url, tries=4):
         except Exception as e:  # мережеві збої / тимчасове блокування
             last = e
             time.sleep(delay)
-            delay = min(delay * 2, 16)
+            delay = min(delay * 2, 4)
     raise last
 
 
