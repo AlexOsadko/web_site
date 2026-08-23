@@ -1,0 +1,22 @@
+name: Пробник LPD-API
+
+# Одноразова розвідка бекенд-API Бази правових позицій ВС (lpd.court.gov.ua):
+# чи можна тягнути реальні позиції ВС запитом (для grounded AI-агента).
+# Нічого не публікує — лише звіт у лог.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Розвідати LPD-API
+        run: python3 tools/probe_lpd_api.py
