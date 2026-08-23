@@ -151,7 +151,7 @@ def analyze(title, url, text):
         "напиши: 'НЕ_РІШЕННЯ'. Стисло, без вступів."
     )
     r = client.messages.create(
-        model=os.environ.get("VS_MODEL", "claude-sonnet-4-5"),
+        model=os.environ.get("VS_MODEL", "claude-sonnet-5"),
         max_tokens=700,
         system=sys_prompt,
         messages=[{"role": "user",
