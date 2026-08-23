@@ -1,0 +1,21 @@
+name: Пробник практики ВС
+
+# Одноразова перевірка: які офіційні джерела практики Верховного Суду реально
+# читаються з GitHub-раннера. Нічого не публікує — лише друкує звіт у лог.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Перевірити джерела практики ВС
+        run: python3 tools/probe_vs_practice.py
