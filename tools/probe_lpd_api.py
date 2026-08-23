@@ -79,33 +79,46 @@ def main():
     for m in re.findall(r'(?:apiUrl|baseUrl|API_URL|apiBase)["\']?\s*[:=]\s*["\']([^"\']+)["\']', html, re.I):
         print(f"   inline config → {m}")
 
-    # 2) читаємо JS-бандли, витягуємо api-рядки
+    # 2) ГЛИБОКИЙ аналіз головного бандла: шукаємо справжню базу API,
+    #    усі хости, шляхи /api/... і контекст навколо них.
     api_candidates = set()
     js_assets = [a for a in assets if a.endswith(".js")]
-    # типові імена бандлів на випадок, якщо їх нема в HTML
-    for guess in ["/main.js", "/app.js", "/runtime.js", "/polyfills.js"]:
-        js_assets.append(guess)
+    if "/static/js/bundle.js" not in js_assets:
+        js_assets.append("/static/js/bundle.js")
     print("=" * 72)
-    print("2) Читаємо JS і шукаємо ендпоінти")
+    print("2) Глибокий аналіз JS-бандла")
     for a in sorted(set(js_assets)):
         url = urljoin(BASE + "/", a)
         try:
-            c, t, r = fetch(url)
-            if c != 200 or not r:
-                print(f"   JS {url} [{c}] — пропуск")
+            c, t, r = fetch(url, timeout=60)
+            if c != 200 or len(r) < 5000:
+                print(f"   JS {url} [{c}] {len(r)}b — не бандл, пропуск")
                 continue
             txt = r.decode("utf-8", "replace")
-            before = len(api_candidates)
-            for mm in re.findall(r'["\'`](/?api/[A-Za-z0-9_\-/{}.]+)["\'`]', txt):
-                api_candidates.add(mm)
-            for mm in re.findall(r'["\'`](https?://[A-Za-z0-9_\-.]+/api/[A-Za-z0-9_\-/{}.]*)["\'`]', txt):
-                api_candidates.add(mm)
-            print(f"   JS {url} [{c}] {len(r)}b — нових api-рядків: {len(api_candidates) - before}")
+            print(f"   JS {url} [{c}] {len(r)}b — аналізуємо…")
+            # усі хости (крім типових CDN/шрифтів)
+            hosts = set(re.findall(r'https?://([A-Za-z0-9._\-]+\.[A-Za-z]{2,})', txt))
+            skip = ("w3.org", "googleapis.com", "gstatic.com", "schema.org",
+                    "reactjs.org", "github.com", "npmjs", "jsdelivr", "unpkg",
+                    "cloudflare", "gvt1.com", "mozilla.org", "example.com")
+            hosts = sorted(h for h in hosts if not any(s in h for s in skip))
+            print(f"     хости в бандлі: {hosts}")
+            # усі /api/... шляхи (не лише в лапках)
+            paths = sorted(set(re.findall(r'/api/[A-Za-z0-9_\-/{}.:]+', txt)))
+            print(f"     шляхи /api/…: {paths[:40]}")
+            for p in paths:
+                api_candidates.add(p)
+            # контекст навколо визначення бази API
+            for key in ("baseURL", "BASE_URL", "REACT_APP_", "apiUrl", "API_URL",
+                        "axios.create", "process.env"):
+                for m in re.finditer(re.escape(key), txt):
+                    ctx = txt[max(0, m.start() - 20):m.start() + 90]
+                    ctx = re.sub(r"\s+", " ", ctx).strip()
+                    print(f"     [{key}] …{ctx}…")
+                    break  # лише перший приклад кожного ключа
         except Exception as ex:
             print(f"   JS {url} ПОМИЛКА: {ex}")
-    print(f"   Усього api-кандидатів із JS: {len(api_candidates)}")
-    for c in sorted(api_candidates)[:60]:
-        print(f"     · {c}")
+    print(f"   Усього шляхів /api/…: {len(api_candidates)}")
 
     # 3) тестуємо: знайдені + типові здогади + config
     guesses = [
