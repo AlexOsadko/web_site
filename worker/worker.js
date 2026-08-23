@@ -72,6 +72,7 @@ function courtReplyKb() {
       [{ text: '➕ Додати клієнта' }],
       [{ text: '👥 Справи клієнтів' }, { text: '⚖️ Справи адвоката' }],
       [{ text: '🔔 Нагадування' }, { text: '📋 Список клієнтів' }],
+      [{ text: '🔎 Пошук практики ВС' }],
       [{ text: '🔄 Терміновий прогін' }],
     ],
     resize_keyboard: true,
@@ -502,6 +503,19 @@ async function triggerVsPractice(env, query) {
   }
 }
 
+// Запускає пошук практики ВС за темою й відповідає адвокату.
+async function runVsSearch(env, query) {
+  const ok = await triggerVsPractice(env, query);
+  return tg(env, 'sendMessage', {
+    chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+    text: ok
+      ? `🔎 Шукаю практику ВС за темою «${esc(query)}». За хвилину надішлю сюди розбір `
+        + `(або повідомлю, що серед свіжих публікацій ВС нічого релевантного немає).`
+      : '⚠️ Не вдалося запустити пошук. Перевірте, що у Worker додано секрет '
+        + '<code>GH_DISPATCH_TOKEN</code>.',
+  });
+}
+
 async function handleUpdate(update, env) {
   // --- натискання кнопок ---
   if (update.callback_query) {
@@ -705,27 +719,41 @@ async function handleUpdate(update, env) {
       return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt });
     }
 
-    // Практика ВС за запитом: /вс <тема> — запускає аналіз новин ВС про
-    // постанови; розбір приходить окремим повідомленням у цей чат.
+    // Кнопка «🔎 Пошук практики ВС» — просимо тему (стан court_await='vs').
+    if (/^🔎/.test(body) || /^пошук практики вс$/i.test(body)) {
+      await env.KV.put('court_await', 'vs');
+      return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+        text: '🔎 Напишіть тему для пошуку практики ВС — напр. '
+          + '<code>поділ майна подружжя</code>, <code>стягнення аліментів</code>, '
+          + '<code>ст. 130 КУпАП</code>. Скасувати — /cancel.' });
+    }
+
+    // Команда /вс <тема> — те саме напряму (без \b: у JS вона не працює після
+    // кирилиці; вимагаємо пробіл/кінець, щоб «/встановлення» не матчилось).
     {
-      // Без \b — у JS вона не працює після кирилиці. Вимагаємо пробіл або кінець
-      // після команди, щоб «/встановлення» не сприймалось як «/вс».
       const vsm = body.match(/^\/(?:вс|vs)(?:\s+([\s\S]*))?$/i);
       if (vsm) {
         const query = (vsm[1] || '').trim();
         if (!query) {
+          await env.KV.put('court_await', 'vs');
           return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-            text: 'Вкажіть тему: напр. <code>/вс поділ майна подружжя</code> або '
-              + '<code>/вс стягнення аліментів</code>.' });
+            text: '🔎 Напишіть тему для пошуку практики ВС (напр. '
+              + '<code>поділ майна подружжя</code>). Скасувати — /cancel.' });
         }
-        const ok = await triggerVsPractice(env, query);
-        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-          text: ok
-            ? `🔎 Шукаю практику ВС за темою «${esc(query)}». За хвилину надішлю сюди розбір `
-              + `(або повідомлю, що серед свіжих публікацій ВС нічого релевантного немає).`
-            : '⚠️ Не вдалося запустити пошук. Перевірте, що у Worker додано секрет '
-              + '<code>GH_DISPATCH_TOKEN</code>.' });
+        await env.KV.delete('court_await');
+        return runVsSearch(env, query);
       }
+    }
+
+    // Введення теми для пошуку практики ВС
+    if (courtAwait === 'vs') {
+      await env.KV.delete('court_await');
+      const query = body.replace(/\s+/g, ' ').trim();
+      if (query.length < 3 || query.startsWith('/')) {
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
+          text: 'Напишіть тему (кілька слів) або /cancel.' });
+      }
+      return runVsSearch(env, query);
     }
 
     // Введення ПІБ для меню суду (додавання / зміна)
