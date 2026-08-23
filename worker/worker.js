@@ -108,6 +108,7 @@ async function setupCommands(env) {
     { command: 'list', description: '📋 Список клієнтів' },
     { command: 'add', description: '➕ Додати клієнта' },
     { command: 'restart', description: '🔄 Терміновий прогін' },
+    { command: 'vs', description: '🔎 Практика ВС за темою' },
     { command: 'start', description: '▶️ Старт / головне меню' },
     { command: 'cancel', description: '↩️ Скасувати' },
     { command: 'help', description: 'ℹ️ Довідка' },
@@ -687,7 +688,7 @@ async function handleUpdate(update, env) {
           '/advocate — ⚖️ справи адвоката\n/reminders — 🔔 нагадування\n' +
           '/list — 📋 список клієнтів\n' +
           '/add — ➕ додати клієнта\n/restart — 🔄 терміновий прогін\n' +
-          '/вс &lt;тема&gt; — ⚖️ практика ВС за запитом (напр. /вс поділ майна)\n' +
+          '/vs &lt;тема&gt; — 🔎 практика ВС за темою (або кнопка «🔎 Пошук практики ВС»)\n' +
           '/cancel — ↩️ скасувати', reply_markup: courtReplyKb() });
     }
 

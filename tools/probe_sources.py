@@ -78,29 +78,45 @@ def probe(label, url, needles=()):
     return html
 
 
-def main():
-    # 1) Пленум ВС — шукаємо розділ у навігації сайту ВС
-    probe("Верховний Суд — про суд (шукаємо Пленум)",
-          "https://supreme.court.gov.ua/supreme/pro_sud/",
-          needles=("plenum", "плен", "постанов"))
-    for u in [
-        "https://supreme.court.gov.ua/supreme/pro_sud/plenum_verhovnogo_sudu/",
-        "https://supreme.court.gov.ua/supreme/pro_sud/postanovy_plenumu/",
-        "https://supreme.court.gov.ua/supreme/pokazniki-diyalnosti/plenum/",
-    ]:
-        probe("Пленум ВС (спроба адреси)", u, needles=("постанов", "плен"))
+def dump_structure(label, url):
+    print("=" * 72)
+    print("СТРУКТУРА: " + label)
+    print("  " + url)
+    code, raw = fetch(url)
+    if code != 200 or not raw:
+        print(f"  ✗ статус {code}")
+        return
+    html = decode(raw)
+    # класи-кандидати контенту
+    classes = sorted(set(c for c in re.findall(r'class="([^"]{0,50})"', html)
+                         if re.search(r'detail|content|text|news|article|body|item|node|field', c, re.I)))
+    print("  класи-кандидати:", classes[:30])
+    m = re.search(r'(?is)<h1[^>]*>(.*?)</h1>', html)
+    if m:
+        print("  <h1>:", strip_tags(m.group(1))[:100])
+    # абзаци
+    paras = [strip_tags(p) for p in re.findall(r'(?is)<p[^>]*>(.*?)</p>', html)]
+    paras = [p for p in paras if len(p) >= 40]
+    print(f"  змістовних <p>: {len(paras)}")
+    if paras:
+        print("  перший абзац:", paras[0][:220])
 
-    # 2) КСУ — головна + новини/рішення
-    probe("Конституційний Суд — головна",
-          "https://ccu.gov.ua/",
-          needles=("novyn", "новин", "rishen", "рішенн", "act", "doccatalog"))
-    for u in [
-        "https://ccu.gov.ua/novyny",
-        "https://ccu.gov.ua/akty",
-        "https://ccu.gov.ua/rishennya-vysnovky",
-        "https://ccu.gov.ua/dovidnyk/rishennya",
-    ]:
-        probe("КСУ (спроба адреси)", u, needles=("рішенн", "висновок", "справ"))
+
+def main():
+    # 1) Пленум ВС — знайдена адреса /plenium/
+    plen = probe("Пленум ВС — розділ",
+                 "https://supreme.court.gov.ua/supreme/pro_sud/plenium/",
+                 needles=("постанов", "plenium", "/news/"))
+
+    # 2) КСУ — стрічка новин
+    news = probe("КСУ — новини (/news)", "https://ccu.gov.ua/news",
+                 needles=("/novyna/",))
+
+    # 3) Структура статті КСУ (беремо перше /novyna/ посилання зі стрічки)
+    if news:
+        m = re.search(r'href="(/novyna/[^"]+)"', news)
+        if m:
+            dump_structure("Стаття КСУ", "https://ccu.gov.ua" + m.group(1))
 
     print("=" * 72)
     print("ГОТОВО")
