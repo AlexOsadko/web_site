@@ -914,6 +914,10 @@ a.card:hover .more span { transform: translateX(5px); }
 /* ===== Посадкові лендінги послуг ===== */
 .lp { padding-bottom: 40px; }
 .lp .container { max-width: 900px; }
+/* Блок форми-CTA (.lead-cta) не має власного .container, тож на широких екранах
+   тягнувся на всю ширину. Обмежуємо тією ж шириною, що й решта секцій LP, і
+   центруємо — щоб сторінка виглядала цілісно, а поля форми не розтягувались. */
+.lp .lead-cta { max-width: 900px; margin-left: auto; margin-right: auto; padding: 0 28px; }
 /* Секція з сіткою карток на сторінці «Послуги» — повна ширина, як на головній
    (текстові блоки лишаються вузькими 900px для читабельності). */
 .lp .container-wide { max-width: 1160px; }
@@ -944,16 +948,7 @@ a.card:hover .more span { transform: translateX(5px); }
 .lp-btn-tg { background: #229ed9; color: #fff; }
 .lp-btn-wa { background: #25d366; color: #06331b; }
 .lp-btn-vb { background: #7360f2; color: #fff; }
-/* Видимий номер телефону в hero/фінальному блоці — люди частіше телефонують,
-   коли бачать сам номер, а не лише кнопку. Клік теж зараховується як конверсія. */
-.lp-phone {
-  display: inline-flex; align-items: center; gap: 9px;
-  margin: 18px 0 2px; font-size: clamp(1.4rem, 3.4vw, 1.7rem); font-weight: 700;
-  color: var(--blue); text-decoration: none; letter-spacing: .3px;
-}
-.lp-phone:hover { text-decoration: underline; }
-.lp-phone svg { width: 24px; height: 24px; flex: none; }
-.lp-note { margin: 8px 0 0; color: var(--muted); font-size: .98rem; line-height: 1.5; }
+.lp-note { margin: 16px 0 0; color: var(--muted); font-size: .98rem; line-height: 1.5; }
 /* Кнопки месенджерів у картці контактів/консультації — завжди в один рядок,
    рівні за шириною. На телефонах підписи ховаються (лишаються іконки). */
 .contacts-cta { flex-wrap: nowrap; gap: 8px; margin: 4px 0 22px; }
