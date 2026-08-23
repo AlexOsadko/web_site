@@ -1,0 +1,39 @@
+name: Практика ВС за запитом
+
+# Приватний помічник: за темою читає новини Верховного Суду про постанови,
+# робить AI-розбір на основі реального тексту й надсилає ПРИВАТНО адвокату.
+# Спершу можна запустити в режимі «структура» (dry) без AI/надсилання.
+
+on:
+  workflow_dispatch:
+    inputs:
+      query:
+        description: "Тема запиту (напр.: поділ майна подружжя; стягнення аліментів; ст. 130 КУпАП)"
+        type: string
+        default: ""
+      dry:
+        description: "Лише розвідка структури сторінки (без AI й без надсилання)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  query:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Встановити залежності
+        run: pip install -r tools/requirements-bot.txt
+      - name: Практика ВС
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_REVIEW_CHAT: ${{ secrets.TELEGRAM_REVIEW_CHAT }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          VS_QUERY: ${{ github.event.inputs.query }}
+          VS_DRY: ${{ github.event.inputs.dry == 'true' && '1' || '' }}
+        run: python3 tools/vs_practice_query.py
