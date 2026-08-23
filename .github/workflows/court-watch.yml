@@ -64,8 +64,9 @@ jobs:
           BOT_WORKER_SECRET: ${{ secrets.BOT_WORKER_SECRET }}
           # Шардинг: ~70 судів за прогін (курсор у стані). Worker (передеплоєний)
           # зливає шарди, тож повний звіт накопичується за ~7 щогодинних прогонів.
-          # Легко для court.gov.ua. Для разового повного обходу — прогін з full=true.
-          COURT_SHARD_SIZE: "70"
+          # Легко для court.gov.ua. Для разового повного обходу — прогін з full=true
+          # (тоді SHARD_SIZE=0 → бот сканує ВСІ суди за раз і оновлює звіт цілком).
+          COURT_SHARD_SIZE: ${{ github.event.inputs.full == 'true' && '0' || '70' }}
           # Швидка відмова недоступних судів (релоковані/ТОТ), щоб шард не залипав.
           COURT_FETCH_TIMEOUT: "8"
           COURT_REQUEST_PAUSE: "0.5"
