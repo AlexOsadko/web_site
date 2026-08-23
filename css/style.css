@@ -944,6 +944,16 @@ a.card:hover .more span { transform: translateX(5px); }
 .lp-btn-tg { background: #229ed9; color: #fff; }
 .lp-btn-wa { background: #25d366; color: #06331b; }
 .lp-btn-vb { background: #7360f2; color: #fff; }
+/* Видимий номер телефону в hero/фінальному блоці — люди частіше телефонують,
+   коли бачать сам номер, а не лише кнопку. Клік теж зараховується як конверсія. */
+.lp-phone {
+  display: inline-flex; align-items: center; gap: 9px;
+  margin: 18px 0 2px; font-size: clamp(1.4rem, 3.4vw, 1.7rem); font-weight: 700;
+  color: var(--blue); text-decoration: none; letter-spacing: .3px;
+}
+.lp-phone:hover { text-decoration: underline; }
+.lp-phone svg { width: 24px; height: 24px; flex: none; }
+.lp-note { margin: 8px 0 0; color: var(--muted); font-size: .98rem; line-height: 1.5; }
 /* Кнопки месенджерів у картці контактів/консультації — завжди в один рядок,
    рівні за шириною. На телефонах підписи ховаються (лишаються іконки). */
 .contacts-cta { flex-wrap: nowrap; gap: 8px; margin: 4px 0 22px; }
