@@ -187,6 +187,24 @@ def main():
                 print("Схожі на номери справ:", nums[:8])
             except Exception as ex:
                 print("Не вдалося дотягнути статтю:", ex)
+        # ДАМП СТРУКТУРИ (щоб знайти точний контейнер статті)
+        if len(news) > 1:
+            print("\n=== ДАМП СТРУКТУРИ (news[1]) ===")
+            try:
+                art = decode(fetch(news[1]["url"]))
+                classes = re.findall(r'class="([^"]{0,60})"', art)
+                interesting = sorted(set(c for c in classes if re.search(
+                    r'detail|content|text|news|article|body|main|item', c, re.I)))
+                print("Класи-кандидати:", interesting[:40])
+                m = re.search(r'(?is)<h1[^>]*>', art)
+                if m:
+                    seg = art[m.start():m.start() + 1400]
+                    seg = re.sub(r"\s+", " ", seg)
+                    print("HTML навколо <h1>:", seg[:1400])
+                else:
+                    print("<h1> не знайдено")
+            except Exception as ex:
+                print("Дамп не вдався:", ex)
         print("\nГОТОВО (розвідка)")
         return
 
