@@ -708,9 +708,11 @@ async function handleUpdate(update, env) {
     // Практика ВС за запитом: /вс <тема> — запускає аналіз новин ВС про
     // постанови; розбір приходить окремим повідомленням у цей чат.
     {
-      const vsm = body.match(/^\/(вс|vs)\b\s*([\s\S]*)$/i);
+      // Без \b — у JS вона не працює після кирилиці. Вимагаємо пробіл або кінець
+      // після команди, щоб «/встановлення» не сприймалось як «/вс».
+      const vsm = body.match(/^\/(?:вс|vs)(?:\s+([\s\S]*))?$/i);
       if (vsm) {
-        const query = (vsm[2] || '').trim();
+        const query = (vsm[1] || '').trim();
         if (!query) {
           return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
             text: 'Вкажіть тему: напр. <code>/вс поділ майна подружжя</code> або '
