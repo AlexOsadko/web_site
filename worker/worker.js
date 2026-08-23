@@ -475,6 +475,33 @@ async function handleRegister(request, env) {
   return Response.json({ ok });
 }
 
+// Запускає приватний аналіз «Практика ВС за запитом» через GitHub Actions
+// (workflow vs-practice.yml). Потрібен секрет GH_DISPATCH_TOKEN у Worker
+// (fine-grained PAT з правом Actions: read+write на цей репозиторій).
+async function triggerVsPractice(env, query) {
+  const token = env.GH_DISPATCH_TOKEN;
+  if (!token) return false;
+  const repo = env.GH_REPO || 'AlexOsadko/web_site';
+  try {
+    const r = await fetch(
+      `https://api.github.com/repos/${repo}/actions/workflows/vs-practice.yml/dispatches`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+          'User-Agent': 'osadko-telegram-bot',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ref: 'main', inputs: { query } }),
+      });
+    return r.status === 204;
+  } catch (e) {
+    return false;
+  }
+}
+
 async function handleUpdate(update, env) {
   // --- натискання кнопок ---
   if (update.callback_query) {
@@ -646,6 +673,7 @@ async function handleUpdate(update, env) {
           '/advocate — ⚖️ справи адвоката\n/reminders — 🔔 нагадування\n' +
           '/list — 📋 список клієнтів\n' +
           '/add — ➕ додати клієнта\n/restart — 🔄 терміновий прогін\n' +
+          '/вс &lt;тема&gt; — ⚖️ практика ВС за запитом (напр. /вс поділ майна)\n' +
           '/cancel — ↩️ скасувати', reply_markup: courtReplyKb() });
     }
 
@@ -675,6 +703,27 @@ async function handleUpdate(update, env) {
       await env.KV.delete('court_await');
       const txt = await urgentScan(env);
       return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt });
+    }
+
+    // Практика ВС за запитом: /вс <тема> — запускає аналіз новин ВС про
+    // постанови; розбір приходить окремим повідомленням у цей чат.
+    {
+      const vsm = body.match(/^\/(вс|vs)\b\s*([\s\S]*)$/i);
+      if (vsm) {
+        const query = (vsm[2] || '').trim();
+        if (!query) {
+          return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+            text: 'Вкажіть тему: напр. <code>/вс поділ майна подружжя</code> або '
+              + '<code>/вс стягнення аліментів</code>.' });
+        }
+        const ok = await triggerVsPractice(env, query);
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+          text: ok
+            ? `🔎 Шукаю практику ВС за темою «${esc(query)}». За хвилину надішлю сюди розбір `
+              + `(або повідомлю, що серед свіжих публікацій ВС нічого релевантного немає).`
+            : '⚠️ Не вдалося запустити пошук. Перевірте, що у Worker додано секрет '
+              + '<code>GH_DISPATCH_TOKEN</code>.' });
+      }
     }
 
     // Введення ПІБ для меню суду (додавання / зміна)
