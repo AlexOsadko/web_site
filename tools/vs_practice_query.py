@@ -96,26 +96,21 @@ def list_news(html):
 
 
 def article_text(html):
-    """Екстракція тіла статті новини ВС. Сайт на Bitrix, тож надійніше брати
-    абзаци-речення статті (<p> з реальним текстом), відкидаючи навігацію/меню
-    (короткі пункти, посилання)."""
-    # 1) типовий контейнер новини (якщо є)
-    m = re.search(r'(?is)<div[^>]+class="[^"]*(?:news-detail|detail[_-]?text|'
-                  r'page-content|content-text|article-text|news-text|detail)[^"]*"[^>]*>(.*)',
-                  html)
+    """Тіло статті новини ВС — у контейнері <div class="news-open__body">
+    (абзаци <p>). Меню/шапка сайту йдуть ДО нього, тож відсікаються."""
+    m = re.search(r'(?is)class="news-open__body"[^>]*>(.*)', html)
     scope = m.group(1) if m else html
-    # 2) абзаци з осмисленим текстом (речення довші за меню)
     paras = re.findall(r'(?is)<p[^>]*>(.*?)</p>', scope)
-    good = []
-    for p in paras:
-        t = strip_tags(p)
-        if len(t) >= 40:              # відкидаємо короткі навігаційні
-            good.append(t)
+    good = [t for t in (strip_tags(p) for p in paras) if len(t) >= 40]
     txt = re.sub(r"\s+", " ", " ".join(good)).strip()
-    if len(txt) >= 200:
+    if len(txt) >= 120:
         return txt
-    # 3) запасний варіант — весь текст без тегів
     return strip_tags(scope)
+
+
+def article_date(html):
+    m = re.search(r'(?is)class="news-open__date"[^>]*>(.*?)</div>', html)
+    return strip_tags(m.group(1)) if m else ""
 
 
 def relevance(item_text, query):
@@ -185,26 +180,9 @@ def main():
                 print("Початок:", txt[:500])
                 nums = re.findall(r"№?\s?\d+/\d+/\d+(?:/\d+)?|справ[аи]\s+№\s?\S+", txt)
                 print("Схожі на номери справ:", nums[:8])
+                print("Дата:", article_date(art))
             except Exception as ex:
                 print("Не вдалося дотягнути статтю:", ex)
-        # ДАМП СТРУКТУРИ (щоб знайти точний контейнер статті)
-        if len(news) > 1:
-            print("\n=== ДАМП СТРУКТУРИ (news[1]) ===")
-            try:
-                art = decode(fetch(news[1]["url"]))
-                classes = re.findall(r'class="([^"]{0,60})"', art)
-                interesting = sorted(set(c for c in classes if re.search(
-                    r'detail|content|text|news|article|body|main|item', c, re.I)))
-                print("Класи-кандидати:", interesting[:40])
-                m = re.search(r'(?is)<h1[^>]*>', art)
-                if m:
-                    seg = art[m.start():m.start() + 1400]
-                    seg = re.sub(r"\s+", " ", seg)
-                    print("HTML навколо <h1>:", seg[:1400])
-                else:
-                    print("<h1> не знайдено")
-            except Exception as ex:
-                print("Дамп не вдався:", ex)
         print("\nГОТОВО (розвідка)")
         return
 
@@ -230,9 +208,11 @@ def main():
             summary = analyze(it["title"], it["url"], txt)
             if "НЕ_РІШЕННЯ" in summary:
                 continue
+            date = article_date(art)
             msg = (f"⚖️ <b>Практика ВС за темою «{_html.escape(QUERY)}»</b>\n\n"
-                   f"<b>{_html.escape(it['title'])}</b>\n\n"
-                   f"{_html.escape(summary)}\n\n"
+                   f"<b>{_html.escape(it['title'])}</b>\n"
+                   + (f"<i>{_html.escape(date)}</i>\n" if date else "")
+                   + f"\n{_html.escape(summary)}\n\n"
                    f"🔗 Джерело: {it['url']}")
             tg_send(msg[:4000])
             sent += 1
