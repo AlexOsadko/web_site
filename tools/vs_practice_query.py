@@ -96,14 +96,26 @@ def list_news(html):
 
 
 def article_text(html):
-    """Груба екстракція основного тексту статті новини."""
-    # шукаємо найбільший текстовий блок
-    body = html
-    m = re.search(r'(?is)<(article|main)[^>]*>(.*?)</\1>', html)
-    if m:
-        body = m.group(2)
-    txt = strip_tags(body)
-    return txt
+    """Екстракція тіла статті новини ВС. Сайт на Bitrix, тож надійніше брати
+    абзаци-речення статті (<p> з реальним текстом), відкидаючи навігацію/меню
+    (короткі пункти, посилання)."""
+    # 1) типовий контейнер новини (якщо є)
+    m = re.search(r'(?is)<div[^>]+class="[^"]*(?:news-detail|detail[_-]?text|'
+                  r'page-content|content-text|article-text|news-text|detail)[^"]*"[^>]*>(.*)',
+                  html)
+    scope = m.group(1) if m else html
+    # 2) абзаци з осмисленим текстом (речення довші за меню)
+    paras = re.findall(r'(?is)<p[^>]*>(.*?)</p>', scope)
+    good = []
+    for p in paras:
+        t = strip_tags(p)
+        if len(t) >= 40:              # відкидаємо короткі навігаційні
+            good.append(t)
+    txt = re.sub(r"\s+", " ", " ".join(good)).strip()
+    if len(txt) >= 200:
+        return txt
+    # 3) запасний варіант — весь текст без тегів
+    return strip_tags(scope)
 
 
 def relevance(item_text, query):
@@ -164,14 +176,14 @@ def main():
         for i, it in enumerate(news[:15], 1):
             print(f"{i:>2}. {it['title'][:90]}")
             print(f"    {it['url']}")
-        if news:
-            print("\n--- Прев'ю тексту першої статті ---")
+        for it in news[:3]:
+            print(f"\n--- Прев'ю статті: {it['title'][:70]} ---")
             try:
-                art = decode(fetch(news[0]["url"]))
+                art = decode(fetch(it["url"]))
                 txt = article_text(art)
                 print(f"Довжина тексту: {len(txt)} символів")
-                print("Початок:", txt[:600])
-                nums = re.findall(r"№?\s?\d+/\d+/\d+|справ[аи]\s+№\s?\S+", txt)
+                print("Початок:", txt[:500])
+                nums = re.findall(r"№?\s?\d+/\d+/\d+(?:/\d+)?|справ[аи]\s+№\s?\S+", txt)
                 print("Схожі на номери справ:", nums[:8])
             except Exception as ex:
                 print("Не вдалося дотягнути статтю:", ex)
