@@ -139,6 +139,27 @@ def main():
             show(url, c, t, r)
         except Exception as ex:
             print(f"  ✗ {url} — {ex}")
+    # 4) ГОЛОВНЕ: стукаємо у справжній API-хост, знайдений у бандлі.
+    API = "https://lpd-api-prod.court.gov.ua"
+    print("=" * 72)
+    print(f"4) Реальний API-хост: {API}")
+    api_paths = [
+        "/", "/swagger", "/swagger/index.html", "/swagger/v1/swagger.json",
+        "/api-docs", "/openapi.json", "/health",
+        "/api", "/api/positions", "/api/categories", "/api/directions",
+        "/api/filters", "/api/search", "/api/documents", "/api/menu",
+        "/api/legal-positions", "/api/practice", "/api/home/search",
+        "/api/v1/positions", "/api/v1/categories", "/api/v1/search",
+        "/positions", "/categories", "/search",
+    ]
+    for p in api_paths:
+        url = API + p
+        try:
+            c, t, r = fetch(url)
+            show(url, c, t, r)
+        except Exception as ex:
+            print(f"  ✗ {url} — {ex}")
+
     print("=" * 72)
     print("ГОТОВО")
 
