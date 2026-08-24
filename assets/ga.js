@@ -13,11 +13,14 @@
   try { stored = localStorage.getItem(KEY); } catch (e) {}
 
   // Consent Mode v2 — стан за замовчуванням (до вибору користувача — denied).
+  // Якщо користувач раніше натиснув «Прийняти» — одразу вмикаємо і аналітику,
+  // і рекламні сигнали (щоб Google Ads рахував конверсії повноцінно, з cookie).
+  var granted = (stored === "granted");
   gtag("consent", "default", {
-    ad_storage: "denied",
-    ad_user_data: "denied",
-    ad_personalization: "denied",
-    analytics_storage: (stored === "granted") ? "granted" : "denied",
+    ad_storage: granted ? "granted" : "denied",
+    ad_user_data: granted ? "granted" : "denied",
+    ad_personalization: granted ? "granted" : "denied",
+    analytics_storage: granted ? "granted" : "denied",
     wait_for_update: 500
   });
 
@@ -48,10 +51,20 @@
   };
 
   function grant() {
-    gtag("consent", "update", { analytics_storage: "granted" });
+    gtag("consent", "update", {
+      ad_storage: "granted",
+      ad_user_data: "granted",
+      ad_personalization: "granted",
+      analytics_storage: "granted"
+    });
   }
   function deny() {
-    gtag("consent", "update", { analytics_storage: "denied" });
+    gtag("consent", "update", {
+      ad_storage: "denied",
+      ad_user_data: "denied",
+      ad_personalization: "denied",
+      analytics_storage: "denied"
+    });
   }
 
   // Події-конверсії (Consent Mode сам вирішує cookie/cookieless за станом згоди).
@@ -96,7 +109,8 @@
     b.setAttribute("role", "dialog");
     b.setAttribute("aria-label", "Згода на використання cookie");
     b.innerHTML =
-      '<p>Ми використовуємо файли cookie для аналітики (Google Analytics), щоб покращувати сайт. ' +
+      '<p>Ми використовуємо файли cookie для аналітики та реклами (Google Analytics і Google Ads), ' +
+      'щоб покращувати сайт і оцінювати ефективність реклами. ' +
       'Деталі — у <a href="' + policyUrl + '">Політиці конфіденційності</a>.</p>' +
       '<div class="cookie-actions">' +
         '<button type="button" class="btn btn-primary ck-accept">Прийняти</button>' +
