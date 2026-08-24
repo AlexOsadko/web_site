@@ -43,12 +43,13 @@
 "https://sud.ua/ru/news/publication/369739-vykonavchyi-lyst-mozhna-otrymaty-poshtoiu-sud-vyznav-vymohu-osobystoi-iavky-za-dokumentamy-nezakonnoiu",
 "https://sud.ua/ru/news/ukraine/370161-shcho-pysaty-u-pryznachenni-platezhu-pry-perekazi-hroshei-na-kartku-pryklady-dlia-riznykh-sytuatsii",
 "https://protocol.ua/ua/pismova_zgoda_odnogo_z_podruggya_na_otrimannya_poziki_inshim_iz_podruggya_svidchit_same_pro_solidarniy_harakter_ihnoi_vidpovidalnosti_nezvagayuchi_na_te_shcho_cholovik_pozichalnik_pomer_ktss_vs/",
-"https://sud.ua/ru/news/sudova-praktyka/370205-vs-skasuvav-rishennia-apeliatsii-cherez-te-shcho-obvynuvachenu-po-statti-121-kku-povidomyly-pro-datu-sudu-u-viber"
+"https://sud.ua/ru/news/sudova-praktyka/370205-vs-skasuvav-rishennia-apeliatsii-cherez-te-shcho-obvynuvachenu-po-statti-121-kku-povidomyly-pro-datu-sudu-u-viber",
+"https://protocol.ua/ua/administrativne_oskargennya_rishen_diy_ta_bezdiyalnosti_dps_za_zakonoproektom_15516_shcho_zminitsya_dlya_biznesu/"
 ],
 "day": "2026-08-24",
-"count": 1,
-"total": 45,
-"seq": 58,
+"count": 2,
+"total": 46,
+"seq": 59,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -146,7 +147,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787554291.2198615,
+"last_content_ts": 1787563611.087378,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
