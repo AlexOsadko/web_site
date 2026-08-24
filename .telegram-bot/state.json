@@ -46,12 +46,13 @@
 "https://sud.ua/ru/news/sudova-praktyka/370205-vs-skasuvav-rishennia-apeliatsii-cherez-te-shcho-obvynuvachenu-po-statti-121-kku-povidomyly-pro-datu-sudu-u-viber",
 "https://protocol.ua/ua/administrativne_oskargennya_rishen_diy_ta_bezdiyalnosti_dps_za_zakonoproektom_15516_shcho_zminitsya_dlya_biznesu/",
 "https://protocol.ua/ua/suddya_z_odeshchini_yakiy_otrimav_7_rokiv_v_yaznitsi_za_1300_dolariv_habara_tikav_vid_nabu_i_nachebto_shovav_groshi/",
-"https://jurliga.ligazakon.net/news/245677_koli-pozov-sta-zlovzhivannyam-velika-palata-okreslila-mezhu"
+"https://jurliga.ligazakon.net/news/245677_koli-pozov-sta-zlovzhivannyam-velika-palata-okreslila-mezhu",
+"https://sud.ua/ru/news/ukraine/370239-ponad-700-tysiach-hryven-nezakonnykh-vyplat-na-odeshchyni-vykryly-skhemu-u-viiskovii-chastyni"
 ],
 "day": "2026-08-24",
-"count": 4,
-"total": 48,
-"seq": 62,
+"count": 5,
+"total": 49,
+"seq": 63,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -150,7 +151,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787588186.256122,
+"last_content_ts": 1787597620.2781558,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
