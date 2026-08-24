@@ -69,15 +69,13 @@ function courtMenuKb() {
 function courtReplyKb() {
   return {
     keyboard: [
-      [{ text: '➕ Додати клієнта' }],
       [{ text: '👥 Справи клієнтів' }, { text: '⚖️ Справи адвоката' }],
-      [{ text: '🔔 Нагадування' }, { text: '📋 Список клієнтів' }],
-      [{ text: '🔎 Пошук практики ВС' }],
+      [{ text: '🔎 Пошук практики ВС' }, { text: '📋 Список клієнтів' }],
+      [{ text: '🔔 Нагадування' }, { text: '➕ Додати клієнта' }],
       [{ text: '🔄 Терміновий прогін' }],
     ],
     resize_keyboard: true,
-    is_persistent: true,
-    input_field_placeholder: 'Оберіть дію в меню нижче…',
+    input_field_placeholder: 'Оберіть дію (меню можна згорнути ☰)',
   };
 }
 
