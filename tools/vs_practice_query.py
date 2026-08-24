@@ -29,6 +29,7 @@ import json
 import html as _html
 import urllib.request
 import urllib.error
+import concurrent.futures
 from urllib.parse import urljoin
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -58,7 +59,6 @@ SOURCES = [
         "body_scope": r'class="container content"[^>]*>(.*)',
         "date_scope": None,
         "scan_body": True,
-        "scan_limit": 30,
     },
     {
         "name": "🏛 Конституційний Суд",
@@ -72,6 +72,11 @@ SOURCES = [
 
 # Скільки матеріалів щонайбільше з ОДНОГО джерела потрапляє у відповідь.
 PER_SOURCE = int(os.environ.get("VS_PER_SOURCE", "2") or "2")
+# Джерела зі scan_body (Пленум) читаємо тілами. 0 = сканувати ВЕСЬ архів;
+# інакше — обмежити цим числом найсвіжіших. Завантаження — паралельне,
+# помірним пулом потоків, щоб не навантажувати сайт суду.
+PLENUM_SCAN = int(os.environ.get("VS_PLENUM_SCAN", "0") or "0")
+SCAN_WORKERS = max(1, int(os.environ.get("VS_SCAN_WORKERS", "6") or "6"))
 
 QUERY = os.environ.get("VS_QUERY", "").strip()
 DRY = os.environ.get("VS_DRY", "").strip() in ("1", "true", "yes")
@@ -210,31 +215,40 @@ def gather():
     return all_items
 
 
+def _scan_body(it, src, query):
+    """Завантажує тіло однієї постанови, витягує текст і рахує релевантність.
+    Викликається паралельно; коротший таймаут, щоб одна сторінка не блокувала пул."""
+    try:
+        art = decode(fetch(it["url"], timeout=15))
+        it["_text"] = article_text(art, src)
+        it["_date"] = article_date(art, src)
+        it["_score"] = relevance(it["_text"], query)
+    except Exception as ex:
+        print("скан тіла не вдався", it["url"], ex)
+        it["_score"] = 0
+    return it
+
+
 def select(items, query):
     """Відбирає найрелевантніші матеріали з кожного джерела.
 
     Для звичайних джерел (ВС, КСУ) релевантність — за заголовком.
     Для джерел зі scan_body (Пленум) заголовок неінформативний (лише номер/дата),
-    тож вантажимо тіло найсвіжіших постанов і рахуємо релевантність за текстом,
-    кешуючи текст у it['_text'] (щоб не тягнути двічі). З кожного джерела беремо
-    щонайбільше PER_SOURCE матеріалів; далі — глобальний ліміт MAX_ARTICLES."""
+    тож вантажимо тіло постанов і рахуємо релевантність за текстом, кешуючи текст
+    у it['_text'] (щоб не тягнути двічі). За замовчуванням скануємо ВЕСЬ архів
+    (цінні — старіші, змістовні постанови), паралельно пулом потоків. З кожного
+    джерела беремо щонайбільше PER_SOURCE матеріалів; далі — ліміт MAX_ARTICLES."""
     picked = []
     for src in SOURCES:
         sub = [it for it in items if it["_src"] is src]
         if src.get("scan_body"):
-            scored = []
-            for it in sub[: src.get("scan_limit", 15)]:
-                try:
-                    art = decode(fetch(it["url"]))
-                    it["_text"] = article_text(art, src)
-                    it["_date"] = article_date(art, src)
-                    it["_score"] = relevance(it["_text"], query)
-                except Exception as ex:
-                    print("скан тіла не вдався", it["url"], ex)
-                    it["_score"] = 0
-                if it["_score"] > 0:
-                    scored.append(it)
-            scored.sort(key=lambda it: it["_score"], reverse=True)
+            pool = sub if PLENUM_SCAN <= 0 else sub[:PLENUM_SCAN]
+            print(f"{src['name']}: сканую тіла {len(pool)} постанов "
+                  f"({SCAN_WORKERS} потоків)…")
+            with concurrent.futures.ThreadPoolExecutor(max_workers=SCAN_WORKERS) as pex:
+                list(pex.map(lambda it: _scan_body(it, src, query), pool))
+            scored = sorted((it for it in pool if it.get("_score", 0) > 0),
+                            key=lambda it: it["_score"], reverse=True)
         else:
             for it in sub:
                 it["_score"] = relevance(it["title"], query)
