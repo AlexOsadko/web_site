@@ -145,8 +145,18 @@ def main():
             print("Перший документ постанови:", doc_url)
     if doc_url:
         dump_structure("Стаття Постанови Пленуму", doc_url)
-        dump_links("Документ Постанови — вкладення/pdf", doc_url,
-                   filt=r'\.pdf|download|upload|files')
+        dump_links("Документ Постанови — усі посилання", doc_url)
+        # сирий фрагмент HTML довкола <h1>, щоб побачити контейнер тексту
+        code, raw = fetch(doc_url)
+        if code == 200 and raw:
+            h = decode(raw)
+            for pat in ("iframe", "embed", ".pdf", ".doc", "pdf-viewer", "news-open"):
+                print(f"  містить «{pat}»:", pat in h)
+            m = re.search(r"(?is)<h1", h)
+            if m:
+                frag = h[m.start(): m.start() + 3000]
+                print("  --- HTML від <h1> (3000 симв.) ---")
+                print(frag)
 
     # 2) КСУ — стрічка новин
     news = probe("КСУ — новини (/news)", "https://ccu.gov.ua/news",
