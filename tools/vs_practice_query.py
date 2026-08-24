@@ -49,12 +49,16 @@ SOURCES = [
         "date_scope": r'class="news-open__date"[^>]*>(.*?)</div>',
     },
     {
+        # Постанови Пленуму — статичний перелік документів; у заголовку лише
+        # номер і дата, тож релевантність рахуємо за ТЕКСТОМ (scan_body).
         "name": "⚖️ Постанови Пленуму ВС",
         "base": "https://supreme.court.gov.ua",
         "listing": "https://supreme.court.gov.ua/supreme/pro_sud/postanovi_plenumu/",
-        "link_re": r'/news/\d+/?',
-        "body_scope": r'class="news-open__body"[^>]*>(.*)',
-        "date_scope": r'class="news-open__date"[^>]*>(.*?)</div>',
+        "link_re": r'postanova_plenumu_',
+        "body_scope": None,
+        "date_scope": None,
+        "scan_body": True,
+        "scan_limit": 18,
     },
     {
         "name": "🏛 Конституційний Суд",
@@ -66,9 +70,12 @@ SOURCES = [
     },
 ]
 
+# Скільки матеріалів щонайбільше з ОДНОГО джерела потрапляє у відповідь.
+PER_SOURCE = int(os.environ.get("VS_PER_SOURCE", "2") or "2")
+
 QUERY = os.environ.get("VS_QUERY", "").strip()
 DRY = os.environ.get("VS_DRY", "").strip() in ("1", "true", "yes")
-MAX_ARTICLES = int(os.environ.get("VS_MAX", "3") or "3")
+MAX_ARTICLES = int(os.environ.get("VS_MAX", "5") or "5")
 
 
 def fetch(url, timeout=30, tries=3):
@@ -110,7 +117,8 @@ def list_articles(html, src):
             continue
         if len(inner) < 12:
             continue
-        url = urljoin(src["base"] + "/", href)
+        # відносні слаги (Пленум) резолвимо саме від адреси стрічки
+        url = urljoin(src["listing"], href)
         if url in seen:
             continue
         seen.add(url)
@@ -201,6 +209,43 @@ def gather():
     return all_items
 
 
+def select(items, query):
+    """Відбирає найрелевантніші матеріали з кожного джерела.
+
+    Для звичайних джерел (ВС, КСУ) релевантність — за заголовком.
+    Для джерел зі scan_body (Пленум) заголовок неінформативний (лише номер/дата),
+    тож вантажимо тіло найсвіжіших постанов і рахуємо релевантність за текстом,
+    кешуючи текст у it['_text'] (щоб не тягнути двічі). З кожного джерела беремо
+    щонайбільше PER_SOURCE матеріалів; далі — глобальний ліміт MAX_ARTICLES."""
+    picked = []
+    for src in SOURCES:
+        sub = [it for it in items if it["_src"] is src]
+        if src.get("scan_body"):
+            scored = []
+            for it in sub[: src.get("scan_limit", 15)]:
+                try:
+                    art = decode(fetch(it["url"]))
+                    it["_text"] = article_text(art, src)
+                    it["_date"] = article_date(art, src)
+                    it["_score"] = relevance(it["_text"], query)
+                except Exception as ex:
+                    print("скан тіла не вдався", it["url"], ex)
+                    it["_score"] = 0
+                if it["_score"] > 0:
+                    scored.append(it)
+            scored.sort(key=lambda it: it["_score"], reverse=True)
+        else:
+            for it in sub:
+                it["_score"] = relevance(it["title"], query)
+            scored = sorted((it for it in sub if it["_score"] > 0),
+                            key=lambda it: it["_score"], reverse=True)
+        top = scored[:PER_SOURCE]
+        print(f"{src['name']}: релевантних {len(scored)}, беремо {len(top)}")
+        picked.extend(top)
+    picked.sort(key=lambda it: it["_score"], reverse=True)
+    return picked[:MAX_ARTICLES]
+
+
 def main():
     items = gather()
 
@@ -238,8 +283,7 @@ def main():
         print("Порожній VS_QUERY.")
         return
     print(f"Запит: {QUERY!r}")
-    ranked = sorted(items, key=lambda it: relevance(it["title"], QUERY), reverse=True)
-    top = [it for it in ranked if relevance(it["title"], QUERY) > 0][:MAX_ARTICLES]
+    top = select(items, QUERY)
     if not top:
         tg_send(f"🔎 <b>Практика судів</b>\nЗа темою «{_html.escape(QUERY)}» серед свіжих "
                 f"офіційних публікацій ВС, Пленуму ВС і КСУ нічого релевантного не знайшов. "
@@ -251,14 +295,18 @@ def main():
     for it in top:
         try:
             src = it["_src"]
-            art = decode(fetch(it["url"]))
-            txt = article_text(art, src)
+            # тіло могли вже завантажити на етапі відбору (scan_body)
+            txt = it.get("_text")
+            date = it.get("_date", "")
+            if txt is None:
+                art = decode(fetch(it["url"]))
+                txt = article_text(art, src)
+                date = article_date(art, src)
             if len(txt) < 200:
                 continue
             summary = analyze(it["title"], it["url"], txt, src["name"])
             if "НЕ_РІШЕННЯ" in summary:
                 continue
-            date = article_date(art, src)
             msg = (f"{src['name']} · <b>за темою «{_html.escape(QUERY)}»</b>\n\n"
                    f"<b>{_html.escape(it['title'])}</b>\n"
                    + (f"<i>{_html.escape(date)}</i>\n" if date else "")
