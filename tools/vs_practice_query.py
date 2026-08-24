@@ -209,6 +209,17 @@ def main():
         for src in SOURCES:
             sub = [it for it in items if it["_src"] is src][:5]
             print(f"\n### {src['name']} — {len(sub)} прикладів")
+            if not sub:
+                # діагностика: покажемо сирі посилання зі сторінки
+                try:
+                    raw = decode(fetch(src["listing"]))
+                    hrefs = re.findall(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', raw, re.I | re.S)
+                    print("  сирі посилання (перші 14):")
+                    for h, t in hrefs[:14]:
+                        print(f"    {h}  |  {strip_tags(t)[:50]}")
+                except Exception as ex:
+                    print("  дамп не вдався:", ex)
+                continue
             for it in sub:
                 print(f"  • {it['title'][:80]}\n    {it['url']}")
             if sub:
