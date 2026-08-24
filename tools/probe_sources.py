@@ -102,11 +102,39 @@ def dump_structure(label, url):
         print("  перший абзац:", paras[0][:220])
 
 
+def dump_links(label, url, limit=60):
+    print("=" * 72)
+    print("ПОСИЛАННЯ: " + label)
+    print("  " + url)
+    code, raw = fetch(url)
+    if code != 200 or not raw:
+        print(f"  ✗ статус {code}")
+        return
+    html = decode(raw)
+    seen = set()
+    n = 0
+    for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', html, re.I | re.S):
+        href, inner = m.group(1), strip_tags(m.group(2))
+        if href in seen or len(inner) < 3:
+            continue
+        seen.add(href)
+        # цікавлять посилання, що схожі на документ/сторінку постанови
+        if re.search(r'plenium|postanov|/news/|\.pdf|\d{4,}', href, re.I):
+            print(f"    {href}  |  {inner[:60]}")
+            n += 1
+        if n >= limit:
+            break
+
+
 def main():
     # 1) Пленум ВС — знайдена адреса /plenium/
     plen = probe("Пленум ВС — розділ",
                  "https://supreme.court.gov.ua/supreme/pro_sud/plenium/",
                  needles=("постанов", "plenium", "/news/"))
+    dump_links("Пленум ВС — усі змістовні посилання",
+               "https://supreme.court.gov.ua/supreme/pro_sud/plenium/")
+    dump_structure("Пленум ВС — сторінка розділу",
+                   "https://supreme.court.gov.ua/supreme/pro_sud/plenium/")
 
     # 2) КСУ — стрічка новин
     news = probe("КСУ — новини (/news)", "https://ccu.gov.ua/news",
