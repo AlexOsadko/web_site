@@ -45,12 +45,13 @@
 "https://protocol.ua/ua/pismova_zgoda_odnogo_z_podruggya_na_otrimannya_poziki_inshim_iz_podruggya_svidchit_same_pro_solidarniy_harakter_ihnoi_vidpovidalnosti_nezvagayuchi_na_te_shcho_cholovik_pozichalnik_pomer_ktss_vs/",
 "https://sud.ua/ru/news/sudova-praktyka/370205-vs-skasuvav-rishennia-apeliatsii-cherez-te-shcho-obvynuvachenu-po-statti-121-kku-povidomyly-pro-datu-sudu-u-viber",
 "https://protocol.ua/ua/administrativne_oskargennya_rishen_diy_ta_bezdiyalnosti_dps_za_zakonoproektom_15516_shcho_zminitsya_dlya_biznesu/",
-"https://protocol.ua/ua/suddya_z_odeshchini_yakiy_otrimav_7_rokiv_v_yaznitsi_za_1300_dolariv_habara_tikav_vid_nabu_i_nachebto_shovav_groshi/"
+"https://protocol.ua/ua/suddya_z_odeshchini_yakiy_otrimav_7_rokiv_v_yaznitsi_za_1300_dolariv_habara_tikav_vid_nabu_i_nachebto_shovav_groshi/",
+"https://jurliga.ligazakon.net/news/245677_koli-pozov-sta-zlovzhivannyam-velika-palata-okreslila-mezhu"
 ],
 "day": "2026-08-24",
-"count": 3,
-"total": 47,
-"seq": 61,
+"count": 4,
+"total": 48,
+"seq": 62,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -149,7 +150,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787580476.6413438,
+"last_content_ts": 1787588186.256122,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
