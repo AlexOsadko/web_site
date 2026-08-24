@@ -132,10 +132,21 @@ def main():
     plen = probe("Пленум ВС — розділ",
                  "https://supreme.court.gov.ua/supreme/pro_sud/plenium/",
                  needles=("постанов", "plenium", "/news/"))
-    dump_links("Постанови Пленуму — усі посилання",
-               "https://supreme.court.gov.ua/supreme/pro_sud/postanovi_plenumu/")
-    dump_structure("Постанови Пленуму — сторінка",
-                   "https://supreme.court.gov.ua/supreme/pro_sud/postanovi_plenumu/")
+    plist = "https://supreme.court.gov.ua/supreme/pro_sud/postanovi_plenumu/"
+    # знайдемо перший слаг постанови й дослідимо його сторінку
+    code, raw = fetch(plist)
+    doc_url = None
+    if code == 200 and raw:
+        h = decode(raw)
+        m = re.search(r'href="([^"]*postanova_plenumu_[^"]+)"', h)
+        if m:
+            from urllib.parse import urljoin
+            doc_url = urljoin(plist, m.group(1))
+            print("Перший документ постанови:", doc_url)
+    if doc_url:
+        dump_structure("Стаття Постанови Пленуму", doc_url)
+        dump_links("Документ Постанови — вкладення/pdf", doc_url,
+                   filt=r'\.pdf|download|upload|files')
 
     # 2) КСУ — стрічка новин
     news = probe("КСУ — новини (/news)", "https://ccu.gov.ua/news",
