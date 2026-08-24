@@ -55,10 +55,10 @@ SOURCES = [
         "base": "https://supreme.court.gov.ua",
         "listing": "https://supreme.court.gov.ua/supreme/pro_sud/postanovi_plenumu/",
         "link_re": r'postanova_plenumu_',
-        "body_scope": None,
+        "body_scope": r'class="container content"[^>]*>(.*)',
         "date_scope": None,
         "scan_body": True,
-        "scan_limit": 18,
+        "scan_limit": 30,
     },
     {
         "name": "🏛 Конституційний Суд",
@@ -132,8 +132,9 @@ def article_text(html, src):
         m = re.search("(?is)" + src["body_scope"], html)
         if m:
             scope = m.group(1)
-    paras = re.findall(r'(?is)<p[^>]*>(.*?)</p>', scope)
-    good = [t for t in (strip_tags(p) for p in paras) if len(t) >= 40]
+    # абзаци й пункти переліку (операційна частина постанов — у <li>)
+    paras = re.findall(r'(?is)<(p|li)[^>]*>(.*?)</\1>', scope)
+    good = [t for t in (strip_tags(raw) for _tag, raw in paras) if len(t) >= 40]
     txt = re.sub(r"\s+", " ", " ".join(good)).strip()
     return txt if len(txt) >= 120 else strip_tags(scope)
 
