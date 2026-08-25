@@ -946,7 +946,7 @@ a.card:hover .more span { transform: translateX(5px); }
 .lp-cta { display: flex; flex-wrap: wrap; gap: 12px; }
 .lp-btn {
   display: inline-flex; align-items: center; justify-content: center;
-  padding: 13px 26px; border-radius: 12px; font-weight: 600; font-size: 1rem;
+  padding: 13px 26px; min-height: 44px; border-radius: 12px; font-weight: 600; font-size: 1rem;
   text-decoration: none; transition: transform .12s, box-shadow .15s, opacity .15s;
 }
 .lp-btn:hover { transform: translateY(-1px); }
