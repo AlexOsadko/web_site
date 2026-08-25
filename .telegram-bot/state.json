@@ -49,12 +49,13 @@
 "https://jurliga.ligazakon.net/news/245677_koli-pozov-sta-zlovzhivannyam-velika-palata-okreslila-mezhu",
 "https://sud.ua/ru/news/ukraine/370239-ponad-700-tysiach-hryven-nezakonnykh-vyplat-na-odeshchyni-vykryly-skhemu-u-viiskovii-chastyni",
 "https://jurliga.ligazakon.net/news/245824_rshennya-sudu-pro-viznachennya-mstsya-prozhivannya-ditini-proponuyut-zrobiti-pdstavoyu-dlya-vdstrochki-vd-moblzats",
-"https://jurliga.ligazakon.net/news/245831_verkhovniy-sud-uzagalniv-praktiku-shchodo-rro-ta-povnovazhen-podatkvtsv-pd-chas-faktichnikh-perevrok"
+"https://jurliga.ligazakon.net/news/245831_verkhovniy-sud-uzagalniv-praktiku-shchodo-rro-ta-povnovazhen-podatkvtsv-pd-chas-faktichnikh-perevrok",
+"https://court.gov.ua/press/news/2086055/"
 ],
 "day": "2026-08-25",
-"count": 2,
-"total": 51,
-"seq": 65,
+"count": 3,
+"total": 52,
+"seq": 66,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -153,7 +154,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787648379.8330894,
+"last_content_ts": 1787656524.8492837,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
