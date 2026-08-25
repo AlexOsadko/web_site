@@ -184,7 +184,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 
 /* Перемикач теми (день/ніч) */
 .theme-toggle {
-  width: 40px; height: 40px; flex-shrink: 0;
+  width: 44px; height: 44px; flex-shrink: 0;
   display: inline-grid; place-items: center;
   border: 1px solid var(--line); border-radius: 11px;
   background: var(--card); color: var(--ink); cursor: pointer;
@@ -230,11 +230,15 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 .nav-toggle {
   display: none;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 5px;
   background: none;
   border: none;
   cursor: pointer;
   padding: 8px;
+  min-width: 44px;
+  min-height: 44px;
 }
 .nav-toggle span { width: 22px; height: 2px; background: var(--ink); border-radius: 2px; }
 
@@ -1228,7 +1232,7 @@ a.card:hover .more span { transform: translateX(5px); }
 .cookie-banner p { font-size: .9rem; color: var(--muted); line-height: 1.5; margin: 0 0 14px; }
 .cookie-banner a { color: var(--blue); font-weight: 600; }
 .cookie-actions { display: flex; gap: 10px; }
-.cookie-actions .btn { padding: 9px 18px; font-size: .9rem; }
+.cookie-actions .btn { padding: 11px 20px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: .9rem; }
 @media (max-width: 520px) { .cookie-banner { left: 12px; right: 12px; bottom: 12px; width: auto; } }
 @media (max-width: 860px) {
   .callback-inner { flex-wrap: wrap; }
