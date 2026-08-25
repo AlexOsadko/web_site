@@ -115,7 +115,7 @@ h1, h2, h3, p, .section-title, .contacts-card h2, .contacts-card p, .article-car
 img { max-width: 100%; display: block; }
 
 h1, h2, h3, .disp {
-  font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+  font-family: 'Onest', 'Inter', sans-serif;
   letter-spacing: -.02em;
   font-weight: 600;
 }
@@ -200,7 +200,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
   display: flex;
   align-items: center;
   gap: 11px;
-  font-family: 'Bricolage Grotesque', sans-serif;
+  font-family: 'Onest', sans-serif;
   font-weight: 800;
   font-size: 1.15rem;
   color: var(--ink);
@@ -746,7 +746,7 @@ p.body-reveal,
 .ci-ico svg { width: 26px; height: 26px; display: block; }
 .contact-item .label {
   display: block;
-  font-family: 'Bricolage Grotesque', sans-serif;
+  font-family: 'Onest', sans-serif;
   font-weight: 600;
   font-size: 1.05rem;
   color: var(--ink);
