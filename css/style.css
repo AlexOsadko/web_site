@@ -1,25 +1,25 @@
 /* ===== Дизайн-система «Синій довіра» ===== */
 :root {
-  --bg: #dce2f0;
+  --bg: #eef1f7;
   --card: #ffffff;
   --ink: #0b1f3a;
   --muted: #5a6b82;
   --faint: #8a97a8;
   --blue: #1e50e6;
   --blue2: #5b7cff;
-  --line: #e4e8f4;
+  --line: #e2e7f1;
   --green: #22c55e;
   --dot-ring: rgba(30, 80, 230, .45);
   --tint: #d2ddf6;
   --tint-warm: #fbe8db;
   --radius: 20px;
-  --shadow: 0 22px 50px rgba(11, 31, 58, .10);
-  --shadow-lg: 0 30px 60px rgba(11, 31, 58, .12);
+  --shadow: 0 18px 40px rgba(11, 31, 58, .12);
+  --shadow-lg: 0 26px 56px rgba(11, 31, 58, .15);
 
   /* Семантичні токени (для перемикача тем) */
   --text: #33425a;                      /* м'який текст статей */
   --field: #ffffff;                     /* фон полів вводу на світлих картках */
-  --header-bg: rgba(220, 226, 240, .88);
+  --header-bg: rgba(238, 241, 247, .88);
   --hover: #e8ebf2;                     /* ховер пунктів меню */
   --hover-soft: rgba(11, 31, 58, .06);
   --mcta-bg: rgba(255, 255, 255, .92);
@@ -40,26 +40,26 @@
 
 /* ===== Темна преміум-тема (перемикач) ===== */
 :root[data-theme="dark"] {
-  --bg: #2e3d5b;
-  --card: #3a4c70;
+  --bg: #16223d;
+  --card: #22314e;
   --ink: #f2f6fd;
   --muted: #b4c2d9;
   --faint: #97a5be;
   --blue: #7aa2ff;
   --blue2: #9cbaff;
   --green: #4ade80;
-  --line: rgba(255, 255, 255, .15);
+  --line: rgba(255, 255, 255, .12);
   --dot-ring: rgba(122, 162, 255, .5);
   --tint: rgba(122, 162, 255, .20);
   --tint-warm: rgba(217, 119, 6, .20);
   --shadow: 0 22px 50px rgba(0, 0, 0, .32);
   --shadow-lg: 0 30px 60px rgba(0, 0, 0, .36);
   --text: #d3dcec;
-  --field: #435477;
-  --header-bg: rgba(46, 61, 91, .85);
+  --field: #2c3f61;
+  --header-bg: rgba(22, 34, 61, .85);
   --hover: rgba(255, 255, 255, .09);
   --hover-soft: rgba(255, 255, 255, .11);
-  --mcta-bg: rgba(50, 64, 94, .92);
+  --mcta-bg: rgba(34, 49, 78, .92);
 
   /* Кольори категорій — освітлені для читабельності на темному фоні */
   --c-civil: #6ea8fe;
