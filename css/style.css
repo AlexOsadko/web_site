@@ -436,7 +436,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
 }
 .cbtn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 12px 10px; border-radius: 10px;
+  padding: 12px 10px; min-height: 44px; border-radius: 10px;
   font-size: .92rem; font-weight: 600; line-height: 1;
   color: #fff; text-decoration: none; min-width: 0;
   transition: transform .15s ease, filter .15s ease;
