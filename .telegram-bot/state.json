@@ -51,12 +51,13 @@
 "https://jurliga.ligazakon.net/news/245824_rshennya-sudu-pro-viznachennya-mstsya-prozhivannya-ditini-proponuyut-zrobiti-pdstavoyu-dlya-vdstrochki-vd-moblzats",
 "https://jurliga.ligazakon.net/news/245831_verkhovniy-sud-uzagalniv-praktiku-shchodo-rro-ta-povnovazhen-podatkvtsv-pd-chas-faktichnikh-perevrok",
 "https://court.gov.ua/press/news/2086055/",
-"https://court.gov.ua/press/news/2086203/"
+"https://court.gov.ua/press/news/2086203/",
+"https://jurliga.ligazakon.net/news/245837_chi-mozhe-ttsk-oskarzhiti-rshennya-pro-mstse-prozhivannya-ditini-verkhovniy-sud-proponu-zmniti-pdkhd"
 ],
 "day": "2026-08-25",
-"count": 4,
-"total": 53,
-"seq": 67,
+"count": 5,
+"total": 54,
+"seq": 68,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -155,7 +156,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787663790.634004,
+"last_content_ts": 1787673243.3054357,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
