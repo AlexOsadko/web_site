@@ -819,7 +819,9 @@ a.card:hover .more span { transform: translateX(5px); }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; }
   .reveal.in { animation: none; }
+  .hero::before { animation: none; }
   .hero-eyebrow::before { animation: none; }
+  .hero-eyebrow .he-text.typing { animation: none; border-right-color: transparent; }
   .fab-toggle .fi-phone, .fab-toggle .fi-mail { animation: none; }
   .fab:not(.open) .fab-toggle .fi-mail { opacity: 0; }
   .fab-top svg { animation: none; }
