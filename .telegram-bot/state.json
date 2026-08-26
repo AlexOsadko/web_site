@@ -55,12 +55,13 @@
 "https://jurliga.ligazakon.net/news/245837_chi-mozhe-ttsk-oskarzhiti-rshennya-pro-mstse-prozhivannya-ditini-verkhovniy-sud-proponu-zmniti-pdkhd",
 "https://court.gov.ua/press/news/2085842/",
 "https://court.gov.ua/press/news/2085785/",
-"https://court.gov.ua/press/news/2086650/"
+"https://court.gov.ua/press/news/2086650/",
+"https://lexinform.com.ua/sudova-praktyka/zatverdzhenyj-derzhavnym-organom-zrazok-sluzhbovogo-posvidchennya-ne-ye-ob-yektom-avtorskogo-prava-ta-ne-mozhe-buty-predmetom-pryvatnyh-majnovyh-prav-shho-obmezhuyut-jogo-vykorystannya-derzhavnymy-org/"
 ],
 "day": "2026-08-26",
-"count": 2,
-"total": 57,
-"seq": 72,
+"count": 3,
+"total": 58,
+"seq": 73,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -160,7 +161,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787744353.8078656,
+"last_content_ts": 1787752999.9537277,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
