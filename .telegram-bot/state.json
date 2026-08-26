@@ -54,12 +54,13 @@
 "https://court.gov.ua/press/news/2086203/",
 "https://jurliga.ligazakon.net/news/245837_chi-mozhe-ttsk-oskarzhiti-rshennya-pro-mstse-prozhivannya-ditini-verkhovniy-sud-proponu-zmniti-pdkhd",
 "https://court.gov.ua/press/news/2085842/",
-"https://court.gov.ua/press/news/2085785/"
+"https://court.gov.ua/press/news/2085785/",
+"https://court.gov.ua/press/news/2086650/"
 ],
 "day": "2026-08-26",
-"count": 1,
-"total": 56,
-"seq": 71,
+"count": 2,
+"total": 57,
+"seq": 72,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -159,7 +160,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1787735271.9362683,
+"last_content_ts": 1787744353.8078656,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
