@@ -800,7 +800,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>document.documentElement.classList.add('js')</script>
-  <script defer src="../assets/ga.js?v=5"></script>
+  <script defer src="../assets/ga.js?v=8"></script>
   <title>{titletag}</title>
   <meta name="description" content="{desc}">
   <meta name="keywords" content="{kw}">
@@ -818,8 +818,8 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
-  <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=133">
+  <link rel="stylesheet" href="../css/fonts.css?v=2">
+  <link rel="stylesheet" href="../css/style.css?v=141">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=21"></script>
@@ -1016,7 +1016,7 @@ def render_catalog(arts):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script defer src="../assets/ga.js?v=5"></script>
+  <script defer src="../assets/ga.js?v=8"></script>
   <title>Статті — Олександр Осадько, адвокат</title>
   <meta name="description" content="Юридичні статті адвоката Олександра Осадька: борги та договори, сімейне право, трудові спори, кримінальні справи, ДТП, нерухомість, бізнес і судовий процес.">
   <link rel="canonical" href="{ART_BASE_URL}">
@@ -1028,8 +1028,8 @@ def render_catalog(arts):
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
-  <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=133">
+  <link rel="stylesheet" href="../css/fonts.css?v=2">
+  <link rel="stylesheet" href="../css/style.css?v=141">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=21"></script>
@@ -1207,7 +1207,7 @@ def render_hub(cat, arts):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script defer src="../assets/ga.js?v=5"></script>
+  <script defer src="../assets/ga.js?v=8"></script>
   <title>{esc(CATS[cat])} — адвокат Осадько</title>
   <meta name="description" content="{esc(CAT_DESC[cat])}">
   <meta name="keywords" content="{esc(KW_BASE[cat])}, адвокат, юрист, Україна">
@@ -1225,8 +1225,8 @@ def render_hub(cat, arts):
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
-  <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=133">
+  <link rel="stylesheet" href="../css/fonts.css?v=2">
+  <link rel="stylesheet" href="../css/style.css?v=141">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=21"></script>
@@ -1466,7 +1466,7 @@ LANDING_PAGE = """<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>document.documentElement.classList.add('js')</script>
-  <script defer src="../assets/ga.js?v=5"></script>
+  <script defer src="../assets/ga.js?v=8"></script>
   <title>{titletag}</title>
   <meta name="description" content="{desc}">
   <link rel="canonical" href="{url}">
@@ -1483,8 +1483,8 @@ LANDING_PAGE = """<!DOCTYPE html>
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
-  <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=133">
+  <link rel="stylesheet" href="../css/fonts.css?v=2">
+  <link rel="stylesheet" href="../css/style.css?v=141">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=21"></script>
@@ -1666,7 +1666,7 @@ PAGE_SHELL = """<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>document.documentElement.classList.add('js')</script>
-  <script defer src="../assets/ga.js?v=5"></script>
+  <script defer src="../assets/ga.js?v=8"></script>
   <title>{titletag}</title>
   <meta name="description" content="{desc}">
   <link rel="canonical" href="{url}">
@@ -1681,8 +1681,8 @@ PAGE_SHELL = """<!DOCTYPE html>
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
-  <link rel="stylesheet" href="../css/fonts.css">
-  <link rel="stylesheet" href="../css/style.css?v=133">
+  <link rel="stylesheet" href="../css/fonts.css?v=2">
+  <link rel="stylesheet" href="../css/style.css?v=141">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=21"></script>
