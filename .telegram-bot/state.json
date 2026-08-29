@@ -63,12 +63,13 @@
 "https://court.gov.ua/press/news/2087521/",
 "https://lexinform.com.ua/sudova-praktyka/kpk-ne-vyklyuchaye-zdijsnennya-dosudovogo-rozsliduvannya-chy-sudovogo-provadzhennya-bez-poterpilogo/",
 "https://lexinform.com.ua/sudova-praktyka/v-konteksti-propozytsiyi-nepravomirnoyi-vygody-nachalnyk-viddilu-bezpeky-dorozhnogo-ruhu-zajmaye-vidpovidalne-stanovyshhe-navit-yakshho-vykonuye-obov-yazky-tymchasovo/",
-"https://jurliga.ligazakon.net/news/245914_turagent-chi-turoperator-khto-vdpovda-za-zrvanu-podorozh"
+"https://jurliga.ligazakon.net/news/245914_turagent-chi-turoperator-khto-vdpovda-za-zrvanu-podorozh",
+"https://lexinform.com.ua/sudova-praktyka/ne-svidchyt-pro-porushennya-kpk-vyznachennya-chleniv-kolegiyi-suddiv-dlya-rozglyadu-apelyatsijnoyi-skargy-iz-chysla-suddiv-sudovoyi-palaty-z-rozglyadu-tsyvilnyh-sprav/"
 ],
 "day": "2026-08-29",
-"count": 2,
-"total": 65,
-"seq": 81,
+"count": 3,
+"total": 66,
+"seq": 82,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -169,7 +170,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788021911.0227811,
+"last_content_ts": 1788031898.6795197,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
