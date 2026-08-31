@@ -69,12 +69,13 @@
 "https://sud.ua/ru/news/publication/370409-vlk-vyznaiut-cholovikiv-z-invalidnistiu-prydatnymy-do-viiskovoi-sluzhby-chy-daie-tsei-vysnovok-ttsk-pravo-mobilizuvaty-taku-osobu",
 "https://protocol.ua/ua/doktrina_aktsesornosti_ta_dolya_ipoteki_pri_zadavnenosti_osnovnogo_borgu/",
 "https://sud.ua/ru/news/abroad/370693-dvokh-divchat-10-i-12-rokiv-sudyly-cherez-zalamanu-hoidalku-v-parku-chym-zakinchylasia-sprava",
-"https://court.gov.ua/press/news/2088678/"
+"https://court.gov.ua/press/news/2088678/",
+"https://lexinform.com.ua/sudova-praktyka/batky-cholovika-yakogo-pislya-smerti-zapysano-batkom-dytyny-mayut-pravo-osporyuvaty-takyj-zapys/"
 ],
 "day": "2026-08-31",
-"count": 2,
-"total": 71,
-"seq": 87,
+"count": 3,
+"total": 72,
+"seq": 88,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -175,7 +176,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788179820.776834,
+"last_content_ts": 1788203634.4516208,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
