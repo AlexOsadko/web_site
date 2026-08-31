@@ -498,7 +498,7 @@ p.body-reveal,
 .catalog-hero p {
   text-align: justify;
   text-align-last: left;
-  hyphens: auto;
+  hyphens: manual;
 }
 /* На вузьких екранах вирівнювання по ширині створює завеликі проміжки й
    притискає текст до правого краю. Тому на мобільних — по лівому краю з
@@ -1008,7 +1008,7 @@ a.card:hover .more span { transform: translateX(5px); }
 .lp-final h2 { font-size: 1.6rem; margin-bottom: 12px; text-wrap: balance; }
 .lp-final > .container > p { color: var(--text); margin-bottom: 22px; }
 /* Основний абзац фінального заклику — по ширині блоку (як інші описи). */
-.lp-final > .container > p:not(.lp-more) { text-align: justify; text-align-last: left; hyphens: auto; }
+.lp-final > .container > p:not(.lp-more) { text-align: justify; text-align-last: left; hyphens: manual; }
 @media (max-width: 640px) {
   .lp-final > .container > p:not(.lp-more) { text-align: left; hyphens: manual; }
 }
