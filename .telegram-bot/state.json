@@ -68,12 +68,13 @@
 "https://sud.ua/ru/news/sudova-praktyka/370753-ekstrenoho-medychnoho-tekhnika-zabroniuvaly-ale-ttsk-vse-odno-ioho-mobilizuvav-chym-vse-skinchylosia",
 "https://sud.ua/ru/news/publication/370409-vlk-vyznaiut-cholovikiv-z-invalidnistiu-prydatnymy-do-viiskovoi-sluzhby-chy-daie-tsei-vysnovok-ttsk-pravo-mobilizuvaty-taku-osobu",
 "https://protocol.ua/ua/doktrina_aktsesornosti_ta_dolya_ipoteki_pri_zadavnenosti_osnovnogo_borgu/",
-"https://sud.ua/ru/news/abroad/370693-dvokh-divchat-10-i-12-rokiv-sudyly-cherez-zalamanu-hoidalku-v-parku-chym-zakinchylasia-sprava"
+"https://sud.ua/ru/news/abroad/370693-dvokh-divchat-10-i-12-rokiv-sudyly-cherez-zalamanu-hoidalku-v-parku-chym-zakinchylasia-sprava",
+"https://court.gov.ua/press/news/2088678/"
 ],
 "day": "2026-08-31",
-"count": 1,
-"total": 70,
-"seq": 86,
+"count": 2,
+"total": 71,
+"seq": 87,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -174,7 +175,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788125658.9916587,
+"last_content_ts": 1788179820.776834,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
