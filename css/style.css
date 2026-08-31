@@ -522,7 +522,7 @@ p.body-reveal,
 
 /* ===== Про мене ===== */
 .about-grid { display: grid; grid-template-columns: 1.35fr .65fr; gap: 40px; align-items: start; }
-.about-text p { margin-bottom: 18px; color: var(--muted); }
+.about-text p { margin-bottom: 18px; color: var(--muted); text-align: left; text-align-last: left; hyphens: manual; }
 .about-text p:first-child { color: var(--ink); font-size: 1.14rem; }
 .about-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
 .about-list li {
