@@ -1,69 +1,22 @@
 // ─────────────────────────────────────────────────────────────────────────
-// Cloudflare Worker для сайту адвоката. Два маршрути:
+// Cloudflare Worker для сайту адвоката.
 //
-//   POST /            → приймає заявки з форм і надсилає їх у Telegram.
-//   GET|PUT /registry → зашифрований реєстр договорів (синхронізація між
-//                       пристроями). Воркер бачить ЛИШЕ шифротекст —
-//                       розшифрувати може тільки браузер із парольною фразою.
+//   POST / → приймає заявки з форм і надсилає їх у Telegram.
 //
-// НАЛАШТУВАННЯ (Cloudflare → ваш Worker → Settings):
-//   Variables and Secrets:
+// НАЛАШТУВАННЯ (Cloudflare → ваш Worker → Settings → Variables and Secrets):
 //     TELEGRAM_BOT_TOKEN  — токен бота від @BotFather                     (Secret)
 //     TELEGRAM_CHAT_ID    — ваш chat_id (через @userinfobot)              (Secret)
 //     TURNSTILE_SECRET    — Secret Key віджета Turnstile                  (Secret)
-//     REGISTRY_TOKEN      — довільний довгий пароль для доступу до реєстру (Secret)
 //     ALLOWED_ORIGIN      — https://osadko.online (обмежує доступ)        (Text)
-//   Bindings → KV Namespace:
-//     REGISTRY_KV         — сховище зашифрованого реєстру
 // ─────────────────────────────────────────────────────────────────────────
 
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
-    if (url.pathname === "/registry") return handleRegistry(request, env);
     return handleLead(request, env);
   },
 };
 
-// ── Реєстр договорів: зберігаємо/віддаємо зашифрований блок ──────────────
-async function handleRegistry(request, env) {
-  const allow = env.ALLOWED_ORIGIN || "*";
-  const cors = {
-    "Access-Control-Allow-Origin": allow,
-    "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, X-Registry-Token",
-  };
-  if (request.method === "OPTIONS") return new Response(null, { headers: cors });
-
-  // Доступ лише з нашого сайту.
-  if (env.ALLOWED_ORIGIN) {
-    const origin = request.headers.get("Origin") || "";
-    if (origin && origin !== env.ALLOWED_ORIGIN)
-      return json({ ok: false, error: "origin" }, 403, cors);
-  }
-  // Сховище має бути прив'язане.
-  if (!env.REGISTRY_KV)
-    return json({ ok: false, error: "kv_not_configured" }, 500, cors);
-  // Секретний токен (анти-зловживання). Дані все одно зашифровані E2E.
-  if (!env.REGISTRY_TOKEN || request.headers.get("X-Registry-Token") !== env.REGISTRY_TOKEN)
-    return json({ ok: false, error: "auth" }, 403, cors);
-
-  const KEY = "registry:blob";
-  if (request.method === "GET") {
-    const blob = await env.REGISTRY_KV.get(KEY);
-    return json({ ok: true, blob: blob || null }, 200, cors);
-  }
-  if (request.method === "PUT") {
-    const body = await request.text();
-    if (body.length > 8_000_000)
-      return json({ ok: false, error: "too_large" }, 413, cors);
-    await env.REGISTRY_KV.put(KEY, body);
-    return json({ ok: true }, 200, cors);
-  }
-  return json({ ok: false, error: "method" }, 405, cors);
-}
-
-// ── Заявки з форм → Telegram (як було) ──────────────────────────────────
+// ── Заявки з форм → Telegram ────────────────────────────────────────────
 async function handleLead(request, env) {
   const allow = env.ALLOWED_ORIGIN || "*";
   const cors = {
