@@ -71,12 +71,13 @@
 "https://sud.ua/ru/news/abroad/370693-dvokh-divchat-10-i-12-rokiv-sudyly-cherez-zalamanu-hoidalku-v-parku-chym-zakinchylasia-sprava",
 "https://court.gov.ua/press/news/2088678/",
 "https://lexinform.com.ua/sudova-praktyka/batky-cholovika-yakogo-pislya-smerti-zapysano-batkom-dytyny-mayut-pravo-osporyuvaty-takyj-zapys/",
-"https://lexinform.com.ua/sudova-praktyka/pereglyad-zaochnogo-rishennya-pro-rozirvannya-shlyubu-za-zayavoyu-vidpovidacha-pislya-smerti-pozyvacha-ye-zlovzhyvannyam-protsesualnymy-pravamy/"
+"https://lexinform.com.ua/sudova-praktyka/pereglyad-zaochnogo-rishennya-pro-rozirvannya-shlyubu-za-zayavoyu-vidpovidacha-pislya-smerti-pozyvacha-ye-zlovzhyvannyam-protsesualnymy-pravamy/",
+"https://lexinform.com.ua/sudova-praktyka/vidsutnist-dovedenoyi-protypravnosti-dij-pravoohorontsiv-pid-chas-tymchasovogo-vyluchennya-majna-vyklyuchaye-pidstavy-dlya-vidshkoduvannya-moralnoyi-shkody-jogo-vlasnyku/"
 ],
 "day": "2026-09-01",
-"count": 1,
-"total": 73,
-"seq": 89,
+"count": 2,
+"total": 74,
+"seq": 90,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -177,7 +178,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788260554.245616,
+"last_content_ts": 1788276417.373731,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
