@@ -70,12 +70,13 @@
 "https://protocol.ua/ua/doktrina_aktsesornosti_ta_dolya_ipoteki_pri_zadavnenosti_osnovnogo_borgu/",
 "https://sud.ua/ru/news/abroad/370693-dvokh-divchat-10-i-12-rokiv-sudyly-cherez-zalamanu-hoidalku-v-parku-chym-zakinchylasia-sprava",
 "https://court.gov.ua/press/news/2088678/",
-"https://lexinform.com.ua/sudova-praktyka/batky-cholovika-yakogo-pislya-smerti-zapysano-batkom-dytyny-mayut-pravo-osporyuvaty-takyj-zapys/"
+"https://lexinform.com.ua/sudova-praktyka/batky-cholovika-yakogo-pislya-smerti-zapysano-batkom-dytyny-mayut-pravo-osporyuvaty-takyj-zapys/",
+"https://lexinform.com.ua/sudova-praktyka/pereglyad-zaochnogo-rishennya-pro-rozirvannya-shlyubu-za-zayavoyu-vidpovidacha-pislya-smerti-pozyvacha-ye-zlovzhyvannyam-protsesualnymy-pravamy/"
 ],
-"day": "2026-08-31",
-"count": 3,
-"total": 72,
-"seq": 88,
+"day": "2026-09-01",
+"count": 1,
+"total": 73,
+"seq": 89,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -176,7 +177,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788203634.4516208,
+"last_content_ts": 1788260554.245616,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
