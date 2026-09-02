@@ -76,12 +76,13 @@
 "https://lexinform.com.ua/sudova-praktyka/smert-odnogo-z-podruzhzhya-yakyj-buv-solidarnym-borzhnykom-ne-prypynyaye-obov-yazku-drugogo-z-podruzhzhya-pered-kredytorom-i-ne-zminyuye-jogo-obsyagu/",
 "https://court.gov.ua/press/news/2089995/",
 "https://jurliga.ligazakon.net/news/245993_verkhovniy-sud-poyasniv-koli-zasnovnik-mozhe-viyti-z-yurosobi-bez-rshennya-zagalnikh-zborv-ta-zgodi-nshikh-uchasnikv",
-"https://lexinform.com.ua/dumka-eksperta/verhovnyj-sud-mizh-yevropejskymy-standartamy-ta-kryzoyu-instytutsijnoyi-doviry/"
+"https://lexinform.com.ua/dumka-eksperta/verhovnyj-sud-mizh-yevropejskymy-standartamy-ta-kryzoyu-instytutsijnoyi-doviry/",
+"https://jurliga.ligazakon.net/news/245973_verkhovniy-sud-utochniv-pdkhd-do-zakhistu-zemelno-dlyanki-vd-chuzhikh-sporud"
 ],
 "day": "2026-09-02",
-"count": 4,
-"total": 78,
-"seq": 95,
+"count": 5,
+"total": 79,
+"seq": 96,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -183,7 +184,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788372266.8290706,
+"last_content_ts": 1788382707.5771134,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
