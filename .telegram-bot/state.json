@@ -77,12 +77,13 @@
 "https://court.gov.ua/press/news/2089995/",
 "https://jurliga.ligazakon.net/news/245993_verkhovniy-sud-poyasniv-koli-zasnovnik-mozhe-viyti-z-yurosobi-bez-rshennya-zagalnikh-zborv-ta-zgodi-nshikh-uchasnikv",
 "https://lexinform.com.ua/dumka-eksperta/verhovnyj-sud-mizh-yevropejskymy-standartamy-ta-kryzoyu-instytutsijnoyi-doviry/",
-"https://jurliga.ligazakon.net/news/245973_verkhovniy-sud-utochniv-pdkhd-do-zakhistu-zemelno-dlyanki-vd-chuzhikh-sporud"
+"https://jurliga.ligazakon.net/news/245973_verkhovniy-sud-utochniv-pdkhd-do-zakhistu-zemelno-dlyanki-vd-chuzhikh-sporud",
+"https://court.gov.ua/press/news/2090727/"
 ],
-"day": "2026-09-02",
-"count": 5,
-"total": 79,
-"seq": 96,
+"day": "2026-09-03",
+"count": 1,
+"total": 80,
+"seq": 97,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -184,7 +185,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788382707.5771134,
+"last_content_ts": 1788431882.562995,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
