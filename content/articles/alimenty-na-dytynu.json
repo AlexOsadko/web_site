@@ -122,6 +122,27 @@
     },
     {
       "type": "h2",
+      "text": "Аліменти: усі повʼязані питання"
+    },
+    {
+      "type": "p",
+      "text": "Тема аліментів охоплює багато ситуацій. Ось матеріали, що детально розкривають кожну — від зміни розміру до стягнення боргу:"
+    },
+    {
+      "type": "ul",
+      "items": [
+        "<a href=\"dodatkovi-vytraty-na-dytynu.html\">Додаткові витрати на дитину</a> — як стягнути понад аліменти (ст. 185 СК);",
+        "<a href=\"alimenty-tverda-suma.html\">Аліменти у твердій грошовій сумі</a> — коли вигідніше й як стягнути;",
+        "<a href=\"zmina-rozmiru-alimentiv.html\">Зміна розміру аліментів</a> — збільшення чи зменшення;",
+        "<a href=\"stiahnennia-zaborhovanosti-alimenty.html\">Стягнення заборгованості з аліментів</a> — якщо платник не платить;",
+        "<a href=\"alimenty-yakshcho-platnyk-za-kordonom.html\">Аліменти, якщо платник за кордоном</a> — як стягнути;",
+        "<a href=\"alimenty-povnolitni.html\">Аліменти на повнолітню дитину</a>, що навчається;",
+        "<a href=\"alimenty-na-druzhynu.html\">Аліменти на дружину або чоловіка</a>;",
+        "<a href=\"pravo-na-alimenty-vid-povnolitnyh-ditey.html\">Аліменти на батьків від повнолітніх дітей</a>."
+      ]
+    },
+    {
+      "type": "h2",
       "text": "З чого почати"
     },
     {
