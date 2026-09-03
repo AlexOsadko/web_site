@@ -79,12 +79,13 @@
 "https://lexinform.com.ua/dumka-eksperta/verhovnyj-sud-mizh-yevropejskymy-standartamy-ta-kryzoyu-instytutsijnoyi-doviry/",
 "https://jurliga.ligazakon.net/news/245973_verkhovniy-sud-utochniv-pdkhd-do-zakhistu-zemelno-dlyanki-vd-chuzhikh-sporud",
 "https://court.gov.ua/press/news/2090727/",
-"https://court.gov.ua/press/news/2090910/"
+"https://court.gov.ua/press/news/2090910/",
+"https://jurliga.ligazakon.net/news/245996_verkhovniy-sud-viznachiv-yak-opkun-mayna-mozhe-realzovuvati-korporativn-prava-zniklo-bezvsti-osobi"
 ],
 "day": "2026-09-03",
-"count": 2,
-"total": 81,
-"seq": 98,
+"count": 3,
+"total": 82,
+"seq": 99,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -186,7 +187,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788446603.137507,
+"last_content_ts": 1788458755.739146,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
