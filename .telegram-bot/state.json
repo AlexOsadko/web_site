@@ -83,10 +83,10 @@
 "https://jurliga.ligazakon.net/news/245996_verkhovniy-sud-viznachiv-yak-opkun-mayna-mozhe-realzovuvati-korporativn-prava-zniklo-bezvsti-osobi",
 "https://osadko.online/articles/povernennia-prav-pislia-pozbavlennia.html"
 ],
-"day": "2026-09-03",
-"count": 4,
+"day": "2026-09-04",
+"count": 0,
 "total": 83,
-"seq": 100,
+"seq": 101,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -105,7 +105,8 @@
 "розбір норми:Гарантійний ремонт: скільки часу продаве",
 "інструкція:Отримали повістку до суду як позивач чи ",
 "міф:Роботодавець може звільнити за прогул од",
-"розбір норми:Позовна давність: чому борг не «згорає» "
+"розбір норми:Позовна давність: чому борг не «згорає» ",
+"інструкція:Держорган відмовив у послузі: що робити "
 ],
 "pending": {
 "1787092661515": {
@@ -188,7 +189,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788469061.744325,
+"last_content_ts": 1788517896.5057821,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
