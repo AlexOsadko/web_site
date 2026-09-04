@@ -82,12 +82,13 @@
 "https://court.gov.ua/press/news/2090910/",
 "https://jurliga.ligazakon.net/news/245996_verkhovniy-sud-viznachiv-yak-opkun-mayna-mozhe-realzovuvati-korporativn-prava-zniklo-bezvsti-osobi",
 "https://osadko.online/articles/povernennia-prav-pislia-pozbavlennia.html",
-"https://jurliga.ligazakon.net/news/246036_ugoda-pro-primirennya-u-krimnalny-sprav-velika-palata-pereglyane-pdkhd"
+"https://jurliga.ligazakon.net/news/246036_ugoda-pro-primirennya-u-krimnalny-sprav-velika-palata-pereglyane-pdkhd",
+"https://court.gov.ua/press/news/2091558/"
 ],
 "day": "2026-09-04",
-"count": 1,
-"total": 84,
-"seq": 102,
+"count": 2,
+"total": 85,
+"seq": 103,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -190,7 +191,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788532256.947855,
+"last_content_ts": 1788543893.46071,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
