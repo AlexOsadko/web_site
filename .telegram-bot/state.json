@@ -84,12 +84,13 @@
 "https://osadko.online/articles/povernennia-prav-pislia-pozbavlennia.html",
 "https://jurliga.ligazakon.net/news/246036_ugoda-pro-primirennya-u-krimnalny-sprav-velika-palata-pereglyane-pdkhd",
 "https://court.gov.ua/press/news/2091558/",
-"https://court.gov.ua/press/news/2091593/"
+"https://court.gov.ua/press/news/2091593/",
+"https://jurliga.ligazakon.net/news/246020_verkhovniy-sud-viznachiv-nasldki-bezpdstavno-vdmovi-u-vdkladenn-apelyatsynogo-rozglyadu-cherez-khvorobu-advokata"
 ],
-"day": "2026-09-04",
-"count": 3,
-"total": 86,
-"seq": 104,
+"day": "2026-09-05",
+"count": 1,
+"total": 87,
+"seq": 105,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -192,7 +193,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788551673.3972402,
+"last_content_ts": 1788602127.562151,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
