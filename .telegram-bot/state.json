@@ -86,12 +86,13 @@
 "https://court.gov.ua/press/news/2091558/",
 "https://court.gov.ua/press/news/2091593/",
 "https://jurliga.ligazakon.net/news/246020_verkhovniy-sud-viznachiv-nasldki-bezpdstavno-vdmovi-u-vdkladenn-apelyatsynogo-rozglyadu-cherez-khvorobu-advokata",
-"https://sud.ua/ru/news/publication/370604-kupyly-kvartyru-ale-mozhete-vtratyty-ii-cherez-sud-koly-cherez-zakon-mozhna-skasuvaty-dohovir"
+"https://sud.ua/ru/news/publication/370604-kupyly-kvartyru-ale-mozhete-vtratyty-ii-cherez-sud-koly-cherez-zakon-mozhna-skasuvaty-dohovir",
+"https://suspilne.media/ternopil/1396348-na-ternopilsini-sud-zobovazav-colovika-vidskoduvati-ponad-600-tisac-griven-skodi-zavdanoi-lisu/"
 ],
 "day": "2026-09-05",
-"count": 2,
-"total": 88,
-"seq": 106,
+"count": 3,
+"total": 89,
+"seq": 107,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -194,7 +195,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788614056.6220443,
+"last_content_ts": 1788624382.7933743,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
@@ -211,5 +212,5 @@
 "headline": "Чоловік/дружина виїхав і забрав дитину без вашої згоди: що робити"
 }
 ],
-"general": 0
+"general": 1
 }
