@@ -87,12 +87,13 @@
 "https://court.gov.ua/press/news/2091593/",
 "https://jurliga.ligazakon.net/news/246020_verkhovniy-sud-viznachiv-nasldki-bezpdstavno-vdmovi-u-vdkladenn-apelyatsynogo-rozglyadu-cherez-khvorobu-advokata",
 "https://sud.ua/ru/news/publication/370604-kupyly-kvartyru-ale-mozhete-vtratyty-ii-cherez-sud-koly-cherez-zakon-mozhna-skasuvaty-dohovir",
-"https://suspilne.media/ternopil/1396348-na-ternopilsini-sud-zobovazav-colovika-vidskoduvati-ponad-600-tisac-griven-skodi-zavdanoi-lisu/"
+"https://suspilne.media/ternopil/1396348-na-ternopilsini-sud-zobovazav-colovika-vidskoduvati-ponad-600-tisac-griven-skodi-zavdanoi-lisu/",
+"https://sud.ua/ru/news/ukraine/371378-taksystam-zahrozhuie-shtraf-do-5100-hrn-za-rosiisku-movu-u-iakykh-vypadkakh-karaiut-vodiiv"
 ],
 "day": "2026-09-05",
-"count": 3,
-"total": 89,
-"seq": 107,
+"count": 4,
+"total": 90,
+"seq": 108,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -195,7 +196,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788624382.7933743,
+"last_content_ts": 1788632004.3339503,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
