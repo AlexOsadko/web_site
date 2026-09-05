@@ -85,12 +85,13 @@
 "https://jurliga.ligazakon.net/news/246036_ugoda-pro-primirennya-u-krimnalny-sprav-velika-palata-pereglyane-pdkhd",
 "https://court.gov.ua/press/news/2091558/",
 "https://court.gov.ua/press/news/2091593/",
-"https://jurliga.ligazakon.net/news/246020_verkhovniy-sud-viznachiv-nasldki-bezpdstavno-vdmovi-u-vdkladenn-apelyatsynogo-rozglyadu-cherez-khvorobu-advokata"
+"https://jurliga.ligazakon.net/news/246020_verkhovniy-sud-viznachiv-nasldki-bezpdstavno-vdmovi-u-vdkladenn-apelyatsynogo-rozglyadu-cherez-khvorobu-advokata",
+"https://sud.ua/ru/news/publication/370604-kupyly-kvartyru-ale-mozhete-vtratyty-ii-cherez-sud-koly-cherez-zakon-mozhna-skasuvaty-dohovir"
 ],
 "day": "2026-09-05",
-"count": 1,
-"total": 87,
-"seq": 105,
+"count": 2,
+"total": 88,
+"seq": 106,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -193,7 +194,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788602127.562151,
+"last_content_ts": 1788614056.6220443,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
