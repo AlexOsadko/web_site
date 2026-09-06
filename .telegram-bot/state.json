@@ -89,12 +89,13 @@
 "https://sud.ua/ru/news/publication/370604-kupyly-kvartyru-ale-mozhete-vtratyty-ii-cherez-sud-koly-cherez-zakon-mozhna-skasuvaty-dohovir",
 "https://suspilne.media/ternopil/1396348-na-ternopilsini-sud-zobovazav-colovika-vidskoduvati-ponad-600-tisac-griven-skodi-zavdanoi-lisu/",
 "https://sud.ua/ru/news/ukraine/371378-taksystam-zahrozhuie-shtraf-do-5100-hrn-za-rosiisku-movu-u-iakykh-vypadkakh-karaiut-vodiiv",
-"https://sud.ua/ru/news/publication/371030-vpo-mozhut-dozvolyty-orenduvaty-budynky-za-1-hryvniu-zaraz-vony-stoiat-porozhni-cherez-koliziiu-v-zakoni"
+"https://sud.ua/ru/news/publication/371030-vpo-mozhut-dozvolyty-orenduvaty-budynky-za-1-hryvniu-zaraz-vony-stoiat-porozhni-cherez-koliziiu-v-zakoni",
+"https://biz.ligazakon.net/news/246037_prodazh-tovaru-pdprimtsya-pratsvnikami-kontragenta-v-yogo-magazinakh-ne--faktichnim-dopuskom-do-roboti-bez-trudovogo-dogovoru"
 ],
-"day": "2026-09-05",
-"count": 5,
-"total": 91,
-"seq": 109,
+"day": "2026-09-06",
+"count": 1,
+"total": 92,
+"seq": 110,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -197,7 +198,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788639849.8094225,
+"last_content_ts": 1788689572.048073,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
