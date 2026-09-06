@@ -93,12 +93,13 @@
 "https://biz.ligazakon.net/news/246037_prodazh-tovaru-pdprimtsya-pratsvnikami-kontragenta-v-yogo-magazinakh-ne--faktichnim-dopuskom-do-roboti-bez-trudovogo-dogovoru",
 "https://court.gov.ua/press/news/2091616/",
 "https://jurliga.ligazakon.net/news/246047_top-10-pravovikh-pody-tizhnya",
-"https://biz.ligazakon.net/events/246048_8-veresnya-zaproshumo-na-vebnar-pravoviy-rezhim-defens-st-praktichniy-ntensiv"
+"https://biz.ligazakon.net/events/246048_8-veresnya-zaproshumo-na-vebnar-pravoviy-rezhim-defens-st-praktichniy-ntensiv",
+"https://www.ukrinform.ua/rubric-polytics/4161433-zelenskij-ukraina-rozrahovue-na-uhvalenna-ssa-novogo-paketa-sankcij-proti-rf.html"
 ],
 "day": "2026-09-06",
-"count": 4,
-"total": 95,
-"seq": 113,
+"count": 5,
+"total": 96,
+"seq": 114,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -201,7 +202,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788711998.023174,
+"last_content_ts": 1788719503.104572,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
@@ -218,5 +219,5 @@
 "headline": "Чоловік/дружина виїхав і забрав дитину без вашої згоди: що робити"
 }
 ],
-"general": 1
+"general": 2
 }
