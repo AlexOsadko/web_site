@@ -15,12 +15,16 @@
 УНІАН | https://rss.unian.net/site/news_ukr.rss | general
 Укрінформ | https://www.ukrinform.ua/rss/block-lastnews | general
 Суспільне | https://suspilne.media/rss/all.rss | general
+Слово і Діло | https://www.slovoidilo.ua/rss.xml | general
 
 # --- Юридичні новини ---
 Судово-юридична газета | https://sud.ua/rss
 Протокол | https://protocol.ua/ua/rss/
 ЛІГА:Закон (ЮрЛіга) | https://jurliga.ligazakon.net/rss
+ЛІГА:Закон (Бізнес) | https://biz.ligazakon.net/rss
 LexInform | https://lexinform.com.ua/feed/
+Конституційний Суд | https://ccu.gov.ua/rss.xml
+НААУ (адвокати) | https://unba.org.ua/rss
 
 # --- Офіційні джерела (органи влади) ---
 # Судова влада України — офіційні новини судів: позиції ВС/КС, узагальнення
