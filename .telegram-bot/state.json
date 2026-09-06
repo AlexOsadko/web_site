@@ -91,12 +91,13 @@
 "https://sud.ua/ru/news/ukraine/371378-taksystam-zahrozhuie-shtraf-do-5100-hrn-za-rosiisku-movu-u-iakykh-vypadkakh-karaiut-vodiiv",
 "https://sud.ua/ru/news/publication/371030-vpo-mozhut-dozvolyty-orenduvaty-budynky-za-1-hryvniu-zaraz-vony-stoiat-porozhni-cherez-koliziiu-v-zakoni",
 "https://biz.ligazakon.net/news/246037_prodazh-tovaru-pdprimtsya-pratsvnikami-kontragenta-v-yogo-magazinakh-ne--faktichnim-dopuskom-do-roboti-bez-trudovogo-dogovoru",
-"https://court.gov.ua/press/news/2091616/"
+"https://court.gov.ua/press/news/2091616/",
+"https://jurliga.ligazakon.net/news/246047_top-10-pravovikh-pody-tizhnya"
 ],
 "day": "2026-09-06",
-"count": 2,
-"total": 93,
-"seq": 111,
+"count": 3,
+"total": 94,
+"seq": 112,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -199,7 +200,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788692032.9568548,
+"last_content_ts": 1788702093.571295,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
