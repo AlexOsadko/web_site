@@ -74,6 +74,44 @@ CANDIDATES = {
         "https://opendatabot.ua/rss",
         "https://opendatabot.ua/blog/feed",
     ],
+    # --- НОВІ кандидати: додаткові українські юридичні джерела ---
+    "Конституційний Суд (ccu.gov.ua)": [
+        "https://ccu.gov.ua/rss.xml",
+        "https://ccu.gov.ua/uk/rss.xml",
+        "https://ccu.gov.ua/rss",
+        "https://ccu.gov.ua/novyny/rss",
+        "https://ccu.gov.ua/uk/rss",
+    ],
+    "Верховний Суд (supreme.court.gov.ua)": [
+        "https://supreme.court.gov.ua/supreme/pres-centr/news/rss/",
+        "https://supreme.court.gov.ua/rss",
+        "https://supreme.court.gov.ua/supreme/rss",
+    ],
+    "НААУ — адвокати (unba.org.ua)": [
+        "https://unba.org.ua/rss",
+        "https://unba.org.ua/news?format=feed&type=rss",
+        "https://unba.org.ua/feed",
+        "https://unba.org.ua/news/rss",
+    ],
+    "Google News — право (UA, укр.)": [
+        "https://news.google.com/rss/search?q=%28%D0%B0%D0%B4%D0%B2%D0%BE%D0%BA%D0%B0%D1%82%20OR%20%D1%81%D1%83%D0%B4%20OR%20%D0%B7%D0%B0%D0%BA%D0%BE%D0%BD%20OR%20%D0%BF%D1%80%D0%B0%D0%B2%D0%BE%29%20when%3A2d&hl=uk&gl=UA&ceid=UA:uk",
+    ],
+    "Слово і Діло (slovoidilo.ua)": [
+        "https://www.slovoidilo.ua/rss/all.xml",
+        "https://slovoidilo.ua/rss/all.xml",
+        "https://www.slovoidilo.ua/rss.xml",
+        "https://slovoidilo.ua/feed",
+    ],
+    "Українське право (ukrainepravo.com)": [
+        "https://ukrainepravo.com/feed/",
+        "https://ukrainepravo.com/rss/",
+        "https://ukrainepravo.com/feed/rss/",
+    ],
+    "ЛІГА:Закон — новини (ligazakon.net)": [
+        "https://news.ligazakon.net/rss",
+        "https://ligazakon.net/rss",
+        "https://biz.ligazakon.net/rss",
+    ],
 }
 
 
