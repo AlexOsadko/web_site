@@ -94,12 +94,13 @@
 "https://court.gov.ua/press/news/2091616/",
 "https://jurliga.ligazakon.net/news/246047_top-10-pravovikh-pody-tizhnya",
 "https://biz.ligazakon.net/events/246048_8-veresnya-zaproshumo-na-vebnar-pravoviy-rezhim-defens-st-praktichniy-ntensiv",
-"https://www.ukrinform.ua/rubric-polytics/4161433-zelenskij-ukraina-rozrahovue-na-uhvalenna-ssa-novogo-paketa-sankcij-proti-rf.html"
+"https://www.ukrinform.ua/rubric-polytics/4161433-zelenskij-ukraina-rozrahovue-na-uhvalenna-ssa-novogo-paketa-sankcij-proti-rf.html",
+"https://www.pravda.com.ua/news/2026/09/06/8052186/"
 ],
 "day": "2026-09-06",
-"count": 5,
-"total": 96,
-"seq": 114,
+"count": 6,
+"total": 97,
+"seq": 115,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -202,7 +203,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788719503.104572,
+"last_content_ts": 1788727524.373274,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
@@ -219,5 +220,5 @@
 "headline": "Чоловік/дружина виїхав і забрав дитину без вашої згоди: що робити"
 }
 ],
-"general": 2
+"general": 3
 }
