@@ -97,12 +97,13 @@
 "https://www.ukrinform.ua/rubric-polytics/4161433-zelenskij-ukraina-rozrahovue-na-uhvalenna-ssa-novogo-paketa-sankcij-proti-rf.html",
 "https://www.pravda.com.ua/news/2026/09/06/8052186/",
 "https://court.gov.ua/press/news/2092172/",
-"https://lexinform.com.ua/sudova-praktyka/opikun-majna-osoby-yaka-znykla-bezvisty-za-osoblyvyh-obstavyn-maye-pravo-golosuvaty-zamist-neyi-na-zagalnyh-zborah-uchasnykiv-tovarystva/"
+"https://lexinform.com.ua/sudova-praktyka/opikun-majna-osoby-yaka-znykla-bezvisty-za-osoblyvyh-obstavyn-maye-pravo-golosuvaty-zamist-neyi-na-zagalnyh-zborah-uchasnykiv-tovarystva/",
+"https://lexinform.com.ua/sudova-praktyka/zmina-zahysnykom-adresy-bez-informuvannya-sudu-ne-ye-pidstavoyu-dlya-ponovlennya-stroku-na-apelyatsijne-oskarzhennya-rishennya-kopiyu-yakogo-sud-nadislav-na-poperednyu-adresu/"
 ],
 "day": "2026-09-07",
-"count": 2,
-"total": 99,
-"seq": 117,
+"count": 3,
+"total": 100,
+"seq": 118,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -205,7 +206,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788799072.1492589,
+"last_content_ts": 1788811729.438003,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
