@@ -96,12 +96,13 @@
 "https://biz.ligazakon.net/events/246048_8-veresnya-zaproshumo-na-vebnar-pravoviy-rezhim-defens-st-praktichniy-ntensiv",
 "https://www.ukrinform.ua/rubric-polytics/4161433-zelenskij-ukraina-rozrahovue-na-uhvalenna-ssa-novogo-paketa-sankcij-proti-rf.html",
 "https://www.pravda.com.ua/news/2026/09/06/8052186/",
-"https://court.gov.ua/press/news/2092172/"
+"https://court.gov.ua/press/news/2092172/",
+"https://lexinform.com.ua/sudova-praktyka/opikun-majna-osoby-yaka-znykla-bezvisty-za-osoblyvyh-obstavyn-maye-pravo-golosuvaty-zamist-neyi-na-zagalnyh-zborah-uchasnykiv-tovarystva/"
 ],
 "day": "2026-09-07",
-"count": 1,
-"total": 98,
-"seq": 116,
+"count": 2,
+"total": 99,
+"seq": 117,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -204,7 +205,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788780608.3753586,
+"last_content_ts": 1788799072.1492589,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
