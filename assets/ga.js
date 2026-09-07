@@ -96,8 +96,8 @@
   document.addEventListener("submit", function (e) {
     var f = e.target;
     if (!f) return;
-    if (f.id === "leadForm") track("generate_lead", { form: "contacts" });
-    else if (f.classList && f.classList.contains("cb-form")) track("generate_lead", { form: "popup" });
+    if (f.id === "leadForm") { track("generate_lead", { form: "contacts" }); microContact("form"); }
+    else if (f.classList && f.classList.contains("cb-form")) { track("generate_lead", { form: "popup" }); microContact("form"); }
   }, true);
 
   // ── Банер згоди на cookie ──
