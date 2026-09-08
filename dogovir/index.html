@@ -8,7 +8,8 @@
 (function(){
   var LIBS=[
     {name:"JSZip", local:"lib/jszip.min.js",      cdn:"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"},
-    {name:"XLSX",  local:"lib/xlsx.full.min.js",  cdn:"https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"}
+    {name:"XLSX",  local:"lib/xlsx.full.min.js",  cdn:"https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"},
+    {name:"docx",  local:"lib/docx-preview.min.js", cdn:"https://cdn.jsdelivr.net/npm/docx-preview@0.3.5/dist/docx-preview.min.js"}
   ];
   window.LIB_STATUS={};
   function inject(src, ok, fail){
@@ -759,10 +760,43 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
       Договір + реєстр (.zip)
     </button>
+    <button class="btn btn-ghost" id="btn_preview" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+      Переглянути
+    </button>
     <button class="btn btn-primary" id="btn_gen" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
       <span id="btn_gen_txt">Завантажити договір (.docx)</span>
     </button>
+  </div>
+</div>
+
+<style>
+#pv-overlay{position:fixed;inset:0;background:rgba(11,31,58,.55);z-index:1000;display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 12px}
+#pv-overlay.on{display:flex}
+#pv-modal{background:#fff;border-radius:14px;max-width:900px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.35);display:flex;flex-direction:column;max-height:calc(100vh - 48px)}
+.pv-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0}
+.pv-head .pv-title{font-weight:700;color:var(--ink);margin-right:auto}
+#pv-body{overflow:auto;padding:18px;background:#e9edf5;border-radius:0 0 14px 14px}
+#pv-render section.docx{margin:0 auto 16px;box-shadow:0 1px 6px rgba(0,0,0,.15);background:#fff}
+#pv-render .docx-wrapper{background:transparent;padding:0}
+@media print{
+  body > *{display:none !important}
+  #pv-overlay{display:block !important;position:static;inset:auto;background:#fff;padding:0;overflow:visible;z-index:auto}
+  #pv-modal{max-width:none;max-height:none;box-shadow:none;border-radius:0;display:block}
+  .pv-head{display:none !important}
+  #pv-body{overflow:visible;padding:0;background:#fff}
+  #pv-render section.docx{box-shadow:none;margin:0 auto}
+}
+</style>
+<div id="pv-overlay" role="dialog" aria-modal="true" aria-label="Перегляд документа">
+  <div id="pv-modal">
+    <div class="pv-head">
+      <span class="pv-title">Перегляд документа</span>
+      <button class="btn btn-primary" type="button" id="pv-pdf">Зберегти як PDF</button>
+      <button class="btn btn-ghost" type="button" id="pv-close">Закрити</button>
+    </div>
+    <div id="pv-body"><div id="pv-render"></div></div>
   </div>
 </div>
 
@@ -2508,6 +2542,41 @@ updateRecap();
     var old=b.textContent;
     b.textContent=ok?"Скопійовано ✓":"Виділено — натисніть Ctrl/Cmd+C";
     setTimeout(function(){ b.textContent=old; }, 2200);
+  });
+})();
+
+/* Перегляд документа (docx-preview) + збереження в PDF через друк */
+(function(){
+  var overlay=document.getElementById("pv-overlay"),
+      render=document.getElementById("pv-render"),
+      btnPrev=document.getElementById("btn_preview"),
+      btnClose=document.getElementById("pv-close"),
+      btnPdf=document.getElementById("pv-pdf");
+  if(!btnPrev||!overlay) return;
+  function openM(){ overlay.classList.add("on"); document.body.style.overflow="hidden"; }
+  function closeM(){ overlay.classList.remove("on"); document.body.style.overflow=""; }
+  btnClose&&btnClose.addEventListener("click",closeM);
+  overlay.addEventListener("click",function(e){ if(e.target===overlay) closeM(); });
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&overlay.classList.contains("on")) closeM(); });
+  btnPdf&&btnPdf.addEventListener("click",function(){ window.print(); });
+
+  btnPrev.addEventListener("click",async function(){
+    var miss=missingFields();
+    if(miss.length){ toast("Заповніть обов'язкові поля: "+miss.join(", "), true); updateRecap(); return; }
+    var sel=partsGuard(); if(!sel) return;
+    if(typeof docx==="undefined"||!docx||!docx.renderAsync){
+      toast("Бібліотека перегляду не завантажилась. Перевірте зʼєднання — завантаження .docx працює як зазвичай.", true);
+      return;
+    }
+    await withBusy(btnPrev,async function(){
+      var r=await buildDocx(sel);
+      render.innerHTML="";
+      await docx.renderAsync(r.blob, render, null, {
+        className:"docx", inWrapper:true, breakPages:true,
+        renderHeaders:true, renderFooters:true, ignoreLastRenderedPageBreak:true, experimental:true
+      });
+      openM();
+    });
   });
 })();
 </script>
