@@ -705,6 +705,49 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
         </div>
       </div>
     </section>
+
+    <!-- ЧАСТИНА 5 — Е-ПІДПИСАННЯ -->
+    <section class="section" id="s-esign">
+      <div class="s-head">
+        <span class="s-num">5</span>
+        <h2 class="s-title">Надіслати клієнту на е-підписання</h2>
+        <span class="s-tag">електронний підпис</span>
+      </div>
+      <div class="s-body">
+        <p class="s-desc">Сформований <b>.docx</b> клієнт може підписати електронно — своїм КЕП або через Дія.Підпис, без встановлення програм. Окремого посилання, що «підписує саме́», не існує (підпис накладає особисто клієнт), але ці сервіси надсилають клієнту посилання на підписання або дають підписати файл онлайн.</p>
+
+        <div class="mini-h">Сервіси</div>
+        <div class="reg-actions" style="flex-wrap:wrap">
+          <a class="btn btn-primary" href="https://vchasno.ua/" target="_blank" rel="noopener noreferrer">Вчасно — надіслати клієнту на підпис ↗</a>
+          <a class="btn btn-ghost" href="https://diia.gov.ua/services/pidpisannya-dokumentiv" target="_blank" rel="noopener noreferrer">Дія.Підпис ↗</a>
+          <a class="btn btn-ghost" href="https://czo.gov.ua/sign" target="_blank" rel="noopener noreferrer">ЦЗО — підписати файл ↗</a>
+        </div>
+        <div class="sub-hint">
+          <b>Вчасно</b> (vchasno.ua) — завантажуєте .docx, вказуєте email клієнта → сервіс надсилає йому лист із посиланням, клієнт підписує онлайн своїм КЕП/Дія.Підпис. Найближче до «клікнув і підписав»; є безкоштовний тариф.<br>
+          <b>Дія / ЦЗО</b> — надсилаєте клієнту сам файл + посилання; клієнт завантажує його на портал, накладає свій підпис і повертає підписаний файл (формат .p7s). Документ у браузері нікуди не передається.
+        </div>
+
+        <div class="mini-h" style="margin-top:16px">Лист клієнту (можна скопіювати)</div>
+        <textarea id="esign_mail" class="pass" rows="12" readonly>Доброго дня!
+
+Надсилаю Вам договір про надання правничої (правової) допомоги для підписання. У додатку — файл договору (.docx).
+
+Підписати можна електронно, без візиту, своїм кваліфікованим електронним підписом (КЕП) або через Дія.Підпис:
+1. Відкрийте файл, що додається.
+2. Перейдіть за посиланням: https://diia.gov.ua/services/pidpisannya-dokumentiv (Дія) або https://czo.gov.ua/sign (ЦЗО).
+3. Завантажте файл договору, накладіть свій підпис і надішліть підписаний файл (.p7s) мені у відповідь на цей лист.
+
+Документ, підписаний КЕП, за юридичною силою прирівнюється до власноручного підпису.
+
+З повагою,
+адвокат Осадько Олександр Олексійович
++38 (093) 466-44-43 · adv.osadko@gmail.com</textarea>
+        <div class="reg-actions" style="margin-top:8px">
+          <button class="btn btn-ghost" type="button" id="esign_copy">Копіювати текст листа</button>
+        </div>
+        <div class="sub-hint">Юридична підстава вже закладена в договір: пункт про КЕП у «Заключних положеннях» і позначка «Підписано за допомогою КЕП» у підписі Клієнта (коли ввімкнена галочка КЕП).</div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -2452,4 +2495,19 @@ applyPayMode();
 loadRegistry();
 renderRegistry();
 updateRecap();
+
+/* Копіювання листа клієнту (розділ «Надіслати на е-підписання») */
+(function(){
+  var b=document.getElementById("esign_copy"), t=document.getElementById("esign_mail");
+  if(!b||!t) return;
+  b.addEventListener("click",function(){
+    var ok=false;
+    try{ t.focus(); t.select(); }catch(e){}
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t.value); ok=true; } }catch(e){}
+    if(!ok){ try{ ok=document.execCommand("copy"); }catch(e){} }
+    var old=b.textContent;
+    b.textContent=ok?"Скопійовано ✓":"Виділено — натисніть Ctrl/Cmd+C";
+    setTimeout(function(){ b.textContent=old; }, 2200);
+  });
+})();
 </script>
