@@ -98,12 +98,13 @@
 "https://www.pravda.com.ua/news/2026/09/06/8052186/",
 "https://court.gov.ua/press/news/2092172/",
 "https://lexinform.com.ua/sudova-praktyka/opikun-majna-osoby-yaka-znykla-bezvisty-za-osoblyvyh-obstavyn-maye-pravo-golosuvaty-zamist-neyi-na-zagalnyh-zborah-uchasnykiv-tovarystva/",
-"https://lexinform.com.ua/sudova-praktyka/zmina-zahysnykom-adresy-bez-informuvannya-sudu-ne-ye-pidstavoyu-dlya-ponovlennya-stroku-na-apelyatsijne-oskarzhennya-rishennya-kopiyu-yakogo-sud-nadislav-na-poperednyu-adresu/"
+"https://lexinform.com.ua/sudova-praktyka/zmina-zahysnykom-adresy-bez-informuvannya-sudu-ne-ye-pidstavoyu-dlya-ponovlennya-stroku-na-apelyatsijne-oskarzhennya-rishennya-kopiyu-yakogo-sud-nadislav-na-poperednyu-adresu/",
+"https://protocol.ua/ua/ginka_pidpisala_shlyubniy_dogovir_pid_tiskom_shchob_viihati_za_kordon_i_zalishila_use_cholovikovi_vs_nazvav_umovu_dlya_yogo_skasuvannya/"
 ],
-"day": "2026-09-07",
-"count": 3,
-"total": 100,
-"seq": 118,
+"day": "2026-09-08",
+"count": 1,
+"total": 101,
+"seq": 119,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -206,7 +207,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788811729.438003,
+"last_content_ts": 1788863513.8187332,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
