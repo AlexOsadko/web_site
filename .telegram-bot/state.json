@@ -102,12 +102,13 @@
 "https://protocol.ua/ua/ginka_pidpisala_shlyubniy_dogovir_pid_tiskom_shchob_viihati_za_kordon_i_zalishila_use_cholovikovi_vs_nazvav_umovu_dlya_yogo_skasuvannya/",
 "https://court.gov.ua/press/news/2093228/",
 "https://lexinform.com.ua/sudova-praktyka/pozov-pro-zahyst-dilovoyi-reputatsiyi-odnochasno-do-fop-i-tiyeyi-zh-fizosoby-rozglyadayetsya-v-gospodarskomu-sudi/",
-"https://jurliga.ligazakon.net/news/246116_rshennya-shchodo-oformlennya-ndivdualnikh-nomernikh-znakv-dozvolili-oskarzhuvati"
+"https://jurliga.ligazakon.net/news/246116_rshennya-shchodo-oformlennya-ndivdualnikh-nomernikh-znakv-dozvolili-oskarzhuvati",
+"https://lexinform.com.ua/sudova-praktyka/ne-maye-zvorotnoyi-diyi-zakon-yakym-rozshyreno-kolo-osib-shho-mayut-pravo-na-otrymannya-groshovoyi-dopomogy-u-zv-yazku-iz-zagybellyu-vijskovosluzhbovtsya/"
 ],
 "day": "2026-09-09",
-"count": 2,
-"total": 104,
-"seq": 123,
+"count": 3,
+"total": 105,
+"seq": 124,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -211,7 +212,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1788950595.9579701,
+"last_content_ts": 1788965332.8384247,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
