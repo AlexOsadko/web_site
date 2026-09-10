@@ -106,12 +106,13 @@
 "https://lexinform.com.ua/sudova-praktyka/ne-maye-zvorotnoyi-diyi-zakon-yakym-rozshyreno-kolo-osib-shho-mayut-pravo-na-otrymannya-groshovoyi-dopomogy-u-zv-yazku-iz-zagybellyu-vijskovosluzhbovtsya/",
 "https://lexinform.com.ua/sudova-praktyka/nenadannya-bankom-povnoyi-informatsiyi-pro-umovy-kredytuvannya-shhe-ne-dovodyt-obmanu-chy-nechesnoyi-pidpryyemnytskoyi-praktyky/",
 "https://jurliga.ligazakon.net/news/246123_osoblivost-derzhavno-restrats-nerukhomogo-mayna-yakshcho-vlasnik-na-moment-zavershennya-budvnitstva-do-5-serpnya-1992-roku-buv-ditinoyu",
-"https://court.gov.ua/press/news/2094643/"
+"https://court.gov.ua/press/news/2094643/",
+"https://jurliga.ligazakon.net/news/246144_dopomogu-na-prozhivannya-vpo-dtyam-prodovzhuvatimut-avtomatichno"
 ],
 "day": "2026-09-10",
-"count": 1,
-"total": 108,
-"seq": 127,
+"count": 2,
+"total": 109,
+"seq": 128,
 "orig_recent": [
 "міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
@@ -215,7 +216,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789036372.8516765,
+"last_content_ts": 1789051008.8121889,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
