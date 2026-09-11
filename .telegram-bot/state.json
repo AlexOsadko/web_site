@@ -111,12 +111,11 @@
 "https://lexinform.com.ua/sudova-praktyka/ni-tsyvilnyj-kodeks-ni-zakon-pro-orendu-zemli-ne-vymagayut-pidpysannya-kozhnogo-arkusha-dogovoru-orendy/",
 "https://lexinform.com.ua/sudova-praktyka/yakshho-platnyk-podatkiv-posylayetsya-na-obstavyny-shho-vyklyuchayut-opodatkuvannya-otrymanyh-koshtiv-same-vin-maye-dovesty-yih-pohodzhennya-ta-pravovu-pryrodu/"
 ],
-"day": "2026-09-10",
-"count": 4,
+"day": "2026-09-11",
+"count": 0,
 "total": 111,
-"seq": 130,
+"seq": 131,
 "orig_recent": [
-"міф:Дитина сама вирішує, з ким жити, після 1",
 "помилка:Подали позов про поділ майна — і забули ",
 "інструкція:Чоловік/дружина виїхав і забрав дитину б",
 "порада:Аліменти без рішення суду: усна домовлен",
@@ -135,7 +134,8 @@
 "міф:Роботодавець може звільнити за прогул од",
 "розбір норми:Позовна давність: чому борг не «згорає» ",
 "інструкція:Держорган відмовив у послузі: що робити ",
-"розбір норми:Перерахунок пенсії: чому вона не відбува"
+"розбір норми:Перерахунок пенсії: чому вона не відбува",
+"інструкція:Отримали повістку в закритому конверті ч"
 ],
 "pending": {
 "1787092661515": {
@@ -218,7 +218,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789070805.7408342,
+"last_content_ts": 1789122809.513773,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
