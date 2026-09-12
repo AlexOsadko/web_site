@@ -113,12 +113,13 @@
 "https://lexinform.com.ua/sudova-praktyka/zemlyana-greblya-ne-ye-samostijnym-ob-yektom-neruhomogo-majna-tomu-derzhavna-reyestratsiya-prava-pryvatnoyi-vlasnosti-na-neyi-ye-nezakonnoyu/",
 "https://biz.ligazakon.net/news/246161_anulyuvannya-ltsenz-viznane-nezakonnim-ne-da-prava-na-dodatkov-dn--d",
 "https://court.gov.ua/press/news/2095525/",
-"https://jurliga.ligazakon.net/news/246160_chi-potrbno-chekati-viroku-lkaryu-shchob-styagnuti-moralnu-shkodu-pozitsya-vs"
+"https://jurliga.ligazakon.net/news/246160_chi-potrbno-chekati-viroku-lkaryu-shchob-styagnuti-moralnu-shkodu-pozitsya-vs",
+"https://court.gov.ua/press/news/2095401/"
 ],
 "day": "2026-09-12",
-"count": 1,
-"total": 115,
-"seq": 135,
+"count": 2,
+"total": 116,
+"seq": 136,
 "orig_recent": [
 "помилка:Подали позов про поділ майна — і забули ",
 "інструкція:Чоловік/дружина виїхав і забрав дитину б",
@@ -222,7 +223,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789207315.0364192,
+"last_content_ts": 1789219943.2312038,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
