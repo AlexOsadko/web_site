@@ -116,12 +116,13 @@
 "https://jurliga.ligazakon.net/news/246160_chi-potrbno-chekati-viroku-lkaryu-shchob-styagnuti-moralnu-shkodu-pozitsya-vs",
 "https://court.gov.ua/press/news/2095401/",
 "https://jurliga.ligazakon.net/news/246157_verkhovniy-sud-rozyasniv-mezh-prava-uchasnika-tovaristva-na-otrimannya-dokumentv-pro-yogo-dyalnst",
-"https://court.gov.ua/press/news/2095209/"
+"https://court.gov.ua/press/news/2095209/",
+"https://court.gov.ua/press/news/2095156/"
 ],
 "day": "2026-09-12",
-"count": 4,
-"total": 118,
-"seq": 138,
+"count": 5,
+"total": 119,
+"seq": 139,
 "orig_recent": [
 "помилка:Подали позов про поділ майна — і забули ",
 "інструкція:Чоловік/дружина виїхав і забрав дитину б",
@@ -225,7 +226,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789238217.5402203,
+"last_content_ts": 1789246581.753793,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
