@@ -1,0 +1,50 @@
+name: Перевірка свіжості судів (реєстр)
+
+# Ручний запуск: перевіряє, що кожен суд із court_registry.json досі відповідає
+# тим самим шляхом, що й бот (CSZ → new.php). Пише звіт tools/_courts_health/
+# report.txt (code|status|count|name) і комітить його. Персональних даних немає.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: court-healthcheck
+  cancel-in-progress: false
+
+jobs:
+  healthcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Перевірити суди
+        env:
+          COURT_FETCH_TIMEOUT: "10"
+          COURT_FETCH_TRIES: "3"
+          COURT_HC_PAUSE: "0.35"
+        run: python3 tools/court_healthcheck.py
+
+      - name: Зберегти звіт
+        run: |
+          if [ -z "$(git status --porcelain tools/_courts_health)" ]; then
+            echo "звіт не змінився"; exit 0
+          fi
+          git config user.name "osadko-court-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p /tmp/hc && cp tools/_courts_health/*.txt /tmp/hc/ 2>/dev/null || true
+          for i in 1 2 3 4 5 6; do
+            git fetch -q origin main
+            git checkout -q -B _hc origin/main
+            mkdir -p tools/_courts_health
+            cp /tmp/hc/*.txt tools/_courts_health/ 2>/dev/null || true
+            git add tools/_courts_health
+            git commit -q -m "chore(court-healthcheck): report [skip ci]" || { echo "нема змін"; exit 0; }
+            if git push -q origin _hc:main; then echo "збережено"; exit 0; fi
+            echo "повтор $i"; sleep 3
+          done
