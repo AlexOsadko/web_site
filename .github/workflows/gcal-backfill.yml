@@ -1,0 +1,37 @@
+name: Синхронізація засідань у Google Calendar (разово)
+
+# Ручний запуск: переносить УСІ вже відомі майбутні засідання (з накопиченого у
+# Worker переліку) у Google Calendar адвоката. Ідемпотентно — повтори не
+# дублюють подій. Зручно для першого наповнення календаря або після зміни ключа.
+# Штатне додавання нових засідань робить основний workflow «Відстеження судових
+# справ» — цей потрібен лише для разової синхронізації наявних.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gcal-backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Залежності для календаря
+        run: pip install --quiet google-auth
+
+      - name: Перенести засідання в календар
+        env:
+          BOT_WORKER_URL: ${{ secrets.BOT_WORKER_URL }}
+          BOT_WORKER_SECRET: ${{ secrets.BOT_WORKER_SECRET }}
+          GOOGLE_CALENDAR_SA: ${{ secrets.GOOGLE_CALENDAR_SA }}
+          GOOGLE_CALENDAR_ID: ${{ secrets.GOOGLE_CALENDAR_ID }}
+        run: python3 tools/gcal_backfill.py
