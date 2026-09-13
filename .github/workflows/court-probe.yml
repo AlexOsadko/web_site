@@ -38,6 +38,10 @@ on:
         description: "RANGE: діапазон кодів для швидкого збору назв судів (напр. 1000-1999)"
         type: string
         default: ""
+      dump:
+        description: "DUMP: зберегти сирий HTML сторінки (url) у tools/_courts_harvest/dump.html"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -60,9 +64,10 @@ jobs:
           HARVEST: ${{ github.event.inputs.harvest == 'true' && '1' || '' }}
           CODES: ${{ github.event.inputs.codes }}
           RANGE: ${{ github.event.inputs.range }}
+          DUMP: ${{ github.event.inputs.dump == 'true' && '1' || '' }}
         run: python3 tools/court_probe.py
       - name: Зберегти зібрані суди
-        if: ${{ github.event.inputs.range != '' }}
+        if: ${{ github.event.inputs.range != '' || github.event.inputs.dump == 'true' }}
         run: |
           if [ -z "$(git status --porcelain tools/_courts_harvest)" ]; then
             echo "нема нових файлів"; exit 0

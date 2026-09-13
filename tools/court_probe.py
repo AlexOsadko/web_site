@@ -90,6 +90,20 @@ def main():
         sys.exit(1)
     print("URL:", url)
 
+    # Режим DUMP: зберегти сирий HTML сторінки у файл (для аналізу структури).
+    if os.environ.get("DUMP", "").strip():
+        try:
+            code, ctype, text = fetch(url)
+        except Exception as e:
+            print("Помилка:", e); sys.exit(1)
+        print("HTTP:", code, "· тип:", ctype, "· довжина:", len(text))
+        outdir = "tools/_courts_harvest"
+        os.makedirs(outdir, exist_ok=True)
+        with open(f"{outdir}/dump.html", "w", encoding="utf-8") as f:
+            f.write(text)
+        print(f"Збережено у {outdir}/dump.html")
+        return
+
     # Режим CODES: перевірити, що court.gov.ua/sud<code> віддає дані кожного суду
     codes = os.environ.get("CODES", "").strip()
     if codes:
