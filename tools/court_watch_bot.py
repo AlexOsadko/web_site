@@ -232,9 +232,15 @@ def load_registry():
         for c in courts:
             code = str(c.get("code") or "").strip()
             if code:
-                out.append({"name": (c.get("name") or f"суд {code}").strip(),
-                            "code": code,
-                            "auto_url": (c.get("auto_url") or "").strip()})
+                entry = {"name": (c.get("name") or f"суд {code}").strip(),
+                         "code": code,
+                         "auto_url": (c.get("auto_url") or "").strip()}
+                # Явний url (для судів, у яких немає /csz на court.gov.ua —
+                # напр. регіональний піддомен). csz_url_for надасть перевагу йому.
+                url = (c.get("url") or "").strip()
+                if url:
+                    entry["url"] = url
+                out.append(entry)
         return out
     except Exception as e:
         print("Реєстр судів недоступний:", e)
