@@ -1,8 +1,11 @@
 name: Перевірка свіжості судів (реєстр)
 
 # Ручний запуск: перевіряє, що кожен суд із court_registry.json досі відповідає
-# тим самим шляхом, що й бот (CSZ → new.php). Пише звіт tools/_courts_health/
-# report.txt (code|status|count|name) і комітить його. Персональних даних немає.
+# тим самим шляхом, що й бот (CSZ → new.php). Щоб не впертись у ліміт court.gov.ua
+# «за IP», паралелимо НЕ потоками, а на 8 окремих раннерах (кожен свій IP),
+# кожен послідовно й ввічливо перевіряє свою частину (round-robin). Далі job
+# «combine» збирає шарди у tools/_courts_health/report.txt (code|status|count|name).
+# Персональних даних немає.
 
 on:
   workflow_dispatch:
@@ -16,34 +19,60 @@ concurrency:
 
 jobs:
   healthcheck:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - name: Перевірити суди
+      - name: Перевірити суди (шард)
         env:
-          COURT_FETCH_TIMEOUT: "9"
-          COURT_FETCH_TRIES: "2"
-          COURT_HC_PAUSE: "0.4"
+          COURT_FETCH_TIMEOUT: "6"
+          COURT_FETCH_TRIES: "1"
+          COURT_HC_PAUSE: "0.25"
+          SHARD_INDEX: ${{ matrix.shard }}
+          SHARD_COUNT: "8"
         run: python3 tools/court_healthcheck.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hc-${{ matrix.shard }}
+          path: tools/_courts_health/report-${{ matrix.shard }}.txt
+          retention-days: 1
 
-      - name: Зберегти звіт
+  combine:
+    needs: healthcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: hc-*
+          path: /tmp/hc
+          merge-multiple: true
+      - name: Зібрати звіт
+        run: |
+          mkdir -p tools/_courts_health
+          cat /tmp/hc/report-*.txt | sort > tools/_courts_health/report.txt
+          echo "Рядків у звіті: $(wc -l < tools/_courts_health/report.txt)"
+          echo "ok/empty/fail:"; awk -F'|' '{print $2}' tools/_courts_health/report.txt | sort | uniq -c
+      - name: Закомітити звіт
         run: |
           if [ -z "$(git status --porcelain tools/_courts_health)" ]; then
             echo "звіт не змінився"; exit 0
           fi
           git config user.name "osadko-court-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          mkdir -p /tmp/hc && cp tools/_courts_health/*.txt /tmp/hc/ 2>/dev/null || true
+          cp tools/_courts_health/report.txt /tmp/report.txt
           for i in 1 2 3 4 5 6; do
             git fetch -q origin main
             git checkout -q -B _hc origin/main
             mkdir -p tools/_courts_health
-            cp /tmp/hc/*.txt tools/_courts_health/ 2>/dev/null || true
-            git add tools/_courts_health
+            cp /tmp/report.txt tools/_courts_health/report.txt
+            git add tools/_courts_health/report.txt
             git commit -q -m "chore(court-healthcheck): report [skip ci]" || { echo "нема змін"; exit 0; }
             if git push -q origin _hc:main; then echo "збережено"; exit 0; fi
             echo "повтор $i"; sleep 3

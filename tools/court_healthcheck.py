@@ -24,18 +24,25 @@ import court_watch_bot as b
 PAUSE = float(os.environ.get("COURT_HC_PAUSE", "0.4") or "0.4")
 OUTDIR = "tools/_courts_health"
 FLUSH_EVERY = 25
+# Шардинг: кожен раннер (окремий IP) перевіряє свою частину судів (round-robin),
+# щоб паралелити на кількох машинах, а не потоками (сервер обмежує за IP).
+SHARD_IDX = int(os.environ.get("SHARD_INDEX", "0") or "0")
+SHARD_CNT = int(os.environ.get("SHARD_COUNT", "1") or "1")
+OUTFILE = f"report-{SHARD_IDX}.txt" if SHARD_CNT > 1 else "report.txt"
 
 
 def _write(rows):
     os.makedirs(OUTDIR, exist_ok=True)
-    with open(f"{OUTDIR}/report.txt", "w", encoding="utf-8") as f:
+    with open(f"{OUTDIR}/{OUTFILE}", "w", encoding="utf-8") as f:
         f.write("\n".join(rows) + "\n")
 
 
 def main():
     courts = b.load_registry()
+    if SHARD_CNT > 1:
+        courts = courts[SHARD_IDX::SHARD_CNT]  # round-robin: рівномірно ділить ТОТ-суди
     total = len(courts)
-    print(f"Судів у реєстрі: {total} · послідовно, пауза {PAUSE}с")
+    print(f"Судів у цьому шарді: {total} (шард {SHARD_IDX}/{SHARD_CNT}) · пауза {PAUSE}с")
     rows = []
     n_ok = n_empty = n_fail = 0
     for i, court in enumerate(courts, 1):
