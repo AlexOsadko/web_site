@@ -1,0 +1,37 @@
+name: Діагностика суду (чому не показав засідання)
+
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: "Код суду (напр. 1015)"
+        type: string
+        default: "1015"
+      date:
+        description: "Дата засідання (ДД.ММ.РРРР)"
+        type: string
+        default: "17.09.2026"
+      surname:
+        description: "Прізвище для пошуку"
+        type: string
+        default: "Осадько"
+
+permissions:
+  contents: read
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Діагностика
+        env:
+          DIAG_CODE: ${{ github.event.inputs.code }}
+          DIAG_DATE: ${{ github.event.inputs.date }}
+          DIAG_SURNAME: ${{ github.event.inputs.surname }}
+          COURT_FETCH_TIMEOUT: "12"
+          COURT_FETCH_TRIES: "3"
+        run: python3 tools/court_diag.py
