@@ -101,6 +101,14 @@ WORKER_SECRET = (os.environ.get("COURT_WORKER_SECRET", "").strip()
 # Окремий перегляд справ самого адвоката (де він захисник/представник).
 ADVOCATE_NAME = os.environ.get("COURT_ADVOCATE", "Осадько Олександр Олексійович").strip()
 
+# Відомі варіанти написання ПІБ адвоката, які теж треба ловити (суди інколи
+# помиляються — напр. по-батькові «Олександрович» замість «Олексійович»).
+# Керується env COURT_ADVOCATE_ALIASES (варіанти через «|»). Це власне ім'я
+# адвоката, не персональні дані клієнтів.
+ADVOCATE_ALIASES = [a.strip() for a in os.environ.get(
+    "COURT_ADVOCATE_ALIASES", "Осадько Олександр Олександрович").split("|")
+    if a.strip()]
+
 
 def post_worker_report(items, kind="advocate", scanned=None):
     """Зберегти у Worker (KV) звіт (advocate|clients) для перегляду з меню.
@@ -646,6 +654,13 @@ def main():
                 low.add(n.lower())
                 added += 1
         print(f"Зі списку Telegram-меню: {len(wnames)} (нових: {added})")
+    # Завжди стежимо за самим адвокатом і відомими варіантами написання його ПІБ
+    # (щоб помилки судів у по-батькові тощо не «губилися»).
+    low = {n.lower() for n in names}
+    for n in [ADVOCATE_NAME] + ADVOCATE_ALIASES:
+        if n and n.lower() not in low:
+            names.append(n)
+            low.add(n.lower())
     if not names:
         print("Порожній список ПІБ (додайте через меню бота: /menu) — нічого відстежувати.")
         return
