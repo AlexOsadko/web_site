@@ -135,8 +135,9 @@ def main():
             r"адміністрат|Верховний|Касаційний|Вищий|військов", re.I)
         found = []
         for code in range(lo, hi + 1):
+            cd = f"{code:04d}"  # коди 4-значні з нулем спереду (напр. 0201)
             try:
-                c, ct, page = fetch(f"https://court.gov.ua/sud{code}/")
+                c, ct, page = fetch(f"https://court.gov.ua/sud{cd}/")
             except Exception:
                 _t.sleep(0.05)
                 continue
@@ -148,8 +149,8 @@ def main():
             if mt:
                 name = re.sub(r"\s+", " ", mt.group(1)).strip()
             if name and court_re.search(name):
-                found.append(f"{code}|{name}")
-                print(f"{code}|{name}")
+                found.append(f"{cd}|{name}")
+                print(f"{cd}|{name}")
             _t.sleep(0.08)
         # Зберегти у файл (воркфлоу закомітить його в репозиторій).
         outdir = "tools/_courts_harvest"
