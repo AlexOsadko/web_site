@@ -34,6 +34,14 @@ import time
 import urllib.parse
 import urllib.request
 
+try:
+    # Додавання засідань у Google Calendar. Модуль лежить поруч; вмикається сам,
+    # лише коли задано секрети GOOGLE_CALENDAR_SA + GOOGLE_CALENDAR_ID. Якщо його
+    # чи бібліотеки немає — бот працює як раніше (календар просто пропускається).
+    import gcal
+except Exception:
+    gcal = None
+
 STATE_PATH = ".court-bot/state.json"
 REGISTRY_PATH = os.path.join(os.path.dirname(__file__), "court_registry.json")
 
@@ -730,6 +738,14 @@ def main():
                     print("  Telegram відмовив (див. приватний чат).")
             except Exception:
                 print("  Помилка надсилання сповіщення.")
+            # Додати засідання у Google Calendar (якщо налаштовано секрети).
+            # events.import ідемпотентний — повтори не дублюють подію.
+            if gcal is not None and gcal.enabled():
+                try:
+                    if gcal.add_event(court["name"], rec):
+                        print("  Календар: подію додано/оновлено.")
+                except Exception:
+                    print("  Календар: помилка (пропущено).")
         if sent >= MAX_ALERTS:
             print("  Досягнуто ліміту сповіщень за запуск — решта наступного разу.")
             break

@@ -52,12 +52,22 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Потрібно лише для запису засідань у Google Calendar (підпис JWT службового
+      # акаунта). Якщо секрети календаря не задані — бібліотека просто не
+      # використовується. Дешево й не впливає на решту роботи бота.
+      - name: Залежності для календаря
+        run: pip install --quiet google-auth
+
       - name: Перевірити призначення справ
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_REVIEW_CHAT: ${{ secrets.TELEGRAM_REVIEW_CHAT }}
           COURT_ALERT_CHAT: ${{ secrets.COURT_ALERT_CHAT }}   # необов'язково; типово = REVIEW_CHAT
           COURT_WATCH: ${{ secrets.COURT_WATCH }}
+          # Google Calendar — засідання додаються у календар адвоката, якщо задано
+          # обидва секрети (інакше крок з календарем тихо пропускається).
+          GOOGLE_CALENDAR_SA: ${{ secrets.GOOGLE_CALENDAR_SA }}
+          GOOGLE_CALENDAR_ID: ${{ secrets.GOOGLE_CALENDAR_ID }}
           # Список ПІБ, яким керуєте з Telegram-меню бота (зберігається приватно у
           # Cloudflare Worker KV). Ті самі секрети, що й для миттєвих кнопок каналу.
           BOT_WORKER_URL: ${{ secrets.BOT_WORKER_URL }}
