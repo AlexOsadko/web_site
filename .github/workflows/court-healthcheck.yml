@@ -25,9 +25,9 @@ jobs:
 
       - name: Перевірити суди
         env:
-          COURT_FETCH_TIMEOUT: "8"
+          COURT_FETCH_TIMEOUT: "9"
           COURT_FETCH_TRIES: "2"
-          COURT_HC_WORKERS: "8"
+          COURT_HC_PAUSE: "0.4"
         run: python3 tools/court_healthcheck.py
 
       - name: Зберегти звіт
