@@ -681,7 +681,12 @@ def main():
     client_hits = []       # окремий звіт «справи клієнтів»
 
     # Шардинг: цей прогін сканує лише частину судів (решта — наступними прогонами).
-    scanned_names = None
+    # scanned_ok — назви судів, які цього прогону завантажилися УСПІШНО. Саме їх
+    # (а не всі спробувані!) шлемо у Worker як scanned: суд, що впав по timeout,
+    # НЕ потрапляє сюди → Worker зберігає його раніше відомі справи, а не обнуляє.
+    # Це рятує від катастрофи, коли court.gov.ua блокує масу запитів і повний
+    # прогін «знаходить 0» — тепер порожнеча не затирає накопичений перелік.
+    scanned_ok = []
     courts_to_scan = courts
     if SHARD_SIZE > 0 and len(courts) > SHARD_SIZE:
         cur = int(st.get("shard_cursor", 0)) % len(courts)
@@ -690,7 +695,6 @@ def main():
         if end > len(courts):                      # перенос через кінець списку
             courts_to_scan = courts_to_scan + courts[:end - len(courts)]
         st["shard_cursor"] = end % len(courts)
-        scanned_names = [c["name"] for c in courts_to_scan]
         print(f"Шард: {len(courts_to_scan)} судів (позиція {cur}), "
               f"наступний курсор {st['shard_cursor']}; повне коло за "
               f"{-(-len(courts)//SHARD_SIZE)} прогонів")
@@ -704,6 +708,7 @@ def main():
         except Exception as e:
             print(f"[{court['name']}] помилка завантаження: {e}")
             continue
+        scanned_ok.append(court["name"])  # суд завантажився — його справи актуальні
         time.sleep(REQUEST_PAUSE)  # ввічлива пауза між судами
 
         # Окремо: справи, де фігурує сам адвокат (для перегляду з меню).
@@ -804,17 +809,23 @@ def main():
                     print("  Помилка надсилання сповіщення (статус).")
 
     # Звіти «справи адвоката» і «справи клієнтів» (майбутні, за датою, без дублів).
-    # При шардингу Worker зливає лише справи просканованих судів (scanned_names).
-    adv = []
-    if ADVOCATE_NAME:
-        adv = build_report(advocate_hits)
-        print(f"Справи адвоката (цей шард): {len(adv)}")
+    # Worker зливає ЛИШЕ справи успішно завантажених судів (scanned_ok); решту
+    # (не завантажені або з інших шардів) зберігає. Якщо цього прогону не вдалося
+    # ЖОДЕН суд — звіт НЕ чіпаємо взагалі, щоб порожнеча не стерла накопичене.
+    adv, cli = [], []
+    if not scanned_ok:
+        print("Жодного суду не проскановано успішно — звіт не оновлюю "
+              "(зберігаю попередній перелік).")
+    else:
+        if ADVOCATE_NAME:
+            adv = build_report(advocate_hits)
+            print(f"Справи адвоката (цей шард): {len(adv)}")
+            if not DRY_RUN:
+                post_worker_report(adv, "advocate", scanned=scanned_ok)
+        cli = build_report(client_hits)
+        print(f"Справи клієнтів (цей шард): {len(cli)}")
         if not DRY_RUN:
-            post_worker_report(adv, "advocate", scanned=scanned_names)
-    cli = build_report(client_hits)
-    print(f"Справи клієнтів (цей шард): {len(cli)}")
-    if not DRY_RUN:
-        post_worker_report(cli, "clients", scanned=scanned_names)
+            post_worker_report(cli, "clients", scanned=scanned_ok)
 
     # ── Нагадування за 3-2-1 день до засідання ──
     if REMIND_DAYS:
@@ -822,9 +833,11 @@ def main():
         # Справи, які адвокат прибрав у боті (🗑 у «Нагадуваннях»/«Прихованих») —
         # по них нагадування більше не надсилаємо.
         blocked = fetch_worker_blocked()
-        # При шардингу цей прогін бачив лише частину судів — тож для нагадувань
-        # беремо ПОВНИЙ накопичений перелік справ із Worker (усі шарди).
-        if scanned_names and not DRY_RUN:
+        # Цей прогін бачив лише частину судів (шард) або міг не завантажити деякі
+        # через timeout — тож для нагадувань беремо ПОВНИЙ накопичений перелік
+        # справ із Worker (усі шарди разом). Локальні cli/adv — лише запасний
+        # варіант у dry-run, коли до Worker не звертаємось.
+        if not DRY_RUN:
             rem_cli = fetch_worker_cases("clients")
             rem_adv = fetch_worker_cases("advocate")
         else:
