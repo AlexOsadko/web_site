@@ -120,12 +120,13 @@
 "https://court.gov.ua/press/news/2095156/",
 "https://unba.org.ua/news/12244-4-zagrozi-dlya-advokaturi-v-umovah-bezpekovih-obmezhen-nazvala-l-izovitova.html",
 "https://www.ukrinform.ua/rubric-polytics/4163795-polsa-ne-blokuvatime-vidkritta-klasteriv-u-peregovorah-pro-vstup-ukraini-do-es-sikorskij.html",
-"https://www.slovoidilo.ua/2026/09/13/pidsumky/udar-rf-po-poyizdu-kordonu-polshheyu-ta-sankcziyi-proty-mendel.-holovne-vyxidni"
+"https://www.slovoidilo.ua/2026/09/13/pidsumky/udar-rf-po-poyizdu-kordonu-polshheyu-ta-sankcziyi-proty-mendel.-holovne-vyxidni",
+"https://court.gov.ua/press/news/2096153/"
 ],
-"day": "2026-09-13",
-"count": 3,
-"total": 122,
-"seq": 143,
+"day": "2026-09-14",
+"count": 1,
+"total": 123,
+"seq": 144,
 "orig_recent": [
 "інструкція:Чоловік/дружина виїхав і забрав дитину б",
 "порада:Аліменти без рішення суду: усна домовлен",
@@ -229,7 +230,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789329241.432746,
+"last_content_ts": 1789386172.8426802,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
