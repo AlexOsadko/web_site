@@ -95,9 +95,13 @@ jobs:
           cp .court-bot/state.json /tmp/state.json
           # Стійкий push без rebase: щоразу беремо свіжий origin/main і кладемо
           # поверх лише наш файл стану (уникаємо конфліктів у detached HEAD).
+          # -f: робоча копія state.json змінена ботом і відрізняється від
+          # origin/main, тож без примусу checkout аварійно завершується
+          # («local changes would be overwritten»). Зміну вже збережено в
+          # /tmp і повертаємо її нижче, тож відкидання безпечне.
           for i in 1 2 3 4 5; do
             git fetch -q origin main
-            git checkout -q -B _state origin/main
+            git checkout -q -f -B _state origin/main
             mkdir -p .court-bot
             cp /tmp/state.json .court-bot/state.json
             git add .court-bot/state.json
