@@ -273,7 +273,7 @@ async function showReminders(env, page = 0) {
       reply_markup: { inline_keyboard: [[{ text: '↩️ Меню', callback_data: 'cmenu' }]] } });
   }
   // Повна інформація по кожній справі одразу; довгий список — по сторінках.
-  const PER = 5;
+  const PER = 7;
   const pages = Math.max(1, Math.ceil(uniq.length / PER));
   page = Math.min(Math.max(0, page | 0), pages - 1);
   const slice = uniq.slice(page * PER, page * PER + PER);
@@ -326,7 +326,7 @@ async function showCourtReport(env, kind = 'advocate', page = 0) {
       text: `${title}</b>\n${extra}`, reply_markup: kb,
     });
   }
-  const PER = 5;
+  const PER = 7;
   const pages = Math.max(1, Math.ceil(visible.length / PER));
   page = Math.min(Math.max(0, page | 0), pages - 1);
   const startI = page * PER;
@@ -344,8 +344,8 @@ async function showCourtReport(env, kind = 'advocate', page = 0) {
     txt += `    🏛 ${cut(it.court, 90)}${it.courtroom ? ' · 🚪 ' + esc(it.courtroom) : ''}\n`;
     const jf = [it.judge, it.forma].filter(Boolean).map(esc).join(' · ');
     if (jf) txt += `    👨‍⚖️ ${jf}\n`;
-    if (it.description) txt += `    📋 ${cut(it.description, 220)}\n`;
-    if (it.involved) txt += `    👥 ${cut(it.involved, 400)}\n`;
+    if (it.description) txt += `    📋 ${cut(it.description, 160)}\n`;
+    if (it.involved) txt += `    👥 ${cut(it.involved, 200)}\n`;
     if (it.address) txt += `    📍 ${cut(it.address, 120)}\n`;
     row.push({ text: `🗑 ${gi + 1}`, callback_data: `chide:${kind}:${gi}:${page}` });
     if (row.length === 5) { rows.push(row); row = []; }
@@ -395,7 +395,7 @@ async function showCourtReportAll(env, page = 0) {
       reply_markup: courtMenuKb(),
     });
   }
-  const PER = 5;
+  const PER = 7;
   const pages = Math.max(1, Math.ceil(all.length / PER));
   page = Math.min(Math.max(0, page | 0), pages - 1);
   const startI = page * PER;
@@ -410,8 +410,8 @@ async function showCourtReportAll(env, page = 0) {
     txt += `    🏛 ${cut(it.court, 90)}${it.courtroom ? ' · 🚪 ' + esc(it.courtroom) : ''}\n`;
     const jf = [it.judge, it.forma].filter(Boolean).map(esc).join(' · ');
     if (jf) txt += `    👨‍⚖️ ${jf}\n`;
-    if (it.description) txt += `    📋 ${cut(it.description, 220)}\n`;
-    if (it.involved) txt += `    👥 ${cut(it.involved, 400)}\n`;
+    if (it.description) txt += `    📋 ${cut(it.description, 160)}\n`;
+    if (it.involved) txt += `    👥 ${cut(it.involved, 200)}\n`;
     if (it.address) txt += `    📍 ${cut(it.address, 120)}\n`;
   });
   const rows = [];
