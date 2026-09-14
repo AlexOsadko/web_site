@@ -58,6 +58,7 @@ function courtMenuKb() {
   return { inline_keyboard: [
     [{ text: '➕ Додати клієнта', callback_data: 'cadd' }],
     [{ text: '📋 Список / кількість', callback_data: 'clist' }],
+    [{ text: '📑 Повний список', callback_data: 'crepall' }],
     [{ text: '👥 Справи клієнтів', callback_data: 'crepc' }],
     [{ text: '⚖️ Справи адвоката', callback_data: 'crep' }],
     [{ text: '🔔 Нагадування', callback_data: 'crem' }],
@@ -69,6 +70,7 @@ function courtMenuKb() {
 function courtReplyKb() {
   return {
     keyboard: [
+      [{ text: '📑 Повний список' }],
       [{ text: '👥 Справи клієнтів' }, { text: '⚖️ Справи адвоката' }],
       [{ text: '🔎 Пошук практики ВС' }, { text: '📋 Список клієнтів' }],
       [{ text: '🔔 Нагадування' }, { text: '➕ Додати клієнта' }],
@@ -100,6 +102,7 @@ async function setupCommands(env) {
   const scope = { type: 'chat', chat_id: env.REVIEW_CHAT };
   await tg(env, 'setMyCommands', { scope, commands: [
     { command: 'menu', description: '⚖️ Меню суду' },
+    { command: 'all', description: '📑 Повний список справ' },
     { command: 'clients', description: '👥 Справи клієнтів' },
     { command: 'advocate', description: '⚖️ Справи адвоката' },
     { command: 'reminders', description: '🔔 Нагадування' },
@@ -363,6 +366,73 @@ async function showCourtReport(env, kind = 'advocate', page = 0) {
   });
 }
 
+// Об'єднаний перегляд: справи адвоката + клієнтів в одному повідомленні.
+// Лише для читання (приховування/видалення — у відповідних окремих розділах),
+// щоб індекси кнопок 🗑 не плутались між двома джерелами.
+async function showCourtReportAll(env, page = 0) {
+  const a = await visibleReport(env, 'advocate');
+  const c = await visibleReport(env, 'clients');
+  const byKey = new Map();
+  a.visible.forEach((it) => byKey.set(itemKey(it), { ...it, _src: '⚖️' }));
+  c.visible.forEach((it) => {
+    const k = itemKey(it);
+    if (byKey.has(k)) {                       // справа є і там, і там — позначаємо обидва
+      const e = byKey.get(k);
+      e._src = '⚖️👥';
+      if (!e.matched && it.matched) e.matched = it.matched;
+    } else {
+      byKey.set(k, { ...it, _src: '👥' });
+    }
+  });
+  const all = [...byKey.values()].sort(caseCmp);
+  const updated = a.updated || c.updated || '';
+  const title = '📑 <b>Повний список справ';
+  if (!all.length) {
+    return tg(env, 'sendMessage', {
+      chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+      text: `${title}</b>\nПоки немає даних. Перелік оновлюється під час прогону ` +
+        '(планового або 🔄 термінового).',
+      reply_markup: courtMenuKb(),
+    });
+  }
+  const PER = 5;
+  const pages = Math.max(1, Math.ceil(all.length / PER));
+  page = Math.min(Math.max(0, page | 0), pages - 1);
+  const startI = page * PER;
+  const slice = all.slice(startI, startI + PER);
+  let txt = `${title}: ${all.length}</b>\n<i>оновлено: ${esc(updated)}</i>` +
+    (pages > 1 ? ` · стор. ${page + 1}/${pages}` : '') +
+    '\n<i>⚖️ — ваші · 👥 — клієнтів</i>\n';
+  slice.forEach((it, j) => {
+    const gi = startI + j;
+    txt += `\n<b>${gi + 1}. ${it._src} № ${esc(it.number)}</b> · 📅 ${esc(it.date)}\n`;
+    if (it.matched) txt += `    🔎 клієнт: <b>${esc(it.matched)}</b>\n`;
+    txt += `    🏛 ${cut(it.court, 90)}${it.courtroom ? ' · 🚪 ' + esc(it.courtroom) : ''}\n`;
+    const jf = [it.judge, it.forma].filter(Boolean).map(esc).join(' · ');
+    if (jf) txt += `    👨‍⚖️ ${jf}\n`;
+    if (it.description) txt += `    📋 ${cut(it.description, 220)}\n`;
+    if (it.involved) txt += `    👥 ${cut(it.involved, 400)}\n`;
+    if (it.address) txt += `    📍 ${cut(it.address, 120)}\n`;
+  });
+  const rows = [];
+  if (pages > 1) {
+    const nav = [];
+    if (page > 0) nav.push({ text: '◀️ Назад', callback_data: `crepall:${page - 1}` });
+    nav.push({ text: `${page + 1}/${pages}`, callback_data: 'cnoop' });
+    if (page < pages - 1) nav.push({ text: 'Далі ▶️', callback_data: `crepall:${page + 1}` });
+    rows.push(nav);
+  }
+  rows.push([
+    { text: '⚖️ Лише мої', callback_data: 'crep' },
+    { text: '👥 Лише клієнтів', callback_data: 'crepc' },
+  ]);
+  rows.push([{ text: '↩️ Меню', callback_data: 'cmenu' }]);
+  return tg(env, 'sendMessage', {
+    chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt,
+    disable_web_page_preview: true, reply_markup: { inline_keyboard: rows },
+  });
+}
+
 async function showCourtMenu(env, prefix = '') {
   const arr = await getNames(env);
   // Закріплюємо меню-клавіатуру біля поля вводу + дублюємо кнопки в повідомленні.
@@ -527,7 +597,7 @@ async function handleUpdate(update, env) {
     const pid = parts[1];
 
     // --- меню бота відстеження судових справ ---
-    if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crun',
+    if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crepall', 'crun',
          'chide', 'cunhide', 'chidden', 'cunhide1', 'cpurge1', 'cpurge',
          'crem', 'cremdel', 'crempg', 'crepp', 'cnoop'].includes(action)) {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
@@ -535,6 +605,7 @@ async function handleUpdate(update, env) {
       if (action === 'cmenu') return showCourtMenu(env);
       if (action === 'crep') return showCourtReport(env, 'advocate', 0);
       if (action === 'crepc') return showCourtReport(env, 'clients', 0);
+      if (action === 'crepall') return showCourtReportAll(env, parseInt(pid, 10) || 0);
       if (action === 'crepp') {  // перегортання сторінок звіту
         const kind = pid === 'clients' ? 'clients' : 'advocate';
         return showCourtReport(env, kind, parseInt(parts[2], 10) || 0);
@@ -695,6 +766,10 @@ async function handleUpdate(update, env) {
       await env.KV.put('court_await', 'add');
       return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
         text: "➕ Надішліть ПІБ клієнта (Прізвище Ім'я По-батькові). Скасувати — /cancel." });
+    }
+    if (/^📑/.test(body) || /^\/all$/i.test(body) || /повний список/i.test(body)) {
+      await env.KV.delete('court_await');
+      return showCourtReportAll(env, 0);
     }
     if (/^📋/.test(body) || /^(\/list|список)/i.test(body)) {
       await env.KV.delete('court_await');
