@@ -122,12 +122,13 @@
 "https://www.ukrinform.ua/rubric-polytics/4163795-polsa-ne-blokuvatime-vidkritta-klasteriv-u-peregovorah-pro-vstup-ukraini-do-es-sikorskij.html",
 "https://www.slovoidilo.ua/2026/09/13/pidsumky/udar-rf-po-poyizdu-kordonu-polshheyu-ta-sankcziyi-proty-mendel.-holovne-vyxidni",
 "https://court.gov.ua/press/news/2096153/",
-"https://lexinform.com.ua/sudova-praktyka/samovilnym-zalyshennyam-mistsya-sluzhby-ye-neyavka-bez-dozvolu-nachalnyka-a-ne-sam-fakt-vidsutnosti-na-terytoriyi-chastyny/"
+"https://lexinform.com.ua/sudova-praktyka/samovilnym-zalyshennyam-mistsya-sluzhby-ye-neyavka-bez-dozvolu-nachalnyka-a-ne-sam-fakt-vidsutnosti-na-terytoriyi-chastyny/",
+"https://court.gov.ua/press/news/2096382/"
 ],
 "day": "2026-09-14",
-"count": 2,
-"total": 124,
-"seq": 145,
+"count": 3,
+"total": 125,
+"seq": 146,
 "orig_recent": [
 "інструкція:Чоловік/дружина виїхав і забрав дитину б",
 "порада:Аліменти без рішення суду: усна домовлен",
@@ -231,7 +232,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789405412.4947968,
+"last_content_ts": 1789419272.4815977,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
