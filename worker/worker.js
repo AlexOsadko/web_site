@@ -596,6 +596,35 @@ async function handleUpdate(update, env) {
     const action = parts[0];
     const pid = parts[1];
 
+    // --- підтвердження додавання клієнтської справи в Google Calendar ---
+    if (action === 'gcaladd' || action === 'gcalskip') {
+      await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
+      const key = pid;
+      const chatId = cq.message && cq.message.chat && cq.message.chat.id;
+      const msgId = cq.message && cq.message.message_id;
+      const statusKb = (label) => ({ inline_keyboard: [[{ text: label, callback_data: 'cnoop' }]] });
+      if (action === 'gcalskip') {
+        await env.KV.delete('gcal_pending_' + key);
+        const ks = (await env.KV.get('gcal_approved', 'json')) || [];
+        if (ks.includes(key)) await env.KV.put('gcal_approved', JSON.stringify(ks.filter((k) => k !== key)));
+        return tg(env, 'editMessageReplyMarkup', { chat_id: chatId, message_id: msgId, reply_markup: statusKb('✖️ Не додано в календар') });
+      }
+      // gcaladd — підтверджуємо й ставимо в чергу; додасть найближчий прогін
+      const pend = await env.KV.get('gcal_pending_' + key, 'json');
+      if (!pend) {
+        return tg(env, 'editMessageReplyMarkup', { chat_id: chatId, message_id: msgId, reply_markup: statusKb('⚠️ Застаріло — недоступно') });
+      }
+      const ks = (await env.KV.get('gcal_approved', 'json')) || [];
+      if (!ks.includes(key)) { ks.push(key); await env.KV.put('gcal_approved', JSON.stringify(ks)); }
+      await tg(env, 'editMessageReplyMarkup', { chat_id: chatId, message_id: msgId, reply_markup: statusKb('⏳ Додаю в календар…') });
+      // швидкий прогін, щоб додати без очікування планового (з тротлінгом ~90с)
+      if (env.GH_TOKEN) {
+        const last = parseInt((await env.KV.get('court_run_at')) || '0', 10);
+        if (Date.now() - last >= 90000) { await triggerScan(env); await env.KV.put('court_run_at', String(Date.now())); }
+      }
+      return;
+    }
+
     // --- меню бота відстеження судових справ ---
     if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crepall', 'crun',
          'chide', 'cunhide', 'chidden', 'cunhide1', 'cpurge1', 'cpurge',
@@ -950,6 +979,44 @@ export default {
       const kind = (url.searchParams.get('kind') === 'clients') ? 'clients' : 'advocate';
       const rep = (await env.KV.get('court_report_' + kind, 'json')) || { items: [] };
       return Response.json({ items: rep.items || [] });
+    }
+    // ── Календар: черга клієнтських справ, що чекають підтвердження ──
+    // Python відкладає клієнтську справу (stash); адвокат тисне «Додати» →
+    // ключ потрапляє в gcal_approved; наступний прогін забирає підтверджені
+    // (/gcal_approved), додає у Google Calendar і підтверджує (/gcal_ack).
+    if (request.method === 'POST' && url.pathname === '/gcal_stash') {
+      if ((request.headers.get('X-Auth-Token') || '') !== env.AUTH_TOKEN) {
+        return new Response('forbidden', { status: 403 });
+      }
+      let o; try { o = await request.json(); } catch { return new Response('bad', { status: 400 }); }
+      if (!o.key) return new Response('bad', { status: 400 });
+      // чекає натискання кнопки; тримаємо до 60 днів, потім само зникне
+      await env.KV.put('gcal_pending_' + o.key, JSON.stringify(o), { expirationTtl: 60 * 24 * 3600 });
+      return Response.json({ ok: true });
+    }
+    if (request.method === 'GET' && url.pathname === '/gcal_approved') {
+      if ((request.headers.get('X-Auth-Token') || '') !== env.AUTH_TOKEN) {
+        return new Response('forbidden', { status: 403 });
+      }
+      const keys = (await env.KV.get('gcal_approved', 'json')) || [];
+      const items = [];
+      for (const k of keys) {
+        const it = await env.KV.get('gcal_pending_' + k, 'json');
+        if (it) items.push(it);
+      }
+      return Response.json({ items });
+    }
+    if (request.method === 'POST' && url.pathname === '/gcal_ack') {
+      if ((request.headers.get('X-Auth-Token') || '') !== env.AUTH_TOKEN) {
+        return new Response('forbidden', { status: 403 });
+      }
+      let o; try { o = await request.json(); } catch { return new Response('bad', { status: 400 }); }
+      if (o.key) {
+        await env.KV.delete('gcal_pending_' + o.key);
+        const keys = (await env.KV.get('gcal_approved', 'json')) || [];
+        await env.KV.put('gcal_approved', JSON.stringify(keys.filter((k) => k !== o.key)));
+      }
+      return Response.json({ ok: true });
     }
     if (request.method === 'POST') {
       // вебхук Telegram (за бажанням — з перевіркою secret_token)

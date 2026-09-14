@@ -548,18 +548,105 @@ def auto_key(court_url, rec):
 
 
 # ─────────────────────────────── Telegram ────────────────────────────
-def tg_send(text):
+def tg_send(text, reply_markup=None):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = json.dumps({
+    body = {
         "chat_id": CHAT,
         "text": text,
         "parse_mode": "HTML",
         "disable_web_page_preview": True,
-    }).encode("utf-8")
+    }
+    if reply_markup is not None:
+        body["reply_markup"] = reply_markup
+    payload = json.dumps(body).encode("utf-8")
     req = urllib.request.Request(url, data=payload,
                                  headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.loads(r.read().decode("utf-8"))
+
+
+def _gcal_key(court_name, rec):
+    """Короткий стабільний ключ справи для callback-кнопок (≤64 байти)."""
+    raw = f"{rec.get('number', '')}|{rec.get('date', '')}|{court_name}"
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def gcal_stash_pending(gkey, court_name, rec, chat_id, message_id):
+    """Відкласти у Worker клієнтську справу, що чекає підтвердження в календар."""
+    if not (WORKER_URL and WORKER_SECRET):
+        return
+    body = json.dumps({
+        "key": gkey, "court": court_name,
+        "chat_id": chat_id, "message_id": message_id,
+        "rec": {k: rec.get(k, "") for k in (
+            "number", "date", "judge", "involved", "description",
+            "forma", "courtroom", "add_address")},
+    }).encode("utf-8")
+    try:
+        req = urllib.request.Request(
+            WORKER_URL.rstrip("/") + "/gcal_stash", data=body,
+            headers={"X-Auth-Token": WORKER_SECRET,
+                     "Content-Type": "application/json", "User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            r.read()
+    except Exception as e:
+        print("Календар: не вдалося відкласти на підтвердження:", str(e)[:60])
+
+
+def _tg_edit_markup(chat_id, message_id, label):
+    """Оновити статус-кнопку під сповіщенням (напр. «✅ Додано в календар»)."""
+    if not (chat_id and message_id):
+        return
+    try:
+        payload = json.dumps({
+            "chat_id": chat_id, "message_id": message_id,
+            "reply_markup": {"inline_keyboard": [[
+                {"text": label, "callback_data": "cnoop"}]]},
+        }).encode("utf-8")
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{TOKEN}/editMessageReplyMarkup",
+            data=payload, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            r.read()
+    except Exception:
+        pass
+
+
+def drain_gcal_approved():
+    """Додати у Google Calendar клієнтські справи, які адвокат підтвердив кнопкою
+    у боті (Worker тримає чергу підтверджених). Викликається на початку прогону."""
+    if DRY_RUN or gcal is None or not gcal.enabled():
+        return
+    if not (WORKER_URL and WORKER_SECRET):
+        return
+    try:
+        req = urllib.request.Request(
+            WORKER_URL.rstrip("/") + "/gcal_approved",
+            headers={"X-Auth-Token": WORKER_SECRET, "User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            items = json.loads(r.read().decode("utf-8")).get("items", [])
+    except Exception as e:
+        print("Календар: черга підтверджень недоступна:", str(e)[:60])
+        return
+    for it in items:
+        rec = it.get("rec", {}) or {}
+        try:
+            ok = gcal.add_event(it.get("court", ""), rec)
+        except Exception:
+            ok = False
+        if ok:
+            _tg_edit_markup(it.get("chat_id"), it.get("message_id"),
+                            "✅ Додано в календар")
+            try:
+                ack = json.dumps({"key": it.get("key")}).encode("utf-8")
+                req = urllib.request.Request(
+                    WORKER_URL.rstrip("/") + "/gcal_ack", data=ack,
+                    headers={"X-Auth-Token": WORKER_SECRET,
+                             "Content-Type": "application/json", "User-Agent": UA})
+                with urllib.request.urlopen(req, timeout=20) as r:
+                    r.read()
+            except Exception:
+                pass
 
 
 def esc(s):
@@ -704,6 +791,10 @@ def main():
               f"наступний курсор {st['shard_cursor']}; повне коло за "
               f"{-(-len(courts)//SHARD_SIZE)} прогонів")
 
+    # Спершу обробляємо клієнтські справи, які адвокат підтвердив кнопкою у боті
+    # (Worker тримає чергу) — додаємо їх у Google Calendar і позначаємо «✅».
+    drain_gcal_approved()
+
     for court in courts_to_scan:
         url = csz_url_for(court)
         if not url:
@@ -759,22 +850,44 @@ def main():
                 continue  # у dry-run нічого не надсилаємо й не зберігаємо
             if sent >= MAX_ALERTS:
                 break
+            # Власна справа адвоката (він фігурує за своїм ПІБ або відомим
+            # варіантом) — надійна, додається в календар АВТОМАТИЧНО. Інакше це
+            # збіг лише за ПІБ клієнта (можливі тезки) — НЕ додаємо самі, а
+            # надсилаємо з кнопкою «Додати в календар» для підтвердження.
+            is_own = name_matches(rec.get("involved", ""),
+                                  [ADVOCATE_NAME] + ADVOCATE_ALIASES) is not None
+            markup = None
+            gkey = None
+            if not is_own:
+                gkey = _gcal_key(court["name"], rec)
+                markup = {"inline_keyboard": [[
+                    {"text": "📅 Додати в календар", "callback_data": f"gcaladd:{gkey}"},
+                    {"text": "✖️ Ні", "callback_data": f"gcalskip:{gkey}"},
+                ]]}
             try:
-                res = tg_send(build_message(court["name"], rec, who))
+                res = tg_send(build_message(court["name"], rec, who),
+                              reply_markup=markup)
                 if res.get("ok"):
                     seen[key] = 1
                     sent += 1
                     time.sleep(0.5)
+                    if not is_own:
+                        m = res.get("result", {}) or {}
+                        gcal_stash_pending(gkey, court["name"], rec,
+                                           (m.get("chat") or {}).get("id"),
+                                           m.get("message_id"))
                 else:
                     print("  Telegram відмовив (див. приватний чат).")
             except Exception:
                 print("  Помилка надсилання сповіщення.")
-            # Додати засідання у Google Calendar (якщо налаштовано секрети).
-            # events.import ідемпотентний — повтори не дублюють подію.
-            if gcal is not None and gcal.enabled():
+            # Лише ВЛАСНІ справи адвоката додаємо у Google Calendar автоматично.
+            # events.import ідемпотентний — повтори не дублюють подію. Клієнтські
+            # справи потраплять у календар тільки після підтвердження кнопкою
+            # (їх обробляє drain_gcal_approved на наступному прогоні).
+            if is_own and gcal is not None and gcal.enabled():
                 try:
                     if gcal.add_event(court["name"], rec):
-                        print("  Календар: подію додано/оновлено.")
+                        print("  Календар: власну справу додано/оновлено.")
                 except Exception:
                     print("  Календар: помилка (пропущено).")
         if sent >= MAX_ALERTS:
