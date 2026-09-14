@@ -512,6 +512,20 @@ def name_matches(involved, names):
     return None
 
 
+# Гнучке впізнавання ПІБ САМОГО адвоката. Суди часто пишуть його з описками чи
+# у відмінку: «Осадько Олександра Олексійович», «Осадько Олександр Олександрович»
+# тощо — точний збіг такі пропускає. Прізвище «Осадько» рідкісне, тож дозволяємо
+# змінні закінчення в імені (корінь «Олександр») і по-батькові (тип «Олекс…ович»)
+# без ризику хибних збігів. Керується env COURT_ADVOCATE_RE (за потреби).
+_ADV_RE = re.compile(
+    os.environ.get("COURT_ADVOCATE_RE", r"осадьк\w+\s+олександр\w*\s+олекс\w*ович"))
+
+
+def advocate_matches(involved):
+    """True, якщо у «сторонах» фігурує сам адвокат (з допуском описок/відмінків)."""
+    return bool(_ADV_RE.search(_norm(involved)))
+
+
 # ─────────────────────────────── стан ────────────────────────────────
 def load_state():
     try:
@@ -811,7 +825,7 @@ def main():
         # Дані йдуть у приватне сховище (Worker KV), не в логи, тож детально.
         if ADVOCATE_NAME:
             for rec in records:
-                if name_matches(rec.get("involved", ""), [ADVOCATE_NAME]):
+                if advocate_matches(rec.get("involved", "")):
                     advocate_hits.append({
                         "court": court["name"],
                         "number": rec.get("number", ""),
@@ -827,16 +841,24 @@ def main():
         # ПІБ, номери справ чи текст «сторін» — лише знеособлені лічильники.
         matches = []
         for rec in records:
-            who = name_matches(rec.get("involved", ""), names)
+            inv = rec.get("involved", "") or ""
+            who = name_matches(inv, names)
+            adv = advocate_matches(inv)
+            # Власна справа адвоката з опискою в ПІБ теж має спрацьовувати.
+            if adv and not who:
+                who = ADVOCATE_NAME
             if who:
                 matches.append((rec, who))
-                client_hits.append({
-                    "court": court["name"], "matched": who,
-                    "number": rec.get("number", ""), "date": rec.get("date", ""),
-                    "judge": rec.get("judge", ""), "involved": rec.get("involved", ""),
-                    "description": rec.get("description", ""), "forma": rec.get("forma", ""),
-                    "courtroom": rec.get("courtroom", ""), "address": rec.get("add_address", ""),
-                })
+                # У «Справи клієнтів» — лише коли збіг за КЛІЄНТСЬКИМ ПІБ (не сам
+                # адвокат): власні справи мають окремий звіт «Справи адвоката».
+                if not adv:
+                    client_hits.append({
+                        "court": court["name"], "matched": who,
+                        "number": rec.get("number", ""), "date": rec.get("date", ""),
+                        "judge": rec.get("judge", ""), "involved": rec.get("involved", ""),
+                        "description": rec.get("description", ""), "forma": rec.get("forma", ""),
+                        "courtroom": rec.get("courtroom", ""), "address": rec.get("add_address", ""),
+                    })
         new_here = sum(1 for rec, _ in matches if rec_key(url, rec) not in seen)
         total_new += new_here
         print(f"[{court['name']}] засідань: {len(records)} · "
@@ -854,8 +876,7 @@ def main():
             # варіантом) — надійна, додається в календар АВТОМАТИЧНО. Інакше це
             # збіг лише за ПІБ клієнта (можливі тезки) — НЕ додаємо самі, а
             # надсилаємо з кнопкою «Додати в календар» для підтвердження.
-            is_own = name_matches(rec.get("involved", ""),
-                                  [ADVOCATE_NAME] + ADVOCATE_ALIASES) is not None
+            is_own = advocate_matches(rec.get("involved", ""))
             markup = None
             gkey = None
             if not is_own:
