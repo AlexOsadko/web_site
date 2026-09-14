@@ -767,7 +767,7 @@ def build_jsonld(a, faq):
         "isAccessibleForFree": True,
         "author": {"@type": "Person", "@id": BASE_URL + "#person", "name": "Олександр Осадько",
                    "jobTitle": "Адвокат", "url": BASE_URL,
-                   "sameAs": ["https://t.me/pro100_law", "https://www.instagram.com/adv_osadko/"]},
+                   "sameAs": ["https://t.me/pro100_law", "https://www.instagram.com/adv.osadko/"]},
         "publisher": {
             "@type": "Organization", "name": "Адвокат Олександр Осадько",
             "logo": {"@type": "ImageObject", "url": BASE_URL + "assets/logo-mark.png"},
