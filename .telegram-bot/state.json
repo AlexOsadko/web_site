@@ -124,12 +124,13 @@
 "https://court.gov.ua/press/news/2096153/",
 "https://lexinform.com.ua/sudova-praktyka/samovilnym-zalyshennyam-mistsya-sluzhby-ye-neyavka-bez-dozvolu-nachalnyka-a-ne-sam-fakt-vidsutnosti-na-terytoriyi-chastyny/",
 "https://court.gov.ua/press/news/2096382/",
-"https://jurliga.ligazakon.net/news/246196_pyat-cherg-spadkuvannya-ta-pravo-predstavlennya-yak-rozpodlyatsya-spadshchina-za-zakonom"
+"https://jurliga.ligazakon.net/news/246196_pyat-cherg-spadkuvannya-ta-pravo-predstavlennya-yak-rozpodlyatsya-spadshchina-za-zakonom",
+"https://jurliga.ligazakon.net/news/246204_shcho-robiti-robotodavtsyu-yakshcho-sudove-rshennya-pro-ponovlennya-pratsvnika-skasuvali"
 ],
 "day": "2026-09-15",
-"count": 1,
-"total": 126,
-"seq": 147,
+"count": 2,
+"total": 127,
+"seq": 148,
 "orig_recent": [
 "інструкція:Чоловік/дружина виїхав і забрав дитину б",
 "порада:Аліменти без рішення суду: усна домовлен",
@@ -233,7 +234,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789470013.2422864,
+"last_content_ts": 1789486291.1346695,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
