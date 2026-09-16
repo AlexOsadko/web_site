@@ -127,12 +127,13 @@
 "https://jurliga.ligazakon.net/news/246196_pyat-cherg-spadkuvannya-ta-pravo-predstavlennya-yak-rozpodlyatsya-spadshchina-za-zakonom",
 "https://jurliga.ligazakon.net/news/246204_shcho-robiti-robotodavtsyu-yakshcho-sudove-rshennya-pro-ponovlennya-pratsvnika-skasuvali",
 "https://lexinform.com.ua/sudova-praktyka/mobilizatsiya-zasudzhenogo-pislya-vyroku-v-umovah-voyennogo-stanu-vkazuye-na-dotsilnist-jogo-zvilnennya-vid-vidbuvannya-pokarannya-z-vyprobuvannyam/",
-"https://biz.ligazakon.net/news/246211_vdeorolik-u-sotsmerezhakh-stav-privodom-dlya-podatkovo-perevrki-magazinu"
+"https://biz.ligazakon.net/news/246211_vdeorolik-u-sotsmerezhakh-stav-privodom-dlya-podatkovo-perevrki-magazinu",
+"https://lexinform.com.ua/sudova-praktyka/dobrovoltsi-tro-ne-ye-vijskovosluzhbovtsyamy-tomu-za-nymy-zberigayetsya-mistse-roboty-ta-serednij-zarobitok-na-chas-vykonannya-obov-yazkiv-u-dobrovolchyh-formuvannyah/"
 ],
 "day": "2026-09-16",
-"count": 1,
-"total": 129,
-"seq": 151,
+"count": 2,
+"total": 130,
+"seq": 152,
 "orig_recent": [
 "порада:Аліменти без рішення суду: усна домовлен",
 "міф:Міф: «Роботодавець може звільнити за одн",
@@ -236,7 +237,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789571449.6941626,
+"last_content_ts": 1789584891.865461,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
