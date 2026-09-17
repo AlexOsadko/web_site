@@ -1913,8 +1913,8 @@ function b64ToUint8(b64){
    Якщо файлу немає або він не завантажився — підпис просто не додається,
    а договір формується як звичайно (жодних помилок). */
 const SIGN_URL="sign.png", SIGN_REL_ID="rId900", SIGN_MEDIA="word/media/sign_adv.png";
-const SIGN_WIDTH_CM=5.5;
-const SIGN_LOWER_HALFPT=36; /* опустити підпис нижче на лінію, у півпунктах (36 = 18 pt) */
+const SIGN_WIDTH_CM=4.2;        /* ширина підпису */
+const SIGN_LINE_EMU=170000;     /* де приблизно лінія підпису нижче верху абзацу (EMU); підбір вертикалі */
 let _signCache; /* undefined — ще не пробували; null — недоступний; {cx,cy,bytes} — готовий */
 async function loadSignature(){
   if(_signCache!==undefined) return _signCache;
@@ -1931,12 +1931,19 @@ async function loadSignature(){
   }catch(e){ _signCache=null; }
   return _signCache;
 }
-/* один inline-малюнок (run) із заданим унікальним id */
+/* плаваючий малюнок «за текстом» (behindDoc) із заданим унікальним id:
+   по центру комірки/колонки, накладається на лінію підпису й НЕ зсуває
+   розмітку документа. Вертикаль — від верху абзацу-якоря (SIGN_LINE_EMU). */
 function signRunXml(cx,cy,id){
   const A="http://schemas.openxmlformats.org/drawingml/2006/main";
   const P="http://schemas.openxmlformats.org/drawingml/2006/picture";
-  return '<w:r><w:rPr><w:position w:val="-'+SIGN_LOWER_HALFPT+'"/></w:rPr><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">'
+  const off=SIGN_LINE_EMU-cy; /* підняти так, щоб низ підпису був біля лінії */
+  return '<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="'+(251658240+id)+'" behindDoc="1" locked="0" layoutInCell="1" allowOverlap="1">'
+    +'<wp:simplePos x="0" y="0"/>'
+    +'<wp:positionH relativeFrom="column"><wp:align>center</wp:align></wp:positionH>'
+    +'<wp:positionV relativeFrom="paragraph"><wp:posOffset>'+off+'</wp:posOffset></wp:positionV>'
     +'<wp:extent cx="'+cx+'" cy="'+cy+'"/><wp:effectExtent l="0" t="0" r="0" b="0"/>'
+    +'<wp:wrapNone/>'
     +'<wp:docPr id="'+id+'" name="Підпис адвоката"/>'
     +'<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="'+A+'" noChangeAspect="1"/></wp:cNvGraphicFramePr>'
     +'<a:graphic xmlns:a="'+A+'"><a:graphicData uri="'+P+'">'
@@ -1944,7 +1951,7 @@ function signRunXml(cx,cy,id){
     +'<pic:blipFill><a:blip r:embed="'+SIGN_REL_ID+'"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>'
     +'<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="'+cx+'" cy="'+cy+'"/></a:xfrm>'
     +'<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>'
-    +'</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
+    +'</pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
 }
 /* вставляє підпис у комірку Адвоката — першу комірку того рядка таблиці
    підписів, де у Клієнта стоїть «КЕП_підпис» (виконувати ДО заміни «КЕП_підпис») */
