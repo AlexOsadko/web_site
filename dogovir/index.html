@@ -1931,12 +1931,23 @@ async function loadSignature(){
   }catch(e){ _signCache=null; }
   return _signCache;
 }
-/* плаваючий малюнок «перед текстом» (behindDoc=0, wrapNone) із унікальним
-   id: по центру комірки/колонки, поверх лінії підпису, рухається з текстом
-   і НЕ зсуває розмітку. Вертикаль — від верху абзацу-якоря (SIGN_LINE_EMU). */
+const _DML_A="http://schemas.openxmlformats.org/drawingml/2006/main";
+const _DML_P="http://schemas.openxmlformats.org/drawingml/2006/picture";
+/* спільний вміст малюнка (graphic → pic) */
+function _signGraphic(cx,cy,id){
+  return '<wp:docPr id="'+id+'" name="Підпис адвоката"/>'
+    +'<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="'+_DML_A+'" noChangeAspect="1"/></wp:cNvGraphicFramePr>'
+    +'<a:graphic xmlns:a="'+_DML_A+'"><a:graphicData uri="'+_DML_P+'">'
+    +'<pic:pic xmlns:pic="'+_DML_P+'"><pic:nvPicPr><pic:cNvPr id="'+id+'" name="Підпис адвоката"/><pic:cNvPicPr/></pic:nvPicPr>'
+    +'<pic:blipFill><a:blip r:embed="'+SIGN_REL_ID+'"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>'
+    +'<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="'+cx+'" cy="'+cy+'"/></a:xfrm>'
+    +'<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>'
+    +'</pic:pic></a:graphicData></a:graphic>';
+}
+/* плаваючий малюнок «перед текстом» (behindDoc=0, wrapNone): по центру
+   комірки/колонки, поверх лінії підпису, рухається з текстом і НЕ зсуває
+   розмітку. Для таблиці підписів (договір/дод.угода/акт). */
 function signRunXml(cx,cy,id){
-  const A="http://schemas.openxmlformats.org/drawingml/2006/main";
-  const P="http://schemas.openxmlformats.org/drawingml/2006/picture";
   const off=SIGN_LINE_EMU-cy; /* підняти так, щоб низ підпису був біля лінії */
   return '<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="'+(251658240+id)+'" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1">'
     +'<wp:simplePos x="0" y="0"/>'
@@ -1944,14 +1955,17 @@ function signRunXml(cx,cy,id){
     +'<wp:positionV relativeFrom="paragraph"><wp:posOffset>'+off+'</wp:posOffset></wp:positionV>'
     +'<wp:extent cx="'+cx+'" cy="'+cy+'"/><wp:effectExtent l="0" t="0" r="0" b="0"/>'
     +'<wp:wrapNone/>'
-    +'<wp:docPr id="'+id+'" name="Підпис адвоката"/>'
-    +'<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="'+A+'" noChangeAspect="1"/></wp:cNvGraphicFramePr>'
-    +'<a:graphic xmlns:a="'+A+'"><a:graphicData uri="'+P+'">'
-    +'<pic:pic xmlns:pic="'+P+'"><pic:nvPicPr><pic:cNvPr id="'+id+'" name="Підпис адвоката"/><pic:cNvPicPr/></pic:nvPicPr>'
-    +'<pic:blipFill><a:blip r:embed="'+SIGN_REL_ID+'"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>'
-    +'<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="'+cx+'" cy="'+cy+'"/></a:xfrm>'
-    +'<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>'
-    +'</pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
+    +_signGraphic(cx,cy,id)
+    +'</wp:anchor></w:drawing></w:r>';
+}
+/* ВБУДОВАНИЙ (inline) малюнок: сидить рівно на місці підкреслень (у центрі
+   абзацу). Для Рахунку — там підпис заміняє лінію «____», а ПІБ лишається
+   нижче, тож плаваючий зсув не потрібен (і не «попливе» над таблицею сум). */
+function signInlineRunXml(cx,cy,id){
+  return '<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">'
+    +'<wp:extent cx="'+cx+'" cy="'+cy+'"/><wp:effectExtent l="0" t="0" r="0" b="0"/>'
+    +_signGraphic(cx,cy,id)
+    +'</wp:inline></w:drawing></w:r>';
 }
 /* вставляє підпис у комірку Адвоката — першу комірку того рядка таблиці
    підписів, де у Клієнта стоїть «КЕП_підпис» (виконувати ДО заміни «КЕП_підпис») */
@@ -1982,7 +1996,7 @@ function injectAdvocateSign(xml, cx, cy){
 function injectInvoiceSign(xml, cx, cy){
   return xml.replace(
     /(Виписав Адвокат<\/w:t><\/w:r><\/w:p><\/w:tc><w:tc>[\s\S]*?<w:p\b[^>]*><w:pPr>[\s\S]*?<\/w:pPr>)([\s\S]*?)(<\/w:p>)/,
-    function(m, head, inner, tail){ return head + signRunXml(cx,cy,949) + tail; }
+    function(m, head, inner, tail){ return head + signInlineRunXml(cx,cy,949) + tail; }
   );
 }
 /* додає зображення підпису + звʼязок (.rels) + тип png у пакет .docx */
