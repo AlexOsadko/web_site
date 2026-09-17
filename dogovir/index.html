@@ -1894,7 +1894,7 @@ function fillTemplateXml(xml, D){
   }
   /* незаповнені плейсхолдери шаблона не лишаються в документі;
      перелік закритий — текст у лапках («Адвокат», «Клієнт», «Сторони») не чіпається */
-  if(D.sig) xml=injectAdvocateSign(xml, D.sig.cx, D.sig.cy);
+  if(D.sig){ xml=injectAdvocateSign(xml, D.sig.cx, D.sig.cy); xml=injectInvoiceSign(xml, D.sig.cx, D.sig.cy); }
   xml=xml.split("«КЕП_підпис»").join(D.kep ? "Підписано за допомогою КЕП" : "");
   for(const k of PLACEHOLDERS) xml=xml.split("«"+k+"»").join("");
   return xml;
@@ -1960,8 +1960,23 @@ function injectAdvocateSign(xml, cx, cy){
   return xml.replace(/<w:tr\b[^>]*>(?:(?!<\/w:tr>)[\s\S])*?«КЕП_підпис»(?:(?!<\/w:tr>)[\s\S])*?<\/w:tr>/g,
     function(row){
       return row.replace(/(<w:tc>\s*<w:tcPr>[\s\S]*?<\/w:tcPr>\s*<w:p\b[^>]*>)([\s\S]*?)(<\/w:p>)/,
-        function(m,a,b,c){ return a+center(b)+signRunXml(cx,cy,id++)+c; });
+        function(m,a,b,c){
+          /* підпис адвоката — лише коли перша комірка рядка ПОРОЖНЯ (лінія
+             підпису). У Згоді перша комірка містить дату/ПІБ клієнта — там
+             адвокат не підписує, тож пропускаємо (повертаємо без змін). */
+          if(b.indexOf('«')>=0 || /<w:t[^>]*>[^<]*\S[^<]*<\/w:t>/.test(b)) return m;
+          return a+center(b)+signRunXml(cx,cy,id++)+c;
+        });
     });
+}
+/* Рахунок-фактура: адвокат підписує на лінії «________» одразу після
+   «Виписав Адвокат» — там немає «КЕП_підпис», тож окрема вставка.
+   Підпис заміняє підкреслення (по центру комірки; ПІБ лишається нижче). */
+function injectInvoiceSign(xml, cx, cy){
+  return xml.replace(
+    /(Виписав Адвокат<\/w:t><\/w:r><\/w:p><\/w:tc><w:tc>[\s\S]*?<w:p\b[^>]*><w:pPr>[\s\S]*?<\/w:pPr>)([\s\S]*?)(<\/w:p>)/,
+    function(m, head, inner, tail){ return head + signRunXml(cx,cy,949) + tail; }
+  );
 }
 /* додає зображення підпису + звʼязок (.rels) + тип png у пакет .docx */
 async function addSignatureAssets(zip, bytes){
@@ -2137,7 +2152,7 @@ function fillFopXml(xml, D){
   map["Вартість_послуг_грн"]=D.totalAct;
   for(const k in map){ xml=xml.split("«"+k+"»").join(val(map[k])); }
   if(!D.kep) xml=dropParagraph(xml,"кваліфікованого електронного підпису");
-  if(D.sig) xml=injectAdvocateSign(xml, D.sig.cx, D.sig.cy);
+  if(D.sig){ xml=injectAdvocateSign(xml, D.sig.cx, D.sig.cy); xml=injectInvoiceSign(xml, D.sig.cx, D.sig.cy); }
   xml=xml.split("«КЕП_підпис»").join(D.kep ? "Підписано за допомогою КЕП" : "");
   for(const k of FOP_PLACEHOLDERS) xml=xml.split("«"+k+"»").join("");
   return xml;
