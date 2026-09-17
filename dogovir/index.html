@@ -1931,14 +1931,14 @@ async function loadSignature(){
   }catch(e){ _signCache=null; }
   return _signCache;
 }
-/* плаваючий малюнок «за текстом» (behindDoc) із заданим унікальним id:
-   по центру комірки/колонки, накладається на лінію підпису й НЕ зсуває
-   розмітку документа. Вертикаль — від верху абзацу-якоря (SIGN_LINE_EMU). */
+/* плаваючий малюнок «перед текстом» (behindDoc=0, wrapNone) із унікальним
+   id: по центру комірки/колонки, поверх лінії підпису, рухається з текстом
+   і НЕ зсуває розмітку. Вертикаль — від верху абзацу-якоря (SIGN_LINE_EMU). */
 function signRunXml(cx,cy,id){
   const A="http://schemas.openxmlformats.org/drawingml/2006/main";
   const P="http://schemas.openxmlformats.org/drawingml/2006/picture";
   const off=SIGN_LINE_EMU-cy; /* підняти так, щоб низ підпису був біля лінії */
-  return '<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="'+(251658240+id)+'" behindDoc="1" locked="0" layoutInCell="1" allowOverlap="1">'
+  return '<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="'+(251658240+id)+'" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1">'
     +'<wp:simplePos x="0" y="0"/>'
     +'<wp:positionH relativeFrom="column"><wp:align>center</wp:align></wp:positionH>'
     +'<wp:positionV relativeFrom="paragraph"><wp:posOffset>'+off+'</wp:posOffset></wp:positionV>'
