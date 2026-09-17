@@ -1913,7 +1913,8 @@ function b64ToUint8(b64){
    Якщо файлу немає або він не завантажився — підпис просто не додається,
    а договір формується як звичайно (жодних помилок). */
 const SIGN_URL="sign.png", SIGN_REL_ID="rId900", SIGN_MEDIA="word/media/sign_adv.png";
-const SIGN_WIDTH_CM=4.2;        /* ширина підпису */
+const SIGN_WIDTH_CM=4.2;        /* ширина підпису (договір/акт/дод.угода) */
+const SIGN_INVOICE_CM=3.6;      /* ширина підпису у рахунку (трохи менша — органічніше) */
 const SIGN_LINE_EMU=360000;     /* де приблизно лінія підпису нижче верху абзацу (EMU); підбір вертикалі (більше = нижче) */
 let _signCache; /* undefined — ще не пробували; null — недоступний; {cx,cy,bytes} — готовий */
 async function loadSignature(){
@@ -1992,12 +1993,20 @@ function injectAdvocateSign(xml, cx, cy){
 }
 /* Рахунок-фактура: адвокат підписує на лінії «________» одразу після
    «Виписав Адвокат» — там немає «КЕП_підпис», тож окрема вставка.
-   Підпис (вбудований) ставимо НАД підкресленнями + розрив рядка, щоб
-   ЛІНІЯ лишалась: підпис зверху, лінія знизу, ПІБ — у рядку нижче. */
+   Підпис (вбудований, трохи менший) ставимо НАД підкресленнями + розрив
+   рядка, щоб ЛІНІЯ лишалась: підпис зверху, лінія знизу, ПІБ — рядком нижче.
+   Напис «Виписав Адвокат» вирівнюємо по центру, щоб не відривався. */
 function injectInvoiceSign(xml, cx, cy){
+  const icx=Math.round(SIGN_INVOICE_CM*360000), icy=Math.round(icx*cy/cx);
+  /* 1) вертикальне центрування комірки з «Виписав Адвокат» */
+  xml=xml.replace(
+    /(<w:tc><w:tcPr>(?:(?!<\/w:tcPr>)[\s\S])*?)(<\/w:tcPr>(?:(?!<\/?w:tc>)[\s\S])*?<w:t>Виписав Адвокат<\/w:t>)/,
+    '$1<w:vAlign w:val="center"/>$2'
+  );
+  /* 2) підпис над підкресленнями (лінія лишається) */
   return xml.replace(
     /(Виписав Адвокат<\/w:t><\/w:r><\/w:p><\/w:tc><w:tc>[\s\S]*?<w:p\b[^>]*><w:pPr>[\s\S]*?<\/w:pPr>)([\s\S]*?)(<\/w:p>)/,
-    function(m, head, inner, tail){ return head + signInlineRunXml(cx,cy,949) + '<w:r><w:br/></w:r>' + inner + tail; }
+    function(m, head, inner, tail){ return head + signInlineRunXml(icx,icy,949) + '<w:r><w:br/></w:r>' + inner + tail; }
   );
 }
 /* додає зображення підпису + звʼязок (.rels) + тип png у пакет .docx */
