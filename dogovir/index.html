@@ -380,7 +380,7 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
               <input type="checkbox" id="f_kep" style="width:16px;height:16px;accent-color:var(--seal)">
               Клієнт підписує документи через КЕП (кваліфікований електронний підпис)
             </label>
-            <div class="sub-hint">Додає до розділу «Заключні положення» пункт: Договір і документи на його виконання можуть підписуватись КЕП (ст. 18 ЗУ «Про електронні довірчі послуги»). За замовчуванням вимкнено.</div>
+            <div class="sub-hint">Додає до розділу «Заключні положення» пункт: Договір і документи на його виконання можуть підписуватись КЕП (ст. 18 ЗУ «Про електронні довірчі послуги»); у полі Клієнта — позначка «Підписано за допомогою КЕП», а в полі Адвоката проставляється його підпис (електронний вигляд). За замовчуванням вимкнено.</div>
           </div>
         </div>
 
@@ -1894,6 +1894,7 @@ function fillTemplateXml(xml, D){
   }
   /* незаповнені плейсхолдери шаблона не лишаються в документі;
      перелік закритий — текст у лапках («Адвокат», «Клієнт», «Сторони») не чіпається */
+  if(D.sig) xml=injectAdvocateSign(xml, D.sig.cx, D.sig.cy);
   xml=xml.split("«КЕП_підпис»").join(D.kep ? "Підписано за допомогою КЕП" : "");
   for(const k of PLACEHOLDERS) xml=xml.split("«"+k+"»").join("");
   return xml;
@@ -1903,6 +1904,81 @@ function b64ToUint8(b64){
   const bin=atob(b64); const len=bin.length; const arr=new Uint8Array(len);
   for(let i=0;i<len;i++) arr[i]=bin.charCodeAt(i);
   return arr;
+}
+
+/* ---------- підпис адвоката (для е-підписання) ----------
+   Коли ввімкнено «Клієнт підписує документи через КЕП» (тобто договір
+   підписується в електронному вигляді), у поле підпису Адвоката
+   вставляється зображення його підпису (файл dogovir/sign.png).
+   Якщо файлу немає або він не завантажився — підпис просто не додається,
+   а договір формується як звичайно (жодних помилок). */
+const SIGN_URL="sign.png", SIGN_REL_ID="rId900", SIGN_MEDIA="word/media/sign_adv.png";
+const SIGN_WIDTH_CM=4.2;
+let _signCache; /* undefined — ще не пробували; null — недоступний; {cx,cy,bytes} — готовий */
+async function loadSignature(){
+  if(_signCache!==undefined) return _signCache;
+  try{
+    const r=await fetch(SIGN_URL,{cache:"force-cache"});
+    if(!r.ok) throw 0;
+    const bytes=new Uint8Array(await r.arrayBuffer());
+    if(!(bytes[0]===0x89 && bytes[1]===0x50 && bytes[2]===0x4E && bytes[3]===0x47)) throw 0; /* не PNG */
+    const w=(bytes[16]<<24|bytes[17]<<16|bytes[18]<<8|bytes[19])>>>0;
+    const h=(bytes[20]<<24|bytes[21]<<16|bytes[22]<<8|bytes[23])>>>0;
+    if(!w||!h) throw 0;
+    const cx=Math.round(SIGN_WIDTH_CM*360000), cy=Math.round(cx*h/w);
+    _signCache={cx,cy,bytes};
+  }catch(e){ _signCache=null; }
+  return _signCache;
+}
+/* один inline-малюнок (run) із заданим унікальним id */
+function signRunXml(cx,cy,id){
+  const A="http://schemas.openxmlformats.org/drawingml/2006/main";
+  const P="http://schemas.openxmlformats.org/drawingml/2006/picture";
+  return '<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">'
+    +'<wp:extent cx="'+cx+'" cy="'+cy+'"/><wp:effectExtent l="0" t="0" r="0" b="0"/>'
+    +'<wp:docPr id="'+id+'" name="Підпис адвоката"/>'
+    +'<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="'+A+'" noChangeAspect="1"/></wp:cNvGraphicFramePr>'
+    +'<a:graphic xmlns:a="'+A+'"><a:graphicData uri="'+P+'">'
+    +'<pic:pic xmlns:pic="'+P+'"><pic:nvPicPr><pic:cNvPr id="'+id+'" name="Підпис адвоката"/><pic:cNvPicPr/></pic:nvPicPr>'
+    +'<pic:blipFill><a:blip r:embed="'+SIGN_REL_ID+'"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>'
+    +'<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="'+cx+'" cy="'+cy+'"/></a:xfrm>'
+    +'<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>'
+    +'</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
+}
+/* вставляє підпис у комірку Адвоката — першу комірку того рядка таблиці
+   підписів, де у Клієнта стоїть «КЕП_підпис» (виконувати ДО заміни «КЕП_підпис») */
+function injectAdvocateSign(xml, cx, cy){
+  let id=900;
+  return xml.replace(/<w:tr\b[^>]*>(?:(?!<\/w:tr>)[\s\S])*?«КЕП_підпис»(?:(?!<\/w:tr>)[\s\S])*?<\/w:tr>/g,
+    function(row){
+      return row.replace(/(<w:tc>\s*<w:tcPr>[\s\S]*?<\/w:tcPr>\s*<w:p\b[^>]*>)([\s\S]*?)(<\/w:p>)/,
+        function(m,a,b,c){ return a+b+signRunXml(cx,cy,id++)+c; });
+    });
+}
+/* додає зображення підпису + звʼязок (.rels) + тип png у пакет .docx */
+async function addSignatureAssets(zip, bytes){
+  zip.file(SIGN_MEDIA, bytes);
+  const relPath="word/_rels/document.xml.rels";
+  let rels=await zip.file(relPath).async("string");
+  if(rels.indexOf('Id="'+SIGN_REL_ID+'"')<0){
+    rels=rels.replace("</Relationships>",
+      '<Relationship Id="'+SIGN_REL_ID+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/sign_adv.png"/></Relationships>');
+    zip.file(relPath, rels);
+  }
+  let ct=await zip.file("[Content_Types].xml").async("string");
+  if(ct.indexOf('Extension="png"')<0){
+    ct=ct.replace("</Types>",'<Default Extension="png" ContentType="image/png"/></Types>');
+    zip.file("[Content_Types].xml", ct);
+  }
+}
+/* якщо ввімкнено КЕП і підпис доступний — готує пакет і повертає {cx,cy};
+   інакше null. Викликати з prepareDoc/prepareDocFop перед заповненням. */
+async function prepareAdvocateSign(zip, kep, xml){
+  if(!kep || xml.indexOf("«КЕП_підпис»")<0) return null;
+  const sig=await loadSignature();
+  if(!sig) return null;
+  await addSignatureAssets(zip, sig.bytes);
+  return {cx:sig.cx, cy:sig.cy};
 }
 
 /* ---------- generate docx ---------- */
@@ -1987,6 +2063,7 @@ async function prepareDoc(){
   const safe=(s)=>String(s).replace(/[^\p{L}\p{N}\-_. ]/gu,"").replace(/\s+/g,"_").slice(0,50);
   const cnameShort = clientType()==="yur" ? (clientName()||"Клієнт") : (shortName(fName.value)||"Клієнт");
   const suffix=`№${safe($("#f_num").value.trim())}_${safe(cnameShort)}`;
+  D.sig = await prepareAdvocateSign(zip, D.kep, xml);
   return {zip, filled: fillTemplateXml(xml, D), suffix};
 }
 
@@ -2052,6 +2129,7 @@ function fillFopXml(xml, D){
   map["Вартість_послуг_грн"]=D.totalAct;
   for(const k in map){ xml=xml.split("«"+k+"»").join(val(map[k])); }
   if(!D.kep) xml=dropParagraph(xml,"кваліфікованого електронного підпису");
+  if(D.sig) xml=injectAdvocateSign(xml, D.sig.cx, D.sig.cy);
   xml=xml.split("«КЕП_підпис»").join(D.kep ? "Підписано за допомогою КЕП" : "");
   for(const k of FOP_PLACEHOLDERS) xml=xml.split("«"+k+"»").join("");
   return xml;
@@ -2102,6 +2180,7 @@ async function prepareDocFop(){
   };
   const safe=(s)=>String(s).replace(/[^\p{L}\p{N}\-_. ]/gu,"").replace(/\s+/g,"_").slice(0,50);
   const suffix=`№${safe($("#f_num").value.trim())}_${safe(zamShort||"Замовник")}`;
+  D.sig = await prepareAdvocateSign(zip, D.kep, xml);
   return {zip, filled: fillFopXml(xml, D), suffix};
 }
 
