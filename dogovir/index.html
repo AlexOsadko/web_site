@@ -1914,6 +1914,7 @@ function b64ToUint8(b64){
    а договір формується як звичайно (жодних помилок). */
 const SIGN_URL="sign.png", SIGN_REL_ID="rId900", SIGN_MEDIA="word/media/sign_adv.png";
 const SIGN_WIDTH_CM=5.5;
+const SIGN_LOWER_HALFPT=22; /* опустити підпис нижче на лінію, у півпунктах (22 = 11 pt) */
 let _signCache; /* undefined — ще не пробували; null — недоступний; {cx,cy,bytes} — готовий */
 async function loadSignature(){
   if(_signCache!==undefined) return _signCache;
@@ -1934,7 +1935,7 @@ async function loadSignature(){
 function signRunXml(cx,cy,id){
   const A="http://schemas.openxmlformats.org/drawingml/2006/main";
   const P="http://schemas.openxmlformats.org/drawingml/2006/picture";
-  return '<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">'
+  return '<w:r><w:rPr><w:position w:val="-'+SIGN_LOWER_HALFPT+'"/></w:rPr><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">'
     +'<wp:extent cx="'+cx+'" cy="'+cy+'"/><wp:effectExtent l="0" t="0" r="0" b="0"/>'
     +'<wp:docPr id="'+id+'" name="Підпис адвоката"/>'
     +'<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="'+A+'" noChangeAspect="1"/></wp:cNvGraphicFramePr>'
