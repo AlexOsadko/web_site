@@ -1914,7 +1914,7 @@ function b64ToUint8(b64){
    а договір формується як звичайно (жодних помилок). */
 const SIGN_URL="sign.png", SIGN_REL_ID="rId900", SIGN_MEDIA="word/media/sign_adv.png";
 const SIGN_WIDTH_CM=4.2;        /* ширина підпису */
-const SIGN_LINE_EMU=280000;     /* де приблизно лінія підпису нижче верху абзацу (EMU); підбір вертикалі (більше = нижче) */
+const SIGN_LINE_EMU=360000;     /* де приблизно лінія підпису нижче верху абзацу (EMU); підбір вертикалі (більше = нижче) */
 let _signCache; /* undefined — ще не пробували; null — недоступний; {cx,cy,bytes} — готовий */
 async function loadSignature(){
   if(_signCache!==undefined) return _signCache;
