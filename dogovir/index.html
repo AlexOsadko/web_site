@@ -1913,7 +1913,7 @@ function b64ToUint8(b64){
    Якщо файлу немає або він не завантажився — підпис просто не додається,
    а договір формується як звичайно (жодних помилок). */
 const SIGN_URL="sign.png", SIGN_REL_ID="rId900", SIGN_MEDIA="word/media/sign_adv.png";
-const SIGN_WIDTH_CM=4.2;
+const SIGN_WIDTH_CM=5.5;
 let _signCache; /* undefined — ще не пробували; null — недоступний; {cx,cy,bytes} — готовий */
 async function loadSignature(){
   if(_signCache!==undefined) return _signCache;
@@ -1949,10 +1949,17 @@ function signRunXml(cx,cy,id){
    підписів, де у Клієнта стоїть «КЕП_підпис» (виконувати ДО заміни «КЕП_підпис») */
 function injectAdvocateSign(xml, cx, cy){
   let id=900;
+  /* абзац підпису вирівнюємо по центру комірки: якщо у pPr вже є <w:jc> —
+     міняємо його на center (зберігає позицію в схемі), інакше додаємо */
+  const center=(inner)=> /<w:jc\b[^>]*\/>/.test(inner)
+    ? inner.replace(/<w:jc\b[^>]*\/>/, '<w:jc w:val="center"/>')
+    : (inner.indexOf('<w:pPr>')>=0
+        ? inner.replace('<w:pPr>','<w:pPr><w:jc w:val="center"/>')
+        : '<w:pPr><w:jc w:val="center"/></w:pPr>'+inner);
   return xml.replace(/<w:tr\b[^>]*>(?:(?!<\/w:tr>)[\s\S])*?«КЕП_підпис»(?:(?!<\/w:tr>)[\s\S])*?<\/w:tr>/g,
     function(row){
       return row.replace(/(<w:tc>\s*<w:tcPr>[\s\S]*?<\/w:tcPr>\s*<w:p\b[^>]*>)([\s\S]*?)(<\/w:p>)/,
-        function(m,a,b,c){ return a+b+signRunXml(cx,cy,id++)+c; });
+        function(m,a,b,c){ return a+center(b)+signRunXml(cx,cy,id++)+c; });
     });
 }
 /* додає зображення підпису + звʼязок (.rels) + тип png у пакет .docx */
