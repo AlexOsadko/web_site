@@ -134,12 +134,13 @@
 "https://jurliga.ligazakon.net/news/246241_kervnik-zvlnivsya-ale-dos-znachitsya-v-dr---shcho-robiti",
 "https://lexinform.com.ua/sudova-praktyka/lyst-regionalnoyi-vlk-pro-vidmovu-v-pereglyadi-prychynnogo-zv-yazku-zahvoryuvannya-iz-zahystom-batkivshhyny-yak-i-postanova-vlk-pidlyagaye-oskarzhennyu-do-tsvlk-abo-do-sudu/",
 "https://protocol.ua/ua/penya_za_nesvoechasnu_splatu_vneskiv_do_osbb_ne_peredbachena_zakonom_moge_vstanovlyuvatisya_lishe_dogovorom_a_ne_rishennyam_zagalnih_zboriv_kgs_vs/",
-"https://jurliga.ligazakon.net/news/246259_obdnana-palata-kasatsynogo-tsivlnogo-sudu-zmnila-pdkhd-do-vstanovlennya-faktu-prozhivannya-z-spadkodavtsem-odnyu-smyu"
+"https://jurliga.ligazakon.net/news/246259_obdnana-palata-kasatsynogo-tsivlnogo-sudu-zmnila-pdkhd-do-vstanovlennya-faktu-prozhivannya-z-spadkodavtsem-odnyu-smyu",
+"https://lexinform.com.ua/sudova-praktyka/v-razi-smerti-pozyvacha-u-spravi-pro-zahyst-chesti-gidnosti-i-dilovoyi-reputatsiyi-pid-chas-kasatsijnogo-pereglyadu-oskarzhuvani-rishennya-pidlyagayut-skasuvannyu-a-sprava-zakryvayetsya/"
 ],
 "day": "2026-09-18",
-"count": 2,
-"total": 136,
-"seq": 158,
+"count": 3,
+"total": 137,
+"seq": 159,
 "orig_recent": [
 "порада:Аліменти без рішення суду: усна домовлен",
 "міф:Міф: «Роботодавець може звільнити за одн",
@@ -243,7 +244,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789742227.011571,
+"last_content_ts": 1789753906.839263,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
