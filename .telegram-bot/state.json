@@ -137,12 +137,13 @@
 "https://jurliga.ligazakon.net/news/246259_obdnana-palata-kasatsynogo-tsivlnogo-sudu-zmnila-pdkhd-do-vstanovlennya-faktu-prozhivannya-z-spadkodavtsem-odnyu-smyu",
 "https://lexinform.com.ua/sudova-praktyka/v-razi-smerti-pozyvacha-u-spravi-pro-zahyst-chesti-gidnosti-i-dilovoyi-reputatsiyi-pid-chas-kasatsijnogo-pereglyadu-oskarzhuvani-rishennya-pidlyagayut-skasuvannyu-a-sprava-zakryvayetsya/",
 "https://court.gov.ua/press/news/2099412/",
-"https://lexinform.com.ua/sudova-praktyka/dlya-vyznachennya-dodatkovogo-stroku-dlya-pryjnyattya-spadshhyny-pozyvachu-yakyj-spadkuye-lyshe-za-zapovitom-i-ne-ye-spadkoyemtsem-za-zakonom-vyrishalnoyu-ye-jogo-obiznanist-same-pro-tsej-zapovit/"
+"https://lexinform.com.ua/sudova-praktyka/dlya-vyznachennya-dodatkovogo-stroku-dlya-pryjnyattya-spadshhyny-pozyvachu-yakyj-spadkuye-lyshe-za-zapovitom-i-ne-ye-spadkoyemtsem-za-zakonom-vyrishalnoyu-ye-jogo-obiznanist-same-pro-tsej-zapovit/",
+"https://jurliga.ligazakon.net/news/246254_derzhavnu-akreditatsyu-naukovikh-ta-naukovo-tekhnchnikh-ekspertv-provoditimut-za-admnstrativnoyu-protseduroyu"
 ],
 "day": "2026-09-19",
-"count": 1,
-"total": 139,
-"seq": 162,
+"count": 2,
+"total": 140,
+"seq": 163,
 "orig_recent": [
 "міф:Міф: «Роботодавець може звільнити за одн",
 "помилка:Пропустили строк на звернення до суду — ",
@@ -246,7 +247,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789826180.1691375,
+"last_content_ts": 1789837273.4546528,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
