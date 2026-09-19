@@ -138,12 +138,11 @@
 "https://lexinform.com.ua/sudova-praktyka/v-razi-smerti-pozyvacha-u-spravi-pro-zahyst-chesti-gidnosti-i-dilovoyi-reputatsiyi-pid-chas-kasatsijnogo-pereglyadu-oskarzhuvani-rishennya-pidlyagayut-skasuvannyu-a-sprava-zakryvayetsya/",
 "https://court.gov.ua/press/news/2099412/"
 ],
-"day": "2026-09-18",
-"count": 4,
+"day": "2026-09-19",
+"count": 0,
 "total": 138,
-"seq": 160,
+"seq": 161,
 "orig_recent": [
-"порада:Аліменти без рішення суду: усна домовлен",
 "міф:Міф: «Роботодавець може звільнити за одн",
 "помилка:Пропустили строк на звернення до суду — ",
 "інструкція:Вас звільняють «за згодою сторін» — а ви",
@@ -162,7 +161,8 @@
 "розбір норми:Перерахунок пенсії: чому вона не відбува",
 "інструкція:Отримали повістку в закритому конверті ч",
 "міф:Якщо я не прийду в суд — справу закриють",
-"розбір норми:Випробувальний строк — це не «безправ'я"
+"розбір норми:Випробувальний строк — це не «безправ'я",
+"інструкція:Що робити, якщо вас затримала поліція: 5"
 ],
 "pending": {
 "1787092661515": {
@@ -245,7 +245,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789761795.2672307,
+"last_content_ts": 1789812941.6447027,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
