@@ -75,4 +75,14 @@ jobs:
           fi
           git add content/articles articles index.html sitemap.xml robots.txt
           git commit -m "Нова стаття: ${{ inputs.topic }}"
-          git push
+          # Стійкий push: якщо в main тим часом запушив бот стану (court/news),
+          # простий push відхиляється (non-fast-forward). Тому rebase коміт статті
+          # на свіжий origin/main і повторюємо. Файли статті й файли стану ботів
+          # не перетинаються, тож rebase проходить без конфліктів.
+          for i in 1 2 3 4 5; do
+            git fetch -q origin main
+            git rebase -q origin/main || { git rebase --abort; echo "rebase-конфлікт, повтор $i"; sleep 3; continue; }
+            if git push -q origin HEAD:main; then echo "запушено"; exit 0; fi
+            echo "push відхилено — повтор $i…"; sleep 3
+          done
+          echo "Не вдалося запушити статтю після кількох спроб."; exit 1

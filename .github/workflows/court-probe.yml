@@ -77,7 +77,7 @@ jobs:
           mkdir -p /tmp/harv && cp tools/_courts_harvest/*.txt /tmp/harv/ 2>/dev/null || true
           for i in 1 2 3 4 5 6; do
             git fetch -q origin main
-            git checkout -q -B _h origin/main
+            git checkout -q -f -B _h origin/main
             mkdir -p tools/_courts_harvest
             cp /tmp/harv/*.txt tools/_courts_harvest/ 2>/dev/null || true
             git add tools/_courts_harvest
