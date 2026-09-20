@@ -141,12 +141,13 @@
 "https://jurliga.ligazakon.net/news/246254_derzhavnu-akreditatsyu-naukovikh-ta-naukovo-tekhnchnikh-ekspertv-provoditimut-za-admnstrativnoyu-protseduroyu",
 "https://suspilne.media/chernihiv/1404980-zamist-dvoh-pat-rokiv-na-cernigivsini-sud-zminiv-virok-zinci-aka-nozem-ubila-kolisnogo-colovika/",
 "https://protocol.ua/ua/oglyad_praktiki_vs_vid_rostislava_kravtsya_shcho_opublikovana_z_05_po_18_veresnya_2026_roku/",
-"https://unba.org.ua/publications/12269-adyutant-diplomat-advokat-i-biograf-zhittepis-doktora-osipa-suhovers-kogo-1888-1962.html"
+"https://unba.org.ua/publications/12269-adyutant-diplomat-advokat-i-biograf-zhittepis-doktora-osipa-suhovers-kogo-1888-1962.html",
+"https://www.ukrinform.ua/rubric-polytics/4166104-polsa-zasudila-nezakonni-rosijski-vibori-na-tot-ukraini.html"
 ],
 "day": "2026-09-20",
-"count": 3,
-"total": 143,
-"seq": 166,
+"count": 4,
+"total": 144,
+"seq": 167,
 "orig_recent": [
 "міф:Міф: «Роботодавець може звільнити за одн",
 "помилка:Пропустили строк на звернення до суду — ",
@@ -250,7 +251,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789925513.4525032,
+"last_content_ts": 1789933301.8660102,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
@@ -267,5 +268,5 @@
 "headline": "Чоловік/дружина виїхав і забрав дитину без вашої згоди: що робити"
 }
 ],
-"general": 6
+"general": 7
 }
