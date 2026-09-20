@@ -139,12 +139,13 @@
 "https://court.gov.ua/press/news/2099412/",
 "https://lexinform.com.ua/sudova-praktyka/dlya-vyznachennya-dodatkovogo-stroku-dlya-pryjnyattya-spadshhyny-pozyvachu-yakyj-spadkuye-lyshe-za-zapovitom-i-ne-ye-spadkoyemtsem-za-zakonom-vyrishalnoyu-ye-jogo-obiznanist-same-pro-tsej-zapovit/",
 "https://jurliga.ligazakon.net/news/246254_derzhavnu-akreditatsyu-naukovikh-ta-naukovo-tekhnchnikh-ekspertv-provoditimut-za-admnstrativnoyu-protseduroyu",
-"https://suspilne.media/chernihiv/1404980-zamist-dvoh-pat-rokiv-na-cernigivsini-sud-zminiv-virok-zinci-aka-nozem-ubila-kolisnogo-colovika/"
+"https://suspilne.media/chernihiv/1404980-zamist-dvoh-pat-rokiv-na-cernigivsini-sud-zminiv-virok-zinci-aka-nozem-ubila-kolisnogo-colovika/",
+"https://protocol.ua/ua/oglyad_praktiki_vs_vid_rostislava_kravtsya_shcho_opublikovana_z_05_po_18_veresnya_2026_roku/"
 ],
 "day": "2026-09-20",
-"count": 1,
-"total": 141,
-"seq": 164,
+"count": 2,
+"total": 142,
+"seq": 165,
 "orig_recent": [
 "міф:Міф: «Роботодавець може звільнити за одн",
 "помилка:Пропустили строк на звернення до суду — ",
@@ -248,7 +249,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789900458.2155547,
+"last_content_ts": 1789914044.0235176,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
