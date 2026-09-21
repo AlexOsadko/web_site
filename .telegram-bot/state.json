@@ -143,12 +143,13 @@
 "https://protocol.ua/ua/oglyad_praktiki_vs_vid_rostislava_kravtsya_shcho_opublikovana_z_05_po_18_veresnya_2026_roku/",
 "https://unba.org.ua/publications/12269-adyutant-diplomat-advokat-i-biograf-zhittepis-doktora-osipa-suhovers-kogo-1888-1962.html",
 "https://www.ukrinform.ua/rubric-polytics/4166104-polsa-zasudila-nezakonni-rosijski-vibori-na-tot-ukraini.html",
-"https://unba.org.ua/publications/12277-chi-vpravi-prokuror-oskarzhiti-postanovu-u-spravi-pro-administrativne-pravoporushennya.html"
+"https://unba.org.ua/publications/12277-chi-vpravi-prokuror-oskarzhiti-postanovu-u-spravi-pro-administrativne-pravoporushennya.html",
+"https://lexinform.com.ua/sudova-praktyka/mobilizatsiya-kerivnyka-sama-po-sobi-ne-vypravdovuye-propusk-protsesualnyh-strokiv-neperebornist-tsiyeyi-obstavyny-dlya-kompaniyi-maye-buty-dovedeno/"
 ],
 "day": "2026-09-21",
-"count": 1,
-"total": 145,
-"seq": 168,
+"count": 2,
+"total": 146,
+"seq": 169,
 "orig_recent": [
 "міф:Міф: «Роботодавець може звільнити за одн",
 "помилка:Пропустили строк на звернення до суду — ",
@@ -252,7 +253,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1789991726.9707031,
+"last_content_ts": 1790013051.598709,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
