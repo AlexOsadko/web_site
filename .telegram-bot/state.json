@@ -146,12 +146,13 @@
 "https://unba.org.ua/publications/12277-chi-vpravi-prokuror-oskarzhiti-postanovu-u-spravi-pro-administrativne-pravoporushennya.html",
 "https://lexinform.com.ua/sudova-praktyka/mobilizatsiya-kerivnyka-sama-po-sobi-ne-vypravdovuye-propusk-protsesualnyh-strokiv-neperebornist-tsiyeyi-obstavyny-dlya-kompaniyi-maye-buty-dovedeno/",
 "https://lexinform.com.ua/sudova-praktyka/pry-zmini-prizvyshha-dytyny-vyznachalnym-ye-zabezpechennya-yiyi-najkrashhyh-interesiv/",
-"https://protocol.ua/ua/standarti_nalegnoi_povedinki_posadovih_osib_u_praktitsi_verhovnogo_sudu_fidutsiarni_obov_yazki_pravilo_dilovogo_rishennya_ta_printsipi_korporativnogo_vryaduvannya_oesr/"
+"https://protocol.ua/ua/standarti_nalegnoi_povedinki_posadovih_osib_u_praktitsi_verhovnogo_sudu_fidutsiarni_obov_yazki_pravilo_dilovogo_rishennya_ta_printsipi_korporativnogo_vryaduvannya_oesr/",
+"https://protocol.ua/ua/chi_vpravi_prokuror_oskargiti_postanovu_u_spravi_pro_administrativne_pravoporushennya/"
 ],
 "day": "2026-09-22",
-"count": 2,
-"total": 148,
-"seq": 172,
+"count": 3,
+"total": 149,
+"seq": 173,
 "orig_recent": [
 "помилка:Пропустили строк на звернення до суду — ",
 "інструкція:Вас звільняють «за згодою сторін» — а ви",
@@ -255,7 +256,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1790090670.3812802,
+"last_content_ts": 1790103669.2438,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
