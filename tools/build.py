@@ -1534,8 +1534,7 @@ LANDING_PAGE = """<!DOCTYPE html>
       <p class="lp-sub">{subtitle}</p>
 {cta}
       <ul class="lp-trust">
-        <li class="lp-trust-hi">Перша консультація — безкоштовна</li>
-        <li>Чинний адвокат · Свідоцтво №&nbsp;001111</li>
+        <li>Перша консультація — безкоштовна</li>
         <li>Конфіденційно</li>
         <li>Відповідаю швидко</li>
       </ul>
