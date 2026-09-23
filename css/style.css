@@ -955,6 +955,17 @@ a.card:hover .more span { transform: translateX(5px); }
 .lp-btn-wa { background: #25d366; color: #06331b; }
 .lp-btn-vb { background: #7360f2; color: #fff; }
 .lp-note { margin: 16px 0 0; color: var(--muted); font-size: .98rem; line-height: 1.5; }
+/* Блок довіри/оферу під CTA у героі лендінгів — піднімає конверсію:
+   безкоштовна консультація, статус адвоката, конфіденційність. */
+.lp-trust { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 10px; padding: 0; margin: 18px 0 0; }
+.lp-trust li {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 14px; background: var(--card); border: 1px solid var(--line);
+  border-radius: 999px; font-size: .9rem; font-weight: 600; color: var(--text);
+}
+.lp-trust li::before { content: "✓"; color: var(--blue); font-weight: 800; }
+.lp-trust .lp-trust-hi { background: var(--blue); border-color: var(--blue); color: #fff; }
+.lp-trust .lp-trust-hi::before { content: "★"; color: #ffd35a; }
 /* Кнопки месенджерів у картці контактів/консультації — завжди в один рядок,
    рівні за шириною. На телефонах підписи ховаються (лишаються іконки). */
 .contacts-cta { flex-wrap: nowrap; gap: 8px; margin: 4px 0 22px; }
