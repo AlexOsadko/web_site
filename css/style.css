@@ -1375,11 +1375,13 @@ a.card:hover .more span { transform: translateX(5px); }
 .hero-text > h1,
 .hero-text > .hero-lead,
 .hero-text > .hero-actions,
+.hero-text > .hero-feats,
 .hero-visual { animation: heroIn .7s cubic-bezier(.2,.7,.3,1) both; }
 .hero-text > .hero-eyebrow         { animation-delay: .05s; }
 .hero-text > h1            { animation-delay: .15s; }
 .hero-text > .hero-lead    { animation-delay: .27s; }
 .hero-text > .hero-actions { animation-delay: .39s; }
+.hero-text > .hero-feats   { animation-delay: .48s; }
 .hero-visual               { animation-delay: .22s; }
 /* LCP: hero-елементи не згасають з opacity:0 (Lighthouse інакше фіксує LCP пізно) —
    лишається лише легкий слайд угору, а фото й H1 малюються одразу. */
