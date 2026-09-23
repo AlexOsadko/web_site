@@ -149,12 +149,13 @@
 "https://protocol.ua/ua/standarti_nalegnoi_povedinki_posadovih_osib_u_praktitsi_verhovnogo_sudu_fidutsiarni_obov_yazki_pravilo_dilovogo_rishennya_ta_printsipi_korporativnogo_vryaduvannya_oesr/",
 "https://protocol.ua/ua/chi_vpravi_prokuror_oskargiti_postanovu_u_spravi_pro_administrativne_pravoporushennya/",
 "https://jurliga.ligazakon.net/news/246322_vs-rozyasniv-chi--dobrosovsnim-nabuvachem-yurosoba-yaky-peredali-sprne-mayno-do-statutnogo-kaptalu",
-"https://jurliga.ligazakon.net/news/246329_mnyust-rozyasniv-yak-rozpodlyatsya-spadshchina-pslya-vdmovi-odnogo-z-spadkomtsv"
+"https://jurliga.ligazakon.net/news/246329_mnyust-rozyasniv-yak-rozpodlyatsya-spadshchina-pslya-vdmovi-odnogo-z-spadkomtsv",
+"https://lexinform.com.ua/yuridychna-praktyka/prokurora-vypravdano/"
 ],
 "day": "2026-09-23",
-"count": 2,
-"total": 151,
-"seq": 175,
+"count": 3,
+"total": 152,
+"seq": 176,
 "orig_recent": [
 "помилка:Пропустили строк на звернення до суду — ",
 "інструкція:Вас звільняють «за згодою сторін» — а ви",
@@ -258,7 +259,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1790176313.8626509,
+"last_content_ts": 1790190227.8938847,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
