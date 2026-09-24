@@ -151,12 +151,13 @@
 "https://jurliga.ligazakon.net/news/246322_vs-rozyasniv-chi--dobrosovsnim-nabuvachem-yurosoba-yaky-peredali-sprne-mayno-do-statutnogo-kaptalu",
 "https://jurliga.ligazakon.net/news/246329_mnyust-rozyasniv-yak-rozpodlyatsya-spadshchina-pslya-vdmovi-odnogo-z-spadkomtsv",
 "https://lexinform.com.ua/yuridychna-praktyka/prokurora-vypravdano/",
-"https://court.gov.ua/press/news/2102609/"
+"https://court.gov.ua/press/news/2102609/",
+"https://lexinform.com.ua/sudova-praktyka/pryberezhni-zahysni-smugy-vyznachenoyi-shyryny-vstanovleni-zakonom-tomu-vidsutnist-proyektu-zemleustroyu-na-nyh-ne-oznachaye-shho-yih-nemaye/"
 ],
 "day": "2026-09-24",
-"count": 1,
-"total": 153,
-"seq": 177,
+"count": 2,
+"total": 154,
+"seq": 178,
 "orig_recent": [
 "помилка:Пропустили строк на звернення до суду — ",
 "інструкція:Вас звільняють «за згодою сторін» — а ви",
@@ -260,7 +261,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1790247835.8339486,
+"last_content_ts": 1790264875.963888,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
