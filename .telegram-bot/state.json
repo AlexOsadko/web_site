@@ -152,12 +152,13 @@
 "https://jurliga.ligazakon.net/news/246329_mnyust-rozyasniv-yak-rozpodlyatsya-spadshchina-pslya-vdmovi-odnogo-z-spadkomtsv",
 "https://lexinform.com.ua/yuridychna-praktyka/prokurora-vypravdano/",
 "https://court.gov.ua/press/news/2102609/",
-"https://lexinform.com.ua/sudova-praktyka/pryberezhni-zahysni-smugy-vyznachenoyi-shyryny-vstanovleni-zakonom-tomu-vidsutnist-proyektu-zemleustroyu-na-nyh-ne-oznachaye-shho-yih-nemaye/"
+"https://lexinform.com.ua/sudova-praktyka/pryberezhni-zahysni-smugy-vyznachenoyi-shyryny-vstanovleni-zakonom-tomu-vidsutnist-proyektu-zemleustroyu-na-nyh-ne-oznachaye-shho-yih-nemaye/",
+"https://biz.ligazakon.net/news/246363_vdmoviti-v-restrats-podatkovo-nakladno-cherez-nezapitan-dokumenti-podatkova-ne-mozhe"
 ],
 "day": "2026-09-24",
-"count": 2,
-"total": 154,
-"seq": 178,
+"count": 3,
+"total": 155,
+"seq": 179,
 "orig_recent": [
 "помилка:Пропустили строк на звернення до суду — ",
 "інструкція:Вас звільняють «за згодою сторін» — а ви",
@@ -261,7 +262,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1790264875.963888,
+"last_content_ts": 1790278271.3850644,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
