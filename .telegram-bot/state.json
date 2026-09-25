@@ -154,12 +154,13 @@
 "https://court.gov.ua/press/news/2102609/",
 "https://lexinform.com.ua/sudova-praktyka/pryberezhni-zahysni-smugy-vyznachenoyi-shyryny-vstanovleni-zakonom-tomu-vidsutnist-proyektu-zemleustroyu-na-nyh-ne-oznachaye-shho-yih-nemaye/",
 "https://biz.ligazakon.net/news/246363_vdmoviti-v-restrats-podatkovo-nakladno-cherez-nezapitan-dokumenti-podatkova-ne-mozhe",
-"https://lexinform.com.ua/sudova-praktyka/za-oskarzhennya-postanov-pro-nakladennya-administratyvnogo-styagnennya-sudovyj-zbir-ne-spravlyayetsya/"
+"https://lexinform.com.ua/sudova-praktyka/za-oskarzhennya-postanov-pro-nakladennya-administratyvnogo-styagnennya-sudovyj-zbir-ne-spravlyayetsya/",
+"https://unba.org.ua/publications/12283-oskarzhennya-rishen-pro-pereglyad-invalidnosti-sudova-praktika.html"
 ],
 "day": "2026-09-25",
-"count": 1,
-"total": 156,
-"seq": 181,
+"count": 2,
+"total": 157,
+"seq": 182,
 "orig_recent": [
 "інструкція:Вас звільняють «за згодою сторін» — а ви",
 "порада:Звільнили — а трудову книжку не віддають",
@@ -263,7 +264,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1790351270.7787352,
+"last_content_ts": 1790364905.3955886,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
