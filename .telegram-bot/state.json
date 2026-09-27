@@ -159,12 +159,13 @@
 "https://unba.org.ua/news/12307-civil-nij-pozov-ne-mozhe-pidminyati-oskarzhennya-rishennya-kdka.html",
 "https://lexinform.com.ua/sudova-praktyka/peredacha-palyvnyh-taloniv-bez-zabezpechennya-yih-otovarennya-na-azs-ne-ye-nalezhnym-vykonannyam-dogovoru-postavky-nafty-i-dystylyativ/",
 "https://jurliga.ligazakon.net/news/246380_chi-ma-skasuvannya-podatkovogo-rshennya-virshalne-znachennya-dlya-krimnalno-spravi",
-"https://lexinform.com.ua/sudova-praktyka/propusk-trydennogo-stroku-dlya-podannya-zayavy-pro-nedoliky-zerna-pozbavlyaye-poklazhodavtsya-prava-na-vidshkoduvannya-zbytkiv/"
+"https://lexinform.com.ua/sudova-praktyka/propusk-trydennogo-stroku-dlya-podannya-zayavy-pro-nedoliky-zerna-pozbavlyaye-poklazhodavtsya-prava-na-vidshkoduvannya-zbytkiv/",
+"https://unba.org.ua/news/12308-u-naau-proanalizuyut-sudovi-dozvoli-na-obshuki-advokativ-ta-inshi-slidchi-dii.html"
 ],
 "day": "2026-09-27",
-"count": 1,
-"total": 161,
-"seq": 186,
+"count": 2,
+"total": 162,
+"seq": 187,
 "orig_recent": [
 "інструкція:Вас звільняють «за згодою сторін» — а ви",
 "порада:Звільнили — а трудову книжку не віддають",
@@ -268,7 +269,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1790456647.7960694,
+"last_content_ts": 1790508035.3354454,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
