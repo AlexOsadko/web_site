@@ -161,12 +161,13 @@
 "https://jurliga.ligazakon.net/news/246380_chi-ma-skasuvannya-podatkovogo-rshennya-virshalne-znachennya-dlya-krimnalno-spravi",
 "https://lexinform.com.ua/sudova-praktyka/propusk-trydennogo-stroku-dlya-podannya-zayavy-pro-nedoliky-zerna-pozbavlyaye-poklazhodavtsya-prava-na-vidshkoduvannya-zbytkiv/",
 "https://unba.org.ua/news/12308-u-naau-proanalizuyut-sudovi-dozvoli-na-obshuki-advokativ-ta-inshi-slidchi-dii.html",
-"https://protocol.ua/ua/oglyad_praktiki_vs_vid_rostislava_kravtsya_shcho_opublikovana_z_19_po_25_veresnya_2026_roku/"
+"https://protocol.ua/ua/oglyad_praktiki_vs_vid_rostislava_kravtsya_shcho_opublikovana_z_19_po_25_veresnya_2026_roku/",
+"https://unba.org.ua/news/12312-sucil-nij-dostup-do-rahunkiv-advokativ-zagrozhue-rozgoloshennyam-danih-klientiv-rau.html"
 ],
 "day": "2026-09-27",
-"count": 3,
-"total": 163,
-"seq": 188,
+"count": 4,
+"total": 164,
+"seq": 189,
 "orig_recent": [
 "інструкція:Вас звільняють «за згодою сторін» — а ви",
 "порада:Звільнили — а трудову книжку не віддають",
@@ -270,7 +271,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1790523685.322581,
+"last_content_ts": 1790536639.4992912,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
