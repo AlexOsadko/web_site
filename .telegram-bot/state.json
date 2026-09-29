@@ -164,12 +164,13 @@
 "https://protocol.ua/ua/oglyad_praktiki_vs_vid_rostislava_kravtsya_shcho_opublikovana_z_19_po_25_veresnya_2026_roku/",
 "https://unba.org.ua/news/12312-sucil-nij-dostup-do-rahunkiv-advokativ-zagrozhue-rozgoloshennyam-danih-klientiv-rau.html",
 "https://lexinform.com.ua/sudova-praktyka/pryznachennya-na-posadu-golovy-okupatsijnoyi-administratsiyi-za-vidsutnosti-prymusu-pidtverdzhuyut-dobrovilnist-yiyi-zajnyattya-ta-kvalifikatsijnu-oznaku-kolaboratsijnoyi-diyalnosti/",
-"https://court.gov.ua/press/news/2104965/"
+"https://court.gov.ua/press/news/2104965/",
+"https://ccu.gov.ua/novyna/oformlennya-dokumentiv-dlya-postiynogo-prozhyvannya-za-kordonom-ne-mozhe-buty-pidstavoyu-dlya"
 ],
 "day": "2026-09-29",
-"count": 1,
-"total": 166,
-"seq": 192,
+"count": 2,
+"total": 167,
+"seq": 193,
 "orig_recent": [
 "порада:Звільнили — а трудову книжку не віддають",
 "міф:Явка з повинною — і тебе одразу відпустя",
@@ -273,7 +274,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1790683475.9493213,
+"last_content_ts": 1790704995.074213,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
