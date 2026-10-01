@@ -169,12 +169,13 @@
 "https://ccu.gov.ua/novyna/sud-uhvalyv-rishennya-u-spravi-shchodo-vstanovlennya-obmezhen-konstytuciynyh-prav-i-svobod-v",
 "https://lexinform.com.ua/sudova-praktyka/sud-ne-vpravi-zalyshaty-bez-ruhu-apelyatsijnu-skargu-na-rishennya-slidchogo-suddi-yak-i-vysuvaty-nadmiru-formalistychni-chy-ne-peredbacheni-zakonom-vymogy-do-yiyi-zmistu/",
 "https://ccu.gov.ua/novyna/ksu-vyznav-nekonstytuciynym-prypys-pro-prypynennya-strahovyh-vyplat-poterpilym-na-vyrobnyctvi",
-"https://ccu.gov.ua/novyna/sud-oprylyudnyv-rishennya-u-spravi-shchodo-vstanovlennya-obmezhen-konstytuciynyh-prav-i"
+"https://ccu.gov.ua/novyna/sud-oprylyudnyv-rishennya-u-spravi-shchodo-vstanovlennya-obmezhen-konstytuciynyh-prav-i",
+"https://court.gov.ua/press/news/2107083/"
 ],
 "day": "2026-10-01",
-"count": 1,
-"total": 171,
-"seq": 197,
+"count": 2,
+"total": 172,
+"seq": 198,
 "orig_recent": [
 "порада:Звільнили — а трудову книжку не віддають",
 "міф:Явка з повинною — і тебе одразу відпустя",
@@ -278,7 +279,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1790803558.0842376,
+"last_content_ts": 1790857361.1965356,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
