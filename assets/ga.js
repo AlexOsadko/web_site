@@ -32,22 +32,19 @@
   gtag("js", new Date());
   gtag("config", GA_ID);
 
-  // Google Ads — тег для відстеження конверсій (заявок).
-  var ADS_ID = "AW-18325879759";
-  var CONV_LABEL = "AW-18325879759/MmC8CI728dEcEM_3uqJE"; // конверсія типу «Контакт»
+  // Google Ads — робочий акаунт (adv.osadko@gmail.com, 624-250-0421).
+  var ADS_ID = "AW-18401189598";
   gtag("config", ADS_ID);
-
-  // Google Ads — тег другого акаунта (adv.osadko@gmail.com, 624-250-0421).
-  gtag("config", "AW-18401189598");
-  // Ярлик конверсії «Запис на встречу» цього акаунта.
+  // Ярлик конверсії «Призначення зустрічі» цього акаунта.
   var CONV_LABEL2 = "AW-18401189598/Cj8ICMiJ_eQcEN69r8ZE";
+  // Щоб розвести телефон/месенджер в окрему конверсію «Контакт» того ж
+  // акаунта — вписати її ярлик сюди й використати в microContact().
+  var CONV_CONTACT = null; // напр. "AW-18401189598/XXXX" — поки не задано
 
-  // Викликати В МОМЕНТ успішної заявки (не при завантаженні сторінки).
+  // Викликати В МОМЕНТ успішного звернення (не при завантаженні сторінки).
   // Consent Mode сам обере cookie/cookieless-режим за станом згоди.
-  // Конверсія надсилається в обидва акаунти Google Ads.
   window.osadkoConversion = function () {
-    gtag("event", "conversion", { send_to: CONV_LABEL });
-    gtag("event", "conversion", { send_to: CONV_LABEL2 });
+    gtag("event", "conversion", { send_to: CONV_CONTACT || CONV_LABEL2 });
   };
 
   function grant() {
