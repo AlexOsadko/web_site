@@ -171,12 +171,13 @@
 "https://ccu.gov.ua/novyna/ksu-vyznav-nekonstytuciynym-prypys-pro-prypynennya-strahovyh-vyplat-poterpilym-na-vyrobnyctvi",
 "https://ccu.gov.ua/novyna/sud-oprylyudnyv-rishennya-u-spravi-shchodo-vstanovlennya-obmezhen-konstytuciynyh-prav-i",
 "https://court.gov.ua/press/news/2107083/",
-"https://jurliga.ligazakon.net/news/246490_zupinennya-vikonavchikh-dy-mnyust-rozyasniv-nyuansi-protsesualno-pauzi-v-primusovomu-vikonann"
+"https://jurliga.ligazakon.net/news/246490_zupinennya-vikonavchikh-dy-mnyust-rozyasniv-nyuansi-protsesualno-pauzi-v-primusovomu-vikonann",
+"https://biz.ligazakon.net/news/246455_postynu-plgovu-tsnu-ne-mozhna-reklamuvati-yak-znizhku"
 ],
-"day": "2026-10-01",
-"count": 3,
-"total": 173,
-"seq": 199,
+"day": "2026-10-02",
+"count": 1,
+"total": 174,
+"seq": 200,
 "orig_recent": [
 "порада:Звільнили — а трудову книжку не віддають",
 "міф:Явка з повинною — і тебе одразу відпустя",
@@ -280,7 +281,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1790879364.2802184,
+"last_content_ts": 1790895097.3121405,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
