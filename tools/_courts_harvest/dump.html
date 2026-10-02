@@ -1,1169 +1,287 @@
-
-
-
 <!DOCTYPE html>
-<html lang="uk">
+<html>
 <head>
-    <meta charset="windows-1251">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="icon" href="/images/favicon.png" type="image/x-icon">
-    <title>Київський апеляційний суд</title>
-    <meta name="description" content="Київський апеляційний суд">
-    <meta name="keywords" content="">
-
-    <meta property="og:url"           content="" />
-    <meta property="og:type"          content="article" />
-    <meta property="og:title"         content="" />
-    <meta property="og:description"   content="" />
-    <meta property="og:image"         content="" />
-    <meta property="fb:app_id"         content="1630382423690791" />
-    <meta name="viewport" content="width=device-width">
-
-    <link rel="stylesheet" href="/styles/main-5bfaeedbd6.css"/>
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    <script src="/scripts/main-b79d782bbd.js"></script>
-    <script src="/js/plugins/bootstrap/bootstrap.bundle.min.js"></script>
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-      ga('create', 'UA-35987142-3', 'auto');
-      ga('send', 'pageview');
-    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ГРАФІК ЗАСІДАНЬ</title>
+    <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+    <link href="/CourtPortal.WebSite/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+   
+    <link href="/CourtPortal.WebSite/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="/CourtPortal.WebSite/Content/component.css" rel="stylesheet" />
+    <link href="/CourtPortal.WebSite/Content/servis.css" rel="stylesheet" />
+    <link href="/CourtPortal.WebSite/Content/style.css?v=202306261228" rel="stylesheet" />
+    <link href="/CourtPortal.WebSite/Content/table.css" rel="stylesheet" />
+    <link href="/CourtPortal.WebSite/Content/bootstrap-datepicker3.css" rel="stylesheet" />
 </head>
 <body>
-<style>
-    #div_chat{
-        left: auto;
-        right: 0;
-        top: auto;
-        bottom: 0;
-        height: 400px;
-        width: 250px;
-        position: fixed;
-        z-index: 2002;
-        padding: 0;
-        border-radius: 11px;
-    }
-</style>
-<div class="menu-button" id="tooltip2"   data-bs-toggle="tooltip"  data-bs-placement="left" title="Онлайн-допомога">
-    <a id="open__pomlka" class="b24-web-form-popup-btn-2" data-bs-toggle="tooltip" data-bs-placement="left" title="Сповістити про помилку/пропозиції"></a>
-    <a href="#" id="popup__toggle" onclick="phoneWin.open()"  data-bs-toggle="tooltip" data-bs-placement="left" title=" "></a>
-    <a id="open__chat2"  data-bs-toggle="tooltip" data-bs-placement="left" title="Онлайн-консультант" ></a>
-</div>
-
-<link rel="stylesheet" href="/styles/slider_main.css?s=24994">
-<link rel="stylesheet" href="/styles/slider_main_992.css?s=26711">
-<!--<link rel="stylesheet" href="/styles/slider_main_768.css">-->
-<link rel="stylesheet" href="/styles/style2_new.css?s=27921">
-
-
-<link rel="stylesheet" href="/styles/style2_new_media.css?s=5278">
-
-  
-		<div class="breadcrump row m-0">
-			<div class="col-xs-5 d-inline-flex">
-				<div>
-					<img src="/images/mod1_1(14)_03_03.png" alt="flag">
-					<span><a href="https://court.gov.ua/">Судова влада України</a></span>
-				</div>
-			</div><div class="center d-none d-lg-inline-flex">
-<div class="d-inline-block">
-		<div class="next">
-					<a href="https://court.gov.ua/sudova-vlada/sudy/">
-						<div>
-							<p>Суди</p>
-
-						</div>
-						</a>
-		</div>
-						 </div></div></div>
-  <div class="container breadcrump2"><div class="d-inline-flex d-lg-none center2">
-<div class="d-inline-block">
-		<div class="next">
-					<a href="https://court.gov.ua/sudova-vlada/sudy/">
-						<div>
-							<p>Суди</p>
-
-						</div>
-						</a>
-		</div>
-						 </div></div></div></div>
-</div>
-<div class="is_vision"></div>
-    <div class="head container">
-        <div class="row">
-                        <div class="col-lg-2 col-xl-2 d-none d-lg-block">
-            	<a href="/sud4824/">
-	                <img src="/images/vesi.png">
-                </a>
+    <header id="header" class="navbar navbar-inverse navbar-fixed-top" role="banner">
+    <div style="background: #fefefe; position: relative; top: 0; margin-top: -20px; padding: 0px; color: #0d354e; text-align: center" class="pagetitle">
+        <a href="http://www.kas.gov.ua">
+            <div class="title">
+                Київський  апеляційний суд
             </div>
-            <div class="col-lg-10 col-xl-10 col-sm-12 ">
-                <div class="col-md-12 Cname">
-                    <a href="/sud4824/">
-                    <div class="ust " style="">
-                        <span>
-                            Київський апеляційний суд
-                        </span>
-                    </div>
-                    </a>
-	            </div>
-            </div> 
-        </div>
-	</div>
-    <div class="container">
-    <div id="info_centr" style="font-family:HelveticaNeueCyr-Roman;width: 100%;margin: 0 auto;padding: 15px; font-size:20px; font-weight:bold;" class="bg-info text-center">
-                  <a href="https://court.gov.ua/sud4824/pidsudnist_to/" target="_blank">
-                  Перелік судів, від яких передано територіальну підсудність.
-                  </a>
-                  </div>
-                  
-	<div style="min-height: 66px; background-color: #f4f4f4;">
-		<script>
-  (function() {
-    var cx = '011908513057418320584:-rquuo2rlxm';
-    var gcse = document.createElement('script');
-    gcse.type = 'text/javascript';
-    gcse.async = true;
-    gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(gcse, s);
-  })();
-</script>
-<div class="gcse-search" data-as_sitesearch="kia.court.gov.ua"></div>
-	</div>
-     <div class="col-lg-12 menu">
-<div class="">
-<div class="col-12 navbar-toggler collapsed d-md-flex d-lg-none align-items-center justify-content-end text-end" data-bs-toggle="collapse" data-bs-target="#myNav" aria-controls="myNav" aria-expanded="false" aria-label="Toggle navigation">
-      <svg xmlns="https://www.w3.org/2000/svg" width="50" height="50" class="bi " fill="currentColor" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M2.5 11.5A.5.5 0 0 1 3 11h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 3h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"></path>
-</svg>
-
-    </div>
-    </div>
-                            <div class=" myNav  collapse  d-lg-flex" id="myNav">
-                                <div class="col-lg-2 d-flex  c btn-group">
-                                <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-    ПРО СУД
-  </button>
-
-                                        <ul class="dropdown-menu">
-                                            <ol><a class="btn btn-block" href="/sud4824/info_sud/info_sud/" >Інформація про суд</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/info_sud/organized/" >Структура</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/info_sud/kerivnictvo/" >Керівництво</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/info_sud/judges/" >Судді</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/info_sud/contacts/" >Контакти</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/info_sud/godyny/" >Режим роботи</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/info_sud/history/" >Історична довідка</a></ol>
-                                            
-											<hr>
-                                            <ol><a class="btn btn-block" href="/sud4824/info_sud//" >Компетенція та нормативно-правові засади діяльності суду. Підсудність суду</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="http://www.apcourtkiev.gov.ua/?cat=205"  target="_blank">Територія, на яку поширюється повноваження суду (територіальна підсудність)</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/info_sud/1/" >Суддівське самоврядування</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/info_sud/2/" >Локальні нормативно-правові акти суду</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/info_sud/3/" >Інклюзивна доступність</a></ol>
-                                            </ul></div>
-                                <div class="col-lg-2 d-flex c btn-group">
-                                    <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-    ПРЕС-ЦЕНТР
-  </button>
-                                      <ul class="dropdown-menu">
-                                       
-                                            <ol><a class="btn btn-block" href="/sud4824/pres-centr/general/" >Головне</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/pres-centr/news/" >Новини</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/pres-centr/events/" >Анонси</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/pres-centr/pres_releases/" >Прес-релізи</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/pres-centr/publications/" >Публікації у ЗМІ</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/pres-centr/interview/" >Інтерв’ю, коментарі, відповіді</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/pres-centr/photo/" >Фотогалерея</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/pres-centr/video/" >Відеогалерея</a></ol>
-                                            
-											<hr>
-                                            <ol><a class="btn btn-block" href="/sud4824/pres-centr/1/" >Судді–спікери</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/pres-centr/kontakty_pressluzhby/" >Контакти Пресслужби</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="https://www.kas.gov.ua/?p=34834"  target="_blank">Кримінальні провадження щодо воєнних злочинів</a></ol>
-                                            </ul></div>
-                                <div class="col-lg-2 d-flex c btn-group">
-                                    <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-    ГРОМАДЯНАМ
-  </button>
-                                      <ul class="dropdown-menu">
-                                       
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/tax/" >Судовий збір</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/sszzrpssznkl/" >Сплата судового збору за рішеннями про стягнення судового збору на користь держави</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/povernennya_sudovoho_zboru/" >Повернення судового збору</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/stavki/" >Сплата штрафів</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/sshzrpnsh/" >Сплата штрафу (як засобу процесуального примусу) за рішеннями про накладення штрафу (як засобу процесуального примусу)</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/order_compensation/" >Реквізити депозитного рахунку для зарахування коштів, внесених у вигляді частки майна, попередньо визначеної суми судових витрат тощо</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/depozit_182_kpk/" >Реквізити спеціального рахунку для зарахування коштів у разі застосування застави як запобіжного заходу відповідно до статті 182 КПК</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/depozit/" >Порядок відшкодування фактичних витрат на копіювання або друк документів, які надаються запитувачам інформації в суді</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="http://www.apcourtkiev.gov.ua/CourtPortal.WebSite/Home/GraficZasidan"  target="_blank">Список справ, призначених до розгляду</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="http://www.apcourtkiev.gov.ua/CourtPortal.WebSite/Home/PoshukSprav"  target="_blank">Список апеляційних скарг</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="http://www.apcourtkiev.gov.ua/CourtPortal.WebSite/Home/GraficZasidan"  target="_blank">Список автоматично розподілених судових справ</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="http://www.apcourtkiev.gov.ua/CourtPortal.WebSite/Home/GraficZasidan"  target="_blank">Інформація щодо стадій розгляду судових справ</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/online_hearings/" >Он-лайн трансляція судових засідань</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/feedback/" >Звернення громадян</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/forma/" >Запит на отримання публічної інформації</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="http://court.gov.ua/legalaid"  target="_blank">Безоплатна правнича допомога</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="http://court.gov.ua/unknown/sud4824"  target="_blank">Оголошення про виклик особи в суд та повідомлення про судове рішення</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="https://vkz.court.gov.ua"  target="_blank">Участь у відеозасіданні</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="https://court.gov.ua/gromadjanam/mediation-help/"  target="_blank">МЕДІАЦІЯ для вирішення спору</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/pov_korup/" >Повідомлення про корупцію або пов'язаного з корупцією правопорушення</a></ol>
-                                            
-											<hr>
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam//" >Реквізити для внесення на депозитний рахунок суду коштів при обранні судом міри запобіжного заходу у виді застави</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/1/" >Оголошення про виклик до суду</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/11/" >Графіки роботи суду</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/2/" >Електронна приймальня</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/12/" >Судові засідання в режимі відеоконференції за дорученням інших судів</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/56/" >Реквізити депозитного рахунку для внесення забезпечення у порядку ЦПК України</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/gromadyanam/22222/" >Електронне судочинство</a></ol>
-                                            </ul></div>
-                                <div class="col-lg-2 d-flex c btn-group">
-                                    <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-    ПОКАЗНИКИ ДІЯЛЬНОСТІ
-  </button>
-                                      <ul class="dropdown-menu">
-                                       
-                                            <ol><a class="btn btn-block" href="/sud4824/pokazniki-diyalnosti/work_results/" >Підсумки роботи</a></ol>
-                                            </ul></div>
-                                <div class="col-lg-2 d-flex c btn-group">
-                                    <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-    ІНШЕ
-  </button>
-                                      <ul class="dropdown-menu">
-                                       
-                                            <ol><a class="btn btn-block" href="/sud4824/inshe/jobs/" >Вакансії</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/inshe/finances/" >Бюджет. Фінанси.</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/inshe/gov_procurement/" >Державні закупівлі</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/inshe/law/" >Законодавство</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/inshe/useful_links/" >Корисні посилання</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/inshe/judical_status/" >Закон України “Про судоустрій і статус суддів”</a></ol>
-                                            
-											<hr>
-                                            <ol><a class="btn btn-block" href="/sud4824/inshe/7/" >Міжнародне співробітництво</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/inshe/public_information/" >Доступ до публічної інформації</a></ol>
-                                            
-                                            <ol><a class="btn btn-block" href="/sud4824/inshe/sudova_praktyka_ta_1/" >Судова практика та статистика</a></ol>
-                                            </ul></div></div></div>
-</div>
-
-
-
-
-
-
-
-<div class="container" xmlns="https://www.w3.org/1999/html">
-    <section class="sliders">
-        <div id="da-slider" class="da-slider">
-            
-            
-            <div class="da-slide">
-                <a href="/sud4824/pres-centr/news/2030534/" target="">
-                    <div class="da-img da-img-main">
-                        <div>
-                            <img src="https://court.gov.ua/storage/portal/img/news/2030534_slider.jpg?" alt=""/>
-                        </div>
-                    </div>
-                    <h2>19 травня 2026, 12:21</h2>
-                    <p>До уваги осіб, які претендують на зайняття посад в апараті Київського апеляційного суду</p>
-                    <div class="da-img"><img src="/images/Slider.svg" alt=""/></div>
-                </a>
-
-            </div>
-            
-            <div class="da-slide">
-                <a href="/sud4824/pres-centr/news/1976764/" target="">
-                    <div class="da-img da-img-main">
-                        <div>
-                            <img src="https://court.gov.ua/storage/portal/img/news/1976764_slider.jpg?" alt=""/>
-                        </div>
-                    </div>
-                    <h2>24 лютого 2026, 10:54</h2>
-                    <p>12 років позбавлення волі: вирок відносно військовослужбовця рф, засудженого за вчинення воєнного злочину проти цивільно...</p>
-                    <div class="da-img"><img src="/images/Slider.svg" alt=""/></div>
-                </a>
-
-            </div>
-            
-            <div class="da-slide">
-                <a href="/sud4824/pres-centr/news/1967188/" target="">
-                    <div class="da-img da-img-main">
-                        <div>
-                            <img src="https://court.gov.ua/storage/portal/img/news/1967188_slider.jpg?" alt=""/>
-                        </div>
-                    </div>
-                    <h2>09 лютого 2026, 10:59</h2>
-                    <p>Довічне позбавлення волі: вирок щодо військовослужбовців збройних сил рф, засуджених за умисне вбивство цивільних осіб н...</p>
-                    <div class="da-img"><img src="/images/Slider.svg" alt=""/></div>
-                </a>
-
-            </div>
-            
-            <nav class="da-arrows">
-                <span class="da-arrows-prev"></span>
-                <span class="da-arrows-next"></span>
-            </nav>
-        </div>
-    </section>
-</div>
-
-
-
-<div class="row buttons m-0" style="background-color: rgb(239,231,227);"> <div class="container d-flex"><a href="/sud4824/gromadyanam/tax/"  class="col-3 d-flex position-relative align-content-center">
-                    <div class="w-100  d-flex">
-                       <span class="align-items-center d-none d-xl-flex m-auto">
-                            <img class="me-2" width="42px" src="/images/mon.svg">Судовий збір
-                       </span>
-                        <div class="align-items-center d-block d-xl-none m-auto">
-                            <div class="w-100 text-center">
-                                <img width="42px" src="/images/mon.svg">
-                            </div>
-                            <div class="w-100 d-block  text-center">
-                                <span class="align-items-center m-auto">Судовий збір</span>
-                            </div>
-                           
-                        </div>
-                    </div>
-            </a><a href="https://cabinet.court.gov.ua/" target="_blank" class="col-3 d-flex position-relative align-content-center">
-                    <div class="w-100  d-flex">
-                       <span class="align-items-center d-none d-xl-flex m-auto">
-                            <img class="me-2" width="42px" src="/images/com.svg">Електронний суд
-                       </span>
-                        <div class="align-items-center d-block d-xl-none m-auto">
-                            <div class="w-100 text-center">
-                                <img width="42px" src="/images/com.svg">
-                            </div>
-                            <div class="w-100 d-block  text-center">
-                                <span class="align-items-center m-auto">Електронний суд</span>
-                            </div>
-                           
-                        </div>
-                    </div>
-            </a><a href="https://court.gov.ua/fair/sud4824/" target="_blank" class="col-3 d-flex position-relative align-content-center">
-                    <div class="w-100  d-flex">
-                       <span class="align-items-center d-none d-xl-flex m-auto">
-                            <img class="me-2" width="42px" src="/images/fil.svg">Стан розгляду справ
-                       </span>
-                        <div class="align-items-center d-block d-xl-none m-auto">
-                            <div class="w-100 text-center">
-                                <img width="42px" src="/images/fil.svg">
-                            </div>
-                            <div class="w-100 d-block  text-center">
-                                <span class="align-items-center m-auto">Стан розгляду справ</span>
-                            </div>
-                           
-                        </div>
-                    </div>
-            </a><a href="https://www.apcourtkiev.gov.ua/CourtPortal.WebSite/Home/GraficZasidan"  class="col-3 d-flex position-relative align-content-center">
-                    <div class="w-100  d-flex">
-                       <span class="align-items-center d-none d-xl-flex m-auto">
-                            <img class="me-2" width="42px" src="/images/popb_3.svg">Розклад засідань
-                       </span>
-                        <div class="align-items-center d-block d-xl-none m-auto">
-                            <div class="w-100 text-center">
-                                <img width="42px" src="/images/popb_3.svg">
-                            </div>
-                            <div class="w-100 d-block  text-center">
-                                <span class="align-items-center m-auto">Розклад засідань</span>
-                            </div>
-                           
-                        </div>
-                    </div>
-            </a>
-    </div>
-</div>
-    
-<div class="container conInform">
-    <div class="row informs">
-        <div class="col-lg-8 col-xl-8">
-            
-            <div class="col-md-12">
-            <h1>Останні новини</h1>
-            </div>
-            <div class="news row"><div class="col-md-4">
-                <span>
-                    <a href="/sud4824/pres-centr/news/2106631/" target="">З Днем захисників і захисниць України</a>
-                </span>
-                <span>01 жовтня 2026, 09:45</span>
-                </div><div class="col-md-4">
-                <span>
-                    <a href="/sud4824/pres-centr/news/2103101/" target="">Онлайн-трансляція судового засідання щодо розгляду апеляційних скарг у кримінальному провадженні за обвинуваченням колишніх працівників підрозділу особливого призначення «Беркут»</a>
-                </span>
-                <span>25 вересня 2026, 10:09</span>
-                </div><div class="col-md-4">
-                <span>
-                    <a href="/sud4824/pres-centr/news/2098643/" target="">До уваги осіб, які претендують на зайняття посад в апараті Київського апеляційного суду</a>
-                </span>
-                <span>17 вересня 2026, 16:05</span>
-                </div><div class="col-md-4">
-                <span>
-                    <a href="/sud4824/pres-centr/news/2095285/" target="">Київський апеляційний суд залишив під вартою колишнього президента АТ «Мотор Січ», який обвинувачується у пособництві державі-агресору</a>
-                </span>
-                <span>11 вересня 2026, 13:08</span>
-                </div><div class="col-md-4">
-                <span>
-                    <a href="/sud4824/pres-centr/news/2085471/" target="">Висловлюємо співчуття у зв’язку із передчасною смертю судді Київського апеляційного суду Олега Володимировича Ігнатюка</a>
-                </span>
-                <span>24 серпня 2026, 12:00</span>
-                </div><div class="col-md-4">
-                <span>
-                    <a href="/sud4824/pres-centr/news/2085465/" target="">З Днем Незалежності України</a>
-                </span>
-                <span>24 серпня 2026, 09:30</span>
-                </div>
-                <div class="allLink">
-                <div class="col-md-12">
-                    <a href="/sud4824/pres-centr/news/">Всі новини</a>
-            </div></div></div>
-            
-         <div class="row twoButtons m-0 d-block">
-        <div class="col-6  d-inline-flex  button1"> 
-                    <a href="/sud4824/feedback/" class=" text-decoration-none">
-                            <div>
-                                <h2>Електронна форма звернення громадян</h2>
-                            </div>
-                    </a>
-</div>
-<div class="col-6 d-inline-flex  float-end button2">
-                    <a href="/sud4824/forma/" class=" text-decoration-none">
-                            <div>
-                                <h2>Запит на отримання публічної інформації</h2>
-                                <span>Форма для інформаційного запиту на отримання публічної інформації</span>
-                            </div>
-                    </a>
-                    </div>
-            </div>
-            
-
-
-            
-        </div>
-        <div class="col-lg-4  col-xl-4 banners">
-            
-            <div class="col-md-12 banners__dsa-adv" >
-                <div class="banner-dsa">
-                    <div id="carousel-generic-1" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner" role="listbox"><div class="carousel-item active">
-<a href="https://osvita.diia.gov.ua/courses/civil-servants">
-    <img src="/images/banners/slide-sud-6.png" alt="Онлайн-курс 'Цифрова грамотність для державних службовців'"></a>
-</div>
-<div class="carousel-item">
-<a href="https://osvita.diia.gov.ua/courses/civil-servants">
-    <img src="/images/banners/slide-sud-6_2.png" alt="на базі інструментів Google"></a>
-</div>  </div>
-                        <a class="carousel-control-prev" data-bs-target="#carousel-generic-1" href="#carousel-generic-1" data-bs-slide="prev">
-                            <span id="generic-1" class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="sr-only">Попередній</span>
-                        </a>
-                        <a class="carousel-control-next" data-bs-target="#carousel-generic-1" href="#carousel-generic-1" data-bs-slide="next">
-                            <span id="generic-1" class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="sr-only">Наступний</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            
-            <div data-toggle="modal" data-bs-toggle="modal" href="#modal_econ" class="col-md-12"
-                 style="margin-bottom: 15px;cursor: pointer">
-                <h2 style=" margin: 0px; padding:10px 5px; text-align: center;cursor: pointer">
-                    Участь у відеозасіданні
-                </h2>
-            </div>
-
-            
-            <div class="col-md-12">
-<div class="row">
-<div class="col-6 p-4 col-md-6 col-lg-12">
-                <h2>Контактні дані</h2>
-                <p>Адреса:<br></p>
-                <p>Веб-сайт:<br><a target="_blank" href="https://kia.court.gov.ua">https://kia.court.gov.ua</a></p>
-                <p>E-mail:<br><a href="mailto:inbox@kia.court.gov.ua">inbox@kia.court.gov.ua</a></p>
-                <p>Телефони:<br>(044) 284-15-77</p>
-
-
-  <div class='col-md-12 social_links'><h2>Соціальні мережі</h2><a href="https://www.facebook.com/Kyiv.Court.Of.Appeal" target="_blank"> <i class="fa fa-facebook-official"></i></a><a href="https://twitter.com/Kyiv_Appeal" target="_blank"> <i class="fa fa-twitter"></i></a><a href="https://www.youtube.com/channel/UC6khd0Mo_HpzcIQCwCCvkPg?view_as=subscriber" target="_blank"> <i class="fa fa-youtube-square"></i></a><a href="https://t.me/kyiv_court_of_appeal" target="_blank"> <i class="fa fa-telegram"></i></a><a href="https://www.instagram.com/kyiv_court_of_appeal/" target="_blank"> <i class="fa fa-instagram"></i></a><a href="https://uk.wikipedia.org/wiki/%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B8%D0%B9_%D0%B0%D0%BF%D0%B5%D0%BB%D1%8F%D1%86%D1%96%D0%B9%D0%BD%D0%B8%D0%B9_%D1%81%D1%83%D0%B4" target="_blank"> <i class="fa fa-wikipedia-w"></i></a></div>
-            </div>
-          
-
-    <div class="col-6 pt-4 pt-lg-0 ps-4 pe-4 pb-1 col-md-6  col-lg-12">
-                <h2>Розклад роботи</h2>
-                <p>Пн-Чт<br>з 09:00 до 18:00</p>
-                <p>Пт<br>з 09:00 до 16:45</p>
-                <p>Перерва<br>з 13:00 до 13:45</p>   
-                  <div class="col-md-12 primitka"><h2>Примітка</h2>
-<p>Власний вебсайт:  
-http://www.kas.gov.ua/
-Телефон управління забезпечення діяльності судової палати з розгляду кримінальних справ:
-(044)284-15-72.
-Телефон управління забезпечення діяльності судової палати з розгляду цивільних справ:
-(044)284-15-82.</p>
-            </div>             
-    </div>
-           
-</div>
-
-</div>
-
-            <div class="col-sm-12">
-                
-     <div class="w-100">
-        <a href=""  target="_blank">
-       
-            <img src="/img/maps/null_S.png?v2" class="w-100">
-            
         </a>
-        </div>
-    
-                <div>
-                    <a href="/sud4824/info_sud/contacts/" class="contacts_link">
-
-                            <span>Детальніше        <span class="glyphicon glyphicon-menu-down"
-                                                          aria-hidden="true"></span>	</span>
-
-                    </a>
-                </div>
-            </div>
-
-            <div class="col-sm-12 ">
-                <ul>
-                                         <a href="/sud4824/info_sud/kerivnictvo/"><li  class="d-flex align-items-center">
-                    <img src="../../../images/dot.png">
-                   <h3 class="mb-0">Керівництво</h3>
-                </li></a>
-                     <a href="/sud4824/info_sud/judges/"><li  class="d-flex align-items-center">
-                    <img src="../../../images/dot.png">
-                   <h3 class="mb-0">Судді</h3>
-                </li></a>
- <a href="#" onclick="document.getElementById('my_form').submit(); return false;">
-                    <li  class="d-flex align-items-center">
-                        <form id="my_form" target="_blank" method="POST" action="https://reyestr.court.gov.ua">
-                            <div style="display:none;">
-
-                                <input type="text" value="4824" name="UserCourtCode">
-                                <input type="text" value="" id="BeginDate" name="ImportDateBegin">
-                                <input type="text" value="" id="EndDate" name="ImportDateEnd">
-                                <input type="text" value="25" name="PagingInfo.ItemsPerPage">
-                                <input type="text" value="1" name="Sort">
-
-                            </div>
-                        </form>
-                        <img src="../../../images/dot.png">
-                        <h3 class="mb-0">Рішення суду внесені до Єдиного державного реєстру судових рішень</h3>
-                    </li>
-                </a>
+</div> 
+            <div class="col-md-2" style="height:20px"></div>
+            <div class="col-md-8 calculator">
+                <ul class="menuzee" style="display:none">
+                    <li>Новини</li>
+                    <li>Про суд</li>
+                    <li>Для громадян</li>
+                    <li>Законодавство</li>
                 </ul>
             </div>
+</header><!-- .header-->
 
-            <div class="col-sm-12 ">
-                <a href="/sud4824/gromadyanam/pov_korup/"
-                   class="text-d-none banner_all grey_banner" style="padding:10px 5px;">
-                    Повідомити про корупцію
-                </a>
-            </div>
-            <div class="col-sm-12 ">
-                <a href="/sud4824/site_map/" class="text-d-none p10tb banner_all banner_blue_border">
-                    Мапа сайту
-                </a>
+    <section id="title" class="emerald">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12">
+                    <h1>ГРАФІК ЗАСІДАНЬ</h1>
+                </div>
             </div>
         </div>
+    </section>
+    <div class="container body-content">
         
-        <div class="col-md-12 Galery">
-                                        <div class="row align-items-center">
-                                            <div class="col-md-9 d-inline-flex">
-                                                <h1>Фотогалерея</h1>
-    
-                                            </div>
-                                            <div class="col-md-3 d-inline-flex float-end h-100 justify-content-end">
-                                                <a href="/sud4824/pres-centr/photo/">Всі альбоми</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12 news"><div class="slider1 col-md-12">
-
-                    <div class="slide">
-                        <a href="/sud4824/pres-centr/photo/3192">
-                            <img src="/img/photos/3192_photo.jpg" alt="3192.jpg"  style="width:171px; height:112px" >
-                        </a>
-                    </div>
-                       
-
-                    <div class="slide">
-                        <a href="/sud4824/pres-centr/photo/3190">
-                            <img src="/img/photos/3190_photo.png" alt="3192.jpg"  style="width:171px; height:112px" >
-                        </a>
-                    </div>
-                       </div></div>
-        <div class="col-md-12" style="margin-bottom: 15px">
-            <h1>Корисні посилання</h1>
-        </div>
-        <div class="col-lg-12 d-none  d-lg-block" style="height: 181px;">
-            <div class="slider3">
-                
-                <div class="slide">
-                    <a href="https://www.president.gov.ua/" style="color: #3a3a3a;" target="_blank">
-                        <div class="image" id="president"><h4>Президент України</h4></div>
-                    </a>
-                </div>
-                
-                <div class="slide">
-                    <a href="https://rada.gov.ua/" style="color: #3a3a3a;" target="_blank">
-                        <div class="image" id="vru"><h4>Верховна Рада України</h4></div>
-                    </a>
-                </div>
-                
-                <div class="slide">
-                    <a href="https://www.kmu.gov.ua/" style="color: #3a3a3a;" target="_blank">
-                        <div class="image" id="uport"><h4>Урядовий портал</h4></div>
-                    </a>
-                </div>
-                
-                <div class="slide">
-                    <a href="https://minjust.gov.ua/m/str_9329" style="color: #3a3a3a;" target="_blank">
-                        <div class="image" id="minust"><h4>Рішення щодо України, винесені Європейським судом з прав людини</h4></div>
-                    </a>
-                </div>
-                
-                <div class="slide">
-                    <a href="https://reyestr.court.gov.ua/" style="color: #3a3a3a;" target="_blank">
-                        <div class="image" id="edrsr"><h4>Рішення, внесені до Єдиного державного реєстру судових рішень</h4></div>
-                    </a>
-                </div>
-                
-                <div class="slide">
-                    <a href="https://erau.unba.org.ua/" style="color: #3a3a3a;" target="_blank">
-                        <div class="image" id="advokat"><h4>Єдиний реєстр адвокатів</h4></div>
-                    </a>
-                </div>
-                
-                <div class="slide">
-                    <a href="https://minjust.gov.ua" style="color: #3a3a3a;" target="_blank">
-                        <div class="image" id="minust"><h4>Міністерство юстиції України</h4></div>
-                    </a>
-                </div>
-                
-            </div>
-        </div>
-        <div class="row d-sm-flex no_slider_img d-lg-none">
-            
-            <div class="col-4 mb-3">
-                <a href="https://www.president.gov.ua/" style="color: #3a3a3a;" target="_blank">
-                    <h4>Президент України</h4>
-                    <div id="president">
-                        <img src="/images/links/president.svg" style="opacity: 0" alt="">
-                    </div>
-                </a>
-            </div>
-            
-            <div class="col-4 mb-3">
-                <a href="https://rada.gov.ua/" style="color: #3a3a3a;" target="_blank">
-                    <h4>Верховна Рада України</h4>
-                    <div id="vru">
-                        <img src="/images/links/vru.svg" style="opacity: 0" alt="">
-                    </div>
-                </a>
-            </div>
-            
-            <div class="col-4 mb-3">
-                <a href="https://www.kmu.gov.ua/" style="color: #3a3a3a;" target="_blank">
-                    <h4>Урядовий портал</h4>
-                    <div id="uport">
-                        <img src="/images/links/uport.svg" style="opacity: 0" alt="">
-                    </div>
-                </a>
-            </div>
-            
-            <div class="col-4 mb-3">
-                <a href="https://minjust.gov.ua/m/str_9329" style="color: #3a3a3a;" target="_blank">
-                    <h4>Рішення щодо України, винесені Європейським судом з прав людини</h4>
-                    <div id="minust">
-                        <img src="/images/links/minust.svg" style="opacity: 0" alt="">
-                    </div>
-                </a>
-            </div>
-            
-            <div class="col-4 mb-3">
-                <a href="https://reyestr.court.gov.ua/" style="color: #3a3a3a;" target="_blank">
-                    <h4>Рішення, внесені до Єдиного державного реєстру судових рішень</h4>
-                    <div id="edrsr">
-                        <img src="/images/links/edrsr.svg" style="opacity: 0" alt="">
-                    </div>
-                </a>
-            </div>
-            
-            <div class="col-4 mb-3">
-                <a href="https://erau.unba.org.ua/" style="color: #3a3a3a;" target="_blank">
-                    <h4>Єдиний реєстр адвокатів</h4>
-                    <div id="advokat">
-                        <img src="/images/links/advokat.svg" style="opacity: 0" alt="">
-                    </div>
-                </a>
-            </div>
-            
-            <div class="col-4 mb-3">
-                <a href="https://minjust.gov.ua" style="color: #3a3a3a;" target="_blank">
-                    <h4>Міністерство юстиції України</h4>
-                    <div id="minust">
-                        <img src="/images/links/minust.svg" style="opacity: 0" alt="">
-                    </div>
-                </a>
-            </div>
-            
-        </div>
-    </div>
 
 
-</div>
 
-<!-- Modal -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="myModalLabel">Справа №</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="print_form" action="/assig.php" method="post" target="_blank">
-                    <span class="sud"></span>
-                    <input hidden type="text" class="sud" name="sud" checked="checked" value="">
-                    <br>
-                    <span class="date"></span>
-                    <input hidden type="text" class="date" name="date" checked="checked" value="">
-                    <br>
-                    <span name="juge" class="juge"></span>
-                    <input hidden type="text" class="judges" name="judges" checked="checked" value="">
-                    <br>
-                    <span class="case" value=""></span>
-                    <input hidden type="text" class="case" name="case" checked="checked" value="" ">
-                    <br>
-                    <span class="involved"></span>
-                    <input hidden type="text" class="involved" name="involved" checked="checked" value="">
-                    <br>
-                    <span class="description"></span>
-                    <input hidden type="text" class="description" name="description" checked="checked" value="">
-                    <input hidden type="text" class="address" name="address" checked="checked" value="">
-                    <input hidden type="text" class="id_sud" name="id_sud" checked="checked" value="">
-                    <input hidden type="text" class="category" name="category" checked="checked" value="">
-
-                    <label hidden for="print"><input type="text" name="option" checked="checked" value="print"
-                                                     id="print">Роздрукувати</label>
-                </form>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="reestr_btn">Перейти до Реєстру</button>
-                <button type="button" class="btn btn-primary" id="print_button">Роздрукувати</button>
-                <button type="button" class="btn btn-primary email" data-bs-target="#myModal2" data-bs-toggle="modal">
-                    Надіслати
-                </button>
-                <button type="button" class="btn btn-default" data-bs-dismiss="modal">Закрити</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- Modal -->
-<div class="modal fade" id="myModal2" tabindex="-1" aria-labelledby="myModalLabel">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="myModalLabel">Справа №</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="email_form" action="/assig_ajax.php" method="post" class="form-horizontal" target="_blank">
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-4 control-label">E-mail:</label>
-                        <div class="col-sm-18">
-                            <input name="email" type="email" class="form-control" id="inputEmail3">
-                        </div>
-                    </div>
-                    <input hidden type="text" name="hash" checked="checked" value="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3OTA5MzQ5ODB9.50Hh6JPHDKoxN1qsPIYLarEso9Qw6KUS4LMuR2EhVOk">
-                    <input hidden type="text" class="date" name="date" checked="checked" value="">
-                    <input hidden type="text" class="judges" name="judges" checked="checked" value="">
-                    <input hidden type="text" class="case" name="case" checked="checked" value="" ">
-                    <input hidden type="text" class="involved" name="involved" checked="checked" value="">
-                    <input hidden type="text" class="description" name="description" checked="checked" value="">
-                    <input hidden type="text" class="address" name="address" checked="checked" value="">
-                    <input hidden type="text" class="category" name="category" checked="checked" value="">
-                    <input hidden name="sud" value="Київський апеляційний суд">
-                    <label hidden for="send"><input type="text" name="option" value="send" id="send">Надіслати</label>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="send_button">Надіслати</button>
-                <button type="button" class="btn btn-default" data-bs-target="#myModal" data-bs-toggle="modal">Закрити
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" tabindex="-1" role="dialog" id="modal_econ" aria-labelledby="myLargeModalLabel">
-    <div class="modal-dialog modal-lg" style="width: 750px">
-        <div class="modal-content" style='font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;'>
-            <div class="modal-body" style="padding: 30px;text-align: justify ;text-indent: 25px">
-                <p>З 1 жовтня 2022 року вхід користувачів до підсистеми відеоконференцзв’язку відбувається виключно
-                    через Електронний кабінет Електронного суду (п.18, 45, 49 <a
-                            href="https://zakon.rada.gov.ua/rada/show/v1845910-21#n22" target="_blank">Положення про
-                        порядок функціонування окремих підсистем Єдиної судової інформаційно-телекомунікаційної
-                        системи</a>).</p>
-                <p>Для участі в судовому засіданні в режимі відеоконференції Вас буде перенаправлено до Електронного
-                    кабінету Електронного суд <a href="https://cabinet.court.gov.ua" target="_blank">cabinet.court.gov.ua</a>
-                    (<strong>пункт меню «Відеозв’язок»</strong> в панелі ліворуч).</p>
-                <p style="text-align: center;font-size: 16px;color: red;"><strong><em>Увага!</em></strong></p>
-                <p><strong>Заява щодо участі</strong> в судовому засіданні в режимі відеоконференції <strong>подається
-                        до відповідного суду не пізніше ніж за п’ять днів до судового засідання</strong> в порядку,
-                    визначеному процесуальним законодавством.</p>
-                <p style="text-align: center;"><strong>Ви вперше звертаєтесь до <a href="https://cabinet.court.gov.ua"
-                                                                                   target="_blank">cabinet.court.gov.ua</a>?</strong>
-                </p>
-                <p>Тоді Вам потрібно мати кваліфікований електронний підпис (КЕП) та <a
-                            href="https://cabinet.court.gov.ua" target="_blank">зареєструватися</a>. Слідуйте
-                    інструкціям сервісу.</p>
-                <p>Звертаємо увагу, якщо Ви вже були зареєстровані на <a href="https://vkz.court.gov.ua/"
-                                                                         target="_blank">vkz.court.gov.ua</a>, для входу
-                    в свій профіль підсистеми відеоконференцзв’язку через Електронний кабінет Електронного суду при
-                    реєстрації потрібно вказати ту ж електронну адресу, від якою ви зареєстровані в підсистемі
-                    відеоконференцзв’язку.</p>
-                <p style="text-align: center;"><strong>Вже користувач <a href="https://cabinet.court.gov.ua"
-                                                                         target="_blank">cabinet.court.gov.ua</a>?</strong>
-                </p>
-                <p>Здійсніть <a href="https://cabinet.court.gov.ua" target="_blank">«Вхід»</a> на сайт Електронного суду
-                    cabinet.court.gov.ua <strong>за допомогою КЕП</strong> та виберіть в панелі ліворуч <strong>пункт
-                        меню «Відеозв’язок»</strong>. Вас буде перенаправлено на підсистему відеоконфернцзв’язку до
-                    розділу «Судові засідання (Відеоконференція)».</p>
-                <p>Якщо потрібна конференція ще не розпочалася, <strong>очікуйте на запрошення</strong> від Організатора
-                    на цій сторінці.</p>
-                <p>Якщо триває конференція, в якій Ви приймаєте участь, знайдіть її в переліку та натисніть кнопку
-                    <strong>"Увійти до конференції".</strong></p>
-            </div>
-            <div class="modal-footer" style="text-align: center;">
-                <button type="button" class="btn btn-default" data-bs-dismiss="modal" style="margin: 0 auto">Відміна
-                </button>
-                <a href="https://cabinet.court.gov.ua" type="button" target="_blank" class="btn btn-primary"
-                   style="margin: 0 auto; text-decoration: none; margin-left: 20px">Вхід/Реєстрація на
-                    cabinet.court.gov.ua</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script type="text/javascript">
-    $().ready(function () {
-
-        temp_date = new Date();
-        day = temp_date.getDate();
-        month = temp_date.getMonth() + 1;
-        year = temp_date.getFullYear();
-
-        if (month == 1) {prev_year = year-1;prev_month = 12;
-        } else {prev_year = year;prev_month = month-1;}
-
-        if (day < 10) {day = "0" + day;}
-            if (month < 10) {month = "0" + month;}
-                if (prev_month < 10) {prev_month = "0" + prev_month;}
-
-                    $('#BeginDate').val(day + '.' + prev_month + '.' + prev_year);
-
-        $('#EndDate').val(day + '.' + month + '.' + year);
-
-
-        $('.spravi').click(function (e) {
-            var date = $(this).find('#date').text();
-            var description = $(this).find('#description').text();
-            var rcase = $(this).find('#case').text();
-            var juge = $(this).find('#judge').val();
-            var judges = $(this).find('#judges').val();
-            var involved = $(this).find('#involved').val();
-            var address = $(this).find('#address').val();
-            var category = $(this).find('#category').val();
-            var sud = $(this).find('#sud').val();
-            var id_sud = $(this).find('#id_sud').val();
-            $('.modal-title').html("Справа №  " + rcase);
-            $('.date').html("Дата та час розгляду:  <b>" + date + '</b>').attr('value', date);
-            $('.sud').html("Назва суду:  <b>" + sud + '</b>').attr('value', sud);
-            $('.juge').html("Склад суду:  <b>" + juge + '</b>');
-            $('.judges').html("Склад суду:  <b>" + judges + '</b>').attr('value', judges);
-            $('.case').html("Єдиний унікальний номер справи:  <b>" + rcase + '</b>').attr('value', rcase);
-            $('.involved').html("Сторони у справі:  <b>" + involved + '</b>').attr('value', involved);
-            $('.description').html("Суть справи: <b>" + description + '</b>').attr('value', description);
-            $('.address').attr('value', address);
-            $('.category').attr('value', category);
-            $('.id_sud').attr('value', id_sud);
-            var myModal = new bootstrap.Modal($('#myModal'), {
-                keyboard: false
-            })
-            myModal.show();
-            e.preventDefault();
-        });
-
-        $('#reestr_btn').on('click', function () {
-            var id_sud = $('#myModal').find('.id_sud').val();
-            var url = 'https://reyestr.court.gov.ua/';
-            var rcase = $('#myModal').find('input.case').val();
-            var BeginDate = day + '.' + prev_month + '.' + prev_year;
-            var EndDate = day + '.' + month + '.' + year;
-            var form2 = $('<div id="div_reestr_form" style="display:block"><form  id="reestr_form" action="' + url + '"  accept-charset="utf-8" method="post" target="_blank">' +
-                '<input type="text" value="' + id_sud + '" name="UserCourtCode">' +
-                '<input type="text" value="' + rcase + '" name="CaseNumber">' +
-                '<input type="text" value="25" name="PagingInfo.ItemsPerPage">' +
-                '<input type="text" value="1" name="Sort">' +
-                '</form></div>');
-            $('#myModal').append(form2);
-            $('#reestr_form').submit();
-            $('#div_reestr_form').remove();
-
-        })
-        $('#send_button').on('click', function () {
-            var datas = $('#email_form').serialize();
-            $.ajax({
-                url: $('#email_form').attr('action'),
-                type: 'POST',
-                data: datas, // здесь мне нужно добавить массив
-                dataType: 'json',
-                encode: true,
-                success: function (data) {
-                    alert(data.message);
-                },
-                error: function (data) {
-                    alert(data.message);
-                }
-            });
-            return false;
-        })
-
-        $('#print_button').click(function () {
-            $('#print_form').submit();
-        })
-    });
-</script>
 <style>
+    @media only screen and (max-width: 760px), (min-device-width: 768px) and (max-device-width: 1024px) {
 
-</style>
-<div class="modal fade bs-example-modal-sm" tabindex="-1" id="modalBitrix" role="dialog" aria-labelledby="" >
-    <div class="modal-dialog modal-sm" role="document" style="float: right">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute;z-index:3000;width: 30px;height: 30px;right: 0;"><span aria-hidden="true">&times;</span></button>
-        <div class="modal-content" id="contentsBitrix" style="background: rgba(50,188,173,1) !important;">
+        /* Force table to not be like tables anymore */
+        table.new, table.new thead, table.new tbody, table.new th, table.new td, table.new tr {
+            display: block;
+        }
 
-        </div>
-    </div>
-</div>
+        /* Hide table headers (but not display: none;, for accessibility) */
+        thead.new tr {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
 
-<script id="bx24_form_button" data-skip-moving="true">
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
-    $(function() {
-        $('#open__pomlka').on('click',function () {
-            window.open('https://court.gov.ua/CRM-form.html', '_blank', 'scrollbars=1,width=450px,height=800px');
-        })
-    });
-    var is_visio = localStorage.getItem('visio');
-    if(is_visio == '1'){
-        $('body').addClass('vision');
-        $('.is_vision').html('<i class="fa fa-eye" aria-hidden="true"> Стандартна версія</i>');
-    } else {
-        $('.is_vision').html('<i class="fa fa-eye" aria-hidden="true"> Людям з порушенням зору</i>');
+        table.new tr {
+            border: 1px solid #ccc;
+        }
+
+        table.new td {
+            /* Behave  like a "row" */
+            min-height: 60px;
+            border: none;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            padding-left: 55%;
+            width: 100%;
+        }
+
+            table.new td:before {
+                /* Now like a table header */
+                position: absolute;
+                /* Top/left values mimic padding */
+                top: 2px;
+                left: 10px;
+                width: 50%;
+                line-height: 1.2em;
+                padding-right: 10px;
+            }
+
+            /*
+        Label the data
+        */
+            table.new td:nth-of-type(1):before {
+                content: "Єдиний унікальний номер судової справи";
+            }
+
+            table.new td:nth-of-type(2):before {
+                content: "Реєстраційній номер судової справи";
+            }
+
+            table.new td:nth-of-type(3):before {
+                content: "Дата розгляду судової справи";
+            }
+
+            table.new td:nth-of-type(4):before {
+                content: "Час розгляду судової справи";
+            }            
+
+			table.new td:nth-of-type(5):before {
+                content: "Зал судового засідання";
+            }
+
+            table.new td:nth-of-type(6):before {
+                content: "Склад суду";
+            }
+
+            table.new td:nth-of-type(7):before {
+                content: "Cторони у справі";
+            }
+
+            table.new td:nth-of-type(8):before {
+                content: "Суть судової справи";
+            }
+			
+			table.new td:nth-of-type(9):before {
+                content: "Результат розгляду";
+            }            
     }
 
-</script>
-<div id="ikeyboard" class="d_none">
-  <ul id="eng" class="d_none">
-      <li class="symbol"><span class="off">`</span><span class="on">~</span></li>
-      <li class="symbol"><span class="off">1</span><span class="on">!</span></li>
-      <li class="symbol"><span class="off">2</span><span class="on">@</span></li>
-      <li class="symbol"><span class="off">3</span><span class="on">#</span></li>
-      <li class="symbol"><span class="off">4</span><span class="on">$</span></li>
-      <li class="symbol"><span class="off">5</span><span class="on">%</span></li>
-      <li class="symbol"><span class="off">6</span><span class="on">^</span></li>
-      <li class="symbol"><span class="off">7</span><span class="on">&</span></li>
-      <li class="symbol"><span class="off">8</span><span class="on">*</span></li>
-      <li class="symbol"><span class="off">9</span><span class="on">(</span></li>
-      <li class="symbol"><span class="off">0</span><span class="on">)</span></li>
-      <li class="symbol"><span class="off">-</span><span class="on">_</span></li>
-      <li class="symbol"><span class="off">=</span><span class="on">+</span></li>
-      <li class="delete lastitem"><img src="/img/backspace.png" /></li>
-      <li class="tab">tab</li>
-      <li class="letter">q</li>
-      <li class="letter">w</li>
-      <li class="letter">e</li>
-      <li class="letter">r</li>
-      <li class="letter">t</li>
-      <li class="letter">y</li>
-      <li class="letter">u</li>
-      <li class="letter">i</li>
-      <li class="letter">o</li>
-      <li class="letter">p</li>
-      <li class="letter">[</li>
-      <li class="letter">]</li>
-      <li class="symbol lastitem"><span class="off">\</span><span class="on">|</span></li>
-      <li class="capslock">caps lock</li>
-      <li class="letter">a</li>
-      <li class="letter">s</li>
-      <li class="letter">d</li>
-      <li class="letter">f</li>
-      <li class="letter">g</li>
-      <li class="letter">h</li>
-      <li class="letter">j</li>
-      <li class="letter">k</li>
-      <li class="letter">l</li>
-      <li class="symbol"><span class="off">;</span><span class="on">:</span></li>
-      <li class="symbol"><span class="off">'</span><span class="on">"</span></li>
-      <li class="return lastitem">Enter</li>
-      <li class="left-shift">shift</li>
-      <li class="letter">z</li>
-      <li class="letter">x</li>
-      <li class="letter">c</li>
-      <li class="letter">v</li>
-      <li class="letter">b</li>
-      <li class="letter">n</li>
-      <li class="letter">m</li>
-      <li class="letter">,</li>
-      <li class="letter">.</li>
-      <li class="symbol"><span class="off">/</span><span class="on">?</span></li>
-      <li class="right-shift">shift</li>
-      <li class="cleared">Очистити</li>
-      <li class="language" language="ukr">Укр</li>
-      <li class="space">&nbsp;</li>
-      <li class="left-arr">&larr;</li>
-      <li class="right-arr">&rarr;</li>
-      <li class="closed lastitem">Сховати</li>
-  </ul>
-  <ul id="ukr">
-      <li class="symbol"><span class="off">'</span><span class="on">~</span></li>
-      <li class="symbol"><span class="off">1</span><span class="on">!</span></li>
-      <li class="symbol"><span class="off">2</span><span class="on">"</span></li>
-      <li class="symbol"><span class="off">3</span><span class="on">№</span></li>
-      <li class="symbol"><span class="off">4</span><span class="on">;</span></li>
-      <li class="symbol"><span class="off">5</span><span class="on">%</span></li>
-      <li class="symbol"><span class="off">6</span><span class="on">:</span></li>
-      <li class="symbol"><span class="off">7</span><span class="on">?</span></li>
-      <li class="symbol"><span class="off">8</span><span class="on">*</span></li>
-      <li class="symbol"><span class="off">9</span><span class="on">(</span></li>
-      <li class="symbol"><span class="off">0</span><span class="on">)</span></li>
-      <li class="symbol"><span class="off">-</span><span class="on">_</span></li>
-      <li class="symbol"><span class="off">=</span><span class="on">+</span></li>
-      <li class="delete lastitem"><img src="/img/backspace.png" /></li>
-      <li class="tab">tab</li>
-      <li class="letter">й</li>
-      <li class="letter">ц</li>
-      <li class="letter">у</li>
-      <li class="letter">к</li>
-      <li class="letter">е</li>
-      <li class="letter">н</li>
-      <li class="letter">г</li>
-      <li class="letter">ш</li>
-      <li class="letter">щ</li>
-      <li class="letter">з</li>
-      <li class="letter">х</li>
-      <li class="letter">ї</li>
-      <li class="symbol lastitem"><span class="off">/</span><span class="on">\</span></li>
-      <li class="capslock">caps lock</li>
-      <li class="letter">ф</li>
-      <li class="letter">і</li>
-      <li class="letter">в</li>
-      <li class="letter">а</li>
-      <li class="letter">п</li>
-      <li class="letter">р</li>
-      <li class="letter">о</li>
-      <li class="letter">л</li>
-      <li class="letter">д</li>
-      <li class="letter">ж</li>
-      <li class="letter">є</li>
-      <li class="return lastitem">Enter</li>
-      <li class="left-shift">shift</li>
-      <li class="letter">я</li>
-      <li class="letter">ч</li>
-      <li class="letter">с</li>
-      <li class="letter">м</li>
-      <li class="letter">и</li>
-      <li class="letter">т</li>
-      <li class="letter">ь</li>
-      <li class="letter">б</li>
-      <li class="letter">ю</li>
-      <li class="symbol"><span class="off">.</span><span class="on">,</span></li>
-      <li class="right-shift">shift</li>
-      <li class="cleared">Очистити</li>
-      <li class="language" language="eng">Eng</li>
-      <li class="space">&nbsp;</li>
-      <li class="left-arr">&larr;</li>
-      <li class="right-arr">&rarr;</li>
-      <li class="closed lastitem">Сховати</li>
-  </ul>
+    .new_tab_btn {
+        margin: auto;
+        padding: 2px;
+        width: 35px;
+        height: 35px;
+        max-width: inherit !important;
+    }            
+    
+    .hover_opacity:hover {
+        opacity: 0.5;
+    }  
+
+    /* Smartphones (portrait and landscape) ----------- */
+    @media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
+        body {
+            padding: 0;
+            margin: 0;
+            width: 320px;
+        }
+    }
+
+    /* iPads (portrait and landscape) ----------- */
+    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+        body {
+            width: 495px;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+                <!-- content -->
+                <div class="nav"><a href="http://www.kas.gov.ua/">Головна</a> / Пошук справ</div>
+
+<form action="/CourtPortal.WebSite/Home/GraficZasidan" method="post" name="searchform">                <table class="one">
+                    <tr>
+                        <td class="gray">Номер судової справи</td>
+                        <td>
+                            
+                            <input class="text-box single-line" id="case_number" name="case_number" type="text" value="" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="gray">Дата розгляду</td>
+                        <td>
+                            
+                            <input autocomplete="off" data-val="true" data-val-date="The field session_date must be a date." id="session_date" name="session_date" readonly="readonly" type="text" value="02.10.2026" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="gray">Суддя доповідач</td>
+                        <td><input class="text-box single-line" id="main_judge" name="main_judge" type="text" value="" /></td>
+                    </tr>
+                    <tr>
+                        <td class="gray">Сторона у справі</td>
+                        <td><input class="text-box single-line" id="litigant" name="litigant" type="text" value="" /></td>
+                    </tr>
+                    <tr>
+                        <td class="gray">Форма судочинства</td>
+                        <td>
+                            <select id="doc_class" name="doc_class">
+                                <option  value=""></option>
+                                <option   value="Цивільна справа">Цивільна справа</option>
+                                <option  value="Справа про адміністративне правопорушення">Справа про адміністративне правопорушення</option>
+                                <option  value="Кримінальна справа">Кримінальна справа</option>
+                            </select>
+
+                            
+                        </td>
+                    </tr>
+                   
+                    <tr>
+                        <td colspan="2" align="center"><input type="submit" name="Search" value="Шукати"></td>
+                    </tr>
+                </table>
+</form>            </div>
+        </div>
+    </div>
 </div>
 
-<footer class="footer">
-    <div class="container">
-        <p class="text-muted">2026 © Всі права захищені <span class="pull-right"><a href="https://www.facebook.com/CourtGovUa/?fref=ts" target="_blank"><i class="fa fa-facebook-official" aria-hidden="true"></i></a> <a href="https://www.youtube.com/channel/UCFDRcAmACu5ljF-YUMGctnA" target="_blank"><i class="fa fa-youtube-play" aria-hidden="true"></i></a>
-        </span></p>
-        <p class="text-links"> <a href="/sud4824/info_sud/">Про суд</a> <a href="/sud4824/pres-centr/">Прес-центр</a> <a href="/sud4824/gromadyanam/">Громадянам</a> <a href="/sud4824/pokazniki-diyalnosti/">Показники діяльності</a> <a href="/sud4824/inshe/">Інше</a> 
-		</p>
-		<p class="build__version">v1.38.1</p>
-    </div>
-</footer>
+<!-- -->
 
+<br><br>
+
+   
+      
+          
+          
+
+<h4 align="center">Результати пошуку</h4>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="new">
+                <thead class="new">
+                    <tr>
+                        <th>Єдиний унікальний номер судової справи</th>
+                        <th>Реєстраційній номер судової справи</th>
+                        <th>Дата розгляду судової справи</th>
+                        <th>Час розгляду судової справи</th>
+                        <th>Зал судового засідання</th>
+
+
+                        <th>Склад суду</th>
+                        <th>Сторони у справі</th>
+                        <th>Суть судової справи</th>
+                        <th>Результат розгляду</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+            </table>
+           
+        </div>
+    </div>
+</div>
+        
+    </div>
+
+    
+
+    <script src="/CourtPortal.WebSite/Scripts/jquery-1.10.2.js"></script>
+<script src="/CourtPortal.WebSite/Scripts/jquery-1.8.2.js"></script>
+
+    <script src="/CourtPortal.WebSite/Scripts/bootstrap.js"></script>
+<script src="/CourtPortal.WebSite/Scripts/respond.js"></script>
+
+    
+    <script type="text/javascript">
+        $(document).ready(function () {
+            constructDatePicker($("#session_date"));
+        });
+
+        function tdclick(e) {
+            if (!e) var e = window.event;                // Get the window event
+            e.cancelBubble = true;                       // IE Stop propagation
+            if (e.stopPropagation) e.stopPropagation();  // Other Broswers                        
+        };
+    </script>
+
+
+    <script src="/CourtPortal.WebSite/Scripts/helpers.js"></script>
+    <script src="/CourtPortal.WebSite/Scripts/modernizr.custom.js"></script>
+    <script src="/CourtPortal.WebSite/Scripts/classie.js"></script>
+    <script src="/CourtPortal.WebSite/Scripts/modalEffects.js"></script>
+    <script>
+        var polyfilter_scriptpath = '/js/';
+    </script>
+    <script src="/CourtPortal.WebSite/Scripts/cssParser.js"></script>
+    <script src="/CourtPortal.WebSite/Scripts/css-filters-polyfill.js"></script>
+    <script src="/CourtPortal.WebSite/Scripts/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+    <script src="/CourtPortal.WebSite/Scripts/bootstrap-datepicker/locales/bootstrap-datepicker.uk.min.js"></script>
 </body>
 </html>
