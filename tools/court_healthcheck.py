@@ -50,7 +50,11 @@ def main():
         name = court.get("name") or ""
         url = b.csz_url_for(court)
         status, count = "fail", ""
-        if url:
+        if url and court.get("kind") == "kas":
+            # Портал із пошуком за стороною: «усіх засідань» не віддає, тож лише
+            # перевіряємо, що форма пошуку відкривається.
+            status = "ok" if b.kas_alive(url) else "fail"
+        elif url:
             try:
                 recs = b.fetch_court_retry(url)
                 count = len(recs)

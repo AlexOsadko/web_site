@@ -2657,7 +2657,9 @@
   },
   {
    "code": "4824",
-   "name": "Київський апеляційний суд"
+   "name": "Київський апеляційний суд",
+   "url": "https://www.kas.gov.ua/CourtPortal.WebSite/Home/GraficZasidan",
+   "kind": "kas"
   },
   {
    "code": "4850",

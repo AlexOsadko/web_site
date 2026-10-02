@@ -25,6 +25,7 @@ GET сторінки CSZ (набрати cookie сесії) → POST /new.php (J
   COURT_MAX_ALERTS     — запобіжник від флуду за один запуск (типово 25).
 """
 import hashlib
+import html as _html
 import http.cookiejar
 import json
 import os
@@ -248,6 +249,11 @@ def load_registry():
                 url = (c.get("url") or "").strip()
                 if url:
                     entry["url"] = url
+                # Особливий тип джерела (напр. "kas" — портал Київського
+                # апеляційного з пошуком за стороною замість /new.php).
+                kind = (c.get("kind") or "").strip()
+                if kind:
+                    entry["kind"] = kind
                 out.append(entry)
         return out
     except Exception as e:
@@ -352,6 +358,115 @@ def fetch_court_retry(csz_url, tries=None):
             last = e
             time.sleep(delay)
             delay = min(delay * 2, 4)
+    raise last
+
+
+# ───────────── Київський апеляційний суд (власний портал kas.gov.ua) ─────────
+# Суд не підключений до court.gov.ua (/sud4824/... → 404). Графік засідань він
+# публікує на порталі з HTML-формою пошуку, де є поле «Сторона у справі».
+# Тож замість «усіх засідань суду» шукаємо за кожним ПІБ під наглядом і беремо
+# лише майбутні засідання (пошук без дати повертає і всю історію справ).
+KAS_URL = "https://www.kas.gov.ua/CourtPortal.WebSite/Home/GraficZasidan"
+KAS_TIMEOUT = max(FETCH_TIMEOUT, 60)  # відповідь із сотнею рядків — ~20 с
+
+
+def _kas_opener():
+    jar = http.cookiejar.CookieJar()
+    return urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+
+
+_KAS_HDR = {"User-Agent": UA, "Accept-Language": "uk,en;q=0.8",
+            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8"}
+
+
+def kas_alive(url=KAS_URL):
+    """Чи відкривається форма «Графік засідань» (для щоденного healthcheck)."""
+    try:
+        with _kas_opener().open(urllib.request.Request(url, headers=_KAS_HDR),
+                                timeout=KAS_TIMEOUT) as r:
+            return "litigant" in r.read().decode("utf-8", "replace")
+    except Exception:
+        return False
+
+
+def _kas_terms(names):
+    """Пошукові запити: «Прізвище Ім'я» (без по-батькові — портал шукає підрядок,
+    а описки в по-батькові не губитимуть справ; точний збіг перевірить
+    name_matches). Дублікати й однослівні записи відкидаємо."""
+    out, low = [], set()
+    for nm in names:
+        words = (nm or "").split()
+        if len(words) < 2:
+            continue
+        term = " ".join(words[:2])
+        if term.lower() not in low:
+            low.add(term.lower())
+            out.append(term)
+    return out
+
+
+def _kas_rows(text):
+    rows = []
+    for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", text, re.S | re.I):
+        cells = [_html.unescape(" ".join(re.sub(r"<[^>]+>", " ", c).split()))
+                 for c in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S | re.I)]
+        if len(cells) >= 8:
+            rows.append(cells)
+    return rows
+
+
+def fetch_kas(names, url=KAS_URL):
+    """Майбутні засідання Київського апеляційного за ПІБ із names — у форматі
+    записів court.gov.ua (number/date/judge/involved/description/courtroom)."""
+    opener = _kas_opener()
+    with opener.open(urllib.request.Request(url, headers=_KAS_HDR),
+                     timeout=KAS_TIMEOUT) as r:
+        r.read()
+    parts = urllib.parse.urlsplit(url)
+    hdr = dict(_KAS_HDR, **{"Content-Type": "application/x-www-form-urlencoded",
+                            "Referer": url,
+                            "Origin": f"{parts.scheme}://{parts.netloc}"})
+    today0 = time.mktime(time.strptime(time.strftime("%d.%m.%Y"), "%d.%m.%Y"))
+    out, keys = [], set()
+    for term in _kas_terms(names):
+        body = urllib.parse.urlencode({
+            "case_number": "", "session_date": "", "main_judge": "",
+            "litigant": term, "doc_class": "", "Search": "Шукати"}).encode()
+        req = urllib.request.Request(url, data=body, headers=hdr)
+        with opener.open(req, timeout=KAS_TIMEOUT) as r:
+            text = r.read().decode("utf-8", "replace")
+        if "litigant" not in text:  # не сторінка порталу — вважаємо збоєм
+            raise RuntimeError("неочікувана відповідь порталу")
+        for c in _kas_rows(text):
+            ts = _hearing_ts(c[2])
+            if ts is None or ts < today0:
+                continue  # минулі засідання (історія) не потрібні
+            rec = {
+                "number": c[0] or c[1],
+                "date": f"{c[2]} {c[3]}".strip(),
+                "courtroom": c[4],
+                "judge": c[5],
+                "involved": c[6],
+                "description": c[7],
+                "forma": "",
+                "add_address": "",
+            }
+            k = (rec["number"], rec["date"])
+            if k not in keys:
+                keys.add(k)
+                out.append(rec)
+        time.sleep(REQUEST_PAUSE)
+    return out
+
+
+def fetch_kas_retry(names, tries=2):
+    last = None
+    for _ in range(tries):
+        try:
+            return fetch_kas(names)
+        except Exception as e:
+            last = e
+            time.sleep(2)
     raise last
 
 
@@ -794,7 +909,13 @@ def main():
     # прогін «знаходить 0» — тепер порожнеча не затирає накопичений перелік.
     scanned_ok = []
     courts_to_scan = courts
-    if SHARD_SIZE > 0 and len(courts) > SHARD_SIZE:
+    # Ручна перевірка окремих судів: COURT_ONLY_CODES="4824,4811" — без шардингу.
+    only = {c.strip().zfill(4) for c in os.environ.get("COURT_ONLY_CODES", "").split(",")
+            if c.strip()}
+    if only:
+        courts_to_scan = [c for c in courts if str(c.get("code") or "").zfill(4) in only]
+        print(f"Лише вибрані суди: {len(courts_to_scan)}")
+    elif SHARD_SIZE > 0 and len(courts) > SHARD_SIZE:
         cur = int(st.get("shard_cursor", 0)) % len(courts)
         end = cur + SHARD_SIZE
         courts_to_scan = courts[cur:end]
@@ -814,7 +935,10 @@ def main():
         if not url:
             continue
         try:
-            records = fetch_court_retry(url)
+            if court.get("kind") == "kas":
+                records = fetch_kas_retry(names)
+            else:
+                records = fetch_court_retry(url)
         except Exception as e:
             print(f"[{court['name']}] помилка завантаження: {e}")
             continue

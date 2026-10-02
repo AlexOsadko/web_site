@@ -35,6 +35,10 @@ on:
         description: "Повний прогін по ВСІХ судах за раз (без шардингу) — довше (~30 хв), але відновлює повний звіт"
         type: boolean
         default: false
+      only:
+        description: "Лише ці суди (коди через кому, напр. 4824) — для перевірки; разом із dry_run"
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -85,6 +89,7 @@ jobs:
           COURT_FETCH_TIMEOUT: "20"
           COURT_REQUEST_PAUSE: "0.5"
           COURT_DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '' }}
+          COURT_ONLY_CODES: ${{ github.event.inputs.only }}
         run: python3 tools/court_watch_bot.py
 
       - name: Зберегти стан

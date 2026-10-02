@@ -137,8 +137,10 @@ def main():
             if len(cells) >= 7:
                 rows.append(cells)
         print("Рядків таблиці (≥7 колонок):", len(rows))
+        # Логи репозиторію публічні: колонку «Сторони» (ПІБ) не виводимо.
         for r in rows[:5]:
-            print("  |", " | ".join(c[:60] for c in r))
+            print("  |", " | ".join(("«сторони приховано»" if i == 6 else c[:60])
+                                     for i, c in enumerate(r)))
         if not rows:
             i = text.lower().find('class="new"')
             print("---- ВІКНО навколо таблиці ----")
