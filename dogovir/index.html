@@ -118,6 +118,16 @@
   textarea.pass{min-height:64px;line-height:1.5;font-size:14px}
   .sub-hint{font-size:11px;color:var(--faint);margin-top:5px;line-height:1.4}
   .auto-badge{font-size:10.5px;color:var(--gold);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+  /* строк дії: текстове поле + кнопка-календар (нативний date-picker під іконкою) */
+  .term-wrap{position:relative}
+  .term-wrap #f_term{padding-right:46px}
+  .term-cal{position:absolute;top:50%;right:6px;transform:translateY(-50%);width:34px;height:34px;
+    border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--ink-2);cursor:pointer}
+  .term-cal:hover{background:#eef1f6;color:var(--ink)}
+  .term-cal svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;pointer-events:none}
+  .term-cal input[type=date]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;
+    padding:0;border:0;background:none}
+  .term-cal input[type=date]::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
   /* services (dynamic annex) */
   .svc-list{display:flex;flex-direction:column;gap:10px}
   .svc-row{display:flex;gap:9px;align-items:flex-start}
@@ -433,8 +443,14 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
           </div>
           <div class="field col-2">
             <label for="f_term">Строк дії договору <span class="auto-badge">авто</span><span class="hint">типово — до кінця року, в якому укладено договір</span></label>
-            <input type="text" id="f_term" data-key="Строк_дії_договору" autocomplete="off">
-            <div class="sub-hint">Можна вказати свою дату або формулювання — тоді воно не перезаписується. Порожнє поле повертає автозначення. У договорі: «…діє до <i>цього значення</i>».</div>
+            <div class="term-wrap">
+              <input type="text" id="f_term" data-key="Строк_дії_договору" autocomplete="off">
+              <span class="term-cal" title="Обрати дату в календарі">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+                <input type="date" id="f_term_pick" aria-label="Обрати дату закінчення дії договору" tabindex="-1">
+              </span>
+            </div>
+            <div class="sub-hint">Оберіть дату в календарі або впишіть своє формулювання. Порожнє поле — автозначення. У договорі: «…діє до <i>цього значення</i>».</div>
           </div>
         </div>
       </div>
@@ -1472,6 +1488,30 @@ function syncTerm(){
   markFilled(ft);
 }
 $("#f_term").addEventListener("change",()=>{ if(!$("#f_term").value.trim()) syncTerm(); });
+/* календар для строку дії: обрана дата → «30 червня 2027 року» (як у договорі) */
+function termToISO(s){
+  const m=/^(\d{1,2})\s+(\S+)\s+(\d{4})/.exec((s||"").trim());
+  if(!m) return "";
+  const mi=MONTHS.indexOf(m[2].toLowerCase()); if(mi<0) return "";
+  return `${m[3]}-${String(mi+1).padStart(2,"0")}-${String(m[1]).padStart(2,"0")}`;
+}
+(function(){
+  const pick=$("#f_term_pick"), ft=$("#f_term"); if(!pick||!ft) return;
+  const preset=()=>{                            // календар відкривається на поточному значенні
+    pick.value = termToISO(ft.value) || "";
+    const d=$("#f_date").value; if(d) pick.min=d; // не раніше дати договору
+  };
+  pick.addEventListener("pointerdown",preset);
+  pick.addEventListener("focus",preset);
+  pick.addEventListener("click",()=>{ try{ pick.showPicker&&pick.showPicker(); }catch(e){} });
+  pick.addEventListener("change",()=>{
+    if(!pick.value) return;
+    ft.value = fmtDate(pick.value,true);
+    ft.dataset.auto = "-";                       // обрано вручну — не перезаписувати
+    markFilled(ft);
+    ft.dispatchEvent(new Event("input",{bubbles:true}));
+  });
+})();
 fDate.addEventListener("input",()=>{
   $("#date_preview").textContent = fDate.value ? "У документі: "+fmtDate(fDate.value,true) : "";
   syncTerm();
