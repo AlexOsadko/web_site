@@ -432,9 +432,9 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
             <input type="email" id="f_email" data-key="Електронна_пошта" placeholder="client@example.com" autocomplete="off">
           </div>
           <div class="field col-2">
-            <label for="f_term">Строк дії договору <span class="auto-badge">авто</span><span class="hint">до кінця року, в якому укладено договір</span></label>
-            <input type="text" id="f_term" data-key="Строк_дії_договору" readonly autocomplete="off">
-            <div class="sub-hint">Можна вказати дату або формулювання. У договорі: «…діє до <i>цього значення</i>».</div>
+            <label for="f_term">Строк дії договору <span class="auto-badge">авто</span><span class="hint">типово — до кінця року, в якому укладено договір</span></label>
+            <input type="text" id="f_term" data-key="Строк_дії_договору" autocomplete="off">
+            <div class="sub-hint">Можна вказати свою дату або формулювання — тоді воно не перезаписується. Порожнє поле повертає автозначення. У договорі: «…діє до <i>цього значення</i>».</div>
           </div>
         </div>
       </div>
@@ -1456,14 +1456,22 @@ fCost.addEventListener("blur",()=>{
 
 // date previews
 const fDate=$("#f_date"), fBirth=$("#f_birth");
-/* строк дії — завжди 31 грудня року, в якому укладено договір (з дати договору) */
+/* строк дії — типово 31 грудня року, в якому укладено договір (з дати договору).
+   Оновлюється, лише поки в полі автозначення (або порожньо); власне значення
+   адвоката (інша дата / формулювання) не перезаписується. */
 function syncTerm(){
   const ft=$("#f_term"); if(!ft) return;
   const iso=$("#f_date").value;
   const y = /^\d{4}/.test(iso) ? iso.slice(0,4) : String(new Date().getFullYear());
-  ft.value = `31 грудня ${y} року`;
+  const auto=`31 грудня ${y} року`;
+  const cur=ft.value.trim();
+  const isAuto = !cur || cur===ft.dataset.auto || (!ft.dataset.auto && cur===auto);
+  if(!isAuto) return;                          // ручне значення — не чіпаємо
+  ft.value = auto;
+  ft.dataset.auto = auto;
   markFilled(ft);
 }
+$("#f_term").addEventListener("change",()=>{ if(!$("#f_term").value.trim()) syncTerm(); });
 fDate.addEventListener("input",()=>{
   $("#date_preview").textContent = fDate.value ? "У документі: "+fmtDate(fDate.value,true) : "";
   syncTerm();
