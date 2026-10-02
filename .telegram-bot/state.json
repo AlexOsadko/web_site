@@ -172,12 +172,13 @@
 "https://ccu.gov.ua/novyna/sud-oprylyudnyv-rishennya-u-spravi-shchodo-vstanovlennya-obmezhen-konstytuciynyh-prav-i",
 "https://court.gov.ua/press/news/2107083/",
 "https://jurliga.ligazakon.net/news/246490_zupinennya-vikonavchikh-dy-mnyust-rozyasniv-nyuansi-protsesualno-pauzi-v-primusovomu-vikonann",
-"https://biz.ligazakon.net/news/246455_postynu-plgovu-tsnu-ne-mozhna-reklamuvati-yak-znizhku"
+"https://biz.ligazakon.net/news/246455_postynu-plgovu-tsnu-ne-mozhna-reklamuvati-yak-znizhku",
+"https://lexinform.com.ua/sudova-praktyka/nalezhnym-vidpovidachem-za-pozovamy-pro-rozirvannya-dogovoru-na-turystychne-obslugovuvannya-ta-povernennya-koshtiv-ye-turoperator/"
 ],
 "day": "2026-10-02",
-"count": 1,
-"total": 174,
-"seq": 201,
+"count": 2,
+"total": 175,
+"seq": 202,
 "orig_recent": [
 "міф:Явка з повинною — і тебе одразу відпустя",
 "помилка:Підписали протокол «без зауважень» — і с",
@@ -281,7 +282,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1790941800.2871099,
+"last_content_ts": 1790959847.7745192,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
