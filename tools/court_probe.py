@@ -111,8 +111,22 @@ def main():
     post_data = os.environ.get("POST_DATA", "").strip()
     if post_data:
         print("POST-дані:", post_data)
+        # Як браузер: спершу GET сторінки (cookie сесії), потім POST форми з
+        # тими ж cookie, Referer/Origin і без позначки AJAX (X-Requested-With).
+        jar = http.cookiejar.CookieJar()
+        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+        base = {"User-Agent": UA, "Accept-Language": "uk,en;q=0.8",
+                "Accept": "text/html,application/xhtml+xml,*/*;q=0.8"}
         try:
-            code, ctype, text = fetch(url, data=post_data)
+            opener.open(urllib.request.Request(url, headers=base), timeout=35).read()
+            print("Cookies після GET:", "; ".join(f"{c.name}" for c in jar) or "(порожньо)")
+            pu = urllib.parse.urlsplit(url)
+            hdr = dict(base, **{"Content-Type": "application/x-www-form-urlencoded",
+                                "Referer": url, "Origin": f"{pu.scheme}://{pu.netloc}"})
+            with opener.open(urllib.request.Request(url, data=post_data.encode("utf-8"),
+                                                    headers=hdr), timeout=35) as r:
+                code, ctype = r.getcode(), r.headers.get("Content-Type", "")
+                text = r.read().decode("utf-8", "replace")
         except Exception as e:
             print("Помилка:", e); sys.exit(1)
         print("HTTP:", code, "· тип:", ctype, "· довжина:", len(text))
