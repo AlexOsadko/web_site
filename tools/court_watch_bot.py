@@ -368,6 +368,8 @@ def fetch_court_retry(csz_url, tries=None):
 # лише майбутні засідання (пошук без дати повертає і всю історію справ).
 KAS_URL = "https://www.kas.gov.ua/CourtPortal.WebSite/Home/GraficZasidan"
 KAS_TIMEOUT = max(FETCH_TIMEOUT, 60)  # відповідь із сотнею рядків — ~20 с
+KAS_PAUSE = float(os.environ.get("COURT_KAS_PAUSE", "3") or "3")   # с між пошуками
+KAS_TRIES = int(os.environ.get("COURT_KAS_TRIES", "3") or "3")     # спроб на ПІБ
 
 
 def _kas_opener():
@@ -419,9 +421,16 @@ def fetch_kas(names, url=KAS_URL):
     """Майбутні засідання Київського апеляційного за ПІБ із names — у форматі
     записів court.gov.ua (number/date/judge/involved/description/courtroom)."""
     opener = _kas_opener()
-    with opener.open(urllib.request.Request(url, headers=_KAS_HDR),
-                     timeout=KAS_TIMEOUT) as r:
-        r.read()
+    for attempt in range(KAS_TRIES):
+        try:
+            with opener.open(urllib.request.Request(url, headers=_KAS_HDR),
+                             timeout=KAS_TIMEOUT) as r:
+                r.read()
+            break
+        except Exception:
+            if attempt == KAS_TRIES - 1:
+                raise
+            time.sleep(KAS_PAUSE * (attempt + 2))
     parts = urllib.parse.urlsplit(url)
     hdr = dict(_KAS_HDR, **{"Content-Type": "application/x-www-form-urlencoded",
                             "Referer": url,
@@ -432,11 +441,23 @@ def fetch_kas(names, url=KAS_URL):
         body = urllib.parse.urlencode({
             "case_number": "", "session_date": "", "main_judge": "",
             "litigant": term, "doc_class": "", "Search": "Шукати"}).encode()
-        req = urllib.request.Request(url, data=body, headers=hdr)
-        with opener.open(req, timeout=KAS_TIMEOUT) as r:
-            text = r.read().decode("utf-8", "replace")
-        if "litigant" not in text:  # не сторінка порталу — вважаємо збоєм
-            raise RuntimeError("неочікувана відповідь порталу")
+        # Портал слабкий: на серію запитів може відповісти 503. Кожен ПІБ —
+        # до KAS_TRIES спроб із наростаючою паузою; якщо всі невдалі, весь суд
+        # вважається незавантаженим (Worker збереже раніше відомі справи).
+        text, last = None, None
+        for attempt in range(KAS_TRIES):
+            try:
+                req = urllib.request.Request(url, data=body, headers=hdr)
+                with opener.open(req, timeout=KAS_TIMEOUT) as r:
+                    text = r.read().decode("utf-8", "replace")
+                if "litigant" not in text:  # не сторінка порталу — збій
+                    raise RuntimeError("неочікувана відповідь порталу")
+                break
+            except Exception as e:
+                last, text = e, None
+                time.sleep(KAS_PAUSE * (attempt + 2))
+        if text is None:
+            raise last
         for c in _kas_rows(text):
             ts = _hearing_ts(c[2])
             if ts is None or ts < today0:
@@ -455,19 +476,13 @@ def fetch_kas(names, url=KAS_URL):
             if k not in keys:
                 keys.add(k)
                 out.append(rec)
-        time.sleep(REQUEST_PAUSE)
+        time.sleep(KAS_PAUSE)  # ввічлива пауза між пошуками (портал слабкий)
     return out
 
 
-def fetch_kas_retry(names, tries=2):
-    last = None
-    for _ in range(tries):
-        try:
-            return fetch_kas(names)
-        except Exception as e:
-            last = e
-            time.sleep(2)
-    raise last
+def fetch_kas_retry(names):
+    # Повтори вже всередині fetch_kas (на кожен ПІБ) — тут без зайвого кола.
+    return fetch_kas(names)
 
 
 # ───────────── автопризначення справ («Призначено склад суду») ─────────
