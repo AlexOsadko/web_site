@@ -6,6 +6,7 @@
 
 Запуск: Actions → «Пробник суду (Список справ)» → Run workflow (можна вказати URL).
 """
+import html
 import http.cookiejar
 import os
 import re
@@ -102,6 +103,33 @@ def main():
         with open(f"{outdir}/dump.html", "w", encoding="utf-8") as f:
             f.write(text)
         print(f"Збережено у {outdir}/dump.html")
+        return
+
+    # Режим POST: надіслати довільні дані форми (urlencoded) і розібрати таблицю
+    # результатів — для порталів судів із власною формою пошуку (напр. Київський
+    # апеляційний: apcourtkiev.gov.ua/CourtPortal.WebSite/Home/GraficZasidan).
+    post_data = os.environ.get("POST_DATA", "").strip()
+    if post_data:
+        print("POST-дані:", post_data)
+        try:
+            code, ctype, text = fetch(url, data=post_data)
+        except Exception as e:
+            print("Помилка:", e); sys.exit(1)
+        print("HTTP:", code, "· тип:", ctype, "· довжина:", len(text))
+        rows = []
+        for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", text, re.S | re.I):
+            cells = [html.unescape(" ".join(re.sub(r"<[^>]+>", " ", c).split()))
+                     for c in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S | re.I)]
+            if len(cells) >= 7:
+                rows.append(cells)
+        print("Рядків таблиці (≥7 колонок):", len(rows))
+        for r in rows[:5]:
+            print("  |", " | ".join(c[:60] for c in r))
+        if not rows:
+            i = text.lower().find('class="new"')
+            print("---- ВІКНО навколо таблиці ----")
+            print(re.sub(r"\s+", " ", text[max(0, i - 200): i + 2500]))
+        print("ГОТОВО")
         return
 
     # Режим CODES: перевірити, що court.gov.ua/sud<code> віддає дані кожного суду

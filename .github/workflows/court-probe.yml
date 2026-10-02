@@ -42,6 +42,10 @@ on:
         description: "DUMP: зберегти сирий HTML сторінки (url) у tools/_courts_harvest/dump.html"
         type: boolean
         default: false
+      post:
+        description: "POST: дані форми (urlencoded) для url — розбір таблиці результатів"
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -65,6 +69,7 @@ jobs:
           CODES: ${{ github.event.inputs.codes }}
           RANGE: ${{ github.event.inputs.range }}
           DUMP: ${{ github.event.inputs.dump == 'true' && '1' || '' }}
+          POST_DATA: ${{ github.event.inputs.post }}
         run: python3 tools/court_probe.py
       - name: Зберегти зібрані суди
         if: ${{ github.event.inputs.range != '' || github.event.inputs.dump == 'true' }}
