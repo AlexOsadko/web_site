@@ -6,7 +6,7 @@
 
 Запуск: Actions → «Пробник суду (Список справ)» → Run workflow (можна вказати URL).
 """
-import html
+import html as _html
 import http.cookiejar
 import os
 import re
@@ -118,7 +118,7 @@ def main():
         print("HTTP:", code, "· тип:", ctype, "· довжина:", len(text))
         rows = []
         for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", text, re.S | re.I):
-            cells = [html.unescape(" ".join(re.sub(r"<[^>]+>", " ", c).split()))
+            cells = [_html.unescape(" ".join(re.sub(r"<[^>]+>", " ", c).split()))
                      for c in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S | re.I)]
             if len(cells) >= 7:
                 rows.append(cells)
