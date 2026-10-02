@@ -74,12 +74,12 @@ jobs:
           fi
           git config user.name "osadko-court-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          mkdir -p /tmp/harv && cp tools/_courts_harvest/*.txt /tmp/harv/ 2>/dev/null || true
+          mkdir -p /tmp/harv && cp tools/_courts_harvest/*.txt tools/_courts_harvest/*.html /tmp/harv/ 2>/dev/null || true
           for i in 1 2 3 4 5 6; do
             git fetch -q origin main
             git checkout -q -f -B _h origin/main
             mkdir -p tools/_courts_harvest
-            cp /tmp/harv/*.txt tools/_courts_harvest/ 2>/dev/null || true
+            cp /tmp/harv/*.txt /tmp/harv/*.html tools/_courts_harvest/ 2>/dev/null || true
             git add tools/_courts_harvest
             git commit -q -m "chore(court-probe): harvest [skip ci]" || { echo "нема змін"; exit 0; }
             if git push -q origin _h:main; then echo "збережено"; exit 0; fi
