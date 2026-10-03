@@ -885,8 +885,6 @@ a.card:hover .more span { transform: translateX(5px); }
 .article-page .author-box .author-name { font-size: 1.18rem; font-weight: 700; color: var(--ink); margin-top: 4px; }
 .author-role { font-size: .92rem; color: var(--muted); }
 .article-page .author-box .author-bio { margin-top: 10px; font-size: .95rem; line-height: 1.6; color: var(--text, var(--ink)); }
-.article-page .author-box .author-lic { margin-top: 10px; font-size: .86rem; color: var(--muted); line-height: 1.5; }
-.author-lic a { font-weight: 600; }
 .article-page .author-box .author-links { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .92rem; font-weight: 600; }
 @media (max-width: 560px) {
   .author-box { flex-direction: column; align-items: center; text-align: center; padding: 22px 18px; }
@@ -1593,11 +1591,3 @@ a.card:hover .more span { transform: translateX(5px); }
 }
 
 /* «Перевірте статус адвоката» (ЄРАУ) на сторінці контактів */
-.erau-check { display: flex; gap: 16px; align-items: center; margin-top: 22px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.14); }
-.erau-qr { width: 104px; height: 104px; flex: none; border-radius: 10px; background: #fff; padding: 6px; }
-.contacts-card .erau-check p { margin: 0; }
-.contacts-card .erau-title { font-weight: 700; color: #fff; font-size: 1rem; }
-.contacts-card .erau-text { font-size: .9rem; color: #aeb9cc; line-height: 1.5; margin-top: 4px; }
-.erau-link { display: inline-block; margin-top: 8px; font-weight: 600; font-size: .92rem; color: #9cbaff; }
-.erau-link:hover { color: #fff; }
-@media (max-width: 560px) { .erau-qr { display: none; } }

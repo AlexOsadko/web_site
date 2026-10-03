@@ -31,12 +31,11 @@ POSLUGY_BASE_URL = BASE_URL + "poslugy/"
 DATE_LABEL = "Липень 2026"
 
 # ---------- АВТОР (блок автора в статтях + розмітка Person) ----------
-# Дані свідоцтва заповнює адвокат. Поки license_no порожній — рядок зі
-# свідоцтвом і посилання на ЄРАУ у блоці не показуються (нічого не вигадуємо).
+# Дані свідоцтва й ЄРАУ людям на сторінках не показуються — лише в розмітці
+# schema.org (Person.hasCredential, sameAs) і в llms.txt.
 AUTHOR = {
     "name": "Олександр Осадько",
     "job": "Адвокат",
-    "since": "2019",      # рік отримання свідоцтва
     "city": "Київ",
     "photo": "assets/photo.jpg",
     "bio": ("Веду справи особисто — від першої консультації до результату. "
@@ -74,24 +73,14 @@ def author_person_ld():
 
 
 def author_box_html(prefix="../"):
-    """Блок «Про автора» наприкінці статті."""
-    lic = ""
-    if AUTHOR["license_no"]:
-        parts = [f"Свідоцтво про право на заняття адвокатською діяльністю {esc(AUTHOR['license_no'])}"]
-        if AUTHOR["license_date"]:
-            parts.append(f"від\u00a0{esc(AUTHOR['license_date'])}")
-        if AUTHOR["license_by"]:
-            parts.append(f"({esc(AUTHOR['license_by'])})")
-        erau = (f' · <a href="{esc(AUTHOR["erau_url"])}" target="_blank" rel="noopener">'
-                f'Перевірити в ЄРАУ</a>' if AUTHOR["erau_url"] else "")
-        lic = f'\n      <p class="author-lic">{" ".join(parts)}{erau}</p>'
+    """Блок «Про автора» наприкінці статті. Свідоцтво й ЄРАУ — лише в розмітці Person."""
     return f"""  <aside class="author-box" id="author" aria-label="Про автора">
     <img class="author-photo" src="{prefix}{AUTHOR['photo']}" alt="Адвокат {esc(AUTHOR['name'])}" width="88" height="88" loading="lazy" decoding="async">
     <div class="author-info">
       <p class="author-kicker">Автор статті</p>
       <p class="author-name">{esc(AUTHOR['name'])}</p>
-      <p class="author-role">{esc(AUTHOR['job'])}{(" з " + esc(AUTHOR["since"]) + " року") if AUTHOR.get("since") else ""} · {esc(AUTHOR['city'])} та вся Україна</p>
-      <p class="author-bio">{esc(AUTHOR['bio'])}</p>{lic}
+      <p class="author-role">{esc(AUTHOR['job'])} · {esc(AUTHOR['city'])} та вся Україна</p>
+      <p class="author-bio">{esc(AUTHOR['bio'])}</p>
       <p class="author-links"><a href="{prefix}#about">Про мене</a><a href="{prefix}#contacts">Записатися на консультацію</a></p>
     </div>
   </aside>"""
@@ -1492,7 +1481,7 @@ def write_llms(arts, landings):
          "Статті пояснюють право простою мовою; вони мають інформаційний характер "
          "і не є юридичною консультацією у конкретній справі.", "",
          "## Про адвоката", "",
-         f"- {AUTHOR['name']} — {AUTHOR['job'].lower()}" + (f" з {AUTHOR['since']} року" if AUTHOR.get('since') else "") + f", {AUTHOR['city']}. {AUTHOR['bio']}"]
+         f"- {AUTHOR['name']} — {AUTHOR['job'].lower()}, {AUTHOR['city']}. {AUTHOR['bio']}"]
     if AUTHOR["license_no"]:
         lic = f"- Свідоцтво про право на заняття адвокатською діяльністю {AUTHOR['license_no']}"
         if AUTHOR["license_date"]:
@@ -2011,25 +2000,6 @@ def render_services_index(landings):
             .replace("{main}", main).replace("{fab}", FAB_HTML).replace("{extra}", ""))
 
 
-def erau_check_html(prefix="../"):
-    """Блок «Перевірте статус адвоката»: QR і посилання на профіль у ЄРАУ."""
-    if not AUTHOR["erau_url"]:
-        return ""
-    lic = ""
-    if AUTHOR["license_no"]:
-        lic = (f'Свідоцтво {esc(AUTHOR["license_no"])}'
-               + (f' від\u00a0{esc(AUTHOR["license_date"])}' if AUTHOR["license_date"] else "") + ". ")
-    return f"""
-        <div class="erau-check">
-          <img class="erau-qr" src="{prefix}assets/qr-erau.svg" width="104" height="104" alt="QR-код: профіль адвоката в ЄРАУ" loading="lazy">
-          <div>
-            <p class="erau-title">Перевірте статус адвоката</p>
-            <p class="erau-text">{lic}Запис у Єдиному реєстрі адвокатів України — наведіть камеру телефону на код або відкрийте профіль.</p>
-            <a class="erau-link" href="{esc(AUTHOR["erau_url"])}" target="_blank" rel="noopener">Профіль у ЄРАУ ↗</a>
-          </div>
-        </div>"""
-
-
 def render_contacts():
     url = BASE_URL + "kontakty/"
     jsonld = json.dumps({
@@ -2070,7 +2040,7 @@ def render_contacts():
         'Заповніть коротку форму — <b>перша консультація безкоштовна</b>.</p>\n'
         '        <a class="btn btn-primary contacts-consult-btn" href="../#contacts">Записатися на консультацію</a>\n'
         '      </div>\n'
-        '      <div class="contacts-card contact-lines reveal contacts-info">\n' + CONTACT_LINES + erau_check_html() + '\n      </div>\n'
+        '      <div class="contacts-card contact-lines reveal contacts-info">\n' + CONTACT_LINES + '\n      </div>\n'
         '    </div>\n'
         '  </div></section>\n'
         '</main>')
