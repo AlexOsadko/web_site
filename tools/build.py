@@ -30,6 +30,70 @@ ART_BASE_URL = BASE_URL + "articles/"
 POSLUGY_BASE_URL = BASE_URL + "poslugy/"
 DATE_LABEL = "Липень 2026"
 
+# ---------- АВТОР (блок автора в статтях + розмітка Person) ----------
+# Дані свідоцтва заповнює адвокат. Поки license_no порожній — рядок зі
+# свідоцтвом і посилання на ЄРАУ у блоці не показуються (нічого не вигадуємо).
+AUTHOR = {
+    "name": "Олександр Осадько",
+    "job": "Адвокат",
+    "city": "Київ",
+    "photo": "assets/photo.jpg",
+    "bio": ("Веду справи особисто — від першої консультації до результату. "
+            "Кримінальний захист, сімейні та цивільні спори, справи за ст. 130 КУпАП, "
+            "питання мобілізації й ТЦК, спори з держорганами. Пояснюю складне простими словами."),
+    "knows": ["кримінальне право", "сімейне право", "цивільне право", "адміністративне право",
+              "ст. 130 КУпАП", "військове право та мобілізація", "трудове право"],
+    "license_no": "",      # номер свідоцтва про право на заняття адвокатською діяльністю
+    "license_date": "",    # дата видачі, напр. «12.03.2015»
+    "license_by": "",      # ким видано, напр. «Рада адвокатів Київської області»
+    "erau_url": "",        # посилання на запис у ЄРАУ (erau.unba.org.ua)
+    "sameAs": ["https://t.me/adv_osadko", "https://t.me/pro100_law",
+               "https://www.instagram.com/adv.osadko/"],
+}
+
+
+def author_person_ld():
+    """Розмітка schema.org/Person автора (однаковий @id на всьому сайті)."""
+    p = {"@type": "Person", "@id": BASE_URL + "#person", "name": AUTHOR["name"],
+         "jobTitle": AUTHOR["job"], "url": BASE_URL, "image": BASE_URL + AUTHOR["photo"],
+         "description": AUTHOR["bio"], "knowsAbout": AUTHOR["knows"],
+         "address": {"@type": "PostalAddress", "addressLocality": AUTHOR["city"], "addressCountry": "UA"},
+         "sameAs": AUTHOR["sameAs"] + ([AUTHOR["erau_url"]] if AUTHOR["erau_url"] else [])}
+    if AUTHOR["license_no"]:
+        cred = {"@type": "EducationalOccupationalCredential",
+                "credentialCategory": "Свідоцтво про право на заняття адвокатською діяльністю",
+                "identifier": AUTHOR["license_no"]}
+        if AUTHOR["license_by"]:
+            cred["recognizedBy"] = {"@type": "Organization", "name": AUTHOR["license_by"]}
+        if AUTHOR["license_date"]:
+            cred["dateCreated"] = AUTHOR["license_date"]
+        p["hasCredential"] = cred
+    return p
+
+
+def author_box_html(prefix="../"):
+    """Блок «Про автора» наприкінці статті."""
+    lic = ""
+    if AUTHOR["license_no"]:
+        parts = [f"Свідоцтво про право на заняття адвокатською діяльністю № {esc(AUTHOR['license_no'])}"]
+        if AUTHOR["license_date"]:
+            parts.append(f"від {esc(AUTHOR['license_date'])}")
+        if AUTHOR["license_by"]:
+            parts.append(f"видане: {esc(AUTHOR['license_by'])}")
+        erau = (f' · <a href="{esc(AUTHOR["erau_url"])}" target="_blank" rel="noopener">'
+                f'Перевірити в ЄРАУ</a>' if AUTHOR["erau_url"] else "")
+        lic = f'\n      <p class="author-lic">{" ".join(parts)}{erau}</p>'
+    return f"""  <aside class="author-box" id="author" aria-label="Про автора">
+    <img class="author-photo" src="{prefix}{AUTHOR['photo']}" alt="Адвокат {esc(AUTHOR['name'])}" width="88" height="88" loading="lazy" decoding="async">
+    <div class="author-info">
+      <p class="author-kicker">Автор статті</p>
+      <p class="author-name">{esc(AUTHOR['name'])}</p>
+      <p class="author-role">{esc(AUTHOR['job'])} · {esc(AUTHOR['city'])} та вся Україна</p>
+      <p class="author-bio">{esc(AUTHOR['bio'])}</p>{lic}
+      <p class="author-links"><a href="{prefix}#about">Про мене</a><a href="{prefix}#contacts">Записатися на консультацію</a></p>
+    </div>
+  </aside>"""
+
 # ---------- КАТЕГОРІЇ ----------
 CATS = {
     "civil":    "Цивільні справи та борги",
@@ -765,9 +829,7 @@ def build_jsonld(a, faq):
         "articleSection": CATS[cat],
         "wordCount": wc,
         "isAccessibleForFree": True,
-        "author": {"@type": "Person", "@id": BASE_URL + "#person", "name": "Олександр Осадько",
-                   "jobTitle": "Адвокат", "url": BASE_URL,
-                   "sameAs": ["https://t.me/adv_osadko", "https://t.me/pro100_law", "https://www.instagram.com/adv.osadko/"]},
+        "author": author_person_ld(),
         "publisher": {
             "@type": "Organization", "name": "Адвокат Олександр Осадько",
             "logo": {"@type": "ImageObject", "url": BASE_URL + "assets/logo-mark.png"},
@@ -820,7 +882,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css?v=2">
-  <link rel="stylesheet" href="../css/style.css?v=146">
+  <link rel="stylesheet" href="../css/style.css?v=147">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=21"></script>
@@ -859,7 +921,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   </nav>
   <span class="cat cat-{cat}">{catname}</span>
   <h1>{h1}</h1>
-  <p class="meta-line">Оновлено: {date} · <span>⏱ {read} хв читання</span> · Адвокат Олександр Осадько</p>
+  <p class="meta-line">Оновлено: {date} · <span>⏱ {read} хв читання</span> · <a href="#author">Адвокат Олександр Осадько</a></p>
 
 {body}
 
@@ -873,6 +935,8 @@ ARTICLE_PAGE = """<!DOCTYPE html>
     консультацією. Кожна ситуація індивідуальна — щоб отримати пораду саме для
     вашого випадку, <a href="../#contacts">зв'яжіться з адвокатом</a>.
   </p>
+
+{author}
 
 {leadcta}
 
@@ -939,6 +1003,7 @@ def render_article(a, allmeta, seealso_map=None):
         "{h1}": esc(a["h1"]), "{date}": DATE_LABEL, "{read}": str(reading_time(body)),
         "{body}": body, "{faq}": build_faq_html(faq), "{related}": build_related_html(a["slug"], a["cat"], allmeta),
         "{leadcta}": lead_cta_block(a["title"], a["h1"]),
+        "{author}": author_box_html(),
         "{fab}": FAB_HTML,
     }
     page = ARTICLE_PAGE
@@ -1040,7 +1105,7 @@ def render_catalog(arts):
   <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css?v=2">
-  <link rel="stylesheet" href="../css/style.css?v=146">
+  <link rel="stylesheet" href="../css/style.css?v=147">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=21"></script>
@@ -1236,7 +1301,7 @@ def render_hub(cat, arts):
   <meta name="twitter:image" content="{BASE_URL}assets/og-image.jpg">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css?v=2">
-  <link rel="stylesheet" href="../css/style.css?v=146">
+  <link rel="stylesheet" href="../css/style.css?v=147">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=21"></script>
@@ -1414,6 +1479,51 @@ def write_feed(arts, limit=30):
         f.write(xml)
 
 
+def write_llms(arts, landings):
+    """llms.txt (llmstxt.org): короткий опис сайту для ШІ-пошуковиків —
+    хто автор, послуги, контакти й розділи статей. Генерується з тих самих даних,
+    що й сайт, тож не застаріває."""
+    L = ["# Адвокат Олександр Осадько", "",
+         "> Сайт адвоката Олександра Осадька (Київ, консультації по всій Україні): "
+         "представництво в судах, кримінальний захист, сімейні та цивільні спори, "
+         "справи за ст. 130 КУпАП, спори з ТЦК і мобілізація, адміністративні спори. "
+         "Статті пояснюють право простою мовою; вони мають інформаційний характер "
+         "і не є юридичною консультацією у конкретній справі.", "",
+         "## Про адвоката", "",
+         f"- {AUTHOR['name']} — {AUTHOR['job'].lower()}, {AUTHOR['city']}. {AUTHOR['bio']}"]
+    if AUTHOR["license_no"]:
+        lic = f"- Свідоцтво про право на заняття адвокатською діяльністю № {AUTHOR['license_no']}"
+        if AUTHOR["license_date"]:
+            lic += f" від {AUTHOR['license_date']}"
+        if AUTHOR["license_by"]:
+            lic += f", видане: {AUTHOR['license_by']}"
+        L.append(lic + (f" ({AUTHOR['erau_url']})" if AUTHOR["erau_url"] else ""))
+    L += [f"- [Про мене]({BASE_URL}#about)", "",
+          "## Контакти", "",
+          "- Телефон: +38 (093) 466 44 43 (також Telegram, WhatsApp, Viber)",
+          "- Telegram: https://t.me/adv_osadko",
+          "- Email: adv.osadko@gmail.com",
+          "- Офіс: Київ, просп. Повітряних Сил, 20/1, оф. 2; Пн–Пт 9:00–18:00",
+          f"- [Контакти та запис на консультацію]({BASE_URL}kontakty/)", ""]
+    if landings:
+        L += ["## Послуги", ""]
+        for l in landings:
+            name = l.get("service") or l.get("h1") or l["slug"]
+            desc = (l.get("card_desc") or "").strip()
+            L.append(f"- [{name}]({POSLUGY_BASE_URL}{l['slug']}.html)" + (f": {desc}" if desc else ""))
+        L.append("")
+    L += ["## Статті за темами", ""]
+    for c in ORDER:
+        n = sum(1 for a in arts if a["cat"] == c)
+        if n:
+            L.append(f"- [{CATS[c]}]({ART_BASE_URL}{c}.html): {n} {plural_uk(n, ('стаття', 'статті', 'статей'))}")
+    L += ["", "## Додатково", "",
+          f"- [Усі статті]({ART_BASE_URL})",
+          f"- [Карта сайту]({BASE_URL}sitemap.xml)"]
+    with open(os.path.join(ROOT, "llms.txt"), "w", encoding="utf-8") as f:
+        f.write("\n".join(L) + "\n")
+
+
 def write_robots():
     txt = ("User-agent: *\n"
            "Allow: /\n"
@@ -1492,7 +1602,7 @@ LANDING_PAGE = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css?v=2">
-  <link rel="stylesheet" href="../css/style.css?v=146">
+  <link rel="stylesheet" href="../css/style.css?v=147">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=21"></script>
@@ -1694,7 +1804,7 @@ PAGE_SHELL = """<!DOCTYPE html>
   <meta name="twitter:image" content="{ogimg}">
   <link rel="icon" type="image/png" href="../assets/logo-mark.png">
   <link rel="stylesheet" href="../css/fonts.css?v=2">
-  <link rel="stylesheet" href="../css/style.css?v=146">
+  <link rel="stylesheet" href="../css/style.css?v=147">
   <script>(function(){{try{{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
   <script defer src="../assets/header-scroll.js?v=15"></script>
   <script defer src="../assets/callback-popup.js?v=21"></script>
@@ -2017,6 +2127,7 @@ def main():
     write_sitemap(arts, landings)
     write_feed(arts)
     write_robots()
+    write_llms(arts, landings)
 
     missing_slug = [s for s in FEATURED if s not in {a["slug"] for a in arts}]
     print(f"Побудовано статей: {n}; тематичних хабів: {len(hubs)}; лендінгів послуг: {len(landings)}; редиректів-дублів: {len(redirects)}")
