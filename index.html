@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="css/fonts.css?v=2">
   <link rel="preload" as="image" href="assets/photo.jpg" fetchpriority="high">
   <link rel="stylesheet" href="css/style.css?v=147">
+  <link rel="stylesheet" href="css/home.css?v=1">
   <script defer src="assets/header-scroll.js?v=15"></script>
   <script defer src="assets/callback-popup.js?v=21"></script>
   <script type="application/ld+json">
@@ -106,22 +107,20 @@
   }
   </script>
 </head>
-<body>
+<body class="home">
 <a class="skip-link" href="#main">Перейти до вмісту</a>
 
-<header class="site-header" id="top">
-  <div class="container header-inner">
-    <a href="#top" class="brand">
-      <span class="brand-mark"><img src="assets/logo-mark.png" alt="Логотип адвоката Осадька" width="36" height="36"></span>
-      Адвокат Осадько Олександр
-    </a>
+<header class="hm-head" id="top">
+  <div class="hm-c">
+    <a href="#top" class="hm-brand"><img src="assets/logo-mark.png" alt="Логотип адвоката Осадька" width="34" height="34"><span>Олександр Осадько<small>Адвокат</small></span></a>
     <nav class="site-nav" id="nav">
       <a href="#about">Про мене</a>
       <a href="poslugy/">Послуги</a>
       <a href="articles/">Статті</a>
       <a href="kontakty/">Контакти</a>
-      <a href="#contacts" class="nav-cta">Консультація</a>
     </nav>
+    <button type="button" class="hm-tel js-pick" aria-haspopup="true" aria-expanded="false" aria-controls="hmMenuHead"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></i>+38 (093) 466 44 43</button>
+    <button type="button" class="hm-tel-m js-pick" aria-label="Звʼязатися з адвокатом" aria-haspopup="true" aria-expanded="false" aria-controls="hmMenuHead"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></button>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">
       <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
@@ -130,399 +129,229 @@
       <span></span><span></span><span></span>
     </button>
   </div>
+  <div class="hm-cw hm-cw-head">
+      <div class="hm-menu" id="hmMenuHead" role="menu">
+        <a class="hm-opt hm-o-call" role="menuitem" href="tel:+380934664443"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></i><span><b>Подзвонити</b><em>+38 (093) 466 44 43</em></span></a>
+        <a class="hm-opt hm-o-tg" role="menuitem" href="https://t.me/adv_osadko" target="_blank" rel="noopener"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 4.3 2.9 11.5c-1.3.5-1.3 1.2-.2 1.5l4.8 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.8-.4l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.6c.3-1.3-.5-1.8-1.4-1.4zM9.6 14.6l-.4 4 .1-.1 1.3-3.6 8.4-7.6c.4-.3-.1-.5-.6-.2z"/></svg></i><span><b>Telegram</b><em>@adv_osadko</em></span></a>
+        <a class="hm-opt hm-o-vb" role="menuitem" href="viber://chat?number=%2B380934664443"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.4 1C8.6 1 3.4 1.6 2.6 7.6c-.6 4.4.2 7.7 2.6 9.6v3.6c0 .4.5.6.8.3l2.6-2.6c.9.1 1.9.2 2.9.2 2.8 0 8-.6 8.8-6.6.9-6.6-2.2-11.1-8.9-11.1zm4.8 13.8c-.4.6-1.2 1.2-2 1.1-2.7-.4-5.6-2.7-6.8-5.5-.3-.8.2-1.8.9-2.2.4-.2.8-.1 1.1.2l1 1.4c.2.3.2.8-.1 1.1l-.4.4c.5 1.2 1.4 2.1 2.6 2.6l.4-.4c.3-.3.8-.3 1.1-.1l1.4 1c.3.2.4.7.1 1z"/></svg></i><span><b>Viber</b><em>написати</em></span></a>
+        <a class="hm-opt hm-o-wa" role="menuitem" href="https://wa.me/380934664443" target="_blank" rel="noopener"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.359.101 11.945c0 2.096.548 4.142 1.588 5.945L0 24l6.335-1.652a11.882 11.882 0 005.71 1.446h.005c6.585 0 11.946-5.359 11.949-11.945a11.821 11.821 0 00-3.479-8.4"/></svg></i><span><b>WhatsApp</b><em>написати</em></span></a>
+      </div>
+  </div>
 </header>
 
 <main id="main">
 
-  <!-- Головний екран -->
-  <section class="hero">
-    <div class="container hero-inner">
-      <div class="hero-text">
-        <span class="hero-eyebrow"><span class="he-text">Адвокат · Київ та вся Україна</span></span>
-        <h1>Правовий захист <span class="accent">без стресу</span></h1>
-        <p class="hero-lead">
-          Представництво в судах, консультації та супровід для людей і бізнесу.
-          Пояснюю складне простими словами і працюю на результат.
-        </p>
-        <div class="hero-actions">
-          <a href="#contacts" class="btn btn-primary">Отримати консультацію</a>
-        </div>
-        <ul class="hero-feats">
-          <li>Перша консультація — безкоштовна</li>
-          <li>Конфіденційно</li>
-          <li>Відповідаю швидко</li>
-        </ul>
+  <!-- Перший екран -->
+  <section class="hm-hero">
+    <div class="hm-ph"><img src="assets/photo.jpg" alt="Адвокат Олександр Осадько" width="724" height="1086" fetchpriority="high" decoding="async"></div>
+    <div class="hm-c">
+      <div class="hm-hc">
+        <h1>Правовий захист <span>без стресу</span></h1>
+        <p class="hm-lead">Представництво в судах, консультації та супровід для людей і бізнесу. Пояснюю складне простими словами і працюю на результат.</p>
+        <a class="hm-pill hm-blue" href="#contacts">Отримати консультацію</a>
+        <div class="hm-cw hm-cw-hero">
+          <button type="button" class="hm-num" aria-haspopup="true" aria-expanded="false" aria-controls="hmMenuHero"><span class="hm-ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></span><span class="t">+38 (093) 466 44 43<small>Пн–Пт, 9:00–18:00 · натисніть, щоб обрати спосіб звʼязку</small></span></button>
+          <div class="hm-menu" id="hmMenuHero" role="menu">
+        <a class="hm-opt hm-o-call" role="menuitem" href="tel:+380934664443"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></i><span><b>Подзвонити</b><em>+38 (093) 466 44 43</em></span></a>
+        <a class="hm-opt hm-o-tg" role="menuitem" href="https://t.me/adv_osadko" target="_blank" rel="noopener"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 4.3 2.9 11.5c-1.3.5-1.3 1.2-.2 1.5l4.8 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.8-.4l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.6c.3-1.3-.5-1.8-1.4-1.4zM9.6 14.6l-.4 4 .1-.1 1.3-3.6 8.4-7.6c.4-.3-.1-.5-.6-.2z"/></svg></i><span><b>Telegram</b><em>@adv_osadko</em></span></a>
+        <a class="hm-opt hm-o-vb" role="menuitem" href="viber://chat?number=%2B380934664443"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.4 1C8.6 1 3.4 1.6 2.6 7.6c-.6 4.4.2 7.7 2.6 9.6v3.6c0 .4.5.6.8.3l2.6-2.6c.9.1 1.9.2 2.9.2 2.8 0 8-.6 8.8-6.6.9-6.6-2.2-11.1-8.9-11.1zm4.8 13.8c-.4.6-1.2 1.2-2 1.1-2.7-.4-5.6-2.7-6.8-5.5-.3-.8.2-1.8.9-2.2.4-.2.8-.1 1.1.2l1 1.4c.2.3.2.8-.1 1.1l-.4.4c.5 1.2 1.4 2.1 2.6 2.6l.4-.4c.3-.3.8-.3 1.1-.1l1.4 1c.3.2.4.7.1 1z"/></svg></i><span><b>Viber</b><em>написати</em></span></a>
+        <a class="hm-opt hm-o-wa" role="menuitem" href="https://wa.me/380934664443" target="_blank" rel="noopener"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.359.101 11.945c0 2.096.548 4.142 1.588 5.945L0 24l6.335-1.652a11.882 11.882 0 005.71 1.446h.005c6.585 0 11.946-5.359 11.949-11.945a11.821 11.821 0 00-3.479-8.4"/></svg></i><span><b>WhatsApp</b><em>написати</em></span></a>
       </div>
-      <div class="hero-visual">
-        <div class="visual-card">
-          <img class="photo" src="assets/photo.jpg" alt="Адвокат Олександр Осадько"
-               width="724" height="1086" fetchpriority="high" decoding="async"
-               onerror="this.onerror=null;this.src='assets/photo-placeholder.svg'">
-          <p class="vc-title">Особистий супровід справи</p>
-          <p>Веду кожного клієнта особисто — від першої консультації до фактичного вирішення питання.</p>
         </div>
       </div>
+      <ul class="hm-facts">
+        <li><b>Київ і Україна</b>суди всіх інстанцій</li>
+        <li><b>Особисто</b>без посередників</li>
+        <li><b>Безкоштовно</b>перша консультація</li>
+        <li><b>Конфіденційно</b>адвокатська таємниця</li>
+      </ul>
     </div>
   </section>
 
   <!-- Про мене -->
-  <section class="section" id="about">
-    <div class="container">
-      <div class="section-head reveal">
-        <span class="section-kicker">Про мене</span>
-        <h2 class="section-title">Адвокат, який на вашому боці</h2>
+  <section class="hm-about" id="about">
+    <div class="hm-c">
+      <div class="reveal">
+        <span class="hm-kick">Про мене</span>
+        <h2 class="hm-h2">Адвокат, який на вашому боці</h2>
+        <p class="hm-big">Мене звати Олександр Осадько. Моя робота проста по суті — зробити так, щоб право працювало на вашому боці, а не проти вас.</p>
       </div>
-      <div class="about-grid">
-        <div class="about-text reveal">
-          <p>
-            Мене звати Олександр Осадько. Я адвокат, і моя робота проста по
-            суті — зробити так, щоб право працювало на вашому боці, а не проти
-            вас.
-          </p>
-          <p>
-            До мене приходять у різних ситуаціях: сімейні, кримінальні, цивільні
-            та трудові спори, ДТП і страхові виплати, спадщина й нерухомість,
-            питання мобілізації. Широка практика допомагає бачити справу
-            цілісно — і діяти на випередження, а не гасити наслідки постфактум.
-          </p>
-          <p>
-            Кожну справу веду особисто, від першої розмови до результату. Ви
-            завжди знаєте, на якому ми етапі, що відбувається далі й чому саме
-            так — без юридичного туману й зайвих обіцянок.
-          </p>
-          <p>
-            Починаю з чесної розмови: відверто кажу про перспективи та ризики
-            ще до того, як ви ухвалите рішення. Так ви обираєте свідомо, а не
-            наосліп.
-          </p>
-          <p>
-            А далі — просто роблю свою роботу добре: тримаю звʼязок, тримаю
-            слово й борюся за ваш результат так, ніби це моя власна справа.
-          </p>
-        </div>
-        <ul class="about-list reveal">
-          <li>
-            <span class="t">Індивідуальний підхід</span>
-            <span class="d">Стратегія захисту під конкретну ситуацію</span>
-          </li>
-          <li>
-            <span class="t">Конфіденційність</span>
-            <span class="d">Адвокатська таємниця гарантована законом</span>
-          </li>
-          <li>
-            <span class="t">Чесна оцінка</span>
-            <span class="d">Реальні перспективи справи ще до початку роботи</span>
-          </li>
-        </ul>
+      <div class="hm-txt reveal">
+        <p>До мене приходять у різних ситуаціях: сімейні, кримінальні, цивільні та трудові спори, ДТП і страхові виплати, спадщина й нерухомість, питання мобілізації. Широка практика допомагає бачити справу цілісно — і діяти на випередження, а не гасити наслідки постфактум.</p>
+        <p>Кожну справу веду особисто, від першої розмови до результату. Ви завжди знаєте, на якому ми етапі, що відбувається далі й чому саме так — без юридичного туману й зайвих обіцянок.</p>
+        <p>Починаю з чесної розмови: відверто кажу про перспективи та ризики ще до того, як ви ухвалите рішення. А далі — тримаю звʼязок, тримаю слово й борюся за ваш результат так, ніби це моя власна справа.</p>
       </div>
+      <ul class="hm-princ reveal">
+        <li><i>01</i><b>Індивідуальний підхід</b><span>Стратегія захисту під конкретну ситуацію</span></li>
+        <li><i>02</i><b>Конфіденційність</b><span>Адвокатська таємниця гарантована законом</span></li>
+        <li><i>03</i><b>Чесна оцінка</b><span>Реальні перспективи справи ще до початку роботи</span></li>
+      </ul>
     </div>
   </section>
 
   <!-- Послуги -->
-  <section class="section" id="services">
-    <div class="container">
-      <div class="section-head reveal">
-        <span class="section-kicker">Послуги</span>
-        <h2 class="section-title">Напрями, у яких я допомагаю</h2>
-        <p class="section-sub">Беру справи, в яких можу дати реальний результат — і чесно кажу про перспективи ще до початку роботи.</p>
+  <section class="hm-svc" id="services">
+    <div class="hm-c">
+      <div class="hm-svc-top reveal">
+        <div><span class="hm-kick">Послуги</span><h2 class="hm-h2">Напрями, у яких я допомагаю</h2></div>
+        <p>Беру справи, в яких можу дати реальний результат, і чесно кажу про перспективи ще до початку роботи.</p>
       </div>
-      <div class="cards">
-        <a class="card reveal" href="poslugy/rozluchennia.html">
-          <div class="ic">💍</div>
-          <h3>Розірвання шлюбу та стягнення аліментів</h3>
-          <p>Розлучення через РАЦС або суд, поділ спільно нажитого майна, визначення місця проживання дітей і стягнення аліментів. Веду справу від підготовки документів до рішення суду — спокійно й без зайвих конфліктів.</p>
-          <span class="more">Детальніше <span>→</span></span>
-        </a>
-        <a class="card reveal" href="poslugy/st-130-kupap.html">
-          <div class="ic">🚗</div>
-          <h3>Захист водія за ст. 130 КУпАП</h3>
-          <p>Справи про керування в нетверезому стані: оцінка процедури огляду на стан сп'яніння, робота з доказами, наслідки відмови від огляду та оскарження постанови про позбавлення водійських прав.</p>
-          <span class="more">Детальніше <span>→</span></span>
-        </a>
-        <a class="card reveal" href="poslugy/kryminalnyi-zahyst.html">
-          <div class="ic">🛡️</div>
-          <h3>Захист у кримінальних справах</h3>
-          <p>Захист на допиті, під час обшуку й затримання, оскарження запобіжного заходу, супровід на слідстві та в суді, представництво потерпілих — на кожній стадії провадження.</p>
-          <span class="more">Детальніше <span>→</span></span>
-        </a>
-        <a class="card reveal" href="poslugy/pensiine-sotsialne.html">
-          <div class="ic">🧾</div>
-          <h3>Пенсійні та соціальні спори</h3>
-          <p>Призначення й перерахунок пенсії, оскарження відмов Пенсійного фонду, субсидії та соціальні виплати, підтвердження трудового стажу через суд — допомагаю відстояти ваше право на виплати.</p>
-          <span class="more">Детальніше <span>→</span></span>
-        </a>
-        <a class="card reveal" href="poslugy/tsyvilne-pravo.html">
-          <div class="ic">📄</div>
-          <h3>Стягнення боргів і цивільні спори</h3>
-          <p>Стягнення боргів і неустойки, спори за договорами, відшкодування шкоди, захист права власності, спадкові та споживчі спори — з повним представництвом ваших інтересів у суді.</p>
-          <span class="more">Детальніше <span>→</span></span>
-        </a>
-        <a class="card reveal" href="poslugy/tck.html">
-          <div class="ic">🪖</div>
-          <h3>Спори з ТЦК та відстрочка від мобілізації</h3>
-          <p>Оскарження рішень і дій ТЦК, оформлення відстрочки від мобілізації, бронювання, питання ВЛК і СЗЧ — законний захист прав військовозобов'язаних і мобілізованих.</p>
-          <span class="more">Детальніше <span>→</span></span>
-        </a>
+      <div class="hm-g">
+        <a class="reveal" href="poslugy/rozluchennia.html"><h3>Розірвання шлюбу та аліменти</h3><p>Розлучення через РАЦС або суд, поділ спільного майна, місце проживання дітей, стягнення аліментів.</p><i aria-hidden="true">→</i></a>
+        <a class="reveal" href="poslugy/st-130-kupap.html"><h3>Захист водія за ст.&nbsp;130 КУпАП</h3><p>Процедура огляду на стан сп'яніння, робота з доказами, наслідки відмови від огляду, оскарження позбавлення прав.</p><i aria-hidden="true">→</i></a>
+        <a class="reveal" href="poslugy/kryminalnyi-zahyst.html"><h3>Захист у кримінальних справах</h3><p>Допит, обшук, затримання, оскарження запобіжного заходу, представництво потерпілих — на кожній стадії.</p><i aria-hidden="true">→</i></a>
+        <a class="reveal" href="poslugy/tck.html"><h3>Спори з ТЦК та відстрочка</h3><p>Оскарження рішень і дій ТЦК, відстрочка від мобілізації, бронювання, питання ВЛК і СЗЧ.</p><i aria-hidden="true">→</i></a>
+        <a class="reveal" href="poslugy/tsyvilne-pravo.html"><h3>Стягнення боргів і цивільні спори</h3><p>Борги й неустойка, спори за договорами, відшкодування шкоди, спадкові та споживчі спори.</p><i aria-hidden="true">→</i></a>
+        <a class="reveal" href="poslugy/pensiine-sotsialne.html"><h3>Пенсійні та соціальні спори</h3><p>Призначення й перерахунок пенсії, оскарження відмов ПФУ, соціальні виплати, стаж через суд.</p><i aria-hidden="true">→</i></a>
       </div>
     </div>
   </section>
 
   <!-- Статті -->
-  <section class="section tint" id="articles">
-    <div class="container">
-      <div class="section-head reveal">
-        <span class="section-kicker">Статті</span>
-        <h2 class="section-title">Пояснюю просто</h2>
-        <p class="section-sub">Розбираю правові питання зрозумілою мовою — щоб ви розуміли свої права ще до звернення. Усього <span class="stat-count" data-to="397">397</span> матеріалів за темами.</p>
+  <section class="hm-arts" id="articles">
+    <div class="hm-c">
+      <div class="reveal"><span class="hm-kick">Статті</span><h2 class="hm-h2">Пояснюю просто</h2></div>
+      <div class="hm-ag">
+        <a class="reveal" href="articles/pershyi-dopyt.html"><span class="hm-tag">Кримінальні справи</span><h3>Виклик на допит: ваші права</h3><p>Свідок, підозрюваний чи потерпілий — що можна, чого не можна і чому адвокат потрібен одразу.</p><span class="hm-more">Читати →</span></a>
+        <a class="reveal" href="articles/rozirvannya-shlyubu.html"><span class="hm-tag">Сімейне право</span><h3>Розірвання шлюбу в Україні</h3><p>ДРАЦС чи суд, строки, майно та діти — відповіді на головні питання.</p><span class="hm-more">Читати →</span></a>
+        <a class="reveal" href="articles/dtp-algorytm.html"><span class="hm-tag">ДТП та авто</span><h3>ДТП: алгоритм дій на місці</h3><p>Що робити одразу після ДТП, як зафіксувати обставини і яких помилок уникати.</p><span class="hm-more">Читати →</span></a>
       </div>
-      <div class="articles">
-        <a class="article-card ac-civil reveal" href="articles/yak-povernuty-borh.html">
-          <span class="cat cat-civil">Борги та договори</span>
-          <h3>Що робити, якщо вам не повертають борг</h3>
-          <p>Від досудової претензії до виконавчого провадження — покроковий алгоритм.</p>
-          <span class="more">Читати <span>→</span></span>
-        </a>
-        <a class="article-card ac-family reveal" href="articles/rozirvannya-shlyubu.html">
-          <span class="cat cat-family">Сімейне право</span>
-          <h3>Розірвання шлюбу в Україні</h3>
-          <p>ДРАЦС чи суд, строки, майно та діти — відповіді на головні питання.</p>
-          <span class="more">Читати <span>→</span></span>
-        </a>
-        <a class="article-card ac-criminal reveal" href="articles/pershyi-dopyt.html">
-          <span class="cat cat-criminal">Кримінальні справи</span>
-          <h3>Виклик на допит: ваші права</h3>
-          <p>Свідок, підозрюваний чи потерпілий — що можна, чого не можна і чому адвокат потрібен одразу.</p>
-          <span class="more">Читати <span>→</span></span>
-        </a>
-        <a class="article-card ac-labor reveal" href="articles/nezakonne-zvilnennya.html">
-          <span class="cat cat-labor">Трудові спори</span>
-          <h3>Незаконне звільнення: як поновитися на роботі</h3>
-          <p>У які строки оскаржити звільнення, як поновитися на роботі через суд і стягнути зарплату за вимушений прогул.</p>
-          <span class="more">Читати <span>→</span></span>
-        </a>
-        <a class="article-card ac-auto reveal" href="articles/dtp-algorytm.html">
-          <span class="cat cat-auto">ДТП та авто</span>
-          <h3>ДТП: алгоритм дій на місці</h3>
-          <p>Що робити одразу після ДТП, як зафіксувати обставини і які помилки можуть коштувати страхового відшкодування.</p>
-          <span class="more">Читати <span>→</span></span>
-        </a>
-        <a class="article-card ac-realty reveal" href="articles/spadschyna-pryynyaty.html">
-          <span class="cat cat-realty">Нерухомість</span>
-          <h3>Спадщина: як прийняти і які строки</h3>
-          <p>Як прийняти спадщину, що робити, якщо пропущено шестимісячний строк, і чи можна відмовитися від боргів спадкодавця.</p>
-          <span class="more">Читати <span>→</span></span>
-        </a>
-      </div>
-      <div class="articles-more reveal">
-        <a class="btn btn-primary" href="articles/"><span class="btn-label">Переглянути всі <span class="stat-count" data-to="397">397</span> статей →</span></a>
-      </div>
+      <div class="hm-all"><a class="hm-pill hm-blue" href="articles/">Усі статті</a></div>
     </div>
   </section>
 
-  <!-- Lead-магніт: бібліотека пам'яток -->
-  <section class="section" id="lead-magnet">
-    <div class="container">
-      <div class="section-head reveal">
-        <span class="section-kicker">Безкоштовно</span>
-        <h2 class="section-title">Пам'ятки від адвоката — коли важлива кожна хвилина</h2>
-        <p class="section-sub">Короткі інструкції «що робити прямо зараз». Залиште контакт один раз — і завантажте будь-яку.</p>
-      </div>
-      <div class="magnet" id="magnetLib">
-        <div class="magnet-cards">
+  <!-- Lead-магніт: бібліотека памʼяток -->
+  <section class="hm-memo" id="lead-magnet">
+    <div class="hm-c">
+      <div class="hm-mbox magnet" id="magnetLib">
+        <div>
+          <span class="hm-kick">Безкоштовно</span>
+          <h2 class="hm-h2">Памʼятки на випадок, коли важлива кожна хвилина</h2>
+          <p class="hm-sub">Короткі інструкції «що робити прямо зараз». Залиште контакт один раз — і завантажте будь-яку.</p>
+          <div class="magnet-cards">
           <article class="magnet-card">
-            <span class="mc-ico">🚗</span>
-            <div class="mc-body">
-              <h3>Забрали права / протокол за ст. 130 КУпАП</h3>
-              <p>Права під час зупинки, огляд на стан сп'яніння, помилки поліції.</p>
-            </div>
+            <div class="mc-body"><h3>Забрали права / протокол за ст. 130 КУпАП</h3><p>Права під час зупинки, огляд на стан сп'яніння, помилки поліції.</p></div>
             <a class="mc-dl" href="assets/pamyatka-st-130.pdf?v=2" target="_blank" rel="noopener" download>Завантажити PDF →</a>
-            <span class="mc-lock">🔒 За контактом</span>
+            <span class="mc-lock" title="Доступ — після форми"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
           </article>
           <article class="magnet-card">
-            <span class="mc-ico">🪖</span>
-            <div class="mc-body">
-              <h3>Зупинив ТЦК або вручають повістку</h3>
-              <p>Ваші права, законна процедура, відстрочка від мобілізації.</p>
-            </div>
+            <div class="mc-body"><h3>Зупинив ТЦК або вручають повістку</h3><p>Ваші права, законна процедура, відстрочка від мобілізації.</p></div>
             <a class="mc-dl" href="assets/pamyatka-tck.pdf?v=2" target="_blank" rel="noopener" download>Завантажити PDF →</a>
-            <span class="mc-lock">🔒 За контактом</span>
+            <span class="mc-lock" title="Доступ — після форми"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
           </article>
           <article class="magnet-card">
-            <span class="mc-ico">🛡️</span>
-            <div class="mc-body">
-              <h3>Що робити під час обшуку</h3>
-              <p>Права, порядок дій і як зафіксувати порушення слідства.</p>
-            </div>
+            <div class="mc-body"><h3>Що робити під час обшуку</h3><p>Права, порядок дій і як зафіксувати порушення слідства.</p></div>
             <a class="mc-dl" href="assets/pamyatka-obshuk.pdf?v=2" target="_blank" rel="noopener" download>Завантажити PDF →</a>
-            <span class="mc-lock">🔒 За контактом</span>
+            <span class="mc-lock" title="Доступ — після форми"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
           </article>
           <article class="magnet-card">
-            <span class="mc-ico">🚦</span>
-            <div class="mc-body">
-              <h3>Що робити одразу після ДТП</h3>
-              <p>Алгоритм на місці, європротокол чи поліція, що зафіксувати.</p>
-            </div>
+            <div class="mc-body"><h3>Що робити одразу після ДТП</h3><p>Алгоритм на місці, європротокол чи поліція, що зафіксувати.</p></div>
             <a class="mc-dl" href="assets/pamyatka-dtp.pdf?v=2" target="_blank" rel="noopener" download>Завантажити PDF →</a>
-            <span class="mc-lock">🔒 За контактом</span>
+            <span class="mc-lock" title="Доступ — після форми"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
           </article>
           <article class="magnet-card">
-            <span class="mc-ico">💰</span>
-            <div class="mc-body">
-              <h3>Якщо телефонують колектори</h3>
-              <p>Що їм заборонено, ваші права й як зупинити незаконний тиск.</p>
-            </div>
+            <div class="mc-body"><h3>Якщо телефонують колектори</h3><p>Що їм заборонено, ваші права й як зупинити незаконний тиск.</p></div>
             <a class="mc-dl" href="assets/pamyatka-kolektory.pdf?v=2" target="_blank" rel="noopener" download>Завантажити PDF →</a>
-            <span class="mc-lock">🔒 За контактом</span>
+            <span class="mc-lock" title="Доступ — після форми"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
           </article>
+          </div>
         </div>
-        <form class="magnet-form" id="magnetForm">
-          <p class="magnet-form-title">Відкрити доступ до пам'яток</p>
-          <label>Ваше ім'я
-            <input name="name" type="text" required placeholder="Ім'я" autocomplete="name">
-          </label>
-          <label>Телефон
-            <input name="phone" type="tel" required placeholder="+38 (0__) ___-__-__" inputmode="tel" autocomplete="tel">
-          </label>
+        <form class="hm-form magnet-form" id="magnetForm">
+          <h3>Відкрити доступ до памʼяток</h3>
+          <label>Ваше імʼя<input name="name" type="text" required placeholder="Імʼя" autocomplete="name"></label>
+          <label>Телефон<input name="phone" type="tel" required placeholder="+38 (0__) ___-__-__" inputmode="tel" autocomplete="tel"></label>
           <input type="text" name="company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <button class="btn btn-primary" type="submit">Відкрити пам'ятки</button>
-          <div class="form-ok" id="magnetOk">Готово! Пам'ятки розблоковано — завантажуйте потрібні зі списку.</div>
-          <p class="magnet-hint">Телефонуємо лише за потреби. Контакт не передаємо третім особам.</p>
+          <button class="hm-pill hm-blue" type="submit">Відкрити памʼятки</button>
+          <div class="form-ok" id="magnetOk">Готово! Памʼятки розблоковано — завантажуйте потрібні зі списку.</div>
+          <small>Телефоную лише за потреби. Контакт не передаю третім особам.</small>
         </form>
       </div>
     </div>
   </section>
 
   <!-- Контакти -->
-  <section class="section" id="contacts">
-    <div class="container">
-      <div class="contacts-card contacts-card--split reveal">
-        <div class="contacts-split">
-          <div class="contacts-split-intro">
-            <span class="section-kicker" style="color:var(--blue2)">Безкоштовна консультація</span>
-            <h2 class="section-title">Розкажіть, що сталося — і дійте впевнено</h2>
-            <p>У правових питаннях час часто вирішує все. Опишіть свою ситуацію — і вже за 15 хвилин ви знатимете, чи є перспектива, з чого почати та чого очікувати. Конкретно, без води й порожніх обіцянок.</p>
-            <ul class="contacts-benefits">
-              <li><svg class="bcheck" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Відповім особисто, а не автовідповідач чи секретар</span></li>
-              <li><svg class="bcheck" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Повна конфіденційність — ваша історія лишиться між нами</span></li>
-              <li><svg class="bcheck" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Чесно оціню ваші шанси ще до того, як ви щось заплатите</span></li>
-            </ul>
-            <div class="lp-cta contacts-cta">
-            <a class="lp-btn lp-btn-call" href="tel:+380934664443" aria-label="Подзвонити"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg><span class="lbl">Дзвінок</span></a>
-            <a class="lp-btn lp-btn-tg" href="https://t.me/adv_osadko" target="_blank" rel="noopener" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg><span class="lbl">Telegram</span></a>
-            <a class="lp-btn lp-btn-wa" href="https://wa.me/380934664443" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.359.101 11.945c0 2.096.548 4.142 1.588 5.945L0 24l6.335-1.652a11.882 11.882 0 005.71 1.446h.005c6.585 0 11.946-5.359 11.949-11.945a11.821 11.821 0 00-3.479-8.4"/></svg><span class="lbl">WhatsApp</span></a>
-            <a class="lp-btn lp-btn-vb" href="viber://chat?number=%2B380934664443" aria-label="Viber"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span class="lbl">Viber</span></a>
-          </div>
-          </div>
-          <div class="contacts-split-form">
-            <h3 class="contacts-form-title">Залиште заявку — і я візьмуся за вашу справу</h3>
-            <form class="lead-form" id="leadForm">
-            <label>Ваше ім'я
-              <input name="name" type="text" required placeholder="Ім'я" autocomplete="name">
-            </label>
-            <label>Телефон
-              <input name="phone" type="tel" required placeholder="+38 (0__) ___-__-__" inputmode="tel" autocomplete="tel">
-            </label>
-            <label>Коротко про ситуацію
-              <textarea name="message" placeholder="Опишіть ваше питання"></textarea>
-            </label>
-            <input type="text" name="company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
-            <!-- Cloudflare Turnstile (захист від спаму). Site Key — публічний ключ домену osadko.online. -->
-            <div class="cf-turnstile" data-sitekey="0x4AAAAAAD1Dx9AvRT4v-VoQ" data-theme="dark" data-size="flexible"></div>
-            <button class="btn btn-primary" type="submit">Отримати безкоштовну консультацію</button>
-            <div class="form-ok" id="formOk">Дякую! Заявку надіслано — зв'яжуся найближчим часом.</div>
-          </form>
-          </div>
+  <section class="hm-contact" id="contacts">
+    <div class="hm-c">
+      <div class="reveal">
+        <span class="hm-kick">Безкоштовна консультація</span>
+        <h2 class="hm-h2">Розкажіть, що сталося</h2>
+        <p class="hm-lead2">Опишіть свою ситуацію — і вже за 15 хвилин розмови ви знатимете, чи є перспектива, з чого почати та чого очікувати. Конкретно, без води й порожніх обіцянок.</p>
+        <ul class="hm-chk">
+          <li>Відповім особисто, а не автовідповідач чи секретар</li>
+          <li>Повна конфіденційність — ваша історія лишиться між нами</li>
+          <li>Чесно оціню ваші шанси ще до того, як ви щось заплатите</li>
+        </ul>
+        <a class="hm-bigtel" href="tel:+380934664443"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></i><span><b>+38 (093) 466 44 43</b><em>Пн–Пт, 9:00–18:00 — натисніть, щоб подзвонити</em></span></a>
+        <div class="hm-msgs">
+          <a class="hm-pill hm-soft" href="https://t.me/adv_osadko" target="_blank" rel="noopener">Telegram</a>
+          <a class="hm-pill hm-soft" href="https://wa.me/380934664443" target="_blank" rel="noopener">WhatsApp</a>
+          <a class="hm-pill hm-soft" href="viber://chat?number=%2B380934664443">Viber</a>
         </div>
+      </div>
+      <div class="hm-form reveal">
+        <h3>Залиште заявку — і я візьмуся за вашу справу</h3>
+        <form class="lead-form" id="leadForm">
+          <label>Ваше імʼя<input name="name" type="text" required placeholder="Імʼя" autocomplete="name"></label>
+          <label>Телефон<input name="phone" type="tel" required placeholder="+38 (0__) ___-__-__" inputmode="tel" autocomplete="tel"></label>
+          <label>Коротко про ситуацію<textarea name="message" placeholder="Опишіть ваше питання"></textarea></label>
+          <input type="text" name="company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <!-- Cloudflare Turnstile (захист від спаму). Site Key — публічний ключ домену osadko.online. -->
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAD1Dx9AvRT4v-VoQ" data-theme="light" data-size="flexible"></div>
+          <button class="hm-pill hm-blue" type="submit">Отримати безкоштовну консультацію</button>
+          <div class="form-ok" id="formOk">Дякую! Заявку надіслано — звʼяжуся найближчим часом.</div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Канал у Telegram -->
+  <section class="hm-chan">
+    <div class="hm-c">
+      <div class="hm-chan-box reveal">
+        <span class="hm-chan-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 4.3 2.9 11.5c-1.3.5-1.3 1.2-.2 1.5l4.8 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.8-.4l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.6c.3-1.3-.5-1.8-1.4-1.4zM9.6 14.6l-.4 4 .1-.1 1.3-3.6 8.4-7.6c.4-.3-.1-.5-.6-.2z"/></svg></span>
+        <div><b>Канал «Про право простою мовою»</b><span>Юридичні новини та поради простою мовою — щодня в Telegram.</span></div>
+        <a class="hm-pill hm-blue" href="https://t.me/pro100_law" target="_blank" rel="noopener">Підписатися</a>
       </div>
     </div>
   </section>
 
 </main>
 
-<!-- Липка CTA-панель для мобільних (з'являється на прокручуванні) -->
-<div class="mcta" id="mcta" aria-label="Швидкі дії">
-  <a class="mcta-btn mcta-call" href="tel:+380934664443">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-    Подзвонити
-  </a>
-  <a class="mcta-btn mcta-lead" href="#contacts">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-    Консультація
-  </a>
-</div>
-
-<div class="fab" aria-label="Швидкий зв'язок">
-  <div class="fab-group">
-  <a class="fab-btn fab-call" href="tel:+380934664443" aria-label="Подзвонити">
-    <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-  </a>
-  <a class="fab-btn fab-tg" href="https://t.me/adv_osadko" target="_blank" rel="noopener" aria-label="Telegram">
-    <svg viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-  </a>
-  <a class="fab-btn fab-wa" href="https://wa.me/380934664443" target="_blank" rel="noopener" aria-label="WhatsApp">
-    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.359.101 11.945c0 2.096.548 4.142 1.588 5.945L0 24l6.335-1.652a11.882 11.882 0 005.71 1.446h.005c6.585 0 11.946-5.359 11.949-11.945a11.821 11.821 0 00-3.479-8.4"/></svg>
-  </a>
-  <a class="fab-btn fab-vb" href="viber://chat?number=%2B380934664443" aria-label="Viber">
-    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-  </a>
-  </div>
-  <button class="fab-btn fab-toggle" type="button" aria-expanded="false" aria-label="Зв'язатися" onclick="this.parentElement.classList.toggle('open');this.setAttribute('aria-expanded',this.parentElement.classList.contains('open'))">
-    <span class="fab-swap"><svg class="fi fi-phone" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg><svg class="fi fi-mail" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4.25-8 5-8-5V6l8 5 8-5v2.25z"/></svg><svg class="fi fi-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
-  </button>
-  <button class="fab-btn fab-top" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Нагору">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
-  </button>
-</div>
-
-<!-- Банер підписки на Telegram-канал новин @pro100_law -->
-<section class="tgc-wrap">
-  <div class="container">
-    <div class="tgc reveal">
-      <span class="tgc-ic">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-      </span>
-      <div class="tgc-txt">
-        <h3>Канал «Про право простою мовою»</h3>
-        <p>Юридичні новини та поради простою мовою — щодня в Telegram. Підпишіться, щоб вчасно дізнаватися про важливе для ваших прав.</p>
+<footer class="hm-ft">
+  <div class="hm-c">
+    <div class="hm-cols">
+      <div>
+        <span class="hm-brand"><img src="assets/logo-mark.png" alt="" width="34" height="34" loading="lazy" decoding="async"><span>Олександр Осадько<small>Адвокат</small></span></span>
+        <p class="hm-ft-about">Представництво в судах, консультації та супровід. Київ та вся Україна.</p>
       </div>
-      <a class="tgc-btn" href="https://t.me/pro100_law" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-        Підписатися на канал
-      </a>
+      <div><h4>Послуги</h4><ul>
+        <li><a href="poslugy/rozluchennia.html">Розлучення та аліменти</a></li>
+        <li><a href="poslugy/st-130-kupap.html">Ст. 130 КУпАП</a></li>
+        <li><a href="poslugy/kryminalnyi-zahyst.html">Кримінальний захист</a></li>
+        <li><a href="poslugy/tck.html">Спори з ТЦК</a></li>
+        <li><a href="poslugy/tsyvilne-pravo.html">Цивільні спори</a></li>
+        <li><a href="poslugy/pensiine-sotsialne.html">Пенсійні спори</a></li>
+      </ul></div>
+      <div><h4>Сайт</h4><ul>
+        <li><a href="#about">Про мене</a></li>
+        <li><a href="articles/">Статті</a></li>
+        <li><a href="https://t.me/pro100_law" target="_blank" rel="noopener">Канал у Telegram</a></li>
+        <li><a href="kontakty/">Контакти</a></li>
+      </ul></div>
+      <div><h4>Контакти</h4><ul>
+        <li><a class="hm-ftel" href="tel:+380934664443">+38 (093) 466 44 43</a></li>
+        <li><a href="https://t.me/adv_osadko" target="_blank" rel="noopener">Telegram: @adv_osadko</a></li>
+        <li><a href="mailto:adv.osadko@gmail.com">adv.osadko@gmail.com</a></li>
+        <li>Київ, просп. Повітряних Сил, 20/1, оф.&nbsp;2</li>
+        <li>Пн–Пт, 9:00–18:00</li>
+      </ul></div>
     </div>
-  </div>
-</section>
-
-<footer class="site-footer">
-  <div class="container footer-inner">
-    <span class="brand">
-      <span class="brand-mark" style="width:28px;height:28px"><img src="assets/logo-mark.png" alt="" width="28" height="28" loading="lazy" decoding="async"></span>
-      Адвокат Осадько Олександр
-    </span>
-    <span>© <span id="year"></span> Адвокат Олександр Осадько · <a href="privacy/">Політика конфіденційності</a></span>
+    <div class="hm-bottom"><span>© <span id="year"></span> Адвокат Олександр Осадько</span><a href="privacy/">Політика конфіденційності</a></div>
   </div>
 </footer>
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
-
-  // Надзаголовок hero: «друкування» тексту по літері (з повагою до reduced-motion)
-  (function () {
-    const el = document.querySelector('.hero-eyebrow .he-text');
-    if (!el) return;
-    const full = el.textContent;
-    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    el.textContent = '';
-    el.classList.add('typing');
-    let i = 0;
-    (function tick() {
-      el.textContent = full.slice(0, i);
-      if (i++ <= full.length) { setTimeout(tick, 80); }
-      else { el.classList.remove('typing'); }
-    })();
-  })();
-
-  // Мобільне меню (гамбургер) — спільний обробник у assets/header-scroll.js
 
   // Поява при скролі
   const io = new IntersectionObserver((entries) => {
@@ -530,21 +359,43 @@
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-  // Лічильник статей: цифра набігає від 0, коли потрапляє в поле зору
-  const cio = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (!e.isIntersecting) return;
-      cio.unobserve(e.target);
-      const el = e.target, to = +el.dataset.to || 0, steps = 45;
-      let i = 0;
-      const t = setInterval(() => {
-        i++;
-        el.textContent = Math.round(to * i / steps);
-        if (i >= steps) { el.textContent = to; clearInterval(t); }
-      }, 22);
-    });
-  }, { threshold: 0.6 });
-  document.querySelectorAll('.stat-count').forEach(el => cio.observe(el));
+  // Шапка: прозора над першим екраном, біла з кнопкою телефону — після нього
+  (function () {
+    const head = document.querySelector('.hm-head');
+    const hero = document.querySelector('.hm-hero');
+    if (!head || !hero) return;
+    function upd() { const y = window.scrollY; head.classList.toggle('scrolled', y > 10); head.classList.toggle('solid', y > hero.offsetHeight - 90); }
+    window.addEventListener('scroll', upd, { passive: true });
+    window.addEventListener('resize', upd);
+    upd();
+  })();
+
+  // Номер телефону → вибір: подзвонити, Telegram, Viber, WhatsApp
+  (function () {
+    const hero = document.querySelector('.hm-cw-hero');
+    const headWrap = document.querySelector('.hm-cw-head');
+    function closeAll() {
+      document.querySelectorAll('.hm-cw.open').forEach(w => w.classList.remove('open'));
+      document.querySelectorAll('[aria-haspopup="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    }
+    function toggle(wrap, btn) {
+      const willOpen = !wrap.classList.contains('open');
+      closeAll();
+      if (willOpen) { wrap.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+    }
+    const heroBtn = hero && hero.querySelector('.hm-num');
+    if (heroBtn) heroBtn.addEventListener('click', (e) => { e.stopPropagation(); toggle(hero, heroBtn); });
+    document.querySelectorAll('.js-pick').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); toggle(headWrap, b); }));
+    document.addEventListener('click', (e) => { if (!e.target.closest('.hm-menu')) closeAll(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAll(); });
+    window.addEventListener('scroll', () => { if (headWrap && headWrap.classList.contains('open') && !document.querySelector('.hm-head.solid')) closeAll(); }, { passive: true });
+  })();
+
+  // Капча у формі — у тон поточної теми сайту
+  (function () {
+    const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    document.querySelectorAll('.cf-turnstile').forEach(el => el.setAttribute('data-theme', t));
+  })();
 
   // ── Обробка заявок ──────────────────────────────────────────────
   // NOTIFY_ENDPOINT — URL релея (Cloudflare Worker), який надсилає заявку
@@ -631,24 +482,6 @@
     });
   });
 
-  // ── Липка мобільна CTA-панель: показ після прокручування, ховаємо біля контактів ──
-  (function () {
-    const mcta = document.getElementById('mcta');
-    if (!mcta) return;
-    const contacts = document.getElementById('contacts');
-    function upd() {
-      const scrolled = window.scrollY > 600;
-      let nearContacts = false;
-      if (contacts) {
-        const r = contacts.getBoundingClientRect();
-        nearContacts = r.top < window.innerHeight && r.bottom > 0;
-      }
-      mcta.classList.toggle('show', scrolled && !nearContacts);
-    }
-    window.addEventListener('scroll', upd, { passive: true });
-    window.addEventListener('resize', upd);
-    upd();
-  })();
 </script>
 <script>
   /* Ліниве завантаження Cloudflare Turnstile (~68 КБ): не вантажимо на старті —
