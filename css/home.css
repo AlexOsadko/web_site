@@ -233,13 +233,18 @@ body.home {
 
 /* ---------- Підвал ---------- */
 .hm-ft { background: var(--hm-hero); color: #b9c5d6; padding: 80px 0 34px; font-size: .95rem; }
-.hm-cols { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.3fr; gap: 40px; }
+.hm-cols { display: grid; grid-template-columns: 1.2fr .9fr .75fr 1.75fr; gap: 36px; }
 .hm-ft h4 { font-family: var(--hm-disp); color: #fff; font-size: 1rem; margin: 0 0 16px; }
 .hm-ft ul { list-style: none; display: grid; gap: 9px; }
 .hm-ft a { color: #b9c5d6; }
 .hm-ft a:hover { color: #fff; }
 .hm-ft .hm-brand { margin-bottom: 18px; }
 .hm-ft-about { max-width: 300px; margin: 0; }
+.hm-fi { display: flex; align-items: center; gap: 10px; }
+.hm-fi svg { flex: none; width: 18px; height: 18px; fill: #8fb3ea; }
+.hm-fmail { color: #fff !important; font-weight: 500; }
+.hm-fmail:hover { text-decoration: underline; }
+.hm-faddr { white-space: nowrap; }
 .hm-ftel { font-family: var(--hm-disp); font-weight: 800; font-size: 1.35rem; color: #fff !important; }
 .hm-bottom { display: flex; justify-content: space-between; gap: 20px; margin-top: 60px; padding-top: 26px; border-top: 1px solid rgba(255, 255, 255, .12); font-size: .85rem; color: #8ea2bf; }
 
@@ -300,10 +305,13 @@ body.home {
   .hm-cols { grid-template-columns: 1fr 1fr; gap: 34px 20px; }
   .hm-cols > div:first-child, .hm-cols > div:last-child { grid-column: 1 / -1; }
   .hm-bottom { flex-direction: column; }
+  .hm-faddr { font-size: .84rem; letter-spacing: -.1px; }
 }
 @media (max-width: 380px) {
   .hm-brand { font-size: 1rem; }
   .hm-hero h1 { font-size: 2.7rem; }
+  .hm-faddr { font-size: .78rem; letter-spacing: -.2px; gap: 7px; }
+  .hm-faddr svg { width: 15px; height: 15px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hm-ring svg, .hm-ring::before, .hm-ring::after { animation: none; }
@@ -311,7 +319,7 @@ body.home {
 }
 
 /* Основний текст — по ширині блоку, як на решті сайту (останній рядок — по лівому краю). */
-.hm-lead, .hm-big, .hm-txt p, .hm-svc-top p, .hm-sub, .hm-lead2, .hm-ft-about {
+.hm-lead, .hm-big, .hm-txt p, .hm-svc-top p, .hm-sub, .hm-lead2 {
   text-align: justify;
   text-align-last: left;
   hyphens: manual;
