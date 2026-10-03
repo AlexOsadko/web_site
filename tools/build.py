@@ -36,6 +36,7 @@ DATE_LABEL = "Липень 2026"
 AUTHOR = {
     "name": "Олександр Осадько",
     "job": "Адвокат",
+    "since": "2019",      # рік отримання свідоцтва
     "city": "Київ",
     "photo": "assets/photo.jpg",
     "bio": ("Веду справи особисто — від першої консультації до результату. "
@@ -43,9 +44,9 @@ AUTHOR = {
             "питання мобілізації й ТЦК, спори з держорганами. Пояснюю складне простими словами."),
     "knows": ["кримінальне право", "сімейне право", "цивільне право", "адміністративне право",
               "ст. 130 КУпАП", "військове право та мобілізація", "трудове право"],
-    "license_no": "",      # номер свідоцтва про право на заняття адвокатською діяльністю
-    "license_date": "",    # дата видачі, напр. «12.03.2015»
-    "license_by": "",      # ким видано, напр. «Рада адвокатів Київської області»
+    "license_no": "серії\u00a0ЧК\u00a0№\u00a0001111",   # свідоцтво про право на заняття адвокатською діяльністю
+    "license_date": "01.04.2019",        # дата видачі
+    "license_by": "Рада адвокатів Черкаської області",  # рішення від 01.04.2019 № 247
     "erau_url": "",        # посилання на запис у ЄРАУ (erau.unba.org.ua)
     "sameAs": ["https://t.me/adv_osadko", "https://t.me/pro100_law",
                "https://www.instagram.com/adv.osadko/"],
@@ -62,11 +63,12 @@ def author_person_ld():
     if AUTHOR["license_no"]:
         cred = {"@type": "EducationalOccupationalCredential",
                 "credentialCategory": "Свідоцтво про право на заняття адвокатською діяльністю",
-                "identifier": AUTHOR["license_no"]}
+                "identifier": AUTHOR["license_no"].replace("\u00a0", " ").replace("серії ", "")}
         if AUTHOR["license_by"]:
             cred["recognizedBy"] = {"@type": "Organization", "name": AUTHOR["license_by"]}
         if AUTHOR["license_date"]:
-            cred["dateCreated"] = AUTHOR["license_date"]
+            d, m, y = AUTHOR["license_date"].split(".")
+            cred["dateCreated"] = f"{y}-{m}-{d}"
         p["hasCredential"] = cred
     return p
 
@@ -75,11 +77,11 @@ def author_box_html(prefix="../"):
     """Блок «Про автора» наприкінці статті."""
     lic = ""
     if AUTHOR["license_no"]:
-        parts = [f"Свідоцтво про право на заняття адвокатською діяльністю № {esc(AUTHOR['license_no'])}"]
+        parts = [f"Свідоцтво про право на заняття адвокатською діяльністю {esc(AUTHOR['license_no'])}"]
         if AUTHOR["license_date"]:
-            parts.append(f"від {esc(AUTHOR['license_date'])}")
+            parts.append(f"від\u00a0{esc(AUTHOR['license_date'])}")
         if AUTHOR["license_by"]:
-            parts.append(f"видане: {esc(AUTHOR['license_by'])}")
+            parts.append(f"({esc(AUTHOR['license_by'])})")
         erau = (f' · <a href="{esc(AUTHOR["erau_url"])}" target="_blank" rel="noopener">'
                 f'Перевірити в ЄРАУ</a>' if AUTHOR["erau_url"] else "")
         lic = f'\n      <p class="author-lic">{" ".join(parts)}{erau}</p>'
@@ -88,7 +90,7 @@ def author_box_html(prefix="../"):
     <div class="author-info">
       <p class="author-kicker">Автор статті</p>
       <p class="author-name">{esc(AUTHOR['name'])}</p>
-      <p class="author-role">{esc(AUTHOR['job'])} · {esc(AUTHOR['city'])} та вся Україна</p>
+      <p class="author-role">{esc(AUTHOR['job'])}{(" з " + esc(AUTHOR["since"]) + " року") if AUTHOR.get("since") else ""} · {esc(AUTHOR['city'])} та вся Україна</p>
       <p class="author-bio">{esc(AUTHOR['bio'])}</p>{lic}
       <p class="author-links"><a href="{prefix}#about">Про мене</a><a href="{prefix}#contacts">Записатися на консультацію</a></p>
     </div>
@@ -1490,13 +1492,13 @@ def write_llms(arts, landings):
          "Статті пояснюють право простою мовою; вони мають інформаційний характер "
          "і не є юридичною консультацією у конкретній справі.", "",
          "## Про адвоката", "",
-         f"- {AUTHOR['name']} — {AUTHOR['job'].lower()}, {AUTHOR['city']}. {AUTHOR['bio']}"]
+         f"- {AUTHOR['name']} — {AUTHOR['job'].lower()}" + (f" з {AUTHOR['since']} року" if AUTHOR.get('since') else "") + f", {AUTHOR['city']}. {AUTHOR['bio']}"]
     if AUTHOR["license_no"]:
-        lic = f"- Свідоцтво про право на заняття адвокатською діяльністю № {AUTHOR['license_no']}"
+        lic = f"- Свідоцтво про право на заняття адвокатською діяльністю {AUTHOR['license_no']}"
         if AUTHOR["license_date"]:
             lic += f" від {AUTHOR['license_date']}"
         if AUTHOR["license_by"]:
-            lic += f", видане: {AUTHOR['license_by']}"
+            lic += f" ({AUTHOR['license_by']})"
         L.append(lic + (f" ({AUTHOR['erau_url']})" if AUTHOR["erau_url"] else ""))
     L += [f"- [Про мене]({BASE_URL}#about)", "",
           "## Контакти", "",
@@ -1521,7 +1523,7 @@ def write_llms(arts, landings):
           f"- [Усі статті]({ART_BASE_URL})",
           f"- [Карта сайту]({BASE_URL}sitemap.xml)"]
     with open(os.path.join(ROOT, "llms.txt"), "w", encoding="utf-8") as f:
-        f.write("\n".join(L) + "\n")
+        f.write("\n".join(L).replace("\u00a0", " ") + "\n")
 
 
 def write_robots():
