@@ -10,7 +10,6 @@ on:
     paths:
       - 'articles/**'
       - 'index.html'
-      - 'zrazky/index.html'
       - 'privacy/index.html'
   workflow_dispatch:
   # Після генератора статей (бот-коміт не тригерить push-подію).
@@ -43,7 +42,7 @@ jobs:
             echo "Ручний запуск або після генератора — надсилаю ВСІ сторінки з sitemap"
             python3 tools/indexnow.py --all
           else
-            CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'articles/*.html' 'index.html' 'zrazky/index.html' 'privacy/index.html' | tr '\n' ' ')
+            CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'articles/*.html' 'index.html' 'privacy/index.html' | tr '\n' ' ')
             echo "Змінені сторінки: $CHANGED"
             python3 tools/indexnow.py $CHANGED
           fi

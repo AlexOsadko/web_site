@@ -319,7 +319,6 @@ Turnkey-план «під ключ»: структура акаунта, клю�
 **Додаткові посилання (sitelinks):**
 - Послуги → `https://osadko.online/poslugy/`  _(7 симв.)_
 - Статті → `https://osadko.online/articles/`  _(6 симв.)_
-- Зразки документів → `https://osadko.online/zrazky/`  _(17 симв.)_
 - Контакти → `https://osadko.online/kontakty/`  _(8 симв.)_
 
 **Уточнення (callouts):**
@@ -361,7 +360,7 @@ utm_source=google&utm_medium=cpc&utm_campaign={кампанія}&utm_content={г
 - Цивільне право → `https://osadko.online/poslugy/tsyvilne-pravo.html`
 - Пенсійне / соціальне → `https://osadko.online/poslugy/pensiine-sotsialne.html`
 
-**Розділи сайту (для sitelinks):** `/poslugy/` · `/articles/` · `/zrazky/` · `/kontakty/` · `/privacy/`
+**Розділи сайту (для sitelinks):** `/poslugy/` · `/articles/` · `/kontakty/` · `/privacy/`
 **Якорі головної:** `/#services` · `/#about` · `/#contacts`
 
 **Статті-посадкові** (використовуються там, де немає дедикованого LP; усі існують): `/articles/alimenty-na-dytynu.html`, `/articles/podil-maina-podruzhzhya.html`, `/articles/strahove-vidshkoduvannya.html`, `/articles/nezakonne-zvilnennya.html`, `/articles/nevyplata-zarplaty.html`, `/articles/spadschyna-pryynyaty.html`.

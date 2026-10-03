@@ -12,7 +12,7 @@
   `<footer>`; коректна ієрархія заголовків **H1 → H2 → H3** (по одному H1 на
   сторінці).
 - **ЧПУ-структура URL** — людиночитні адреси без параметрів:
-  `/articles/rozirvannya-shlyubu.html`, `/zrazky/`. Slug-и генеруються
+  `/articles/rozirvannya-shlyubu.html`. Slug-и генеруються
   транслітерацією заголовка (`tools/generate_article.py`, `tools/build.py`).
 - **Наскрізна перелінковка** — `tools/build.py` автоматично проставляє
   внутрішні посилання на перші згадки ключових фраз (`autolink_blocks`,

@@ -1348,7 +1348,6 @@ def write_sitemap(arts, landings=None):
     entries = [
         (BASE_URL, today, "weekly", "1.0"),
         (ART_BASE_URL, today, "weekly", "0.8"),
-        (BASE_URL + "zrazky/", today, "monthly", "0.5"),
         (BASE_URL + "kontakty/", today, "monthly", "0.6"),
         (BASE_URL + "privacy/", "2026-07-01", "yearly", "0.3"),
     ]
