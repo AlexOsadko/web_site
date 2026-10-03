@@ -47,7 +47,7 @@ AUTHOR = {
     "license_no": "серії\u00a0ЧК\u00a0№\u00a0001111",   # свідоцтво про право на заняття адвокатською діяльністю
     "license_date": "01.04.2019",        # дата видачі
     "license_by": "Рада адвокатів Черкаської області",  # рішення від 01.04.2019 № 247
-    "erau_url": "",        # посилання на запис у ЄРАУ (erau.unba.org.ua)
+    "erau_url": "https://erau.unba.org.ua/profile/68567",  # запис у Єдиному реєстрі адвокатів України
     "sameAs": ["https://t.me/adv_osadko", "https://t.me/pro100_law",
                "https://www.instagram.com/adv.osadko/"],
 }
@@ -2011,6 +2011,25 @@ def render_services_index(landings):
             .replace("{main}", main).replace("{fab}", FAB_HTML).replace("{extra}", ""))
 
 
+def erau_check_html(prefix="../"):
+    """Блок «Перевірте статус адвоката»: QR і посилання на профіль у ЄРАУ."""
+    if not AUTHOR["erau_url"]:
+        return ""
+    lic = ""
+    if AUTHOR["license_no"]:
+        lic = (f'Свідоцтво {esc(AUTHOR["license_no"])}'
+               + (f' від\u00a0{esc(AUTHOR["license_date"])}' if AUTHOR["license_date"] else "") + ". ")
+    return f"""
+        <div class="erau-check">
+          <img class="erau-qr" src="{prefix}assets/qr-erau.svg" width="104" height="104" alt="QR-код: профіль адвоката в ЄРАУ" loading="lazy">
+          <div>
+            <p class="erau-title">Перевірте статус адвоката</p>
+            <p class="erau-text">{lic}Запис у Єдиному реєстрі адвокатів України — наведіть камеру телефону на код або відкрийте профіль.</p>
+            <a class="erau-link" href="{esc(AUTHOR["erau_url"])}" target="_blank" rel="noopener">Профіль у ЄРАУ ↗</a>
+          </div>
+        </div>"""
+
+
 def render_contacts():
     url = BASE_URL + "kontakty/"
     jsonld = json.dumps({
@@ -2020,6 +2039,7 @@ def render_contacts():
         "address": {"@type": "PostalAddress", "streetAddress": "просп. Повітряних Сил, 20/1, оф. 2",
                     "addressLocality": "Київ", "postalCode": "03049", "addressCountry": "UA"},
         "openingHours": "Mo-Fr 09:00-18:00", "areaServed": "UA",
+        **({"sameAs": [AUTHOR["erau_url"]]} if AUTHOR["erau_url"] else {}),
     }, ensure_ascii=False)
     main = (
         '<main id="main">\n'
@@ -2050,7 +2070,7 @@ def render_contacts():
         'Заповніть коротку форму — <b>перша консультація безкоштовна</b>.</p>\n'
         '        <a class="btn btn-primary contacts-consult-btn" href="../#contacts">Записатися на консультацію</a>\n'
         '      </div>\n'
-        '      <div class="contacts-card contact-lines reveal contacts-info">\n' + CONTACT_LINES + '\n      </div>\n'
+        '      <div class="contacts-card contact-lines reveal contacts-info">\n' + CONTACT_LINES + erau_check_html() + '\n      </div>\n'
         '    </div>\n'
         '  </div></section>\n'
         '</main>')
