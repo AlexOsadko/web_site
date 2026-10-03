@@ -839,7 +839,6 @@ ARTICLE_PAGE = """<!DOCTYPE html>
       <a href="../#about">Про мене</a>
       <a href="../poslugy/">Послуги</a>
       <a href="../articles/">Статті</a>
-      <a href="../zrazky/">Зразки</a>
       <a href="../kontakty/">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
@@ -1060,7 +1059,6 @@ def render_catalog(arts):
       <a href="../#about">Про мене</a>
       <a href="../poslugy/">Послуги</a>
       <a href="./">Статті</a>
-      <a href="../zrazky/">Зразки</a>
       <a href="../kontakty/">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
@@ -1257,7 +1255,6 @@ def render_hub(cat, arts):
       <a href="../#about">Про мене</a>
       <a href="../poslugy/">Послуги</a>
       <a href="./">Статті</a>
-      <a href="../zrazky/">Зразки</a>
       <a href="../kontakty/">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
@@ -1515,7 +1512,6 @@ LANDING_PAGE = """<!DOCTYPE html>
       <a href="../#about">Про мене</a>
       <a href="../poslugy/">Послуги</a>
       <a href="../articles/">Статті</a>
-      <a href="../zrazky/">Зразки</a>
       <a href="../kontakty/">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
@@ -1718,7 +1714,6 @@ PAGE_SHELL = """<!DOCTYPE html>
       <a href="../#about">Про мене</a>
       <a href="../poslugy/">Послуги</a>
       <a href="../articles/">Статті</a>
-      <a href="../zrazky/">Зразки</a>
       <a href="../kontakty/">Контакти</a>
       <a href="../#contacts" class="nav-cta">Консультація</a>
     </nav>
