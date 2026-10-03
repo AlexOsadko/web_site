@@ -20,7 +20,7 @@
 3. **Settings → Variables and Secrets → Add**:
    - `TELEGRAM_BOT_TOKEN` — токен з кроку 1 (тип **Secret**);
    - `TELEGRAM_CHAT_ID` — ваш Id з кроку 1 (тип **Secret**);
-   - `ALLOWED_ORIGIN` — `https://alexosadko.github.io` (необовʼязково, тип Text).
+   - `ALLOWED_ORIGIN` — `https://osadko.online` (необовʼязково, тип Text).
    Збережіть і, за потреби, ще раз **Deploy**.
 4. Скопіюйте адресу воркера — вона виду
    `https://osadko-notify.<ваш-субдомен>.workers.dev`.
