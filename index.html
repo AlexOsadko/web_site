@@ -25,7 +25,8 @@
   <link rel="stylesheet" href="css/fonts.css?v=2">
   <link rel="preload" as="image" href="assets/photo.jpg" fetchpriority="high">
   <link rel="stylesheet" href="css/style.css?v=147">
-  <link rel="stylesheet" href="css/home.css?v=3">
+  <link rel="stylesheet" href="css/site.css?v=1">
+  <script defer src="assets/site.js?v=1"></script>
   <script defer src="assets/header-scroll.js?v=15"></script>
   <script defer src="assets/callback-popup.js?v=21"></script>
   <script type="application/ld+json">
@@ -107,7 +108,7 @@
   }
   </script>
 </head>
-<body class="home">
+<body class="home hm">
 <a class="skip-link" href="#main">Перейти до вмісту</a>
 
 <header class="hm-head" id="top">
@@ -324,7 +325,7 @@
     <div class="hm-cols">
       <div>
         <span class="hm-brand"><img src="assets/logo-mark.png" alt="" width="34" height="34" loading="lazy" decoding="async"><span>Олександр Осадько<small>Адвокат</small></span></span>
-        <p class="hm-ft-about">Представництво в судах, консультації та супровід. Київ та вся Україна.</p>
+        <p class="hm-ft-about">Представництво в судах,<br>консультації та супровід.<br>Київ та вся Україна.</p>
       </div>
       <div><h4>Послуги</h4><ul>
         <li><a href="poslugy/rozluchennia.html">Розлучення та аліменти</a></li>
@@ -359,38 +360,6 @@
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-  // Шапка: прозора над першим екраном, біла з кнопкою телефону — після нього
-  (function () {
-    const head = document.querySelector('.hm-head');
-    const hero = document.querySelector('.hm-hero');
-    if (!head || !hero) return;
-    function upd() { const y = window.scrollY; head.classList.toggle('scrolled', y > 10); head.classList.toggle('solid', y > hero.offsetHeight - 90); }
-    window.addEventListener('scroll', upd, { passive: true });
-    window.addEventListener('resize', upd);
-    upd();
-  })();
-
-  // Номер телефону → вибір: подзвонити, Telegram, Viber, WhatsApp
-  (function () {
-    const hero = document.querySelector('.hm-cw-hero');
-    const headWrap = document.querySelector('.hm-cw-head');
-    function closeAll() {
-      document.querySelectorAll('.hm-cw.open').forEach(w => w.classList.remove('open'));
-      document.querySelectorAll('[aria-haspopup="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
-    }
-    function toggle(wrap, btn) {
-      const willOpen = !wrap.classList.contains('open');
-      closeAll();
-      if (willOpen) { wrap.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
-    }
-    const heroBtn = hero && hero.querySelector('.hm-num');
-    if (heroBtn) heroBtn.addEventListener('click', (e) => { e.stopPropagation(); toggle(hero, heroBtn); });
-    document.querySelectorAll('.js-pick').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); toggle(headWrap, b); }));
-    document.addEventListener('click', (e) => { if (!e.target.closest('.hm-menu')) closeAll(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAll(); });
-    window.addEventListener('scroll', () => { if (headWrap && headWrap.classList.contains('open') && !document.querySelector('.hm-head.solid')) closeAll(); }, { passive: true });
-  })();
 
   // Капча у формі — у тон поточної теми сайту
   (function () {

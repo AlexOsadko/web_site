@@ -1,7 +1,8 @@
-/* ===== Головна сторінка — стиль «E»: фото на весь перший екран ===== */
-/* Підключається лише на index.html поверх css/style.css. Усі класи — з префіксом hm-. */
+/* ===== Стиль сайту «E» (шапка, вибір звʼязку, підвал, головна) ===== */
+/* Підключається на всіх сторінках поверх css/style.css (body.hm). Класи — з префіксом hm-.
+   Правила з .home — лише для головної. */
 
-body.home {
+body.hm {
   --hm-hero: #0f2342;          /* тло першого екрана й підвалу */
   --hm-bg: #eef1f6;
   --hm-soft: #e3e8f0;
@@ -21,7 +22,7 @@ body.home {
   color: var(--hm-ink);
   font-weight: 400;
 }
-:root[data-theme="dark"] body.home {
+:root[data-theme="dark"] body.hm {
   --hm-hero: #0b1a33;
   --hm-bg: #0e1c33;
   --hm-soft: #15263f;
@@ -36,8 +37,9 @@ body.home {
   --hm-blue-soft: rgba(90, 140, 240, .16);
 }
 
-.home .hm-c { max-width: 1240px; margin: 0 auto; padding: 0 40px; }
+.hm .hm-c { max-width: 1240px; margin: 0 auto; padding: 0 40px; }
 .home section[id] { scroll-margin-top: 84px; }
+.hm:not(.home) [id] { scroll-margin-top: 90px; }
 .home h1, .home h2, .home h3 { font-family: var(--hm-disp); }
 .hm-kick { display: inline-block; font-size: .78rem; letter-spacing: 2.6px; text-transform: uppercase; font-weight: 600; color: var(--hm-link); margin-bottom: 18px; }
 .hm-h2 { font-weight: 800; font-size: clamp(2.1rem, 4vw, 3.4rem); line-height: 1.04; letter-spacing: -1.2px; color: var(--hm-head); }
@@ -250,7 +252,7 @@ body.home {
 
 /* ---------- Телефон / планшет ---------- */
 @media (max-width: 860px) {
-  .home .hm-c { padding: 0 20px; }
+  .hm .hm-c { padding: 0 20px; }
   .hm-head .hm-c { height: 68px; gap: 8px; }
   .hm-head.solid .hm-c { height: 62px; }
   .hm-head .site-nav { background: var(--hm-bg); border-bottom: 1px solid var(--hm-line); }
@@ -324,3 +326,50 @@ body.home {
   text-align-last: left;
   hyphens: manual;
 }
+
+/* ===== Внутрішні сторінки: та сама палітра для компонентів зі style.css ===== */
+body.hm:not(.home) {
+  --bg: #eef1f6;
+  --card: #f8f9fc;
+  --ink: #0f2342;
+  --muted: #5d6777;
+  --text: #36435a;
+  --blue: #1f56c3;
+  --blue2: #3b6fd8;
+  --line: #d9dfe8;
+  --tint: #dfe7f6;
+  --field: #ffffff;
+  --hover: #e3e8f0;
+  --shadow: 0 14px 34px rgba(15, 35, 66, .08);
+  --shadow-lg: 0 22px 48px rgba(15, 35, 66, .12);
+  background: var(--bg);
+}
+:root[data-theme="dark"] body.hm:not(.home) {
+  --bg: #0e1c33;
+  --card: #1a2c48;
+  --ink: #f2f6fd;
+  --muted: #a9b7cc;
+  --text: #d3dcec;
+  --blue: #8fb3ff;
+  --blue2: #a9c4ff;
+  --line: rgba(255, 255, 255, .1);
+  --tint: rgba(90, 140, 240, .16);
+  --field: #22385a;
+  --hover: rgba(255, 255, 255, .08);
+}
+/* Шапка на внутрішніх сторінках — одразу біла, липка, з кнопкою телефону */
+.hm-head.hm-static { position: sticky; }
+.hm-head.hm-static .hm-cw-head { display: block; }
+/* Кнопки — «пігулки», як на головній */
+body.hm .btn { border-radius: 60px; font-family: var(--hm-disp); font-weight: 700; }
+body.hm .btn-primary { background: var(--hm-blue); color: #fff; }
+body.hm .btn-primary:hover { background: var(--hm-blue-h); box-shadow: none; }
+body.hm .lp-btn { border-radius: 60px; }
+/* Темні блоки заявки — у тон першого екрана головної */
+body.hm .lead-cta-inner { background: var(--hm-hero); border-radius: 22px; }
+body.hm:not(.home) .hm-ft { margin-top: 40px; }
+/* Емодзі-іконки в картках послуг — прибрано, як на головній */
+body.hm .cards .card .ic { display: none; }
+/* Кнопка дзвінка — завжди насичено-синя з білим текстом (і в темній темі) */
+body.hm .lp-btn-call, body.hm .mcta-call { background: var(--hm-blue); color: #fff; }
+:root[data-theme="dark"] .hm-ft { border-top: 1px solid rgba(255, 255, 255, .08); }

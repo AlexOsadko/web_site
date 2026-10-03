@@ -2055,6 +2055,66 @@ def render_contacts():
 
 
 # ---------- ГОЛОВНИЙ ПРОХІД ----------
+# ---------- СТИЛЬ «E»: спільна шапка й підвал для внутрішніх сторінок ----------
+# Головна (index.html) має власну розмітку; решта сторінок отримують ту саму
+# шапку (з кнопкою телефону та вибором способу звʼязку) і підвал. Прохід
+# restyle_all() виконується наприкінці білду й ідемпотентний: замінює стару
+# шапку/підвал (site-header/site-footer) або вже нові (hm-head/hm-ft), прибирає
+# бічні кнопки FAB і нижню панель, підключає css/site.css і assets/site.js.
+SITE_CSS_V = "1"
+SITE_JS_V = "1"
+HM_HEADER = '<header class="hm-head solid hm-static" id="top">\n  <div class="hm-c">\n    <a href="{p}" class="hm-brand"><img src="{p}assets/logo-mark.png" alt="Логотип адвоката Осадька" width="34" height="34"><span>Олександр Осадько<small>Адвокат</small></span></a>\n    <nav class="site-nav" id="nav">\n      <a href="{p}#about">Про мене</a>\n      <a href="{p}poslugy/">Послуги</a>\n      <a href="{p}articles/">Статті</a>\n      <a href="{p}kontakty/">Контакти</a>\n    </nav>\n    <button type="button" class="hm-tel js-pick" aria-haspopup="true" aria-expanded="false" aria-controls="hmMenuHead"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></i>+38 (093) 466 44 43</button>\n    <button type="button" class="hm-tel-m js-pick" aria-label="Звʼязатися з адвокатом" aria-haspopup="true" aria-expanded="false" aria-controls="hmMenuHead"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></button>\n    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Змінити тему (день/ніч)">\n      <svg class="i-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>\n      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>\n    </button>\n    <button class="nav-toggle" id="navToggle" aria-label="Відкрити меню" aria-expanded="false">\n      <span></span><span></span><span></span>\n    </button>\n  </div>\n  <div class="hm-cw hm-cw-head">\n      <div class="hm-menu" id="hmMenuHead" role="menu">\n        <a class="hm-opt hm-o-call" role="menuitem" href="tel:+380934664443"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></i><span><b>Подзвонити</b><em>+38 (093) 466 44 43</em></span></a>\n        <a class="hm-opt hm-o-tg" role="menuitem" href="https://t.me/adv_osadko" target="_blank" rel="noopener"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 4.3 2.9 11.5c-1.3.5-1.3 1.2-.2 1.5l4.8 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.8-.4l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.6c.3-1.3-.5-1.8-1.4-1.4zM9.6 14.6l-.4 4 .1-.1 1.3-3.6 8.4-7.6c.4-.3-.1-.5-.6-.2z"/></svg></i><span><b>Telegram</b><em>@adv_osadko</em></span></a>\n        <a class="hm-opt hm-o-vb" role="menuitem" href="viber://chat?number=%2B380934664443"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.4 1C8.6 1 3.4 1.6 2.6 7.6c-.6 4.4.2 7.7 2.6 9.6v3.6c0 .4.5.6.8.3l2.6-2.6c.9.1 1.9.2 2.9.2 2.8 0 8-.6 8.8-6.6.9-6.6-2.2-11.1-8.9-11.1zm4.8 13.8c-.4.6-1.2 1.2-2 1.1-2.7-.4-5.6-2.7-6.8-5.5-.3-.8.2-1.8.9-2.2.4-.2.8-.1 1.1.2l1 1.4c.2.3.2.8-.1 1.1l-.4.4c.5 1.2 1.4 2.1 2.6 2.6l.4-.4c.3-.3.8-.3 1.1-.1l1.4 1c.3.2.4.7.1 1z"/></svg></i><span><b>Viber</b><em>написати</em></span></a>\n        <a class="hm-opt hm-o-wa" role="menuitem" href="https://wa.me/380934664443" target="_blank" rel="noopener"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.359.101 11.945c0 2.096.548 4.142 1.588 5.945L0 24l6.335-1.652a11.882 11.882 0 005.71 1.446h.005c6.585 0 11.946-5.359 11.949-11.945a11.821 11.821 0 00-3.479-8.4"/></svg></i><span><b>WhatsApp</b><em>написати</em></span></a>\n      </div>\n  </div>\n</header>'
+
+HM_FOOTER = '<footer class="hm-ft">\n  <div class="hm-c">\n    <div class="hm-cols">\n      <div>\n        <span class="hm-brand"><img src="{p}assets/logo-mark.png" alt="" width="34" height="34" loading="lazy" decoding="async"><span>Олександр Осадько<small>Адвокат</small></span></span>\n        <p class="hm-ft-about">Представництво в судах,<br>консультації та супровід.<br>Київ та вся Україна.</p>\n      </div>\n      <div><h4>Послуги</h4><ul>\n        <li><a href="{p}poslugy/rozluchennia.html">Розлучення та аліменти</a></li>\n        <li><a href="{p}poslugy/st-130-kupap.html">Ст. 130 КУпАП</a></li>\n        <li><a href="{p}poslugy/kryminalnyi-zahyst.html">Кримінальний захист</a></li>\n        <li><a href="{p}poslugy/tck.html">Спори з ТЦК</a></li>\n        <li><a href="{p}poslugy/tsyvilne-pravo.html">Цивільні спори</a></li>\n        <li><a href="{p}poslugy/pensiine-sotsialne.html">Пенсійні спори</a></li>\n      </ul></div>\n      <div><h4>Сайт</h4><ul>\n        <li><a href="{p}#about">Про мене</a></li>\n        <li><a href="{p}articles/">Статті</a></li>\n        <li><a href="https://t.me/pro100_law" target="_blank" rel="noopener">Канал у Telegram</a></li>\n        <li><a href="{p}kontakty/">Контакти</a></li>\n      </ul></div>\n      <div><h4>Контакти</h4><ul>\n        <li><a class="hm-ftel" href="tel:+380934664443">+38 (093) 466 44 43</a></li>\n        <li><a class="hm-fi hm-fmail" href="mailto:adv.osadko@gmail.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4.25-8 5-8-5V6l8 5 8-5v2.25z"/></svg>adv.osadko@gmail.com</a></li>\n        <li class="hm-fi hm-faddr"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>03049, м.&nbsp;Київ, просп.&nbsp;Повітряних Сил, 20/1, оф.&nbsp;2</li>\n        <li class="hm-fi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.4 3.2 1.9-.8 1.3L11 13V7h2z"/></svg>Пн–Пт, 9:00–18:00</li>\n      </ul></div>\n    </div>\n    <div class="hm-bottom"><span>© <span id="year"></span> Адвокат Олександр Осадько</span><a href="{p}privacy/">Політика конфіденційності</a></div>\n  </div>\n</footer>'
+
+
+def restyle_page(html):
+    """Повертає сторінку з новою шапкою/підвалом (або без змін, якщо шапки немає)."""
+    m = re.search(r'<header class="(?:site-header|hm-head[^"]*)"[^>]*>.*?</header>', html, re.S)
+    if not m:
+        return html
+    pm = re.search(r'<a href="([^"]*)" class="(?:hm-)?brand"', m.group(0))
+    p = pm.group(1) if pm else "../"
+    if p in ("#top", ""):
+        p = "./"
+    html = html[:m.start()] + HM_HEADER.replace("{p}", p) + html[m.end():]
+    html = re.sub(r'<footer class="(?:site-footer|hm-ft)">.*?</footer>',
+                  lambda _: HM_FOOTER.replace("{p}", p), html, count=1, flags=re.S)
+    html = re.sub(r'\n?<div class="fab"[^>]*>.*?class="fab-btn fab-top".*?</button>\s*</div>\n?', "\n", html, flags=re.S)
+    html = re.sub(r'\n?<div class="mcta"[^>]*>.*?</div>\n?', "\n", html, flags=re.S)
+    html = re.sub(r'\s*<link rel="stylesheet" href="[^"]*css/site\.css\?v=\d+">', "", html)
+    html = re.sub(r'\s*<script defer src="[^"]*assets/site\.js\?v=\d+"></script>', "", html)
+    html = re.sub(r'(<link rel="stylesheet" href="([^"]*)css/style\.css\?v=\d+">)',
+                  lambda mm: (mm.group(1) + f'\n  <link rel="stylesheet" href="{mm.group(2)}css/site.css?v={SITE_CSS_V}">'
+                              f'\n  <script defer src="{mm.group(2)}assets/site.js?v={SITE_JS_V}"></script>'),
+                  html, count=1)
+    if re.search(r'<body(?:\s[^>]*)?>', html) and not re.search(r'<body[^>]*class="[^"]*\bhm\b', html):
+        if re.search(r'<body class="', html):
+            html = re.sub(r'<body class="', '<body class="hm ', html, count=1)
+        else:
+            html = html.replace("<body>", '<body class="hm">', 1)
+    return html
+
+
+def restyle_all():
+    """Застосовує стиль «E» до всіх сторінок, окрім головної та службових інструментів."""
+    files = (glob.glob(os.path.join(ART, "*.html")) + glob.glob(os.path.join(POSLUGY, "*.html"))
+             + [os.path.join(ROOT, d, "index.html") for d in ("kontakty", "privacy", "kanal")]
+             + [os.path.join(ROOT, "404.html")])
+    n = 0
+    for path in files:
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            html = f.read()
+        new = restyle_page(html)
+        if new != html:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(new)
+            n += 1
+    return n
+
+
 def main():
     os.makedirs(ART, exist_ok=True)
     all_arts = load_articles()
@@ -2115,6 +2175,7 @@ def main():
     with open(os.path.join(kontakty_dir, "index.html"), "w", encoding="utf-8") as f:
         f.write(render_contacts())
 
+    restyled = restyle_all()
     c1, c2 = update_homepage_count(n)
     write_sitemap(arts, landings)
     write_feed(arts)
@@ -2125,6 +2186,7 @@ def main():
     print(f"Побудовано статей: {n}; тематичних хабів: {len(hubs)}; лендінгів послуг: {len(landings)}; редиректів-дублів: {len(redirects)}")
     print(f"Авто-анкорів згенеровано: {auto_anchors}; усього анкорів: {len(LINK_TERMS)}")
     print(f"Оновлено лічильник на головній: секція={c1}, кнопка={c2}")
+    print(f"Стиль «E» застосовано до сторінок: {restyled}")
     if missing_slug:
         print(f"⚠ Обрані статті відсутні в даних: {missing_slug}")
     print("Готово: articles/, poslugy/, articles/index.html, index.html, sitemap.xml, robots.txt")
