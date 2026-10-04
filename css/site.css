@@ -421,3 +421,8 @@ body.hm h1, body.hm h2 { line-height: 1.15; }
 /* «Послуги»: як «Памʼятки» — заголовок і підпис на всю ширину */
 .hm-svc-head { margin-bottom: 32px; }
 @media (max-width: 860px) { .hm-hero h1 span { font-size: .58em; margin-top: 10px; } }
+/* «Про мене»: як «Памʼятки» і «Послуги» — заголовок і вступ на всю ширину, далі два абзаци поруч */
+.hm-about .hm-c { display: block; }
+.hm-txt2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 26px; }
+.hm-txt2 p { margin: 0; }
+@media (max-width: 860px) { .hm-txt2 { grid-template-columns: 1fr; gap: 14px; margin-top: 18px; } }
