@@ -145,10 +145,10 @@ body.hm {
 
 /* ---------- Про мене ---------- */
 .hm-about { padding: 72px 0; }
-.hm-about .hm-c { display: grid; grid-template-columns: 1fr 1.15fr; column-gap: 90px; }
-.hm-big { font-family: var(--hm-disp); font-weight: 600; font-size: 1.55rem; line-height: 1.4; color: var(--hm-head); margin: 28px 0 0; letter-spacing: -.3px; }
+.hm-about .hm-c { display: grid; grid-template-columns: .85fr 1.15fr; column-gap: 70px; align-items: start; }
+.hm-big { font-family: var(--hm-disp); font-weight: 600; font-size: 1.45rem; line-height: 1.4; color: var(--hm-head); margin: 0 0 20px; letter-spacing: -.3px; }
 .hm-txt p { margin: 0 0 18px; color: var(--hm-muted); font-size: 1.06rem; line-height: 1.7; }
-.hm-princ { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px; grid-column: 1 / -1; list-style: none; }
+.hm-princ { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 36px; grid-column: 1 / -1; list-style: none; }
 .hm-princ li { background: var(--hm-soft); border-radius: var(--hm-r); padding: 30px 28px; }
 .hm-princ i { font-style: normal; font-family: var(--hm-disp); font-weight: 800; color: var(--hm-link); font-size: .95rem; }
 .hm-princ b { display: block; font-family: var(--hm-disp); font-size: 1.18rem; color: var(--hm-head); margin: 14px 0 6px; }
@@ -159,23 +159,23 @@ body.hm {
 .hm-svc-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 30px; margin-bottom: 32px; }
 .hm-svc-top p { margin: 0; max-width: 380px; color: var(--hm-muted); }
 .hm-g { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-.hm-g a { position: relative; display: block; background: var(--hm-soft); border-radius: var(--hm-r); padding: 34px 30px 86px; min-height: 260px; color: var(--hm-ink); transition: transform .2s, box-shadow .2s; }
+.hm-g a { position: relative; display: block; background: var(--hm-soft); border-radius: var(--hm-r); padding: 28px 28px 76px; min-height: 0; color: var(--hm-ink); transition: transform .2s, box-shadow .2s; }
 .hm-g a:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(15, 35, 66, .10); }
 .hm-g a:first-child { background: var(--hm-blue-soft); }
 .hm-g a:first-child h3 { color: var(--hm-link); }
 .hm-g h3 { font-weight: 700; font-size: 1.38rem; line-height: 1.2; margin: 0 0 12px; color: var(--hm-head); }
 .hm-g p { margin: 0; color: var(--hm-muted); font-size: .96rem; }
-.hm-g i { position: absolute; right: 26px; bottom: 26px; width: 50px; height: 50px; border-radius: 50%; border: 1px solid var(--hm-link); color: var(--hm-link); display: flex; align-items: center; justify-content: center; font-style: normal; }
+.hm-g i { position: absolute; right: 22px; bottom: 20px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--hm-link); color: var(--hm-link); display: flex; align-items: center; justify-content: center; font-style: normal; }
 
 /* ---------- Статті ---------- */
 .hm-arts { background: var(--hm-soft); padding: 64px 0; }
 .hm-ag { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 18px; margin-top: 32px; }
-.hm-ag a { background: var(--hm-card); border-radius: var(--hm-r); padding: 32px 30px; display: flex; flex-direction: column; min-height: 280px; color: var(--hm-ink); transition: transform .2s; }
+.hm-ag a { background: var(--hm-card); border-radius: var(--hm-r); padding: 32px 30px; display: flex; flex-direction: column; min-height: 0; color: var(--hm-ink); transition: transform .2s; }
 .hm-ag a:hover { transform: translateY(-4px); }
 .hm-tag { align-self: flex-start; font-size: .78rem; font-weight: 600; padding: 6px 12px; border-radius: 30px; background: var(--hm-blue-soft); color: var(--hm-link); margin-bottom: 22px; }
 .hm-ag h3 { font-weight: 700; font-size: 1.32rem; line-height: 1.25; margin: 0 0 12px; color: var(--hm-head); }
 .hm-ag p { margin: 0; color: var(--hm-muted); font-size: .95rem; }
-.hm-more { margin-top: auto; padding-top: 24px; font-weight: 700; font-size: .95rem; color: var(--hm-link); }
+.hm-more { margin-top: auto; padding-top: 18px; font-weight: 700; font-size: .95rem; color: var(--hm-link); }
 .hm-all { margin-top: 28px; text-align: center; }
 
 /* ---------- Памʼятки (лід-магніт) ---------- */
@@ -281,7 +281,7 @@ body.hm {
   .hm-facts li { flex: 1 1 calc(50% - 30px); }
   .hm-about { padding: 48px 0; }
   .hm-about .hm-c { grid-template-columns: 1fr; row-gap: 20px; }
-  .hm-big { font-size: 1.25rem; }
+  .hm-big { font-size: 1.2rem; }
   .hm-princ { grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
   .hm-princ li { padding: 22px; }
   .hm-svc { padding-bottom: 48px; }
@@ -405,3 +405,5 @@ body.hm h1, body.hm h2 { line-height: 1.15; }
 @media (max-width: 640px) {
   .hm-lead, .hm-big, .hm-txt p, .hm-svc-top p, .hm-sub, .hm-lead2 { text-align: left; }
 }
+.hm-txt p.hm-big { font-size: 1.45rem; color: var(--hm-head); line-height: 1.4; margin: 0 0 20px; }
+@media (max-width: 860px) { .hm-txt p.hm-big { font-size: 1.2rem; } }
