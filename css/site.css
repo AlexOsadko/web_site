@@ -3,12 +3,12 @@
    Правила з .home — лише для головної. */
 
 body.hm {
-  --hm-hero: #0f2342;          /* тло першого екрана й підвалу */
+  --hm-hero: #1a3a68;          /* тло першого екрана й підвалу */
   --hm-bg: #eef1f6;
   --hm-soft: #e3e8f0;
   --hm-card: #f8f9fc;
   --hm-ink: #111a28;
-  --hm-head: #0f2342;          /* заголовки */
+  --hm-head: #16325a;          /* заголовки */
   --hm-muted: #5d6777;
   --hm-line: #d9dfe8;
   --hm-blue: #1f56c3;          /* кнопки, посилання */
@@ -23,10 +23,10 @@ body.hm {
   font-weight: 400;
 }
 :root[data-theme="dark"] body.hm {
-  --hm-hero: #0b1a33;
-  --hm-bg: #0e1c33;
-  --hm-soft: #15263f;
-  --hm-card: #1a2c48;
+  --hm-hero: #173257;
+  --hm-bg: #1a3053;
+  --hm-soft: #213a61;
+  --hm-card: #26416b;
   --hm-ink: #e6ecf5;
   --hm-head: #f2f6fd;
   --hm-muted: #a9b7cc;
@@ -73,7 +73,7 @@ body.hm {
 
 .hm-head.scrolled { background: color-mix(in srgb, var(--hm-hero) 94%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 .hm-head.solid { background: rgba(238, 241, 246, .97); box-shadow: 0 6px 24px rgba(15, 35, 66, .10); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
-:root[data-theme="dark"] .hm-head.solid { background: rgba(14, 28, 51, .96); box-shadow: 0 6px 24px rgba(0, 0, 0, .3); }
+:root[data-theme="dark"] .hm-head.solid { background: rgba(26, 48, 83, .96); box-shadow: 0 6px 24px rgba(0, 0, 0, .3); }
 .hm-head.solid .hm-c { height: 72px; }
 .hm-head.solid .hm-brand { color: var(--hm-head); }
 .hm-head.solid .hm-brand small { color: var(--hm-muted); }
@@ -331,7 +331,7 @@ body.hm {
 body.hm:not(.home) {
   --bg: #eef1f6;
   --card: #f8f9fc;
-  --ink: #0f2342;
+  --ink: #16325a;
   --muted: #5d6777;
   --text: #36435a;
   --blue: #1f56c3;
@@ -345,8 +345,8 @@ body.hm:not(.home) {
   background: var(--bg);
 }
 :root[data-theme="dark"] body.hm:not(.home) {
-  --bg: #0e1c33;
-  --card: #1a2c48;
+  --bg: #1a3053;
+  --card: #26416b;
   --ink: #f2f6fd;
   --muted: #a9b7cc;
   --text: #d3dcec;
@@ -354,7 +354,7 @@ body.hm:not(.home) {
   --blue2: #a9c4ff;
   --line: rgba(255, 255, 255, .1);
   --tint: rgba(90, 140, 240, .16);
-  --field: #22385a;
+  --field: #2c4874;
   --hover: rgba(255, 255, 255, .08);
 }
 /* Шапка на внутрішніх сторінках — одразу біла, липка, з кнопкою телефону */
@@ -401,3 +401,7 @@ body.hm h1, body.hm h2 { line-height: 1.15; }
 }
 .hm-tel, .hm-tel-m { transition: transform .18s ease, box-shadow .18s ease; }
 .hm-pill:active, .hm-bigtel:active { transform: scale(.97); }
+/* На телефоні — по лівому краю: вузька колонка дає завеликі пробіли при вирівнюванні по ширині */
+@media (max-width: 640px) {
+  .hm-lead, .hm-big, .hm-txt p, .hm-svc-top p, .hm-sub, .hm-lead2 { text-align: left; }
+}
