@@ -373,3 +373,16 @@ body.hm .cards .card .ic { display: none; }
 /* Кнопка дзвінка — завжди насичено-синя з білим текстом (і в темній темі) */
 body.hm .lp-btn-call, body.hm .mcta-call { background: var(--hm-blue); color: #fff; }
 :root[data-theme="dark"] .hm-ft { border-top: 1px solid rgba(255, 255, 255, .08); }
+
+/* ===== Заголовки — Source Serif 4 (із засічками) ===== */
+body.hm { --hm-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif; }
+body.hm h1, body.hm h2, body.hm h3,
+.hm-big, .hm-num .t, .hm-bigtel b {
+  font-family: var(--hm-serif);
+  font-weight: 600;
+}
+body.hm h1, body.hm h2 { line-height: 1.15; }
+.hm-hero h1 { letter-spacing: -1.5px; line-height: 1.02; }
+.hm-h2 { letter-spacing: -.6px; line-height: 1.08; }
+.hm-big { font-weight: 400; letter-spacing: 0; line-height: 1.45; }
+.hm-num .t { letter-spacing: 0; }
