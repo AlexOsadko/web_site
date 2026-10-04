@@ -416,3 +416,8 @@ body.hm h1, body.hm h2 { line-height: 1.15; }
 .hm-wide span { font-style: italic; font-weight: 400; color: var(--hm-link); }
 .hm-wide + .hm-sub { font-size: 1.32rem; line-height: 1.55; margin-top: 14px; }
 @media (max-width: 860px) { .hm-wide { font-size: 2rem; } .hm-wide span { display: block; } .hm-wide + .hm-sub { font-size: 1.02rem; } }
+/* Перший екран: «Адвокат у Києві» + курсивний рядок «правовий захист без стресу» */
+.hm-hero h1 span { display: block; margin-top: 14px; font-style: italic; font-weight: 400; font-size: .5em; letter-spacing: -.2px; line-height: 1.15; color: var(--hm-accent); }
+/* «Послуги»: як «Памʼятки» — заголовок і підпис на всю ширину */
+.hm-svc-head { margin-bottom: 32px; }
+@media (max-width: 860px) { .hm-hero h1 span { font-size: .58em; margin-top: 10px; } }
