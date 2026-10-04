@@ -45,7 +45,7 @@ body.hm {
 .hm-h2 { font-weight: 800; font-size: clamp(2.1rem, 4vw, 3.4rem); line-height: 1.04; letter-spacing: -1.2px; color: var(--hm-head); }
 
 /* Кнопки-«пігулки» */
-.hm-pill { display: inline-flex; align-items: center; justify-content: center; gap: 10px; border-radius: 60px; font-family: var(--hm-disp); font-weight: 700; font-size: 1rem; padding: 18px 30px; white-space: nowrap; border: 0; cursor: pointer; transition: background .2s, transform .12s; }
+.hm-pill { display: inline-flex; align-items: center; justify-content: center; gap: 10px; border-radius: 60px; font-family: var(--hm-disp); font-weight: 700; font-size: 1rem; padding: 18px 30px; white-space: nowrap; border: 0; cursor: pointer; transition: background .2s, color .2s, transform .18s ease, box-shadow .18s ease; }
 .hm-pill:active { transform: scale(.97); }
 .hm-pill svg { width: 20px; height: 20px; fill: currentColor; }
 .hm-blue { background: var(--hm-blue); color: #fff; }
@@ -214,7 +214,7 @@ body.hm {
 .hm-chk { list-style: none; margin: 0 0 34px; display: grid; gap: 12px; }
 .hm-chk li { display: flex; gap: 12px; align-items: flex-start; }
 .hm-chk li::before { content: ""; flex: none; width: 22px; height: 22px; border-radius: 50%; margin-top: 2px; background: var(--hm-blue) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 12px no-repeat; }
-.hm-bigtel { display: flex; align-items: center; gap: 16px; background: var(--hm-blue-soft); border-radius: 22px; padding: 18px 22px; margin: 0 0 14px; color: var(--hm-ink); }
+.hm-bigtel { transition: transform .18s ease, box-shadow .18s ease; display: flex; align-items: center; gap: 16px; background: var(--hm-blue-soft); border-radius: 22px; padding: 18px 22px; margin: 0 0 14px; color: var(--hm-ink); }
 .hm-bigtel i { flex: none; width: 50px; height: 50px; border-radius: 50%; background: var(--hm-blue); display: flex; align-items: center; justify-content: center; }
 .hm-bigtel i svg { width: 22px; height: 22px; fill: #fff; }
 .hm-bigtel b { display: block; font-family: var(--hm-disp); font-size: 1.6rem; line-height: 1.1; color: var(--hm-link); }
@@ -386,3 +386,18 @@ body.hm h1, body.hm h2 { line-height: 1.15; }
 .hm-h2 { letter-spacing: -.6px; line-height: 1.08; }
 .hm-big { font-weight: 400; letter-spacing: 0; line-height: 1.45; }
 .hm-num .t { letter-spacing: 0; }
+
+/* ===== Анімація кнопок при наведенні (лише пристрої з мишею) ===== */
+@media (hover: hover) {
+  .hm-pill:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(15, 35, 66, .18); }
+  .hm-blue:hover { box-shadow: 0 12px 28px rgba(31, 86, 195, .35); }
+  .hm-tg:hover { background: #229ed9; color: #fff; }
+  .hm-wa:hover { background: #25d366; color: #fff; }
+  .hm-vb:hover { background: #7360f2; color: #fff; }
+  .hm-bigtel:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(15, 35, 66, .16); }
+  .hm-bigtel:hover i { animation: hmShake 1s ease-in-out; }
+  .hm-tel:hover, .hm-tel-m:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(31, 86, 195, .35); }
+  body.hm .btn-primary:hover, body.hm .lp-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(15, 35, 66, .18); }
+}
+.hm-tel, .hm-tel-m { transition: transform .18s ease, box-shadow .18s ease; }
+.hm-pill:active, .hm-bigtel:active { transform: scale(.97); }
