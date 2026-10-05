@@ -305,6 +305,7 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
     </div>
   </div>
 </header>
+<div id="gen_update" style="display:none;position:sticky;top:0;z-index:200;background:#b42318;color:#fff;padding:12px 18px;text-align:center;font-weight:600">Доступна нова версія генератора — документи з цієї сторінки формуються за старими шаблонами. <button type="button" onclick="location.reload()" style="margin-left:10px;background:#fff;color:#b42318;border:0;border-radius:8px;padding:6px 14px;font-weight:700;cursor:pointer">Оновити сторінку</button></div>
 
 <div class="wrap">
   <nav class="rail" aria-label="Склад документа">
@@ -2774,5 +2775,21 @@ updateRecap();
     b.textContent=ok?"Скопійовано ✓":"Виділено — натисніть Ctrl/Cmd+C";
     setTimeout(function(){ b.textContent=old; }, 2200);
   });
+})();
+</script>
+<script>
+/* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
+   Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
+const GEN_VERSION="2026-10-05.2";
+(function(){
+  const sub=document.querySelector("header.top .sub");
+  if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
+  function check(){
+    fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{
+      if(j && j.v && j.v!==GEN_VERSION){ const b=document.getElementById("gen_update"); if(b) b.style.display=""; }
+    }).catch(()=>{});
+  }
+  check();
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden) check(); });
 })();
 </script>
