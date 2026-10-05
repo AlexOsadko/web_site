@@ -291,6 +291,9 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
 /* базовий .icon-btn має display:grid — це блок, тож кнопки ставали одна під одною */
 .reg-acts .icon-btn{display:inline-grid;vertical-align:middle;width:28px;height:28px;font-size:13px}
 .reg-acts .icon-btn + .icon-btn{margin-left:6px}
+.reg-prov{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.8rem;font-weight:700;letter-spacing:.3px}
+.reg-prov-adv{background:rgba(30,80,200,.1);color:#1f4fb8}
+.reg-prov-fop{background:rgba(120,30,40,.1);color:#7a2a35}
 </style>
 
 <header class="top">
@@ -715,8 +718,8 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
 
         <div class="reg-empty" id="reg_empty">Реєстр порожній. Сформуйте перший договір — і він з'явиться тут.</div>
         <div class="reg-tablewrap" id="reg_table" style="display:none">
-          <table class="reg-table">
-            <thead><tr><th>№ договору</th><th>Дата</th><th>Клієнт</th><th>Оплата</th><th>Сума, грн</th><th style="width:122px;text-align:center">Дії</th></tr></thead>
+          <table class="reg-table" data-norole>
+            <thead><tr><th>№ договору</th><th>Дата</th><th>Виконавець</th><th>Клієнт / Замовник</th><th>Оплата</th><th>Сума, грн</th><th style="width:122px;text-align:center">Дії</th></tr></thead>
             <tbody id="reg_tbody"></tbody>
           </table>
         </div>
@@ -2481,8 +2484,8 @@ function applyDefaults(){
 }
 
 /* ---------- реєстр договорів (Excel) ---------- */
-const REG_WIDTHS=[{wch:16},{wch:15},{wch:15},{wch:34},{wch:16},{wch:32},{wch:24},{wch:16},{wch:20},{wch:9},{wch:42},{wch:13},{wch:14},{wch:11},{wch:8},{wch:10},{wch:14},{wch:28},{wch:60}];
-const REG_COLS=["Дата укладення","Номер договору","Тип клієнта","Клієнт","ЄДРПОУ / РНОКПП","Адреса","Представник","Телефон","Ел. пошта","№ дод. угоди","Зміст додаткової угоди","Модель оплати","Ставка, грн/год","Годин разом","№ акта","№ рахунку","Сума, грн","Сума прописом","Порядок оплати"];
+const REG_WIDTHS=[{wch:16},{wch:15},{wch:12},{wch:15},{wch:34},{wch:16},{wch:32},{wch:24},{wch:16},{wch:20},{wch:9},{wch:42},{wch:13},{wch:14},{wch:11},{wch:8},{wch:10},{wch:14},{wch:28},{wch:60}];
+const REG_COLS=["Дата укладення","Номер договору","Виконавець","Тип клієнта","Клієнт","ЄДРПОУ / РНОКПП","Адреса","Представник","Телефон","Ел. пошта","№ дод. угоди","Зміст додаткової угоди","Модель оплати","Ставка, грн/год","Годин разом","№ акта","№ рахунку","Сума, грн","Сума прописом","Порядок оплати"];
 const SNAP_SHEET="Дані для повторного формування";
 /* registry: [{row:{…для Excel…}, snap:{…повний стан форми…}|null}] */
 let registry=[];
@@ -2547,6 +2550,13 @@ function applySnapshot(o){
   applyProvider(); applyClientType(); applyPayMode(); updateRecap();
 }
 
+/* «Виконавець» у реєстрі: Адвокат або ФОП (для старих записів — зі збереженого стану форми) */
+function providerLabel(mode){ return mode==="fop" ? "ФОП" : "Адвокат"; }
+function regProvider(e){
+  const r=e.row||{};
+  if(r["Виконавець"]) return r["Виконавець"];
+  return e.snap ? providerLabel(e.snap.provider||"advocate") : "";
+}
 function addRegistryRow(){
   const t=clientType(), yur=t==="yur";
   const typeLabel = yur ? "Юридична особа" : (t==="fop" ? "Фізична особа-підприємець (ФОП)" : "Фізична особа");
@@ -2557,6 +2567,7 @@ function addRegistryRow(){
   const row={
     "Дата укладення": fmtDate($("#f_date").value,true),
     "Номер договору": $("#f_num").value.trim(),
+    "Виконавець": providerLabel(providerMode()),
     "Тип клієнта": typeLabel,
     "Клієнт": clientName(),
     "ЄДРПОУ / РНОКПП": yur ? $("#f_edrpou").value.trim() : $("#f_rnokpp").value.trim(),
@@ -2596,7 +2607,9 @@ function renderRegistry(){
       : `<button class="icon-btn" disabled title="${NO_SNAP}">✎</button>`
         + `<button class="icon-btn" disabled title="${NO_SNAP}">⤓</button>`)
       + `<button class="icon-btn danger" data-del="${i}" title="Вилучити запис із реєстру" aria-label="Вилучити запис">✕</button>`;
-    return `<tr><td>${xmlEsc(r["Номер договору"]||"")}</td><td>${xmlEsc(r["Дата укладення"]||"")}</td>`
+    const prov=regProvider(e);
+    const provCell = prov ? `<span class="reg-prov reg-prov-${prov==="ФОП"?"fop":"adv"}">${xmlEsc(prov)}</span>` : "—";
+    return `<tr><td>${xmlEsc(r["Номер договору"]||"")}</td><td>${xmlEsc(r["Дата укладення"]||"")}</td><td>${provCell}</td>`
          + `<td>${xmlEsc(r["Клієнт"]||"")}</td><td>${xmlEsc(r["Модель оплати"]||"")}</td>`
          + `<td>${xmlEsc(r["Сума, грн"]||"")}</td><td class="reg-acts">${acts}</td></tr>`;
   }).join("");
@@ -2646,7 +2659,7 @@ async function downloadFromRegistry(i){
 }
 
 function registryWorkbook(){
-  const ws=XLSX.utils.json_to_sheet(registry.map(e=>e.row),{header:REG_COLS});
+  const ws=XLSX.utils.json_to_sheet(registry.map(e=>Object.assign({}, e.row, {"Виконавець": regProvider(e)})),{header:REG_COLS});
   ws["!cols"]=REG_WIDTHS;
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,"Реєстр договорів");
