@@ -2065,11 +2065,13 @@ function _signGraphic(cx,cy,id){
 /* плаваючий малюнок «перед текстом» (behindDoc=0, wrapNone): по центру
    комірки/колонки, поверх лінії підпису, рухається з текстом і НЕ зсуває
    розмітку. Для таблиці підписів (договір/дод.угода/акт). */
-function signRunXml(cx,cy,id){
-  const off=SIGN_LINE_EMU-cy; /* підняти так, щоб низ підпису був біля лінії */
+function signRunXml(cx,cy,id,pos){
+  /* pos — точне положення (EMU) з еталона: {h: зсув від лівого краю колонки, v: від абзацу} */
+  const off=(pos && pos.v!=null) ? pos.v : SIGN_LINE_EMU-cy; /* підняти так, щоб низ підпису був біля лінії */
+  const posH=(pos && pos.h!=null) ? '<wp:posOffset>'+pos.h+'</wp:posOffset>' : '<wp:align>center</wp:align>';
   return '<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="'+(251658240+id)+'" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1">'
     +'<wp:simplePos x="0" y="0"/>'
-    +'<wp:positionH relativeFrom="column"><wp:align>center</wp:align></wp:positionH>'
+    +'<wp:positionH relativeFrom="column">'+posH+'</wp:positionH>'
     +'<wp:positionV relativeFrom="paragraph"><wp:posOffset>'+off+'</wp:posOffset></wp:positionV>'
     +'<wp:extent cx="'+cx+'" cy="'+cy+'"/><wp:effectExtent l="0" t="0" r="0" b="0"/>'
     +'<wp:wrapNone/>'
@@ -2087,8 +2089,11 @@ function signInlineRunXml(cx,cy,id){
 }
 /* вставляє підпис у комірку Адвоката — першу комірку того рядка таблиці
    підписів, де у Клієнта стоїть «КЕП_підпис» (виконувати ДО заміни «КЕП_підпис») */
-function injectAdvocateSign(xml, cx, cy){
-  let id=900;
+/* ФОП: положення підпису Виконавця, вручну налаштовані у Word (еталон 05.10.2026):
+   договір, додаткова угода, акт. Рахунок — окремим блоком INVOICE_SIGN_BLOCK_FOP. */
+const SIGN_POS_FOP=[{h:540776, v:-64574}, {h:533742, v:-163049}, {h:526708, v:-120846}];
+function injectAdvocateSign(xml, cx, cy, positions){
+  let id=900, k=0;
   /* абзац підпису вирівнюємо по центру комірки: якщо у pPr вже є <w:jc> —
      міняємо його на center (зберігає позицію в схемі), інакше додаємо */
   const center=(inner)=> /<w:jc\b[^>]*\/>/.test(inner)
@@ -2104,7 +2109,7 @@ function injectAdvocateSign(xml, cx, cy){
              підпису). У Згоді перша комірка містить дату/ПІБ клієнта — там
              адвокат не підписує, тож пропускаємо (повертаємо без змін). */
           if(b.indexOf('«')>=0 || /<w:t[^>]*>[^<]*\S[^<]*<\/w:t>/.test(b)) return m;
-          return a+center(b)+signRunXml(cx,cy,id++)+c;
+          return a+center(b)+signRunXml(cx,cy,id++,positions ? positions[k++] : null)+c;
         });
     });
 }
@@ -2311,7 +2316,7 @@ function fillFopXml(xml, D){
   if(!String(map["Замовник_представник_рядок"]||"").trim()) xml=dropParagraph(xml,"«Замовник_представник_рядок»");
   for(const k in map){ xml=xml.split("«"+k+"»").join(val(map[k])); }
   if(!D.kep) xml=dropParagraph(xml,"кваліфікованого електронного підпису");
-  if(D.sig){ xml=injectAdvocateSign(xml, D.sig.cx, D.sig.cy); xml=injectInvoiceSign(xml, D.sig.cx, D.sig.cy, "Виконавець"); }
+  if(D.sig){ xml=injectAdvocateSign(xml, D.sig.cx, D.sig.cy, SIGN_POS_FOP); xml=injectInvoiceSign(xml, D.sig.cx, D.sig.cy, "Виконавець"); }
   xml=xml.split("«КЕП_підпис»").join(D.kep ? "Підписано за допомогою КЕП" : "");
   for(const k of FOP_PLACEHOLDERS) xml=xml.split("«"+k+"»").join("");
   return xml;
@@ -2787,7 +2792,7 @@ updateRecap();
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-05.3";
+const GEN_VERSION="2026-10-05.4";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
