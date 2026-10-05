@@ -2120,6 +2120,13 @@ function injectInvoiceSign(xml, cx, cy, role){
   /* role — підпис у блоці «Виписав …»: «Адвокат» (за замовчуванням) або «Виконавець» (ФОП) */
   const r=role||"Адвокат";
   const block = r==="Адвокат" ? INVOICE_SIGN_BLOCK : (r==="Виконавець" ? INVOICE_SIGN_BLOCK_FOP : INVOICE_SIGN_BLOCK.split("Виписав Адвокат").join("Виписав "+r));
+  if(r==="Виконавець"){
+    /* ФОП: блок з еталона містить і кінцеві абзаци рахунку — замінюємо все до кінця тіла документа */
+    return xml.replace(
+      /(Сума, яка підлягає[\s\S]*?<\/w:tbl>)[\s\S]*?(?=<w:sectPr(?![\s\S]*<w:sectPr))/,
+      function(m, g1){ return g1 + block; }
+    );
+  }
   return xml.replace(
     /(Сума, яка підлягає[\s\S]*?<\/w:tbl>)[\s\S]*?Виписав (?:Адвокат|Виконавець)[\s\S]*?ОСАДЬКО[\s\S]*?<\/w:tbl>/,
     function(m, g1){ return g1 + block; }
@@ -2780,7 +2787,7 @@ updateRecap();
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-05.2";
+const GEN_VERSION="2026-10-05.3";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
