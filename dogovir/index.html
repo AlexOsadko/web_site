@@ -126,6 +126,10 @@
     border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--ink-2);cursor:pointer}
   .term-cal:hover{background:#eef1f6;color:var(--ink)}
   .term-cal svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;pointer-events:none}
+  .term-quick{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .term-btn{font:inherit;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid #c3cad6;background:#fff;color:var(--ink-2);cursor:pointer}
+  .term-btn:hover{border-color:var(--ink-2);color:var(--ink)}
+  .term-btn.on{background:var(--ink);border-color:var(--ink);color:#fff}
   .term-cal input[type=date]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;
     padding:0;border:0;background:none}
   .term-cal input[type=date]::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
@@ -455,7 +459,11 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
                 <input type="date" id="f_term_pick" aria-label="Обрати дату закінчення дії договору" tabindex="-1">
               </span>
             </div>
-            <div class="sub-hint">Оберіть дату в календарі або впишіть своє формулювання. Порожнє поле — автозначення. У договорі: «…діє до <i>цього значення</i>».</div>
+            <div class="term-quick">
+              <button type="button" class="term-btn" data-term="6m">6 місяців</button>
+              <button type="button" class="term-btn" data-term="year">До кінця року</button>
+            </div>
+            <div class="sub-hint">Оберіть дату в календарі, натисніть «6 місяців» (від дати договору, ст. 254 ЦК) або впишіть своє формулювання. Порожнє поле — автозначення. У договорі: «…діє до <i>цього значення</i>».</div>
           </div>
         </div>
       </div>
@@ -1481,9 +1489,24 @@ const fDate=$("#f_date"), fBirth=$("#f_birth");
 /* строк дії — типово 31 грудня року, в якому укладено договір (з дати договору).
    Оновлюється, лише поки в полі автозначення (або порожньо); власне значення
    адвоката (інша дата / формулювання) не перезаписується. */
+/* +6 місяців від дати договору: строк спливає у відповідне число останнього місяця
+   (ст. 254 ЦК); якщо такого числа немає (31 серпня → лютий) — останній день місяця */
+function plusMonthsISO(iso, n){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||""); if(!m) return "";
+  let y=+m[1], mo=+m[2]-1+n, d=+m[3];
+  y+=Math.floor(mo/12); mo=((mo%12)+12)%12;
+  const last=new Date(y,mo+1,0).getDate();
+  return `${y}-${String(mo+1).padStart(2,"0")}-${String(Math.min(d,last)).padStart(2,"0")}`;
+}
+function termModeBtns(mode){ $$(".term-btn").forEach(b=>b.classList.toggle("on", b.dataset.term===mode)); }
 function syncTerm(){
   const ft=$("#f_term"); if(!ft) return;
   const iso=$("#f_date").value;
+  /* режим «6 місяців»: перераховуємо при зміні дати договору, поки значення не змінено вручну */
+  if(ft.dataset.mode==="6m" && ft.value.trim()===ft.dataset.auto){
+    const d=iso||todayISO(); const v=fmtDate(plusMonthsISO(d,6),true);
+    ft.value=v; ft.dataset.auto=v; markFilled(ft); termModeBtns("6m"); return;
+  }
   const y = /^\d{4}/.test(iso) ? iso.slice(0,4) : String(new Date().getFullYear());
   const auto=`31 грудня ${y} року`;
   const cur=ft.value.trim();
@@ -1491,8 +1514,20 @@ function syncTerm(){
   if(!isAuto) return;                          // ручне значення — не чіпаємо
   ft.value = auto;
   ft.dataset.auto = auto;
+  ft.dataset.mode = "year";
   markFilled(ft);
+  termModeBtns("year");
 }
+$$(".term-btn").forEach(b=>b.addEventListener("click",()=>{
+  const ft=$("#f_term"); if(!ft) return;
+  ft.dataset.mode=b.dataset.term; ft.value=""; ft.dataset.auto="";
+  if(b.dataset.term==="6m"){
+    const v=fmtDate(plusMonthsISO($("#f_date").value||todayISO(),6),true);
+    ft.value=v; ft.dataset.auto=v; markFilled(ft); termModeBtns("6m");
+  }else{ ft.dataset.mode=""; syncTerm(); }
+  ft.dispatchEvent(new Event("input",{bubbles:true}));
+}));
+$("#f_term").addEventListener("input",()=>{ const ft=$("#f_term"); if(ft.value.trim()!==ft.dataset.auto) termModeBtns(""); });
 $("#f_term").addEventListener("change",()=>{ if(!$("#f_term").value.trim()) syncTerm(); });
 /* календар для строку дії: обрана дата → «30 червня 2027 року» (як у договорі) */
 function termToISO(s){
@@ -1514,6 +1549,7 @@ function termToISO(s){
     if(!pick.value) return;
     ft.value = fmtDate(pick.value,true);
     ft.dataset.auto = "-";                       // обрано вручну — не перезаписувати
+    ft.dataset.mode = ""; termModeBtns("");
     markFilled(ft);
     ft.dispatchEvent(new Event("input",{bubbles:true}));
   });
@@ -2781,7 +2817,7 @@ updateRecap();
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-05.5";
+const GEN_VERSION="2026-10-06.1";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
