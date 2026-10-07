@@ -512,3 +512,5 @@ button.hm-opt { width: 100%; border: 0; background: none; font: inherit; text-al
   .hc-fab i svg { width: 26px; height: 26px; fill: #fff; }
   .hm-chat-h { width: 40px; height: 40px; }
 }
+/* Місце під кнопку чату, щоб вона не перекривала нижній рядок підвалу */
+body.hm .hm-ft { padding-bottom: 100px; }
