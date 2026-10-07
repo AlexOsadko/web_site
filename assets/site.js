@@ -2,6 +2,15 @@
    — шапка на головній: прозора над першим екраном, біла після нього;
    — кнопка телефону / номер → вибір: подзвонити, Telegram, Viber, WhatsApp. */
 (function () {
+  // Чат на сайті (assets/chat.js) — поруч із цим файлом, з тією ж версією
+  var me = document.currentScript && document.currentScript.src;
+  if (me) {
+    var cs = document.createElement('script');
+    cs.src = me.replace(/site\.js(\?.*)?$/, 'chat.js$1');
+    cs.defer = true;
+    document.head.appendChild(cs);
+  }
+
   var yr = document.getElementById('year');
   if (yr && !yr.textContent) yr.textContent = new Date().getFullYear();
 

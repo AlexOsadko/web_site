@@ -78,6 +78,7 @@
     microFired[kind] = true;
     contactConversion();
   }
+  window.osadkoContact = microContact;   // чат на сайті: перше повідомлення
 
   document.addEventListener("click", function (e) {
     var a = e.target && e.target.closest ? e.target.closest("a") : null;
@@ -102,7 +103,7 @@
 
   // ── Банер згоди на cookie ──
   function buildBanner() {
-    var inSub = /\/(articles|zrazky|privacy)\//.test(location.pathname);
+    var inSub = /\/(articles|poslugy|kontakty|privacy|kanal)\//.test(location.pathname);
     var policyUrl = (inSub ? "../" : "") + "privacy/index.html";
     var b = document.createElement("div");
     b.className = "cookie-banner";

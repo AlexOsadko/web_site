@@ -1,0 +1,287 @@
+// Чат на сайті → Telegram.
+// Відвідувач пише у віконце на osadko.online → повідомлення приходить адвокату
+// в Telegram (окремий бот). Відповідь реплаєм у Telegram з'являється в чаті на сайті.
+// Cloudflare Worker + база D1 (binding DB). Налаштування — див. README.md поруч.
+//
+// Змінні воркера:
+//   CHAT_BOT_TOKEN   (Secret)  токен бота від @BotFather
+//   WEBHOOK_SECRET   (Secret)  довгий випадковий рядок (захист вебхука й /setup)
+//   OWNER_CHAT       (Text)    ваш Telegram id (бот підкаже його на /start)
+//   TURNSTILE_SECRET (Secret)  опційно: секрет Cloudflare Turnstile (антиспам)
+//   ALLOWED_ORIGINS  (Text)    опційно: дозволені сайти через кому
+
+const MAX_LEN = 2000;          // символів в одному повідомленні
+const RETAIN_DAYS = 30;        // листування старше — видаляється
+const ACTIVE_MIN = 30;         // «активна» розмова для відповіді без реплаю
+const DEFAULT_ORIGINS = 'https://osadko.online,https://www.osadko.online';
+
+class HttpError extends Error {
+  constructor(status, message) { super(message); this.status = status; }
+}
+
+export default {
+  async fetch(req, env, ctx) {
+    const url = new URL(req.url);
+    const cors = corsHeaders(env, req.headers.get('Origin') || '');
+    if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+    try {
+      await ensureSchema(env);
+      if (url.pathname === '/tg' && req.method === 'POST') return await onTelegram(req, env);
+      if (url.pathname === '/setup') return await onSetup(env, url);
+      if (url.pathname === '/chat/send' && req.method === 'POST') {
+        if (!cors['Access-Control-Allow-Origin']) throw new HttpError(403, 'origin');
+        return json(await onSend(req, env), cors);
+      }
+      if (url.pathname === '/chat/poll' && req.method === 'GET') return json(await onPoll(url, env), cors);
+      if (url.pathname === '/') return new Response('osadko chat: ok');
+      return new Response('not found', { status: 404 });
+    } catch (e) {
+      if (e instanceof HttpError) return json({ error: e.message }, cors, e.status);
+      console.log('chat error', e && e.stack || e);
+      return json({ error: 'server' }, cors, 500);
+    }
+  }
+};
+
+// ── Допоміжне ──────────────────────────────────────────────────────
+function corsHeaders(env, origin) {
+  const allowed = (env.ALLOWED_ORIGINS || DEFAULT_ORIGINS).split(',').map((s) => s.trim());
+  const h = { 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type', 'Vary': 'Origin' };
+  if (allowed.includes(origin)) h['Access-Control-Allow-Origin'] = origin;
+  return h;
+}
+
+function json(data, headers = {}, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status, headers: { ...headers, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }
+  });
+}
+
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const clean = (s, n) => String(s == null ? '' : s).replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, '').trim().slice(0, n);
+const now = () => Date.now();
+
+function randomId(bytes) {
+  const a = crypto.getRandomValues(new Uint8Array(bytes));
+  return btoa(String.fromCharCode(...a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function shortCode() {
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const a = crypto.getRandomValues(new Uint8Array(4));
+  return Array.from(a, (x) => abc[x % abc.length]).join('');
+}
+
+async function sha256(s) {
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(d), (x) => x.toString(16).padStart(2, '0')).join('').slice(0, 32);
+}
+
+async function tg(env, method, payload) {
+  const r = await fetch(`https://api.telegram.org/bot${env.CHAT_BOT_TOKEN}/${method}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+  });
+  return r.json().catch(() => ({ ok: false }));
+}
+
+let schemaReady = false;
+async function ensureSchema(env) {
+  if (schemaReady) return;
+  if (!env.DB) throw new Error('D1 binding "DB" is missing');
+  await env.DB.batch([
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, code TEXT, created INTEGER, last INTEGER, page TEXT, contact TEXT, iph TEXT)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS msgs (id INTEGER PRIMARY KEY AUTOINCREMENT, sid TEXT, who TEXT, text TEXT, t INTEGER)'),
+    env.DB.prepare('CREATE INDEX IF NOT EXISTS msgs_sid ON msgs (sid, id)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS tgmap (tg INTEGER PRIMARY KEY, sid TEXT)')
+  ]);
+  schemaReady = true;
+}
+
+async function purgeOld(env) {
+  const cut = now() - RETAIN_DAYS * 864e5;
+  const old = 'SELECT id FROM sessions WHERE last < ?1';
+  await env.DB.batch([
+    env.DB.prepare(`DELETE FROM msgs WHERE sid IN (${old})`).bind(cut),
+    env.DB.prepare(`DELETE FROM tgmap WHERE sid IN (${old})`).bind(cut),
+    env.DB.prepare('DELETE FROM sessions WHERE last < ?1').bind(cut)
+  ]);
+}
+
+async function verifyTurnstile(env, token, ip) {
+  if (!env.TURNSTILE_SECRET) return true;
+  if (!token) return false;
+  const fd = new FormData();
+  fd.append('secret', env.TURNSTILE_SECRET);
+  fd.append('response', token);
+  if (ip) fd.append('remoteip', ip);
+  const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: fd });
+  const j = await r.json().catch(() => ({}));
+  return !!j.success;
+}
+
+function pagePath(page) {
+  try { const u = new URL(page); return decodeURIComponent(u.pathname) || '/'; } catch (e) { return ''; }
+}
+
+// ── Відвідувач надсилає повідомлення ───────────────────────────────
+async function onSend(req, env) {
+  const b = await req.json().catch(() => null);
+  if (!b) throw new HttpError(400, 'bad json');
+  if (b.hp) return { ok: true, sid: '', id: 0 };            // honeypot: тихо ігноруємо
+  const text = clean(b.text, MAX_LEN);
+  const contact = clean(b.contact, 100);
+  if (!text && !contact) throw new HttpError(400, 'empty');
+  const ip = req.headers.get('CF-Connecting-IP') || '';
+  const t = now();
+
+  let s = null;
+  if (typeof b.sid === 'string' && /^[\w-]{20,40}$/.test(b.sid)) {
+    s = await env.DB.prepare('SELECT * FROM sessions WHERE id = ?1').bind(b.sid).first();
+  }
+
+  if (!s) {
+    if (!text) throw new HttpError(400, 'empty');
+    const iph = await sha256(ip + '|' + (env.WEBHOOK_SECRET || ''));
+    const recent = await env.DB.prepare('SELECT COUNT(*) AS n FROM sessions WHERE iph = ?1 AND created > ?2').bind(iph, t - 36e5).first();
+    if (recent && recent.n >= 5) throw new HttpError(429, 'rate');
+    if (!(await verifyTurnstile(env, b.token, ip))) throw new HttpError(403, 'captcha');
+    s = { id: randomId(18), code: shortCode(), created: t, last: t, page: clean(b.page, 300), contact: '', iph };
+    await env.DB.prepare('INSERT INTO sessions (id, code, created, last, page, contact, iph) VALUES (?1, ?2, ?3, ?3, ?4, ?5, ?6)')
+      .bind(s.id, s.code, t, s.page, '', iph).run();
+    s.isNew = true;
+    await purgeOld(env);
+  } else {
+    const burst = await env.DB.prepare("SELECT COUNT(*) AS n FROM msgs WHERE sid = ?1 AND who = 'me' AND t > ?2").bind(s.id, t - 6e4).first();
+    if (burst && burst.n >= 8) throw new HttpError(429, 'rate');
+    const total = await env.DB.prepare("SELECT COUNT(*) AS n FROM msgs WHERE sid = ?1 AND who = 'me'").bind(s.id).first();
+    if (total && total.n >= 150) throw new HttpError(429, 'limit');
+  }
+
+  let id = 0;
+  if (text) {
+    const r = await env.DB.prepare("INSERT INTO msgs (sid, who, text, t) VALUES (?1, 'me', ?2, ?3)").bind(s.id, text, t).run();
+    id = r.meta && r.meta.last_row_id || 0;
+  }
+  const newContact = contact && contact !== s.contact;
+  await env.DB.prepare('UPDATE sessions SET last = ?2, contact = CASE WHEN ?3 <> \'\' THEN ?3 ELSE contact END WHERE id = ?1')
+    .bind(s.id, t, contact).run();
+
+  // У Telegram
+  const lines = [];
+  if (s.isNew) {
+    lines.push(`💬 <b>Чат із сайту</b> · #${s.code}`);
+    const pp = pagePath(s.page);
+    if (pp) lines.push(`📄 ${esc(pp)}`);
+    lines.push('');
+    lines.push(esc(text));
+    if (contact) lines.push(`📞 Контакт: <code>${esc(contact)}</code>`);
+    lines.push('');
+    lines.push('<i>Відповідайте реплаєм на це повідомлення — відповідь з\'явиться в чаті на сайті.</i>');
+  } else {
+    if (text) lines.push(`💬 <b>#${s.code}</b>: ${esc(text)}`);
+    if (newContact) lines.push(`📞 <b>#${s.code}</b> залишив контакт: <code>${esc(contact)}</code>`);
+  }
+  let delivered = true;
+  if (lines.length) {
+    const res = await tg(env, 'sendMessage', {
+      chat_id: env.OWNER_CHAT, text: lines.join('\n'), parse_mode: 'HTML', link_preview_options: { is_disabled: true }
+    });
+    delivered = !!res.ok;
+    if (res.ok) await env.DB.prepare('INSERT OR REPLACE INTO tgmap (tg, sid) VALUES (?1, ?2)').bind(res.result.message_id, s.id).run();
+    else console.log('telegram send failed', JSON.stringify(res));
+  }
+  return { ok: true, sid: s.id, id, delivered };
+}
+
+// ── Відвідувач отримує нові повідомлення ───────────────────────────
+async function onPoll(url, env) {
+  const sid = url.searchParams.get('sid') || '';
+  if (!/^[\w-]{20,40}$/.test(sid)) throw new HttpError(400, 'sid');
+  const after = Math.max(0, parseInt(url.searchParams.get('after') || '0', 10) || 0);
+  const r = await env.DB.prepare('SELECT id, who, text, t FROM msgs WHERE sid = ?1 AND id > ?2 ORDER BY id LIMIT 100').bind(sid, after).all();
+  return { msgs: r.results || [] };
+}
+
+// ── Вебхук Telegram: адвокат відповідає ────────────────────────────
+async function onTelegram(req, env) {
+  if (!env.WEBHOOK_SECRET || req.headers.get('X-Telegram-Bot-Api-Secret-Token') !== env.WEBHOOK_SECRET) {
+    return new Response('forbidden', { status: 403 });
+  }
+  const u = await req.json().catch(() => ({}));
+  const m = u.message;
+  if (!m || !m.chat) return new Response('ok');
+  const chatId = String(m.chat.id);
+
+  if (!env.OWNER_CHAT) {
+    await tg(env, 'sendMessage', { chat_id: chatId, text: `Ваш Telegram id: ${chatId}\nВпишіть його у змінну OWNER_CHAT воркера.` });
+    return new Response('ok');
+  }
+  if (chatId !== String(env.OWNER_CHAT)) {
+    await tg(env, 'sendMessage', { chat_id: chatId, text: 'Це службовий бот чату на сайті osadko.online. Написати адвокату: @adv_osadko' });
+    return new Response('ok');
+  }
+
+  const say = (text) => tg(env, 'sendMessage', { chat_id: chatId, text, parse_mode: 'HTML', reply_parameters: { message_id: m.message_id, allow_sending_without_reply: true } });
+
+  if (m.text && /^\/(start|help)\b/.test(m.text)) {
+    await say('Бот чату на сайті працює ✅\nНові повідомлення з сайту приходять сюди. Щоб відповісти — зробіть <b>реплай</b> на повідомлення клієнта. Якщо зараз активна лише одна розмова, можна писати і без реплаю.\n\n/list — активні розмови');
+    return new Response('ok');
+  }
+  if (m.text && /^\/list\b/.test(m.text)) {
+    const r = await env.DB.prepare('SELECT code, last, contact, page FROM sessions ORDER BY last DESC LIMIT 8').all();
+    const rows = (r.results || []).map((x) => {
+      const ago = Math.round((now() - x.last) / 6e4);
+      return `#${x.code} · ${ago < 60 ? ago + ' хв' : Math.round(ago / 60) + ' год'} тому${x.contact ? ' · ' + esc(x.contact) : ''}`;
+    });
+    await say(rows.length ? rows.join('\n') : 'Розмов ще немає.');
+    return new Response('ok');
+  }
+
+  const text = clean(m.text || m.caption || '', MAX_LEN);
+  if (!text) { await say('Поки що в чат на сайті можна надсилати лише текст.'); return new Response('ok'); }
+
+  let sid = null;
+  const rep = m.reply_to_message;
+  if (rep) {
+    const row = await env.DB.prepare('SELECT sid FROM tgmap WHERE tg = ?1').bind(rep.message_id).first();
+    if (row) sid = row.sid;
+    else { await say('Не знайшов, до якої розмови це повідомлення (можливо, вона старша за 30 днів).'); return new Response('ok'); }
+  } else {
+    const r = await env.DB.prepare('SELECT id FROM sessions WHERE last > ?1 ORDER BY last DESC LIMIT 2').bind(now() - ACTIVE_MIN * 6e4).all();
+    const act = r.results || [];
+    if (act.length === 1) sid = act[0].id;
+    else {
+      await say(act.length ? 'Зараз кілька активних розмов — зробіть <b>реплай</b> на повідомлення потрібного клієнта.' : 'Немає активної розмови. Щоб відповісти, зробіть <b>реплай</b> на повідомлення клієнта.');
+      return new Response('ok');
+    }
+  }
+
+  const s = await env.DB.prepare('SELECT id, code FROM sessions WHERE id = ?1').bind(sid).first();
+  if (!s) { await say('Розмову не знайдено (можливо, вже видалена).'); return new Response('ok'); }
+  const t = now();
+  await env.DB.batch([
+    env.DB.prepare("INSERT INTO msgs (sid, who, text, t) VALUES (?1, 'adv', ?2, ?3)").bind(s.id, text, t),
+    env.DB.prepare('UPDATE sessions SET last = ?2 WHERE id = ?1').bind(s.id, t),
+    env.DB.prepare('INSERT OR REPLACE INTO tgmap (tg, sid) VALUES (?1, ?2)').bind(m.message_id, s.id)
+  ]);
+  await tg(env, 'setMessageReaction', { chat_id: chatId, message_id: m.message_id, reaction: [{ type: 'emoji', emoji: '👍' }] });
+  return new Response('ok');
+}
+
+// ── Разове налаштування вебхука: відкрити /setup?key=WEBHOOK_SECRET ─
+async function onSetup(env, url) {
+  if (!env.WEBHOOK_SECRET || url.searchParams.get('key') !== env.WEBHOOK_SECRET) return new Response('forbidden', { status: 403 });
+  const me = await tg(env, 'getMe', {});
+  const hook = await tg(env, 'setWebhook', {
+    url: `${url.origin}/tg`, secret_token: env.WEBHOOK_SECRET, allowed_updates: ['message'], drop_pending_updates: true
+  });
+  await tg(env, 'setMyCommands', { commands: [{ command: 'list', description: 'Активні розмови' }, { command: 'help', description: 'Як відповідати' }] });
+  const ok = me.ok && hook.ok;
+  const lines = [
+    ok ? '✅ Готово.' : '❌ Помилка — перевірте CHAT_BOT_TOKEN.',
+    me.ok ? `Бот: @${me.result.username}` : `getMe: ${JSON.stringify(me)}`,
+    `Вебхук: ${JSON.stringify(hook)}`,
+    env.OWNER_CHAT ? `OWNER_CHAT: ${env.OWNER_CHAT}` : 'OWNER_CHAT ще не задано: напишіть боту /start — він підкаже ваш id.'
+  ];
+  return new Response(lines.join('\n'), { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+}
