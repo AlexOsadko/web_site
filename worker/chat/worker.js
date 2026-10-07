@@ -33,6 +33,10 @@ export default {
         return json(await onSend(req, env), cors);
       }
       if (url.pathname === '/chat/poll' && req.method === 'GET') return json(await onPoll(url, env), cors);
+      if (url.pathname === '/chat/seen' && req.method === 'POST') {
+        if (!cors['Access-Control-Allow-Origin']) throw new HttpError(403, 'origin');
+        return json(await onSeen(req, env), cors);
+      }
       if (url.pathname === '/') return new Response('osadko chat: ok');
       return new Response('not found', { status: 404 });
     } catch (e) {
@@ -94,6 +98,10 @@ async function ensureSchema(env) {
     env.DB.prepare('CREATE INDEX IF NOT EXISTS msgs_sid ON msgs (sid, id)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS tgmap (tg INTEGER PRIMARY KEY, sid TEXT)')
   ]);
+  // Колонки для позначки «прочитано» (додаються до вже створеної таблиці)
+  for (const col of ['tg INTEGER', 'seen INTEGER']) {
+    try { await env.DB.prepare(`ALTER TABLE msgs ADD COLUMN ${col}`).run(); } catch (e) { /* уже є */ }
+  }
   schemaReady = true;
 }
 
@@ -202,6 +210,22 @@ async function onPoll(url, env) {
   return { msgs: r.results || [] };
 }
 
+// ── Відвідувач побачив відповіді → позначка 👀 на них у Telegram ────
+async function onSeen(req, env) {
+  const b = await req.json().catch(() => null);
+  if (!b || typeof b.sid !== 'string' || !/^[\w-]{20,40}$/.test(b.sid)) throw new HttpError(400, 'sid');
+  const upto = Math.max(0, parseInt(b.upto, 10) || 0);
+  const r = await env.DB.prepare("SELECT id, tg FROM msgs WHERE sid = ?1 AND who = 'adv' AND id <= ?2 AND seen IS NULL AND tg IS NOT NULL ORDER BY id LIMIT 20")
+    .bind(b.sid, upto).all();
+  const rows = r.results || [];
+  if (!rows.length) return { ok: true, n: 0 };
+  await env.DB.prepare("UPDATE msgs SET seen = ?3 WHERE sid = ?1 AND who = 'adv' AND id <= ?2 AND seen IS NULL").bind(b.sid, upto, now()).run();
+  for (const x of rows) {
+    await tg(env, 'setMessageReaction', { chat_id: env.OWNER_CHAT, message_id: x.tg, reaction: [{ type: 'emoji', emoji: '👀' }] });
+  }
+  return { ok: true, n: rows.length };
+}
+
 // ── Вебхук Telegram: адвокат відповідає ────────────────────────────
 async function onTelegram(req, env) {
   if (!env.WEBHOOK_SECRET || req.headers.get('X-Telegram-Bot-Api-Secret-Token') !== env.WEBHOOK_SECRET) {
@@ -260,7 +284,7 @@ async function onTelegram(req, env) {
   if (!s) { await say('Розмову не знайдено (можливо, вже видалена).'); return new Response('ok'); }
   const t = now();
   await env.DB.batch([
-    env.DB.prepare("INSERT INTO msgs (sid, who, text, t) VALUES (?1, 'adv', ?2, ?3)").bind(s.id, text, t),
+    env.DB.prepare("INSERT INTO msgs (sid, who, text, t, tg) VALUES (?1, 'adv', ?2, ?3, ?4)").bind(s.id, text, t, m.message_id),
     env.DB.prepare('UPDATE sessions SET last = ?2 WHERE id = ?1').bind(s.id, t),
     env.DB.prepare('INSERT OR REPLACE INTO tgmap (tg, sid) VALUES (?1, ?2)').bind(m.message_id, s.id)
   ]);

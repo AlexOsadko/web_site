@@ -321,9 +321,22 @@
         });
         save();
         if (fresh) notify(fresh.text);
+        markSeen();
       })
       .catch(function () {})
       .then(function () { polling = false; schedule(); });
+  }
+
+  // Відвідувач бачить відповіді (вікно відкрите, вкладка активна) → адвокату позначка 👀
+  function markSeen() {
+    if (!isOpen() || document.hidden || !st.sid) return;
+    var last = 0;
+    for (var k in rendered) if (+k > last && rendered[k].classList.contains("hc-adv")) last = +k;
+    if (!last || last <= (st.ack || 0)) return;
+    var upto = last;
+    fetch(ENDPOINT + "/chat/seen", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid: st.sid, upto: upto })
+    }).then(function (r) { if (r.ok) { st.ack = Math.max(st.ack || 0, upto); save(); } }).catch(function () {});
   }
 
   function notify(text) {
