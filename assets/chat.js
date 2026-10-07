@@ -5,7 +5,7 @@
    Поки ENDPOINT порожній — нічого не показується. */
 (function () {
   "use strict";
-  var ENDPOINT = window.OSADKO_CHAT_ENDPOINT || "";   // напр. "https://osadko-chat.espir3.workers.dev"
+  var ENDPOINT = window.OSADKO_CHAT_ENDPOINT || "https://osadko-chat.espir3.workers.dev";
   var TS_SITEKEY = "0x4AAAAAAD1Dx9AvRT4v-VoQ";        // Turnstile (той самий, що й у формах)
   var KEY = "osadkoChat";
   // Окрема іконка чату: "fab" — кнопка в правому нижньому куті, "head" — у шапці, "both", "" — без неї
