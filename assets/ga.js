@@ -35,17 +35,19 @@
   // Google Ads — робочий акаунт (adv.osadko@gmail.com, 624-250-0421).
   var ADS_ID = "AW-18401189598";
   gtag("config", ADS_ID);
-  // Ярлик конверсії «Призначення зустрічі» цього акаунта.
+  // Ярлик конверсії «Призначення зустрічі» — заявка через форму.
   var CONV_LABEL2 = "AW-18401189598/Cj8ICMiJ_eQcEN69r8ZE";
-  // Щоб розвести телефон/месенджер в окрему конверсію «Контакт» того ж
-  // акаунта — вписати її ярлик сюди й використати в microContact().
-  var CONV_CONTACT = null; // напр. "AW-18401189598/XXXX" — поки не задано
+  // Ярлик конверсії «Інтерактивний номер» — клік по телефону або месенджеру.
+  var CONV_CONTACT = "AW-18401189598/StPvCLyjxJQdEN69r8ZE";
 
   // Викликати В МОМЕНТ успішного звернення (не при завантаженні сторінки).
   // Consent Mode сам обере cookie/cookieless-режим за станом згоди.
   window.osadkoConversion = function () {
-    gtag("event", "conversion", { send_to: CONV_CONTACT || CONV_LABEL2 });
+    gtag("event", "conversion", { send_to: CONV_LABEL2 });
   };
+  function contactConversion() {
+    gtag("event", "conversion", { send_to: CONV_CONTACT, value: 1.0, currency: "UAH" });
+  }
 
   function grant() {
     gtag("consent", "update", {
@@ -68,13 +70,13 @@
   function track(name, params) { gtag("event", name, params || {}); }
   window.osadkoTrack = track;
 
-  // Мікроконверсія в Google Ads: дзвінок і месенджер — це теж «Контакт».
+  // Мікроконверсія в Google Ads: дзвінок і месенджер → «Інтерактивний номер».
   // Дедуплікація за типом у межах одного перегляду, щоб не роздувати статистику.
   var microFired = {};
   function microContact(kind) {
     if (microFired[kind]) return;
     microFired[kind] = true;
-    if (window.osadkoConversion) window.osadkoConversion();
+    contactConversion();
   }
 
   document.addEventListener("click", function (e) {
@@ -93,8 +95,9 @@
   document.addEventListener("submit", function (e) {
     var f = e.target;
     if (!f) return;
-    if (f.id === "leadForm") { track("generate_lead", { form: "contacts" }); microContact("form"); }
-    else if (f.classList && f.classList.contains("cb-form")) { track("generate_lead", { form: "popup" }); microContact("form"); }
+    // Конверсію «Призначення зустрічі» шле сама форма після успішного надсилання.
+    if (f.id === "leadForm") track("generate_lead", { form: "contacts" });
+    else if (f.classList && f.classList.contains("cb-form")) track("generate_lead", { form: "popup" });
   }, true);
 
   // ── Банер згоди на cookie ──
