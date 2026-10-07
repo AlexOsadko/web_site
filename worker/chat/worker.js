@@ -264,7 +264,6 @@ async function onTelegram(req, env) {
     env.DB.prepare('UPDATE sessions SET last = ?2 WHERE id = ?1').bind(s.id, t),
     env.DB.prepare('INSERT OR REPLACE INTO tgmap (tg, sid) VALUES (?1, ?2)').bind(m.message_id, s.id)
   ]);
-  await tg(env, 'setMessageReaction', { chat_id: chatId, message_id: m.message_id, reaction: [{ type: 'emoji', emoji: '👍' }] });
   return new Response('ok');
 }
 
