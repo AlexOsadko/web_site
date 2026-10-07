@@ -489,3 +489,26 @@ button.hm-opt { width: 100%; border: 0; background: none; font: inherit; text-al
   .hc-lock, .hc-lock body { overflow: hidden; }
   .hc-toast { left: 12px; right: 12px; bottom: 12px; max-width: none; }
 }
+/* Окрема іконка чату: кнопка в куті (.hc-fab) і в шапці (.hm-chat-h) */
+.hc-fab { position: fixed; right: 24px; bottom: 24px; z-index: 990; display: inline-flex; align-items: center; gap: 10px; padding: 8px 22px 8px 8px; border: 0; border-radius: 40px;
+  background: var(--hm-blue, #1f56c3); color: #fff; font-family: var(--hm-disp); font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 14px 34px rgba(16, 45, 110, .38);
+  opacity: 0; visibility: hidden; transform: translateY(16px) scale(.9); transition: opacity .25s ease, transform .3s cubic-bezier(.2, .9, .3, 1.25), visibility .3s, box-shadow .18s, background .18s; }
+.hc-fab.show { opacity: 1; visibility: visible; transform: none; }
+.hc-fab.show.hc-away, .hc-fab.show.hc-hide { opacity: 0; visibility: hidden; transform: translateY(16px) scale(.9); }
+.hc-fab:hover { background: var(--hm-blue-h, #1a49a6); box-shadow: 0 18px 40px rgba(16, 45, 110, .45); transform: translateY(-2px); }
+.hc-fab i { position: relative; width: 40px; height: 40px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+.hc-fab i::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .55); animation: hcPulse 2.6s ease-out infinite; }
+.hc-fab i svg { width: 20px; height: 20px; fill: var(--hm-blue, #1f56c3); }
+@keyframes hcPulse { 0% { transform: scale(.85); opacity: .9; } 70%, 100% { transform: scale(1.35); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .hc-fab i::after { animation: none; display: none; } }
+.hm-chat-h { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .25); background: transparent; color: #fff; cursor: pointer; transition: background .15s, transform .18s; }
+.hm-chat-h svg { width: 20px; height: 20px; fill: currentColor; }
+.hm-chat-h:hover { background: rgba(255, 255, 255, .12); transform: translateY(-1px); }
+.hm-head.solid .hm-chat-h { border-color: transparent; background: var(--hm-blue-soft); color: var(--hm-link); }
+@media (max-width: 600px) {
+  .hc-fab { right: 16px; bottom: 16px; padding: 0; width: 58px; height: 58px; justify-content: center; }
+  .hc-fab span { display: none; }
+  .hc-fab i { width: 58px; height: 58px; background: transparent; }
+  .hc-fab i svg { width: 26px; height: 26px; fill: #fff; }
+  .hm-chat-h { width: 40px; height: 40px; }
+}

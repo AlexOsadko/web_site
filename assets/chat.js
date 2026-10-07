@@ -8,6 +8,8 @@
   var ENDPOINT = window.OSADKO_CHAT_ENDPOINT || "";   // напр. "https://osadko-chat.espir3.workers.dev"
   var TS_SITEKEY = "0x4AAAAAAD1Dx9AvRT4v-VoQ";        // Turnstile (той самий, що й у формах)
   var KEY = "osadkoChat";
+  // Окрема іконка чату: "fab" — кнопка в правому нижньому куті, "head" — у шапці, "both", "" — без неї
+  var LAUNCHER = window.OSADKO_CHAT_LAUNCHER != null ? window.OSADKO_CHAT_LAUNCHER : "fab";
   if (!ENDPOINT || !window.fetch || !document.querySelector) return;
   ENDPOINT = ENDPOINT.replace(/\/+$/, "");
 
@@ -54,6 +56,37 @@
       b.innerHTML = ICON_CHAT + "<span>Або напишіть у чат прямо тут, на сайті</span>";
       row.parentNode.insertBefore(b, row.nextSibling);
     });
+  }
+
+  // ── Окрема іконка чату ─────────────────────────────────────────────
+  var fab = null;
+  function addLauncher() {
+    if (/head|both/.test(LAUNCHER)) {
+      var c = document.querySelector(".hm-head .hm-c");
+      var ref = c && (c.querySelector(".hm-tel") || c.querySelector(".theme-toggle"));
+      if (ref && !c.querySelector(".hm-chat-h")) {
+        var h = document.createElement("button");
+        h.type = "button";
+        h.className = "hm-chat-h js-chat";
+        h.setAttribute("aria-label", "Написати в чат");
+        h.title = "Написати в чат";
+        h.innerHTML = ICON_CHAT;
+        c.insertBefore(h, ref);
+      }
+    }
+    if (/fab|both/.test(LAUNCHER)) {
+      fab = document.createElement("button");
+      fab.type = "button";
+      fab.className = "hc-fab js-chat";
+      fab.setAttribute("aria-label", "Написати в чат");
+      fab.innerHTML = "<i>" + ICON_CHAT + "</i><span>Написати в чат</span>";
+      document.body.appendChild(fab);
+      // Поки видно банер cookie (він унизу екрана) — кнопку не показуємо, щоб не перекривати
+      var sync = function () { fab.classList.toggle("hc-hide", !!document.querySelector(".cookie-banner")); };
+      sync();
+      if (window.MutationObserver) new MutationObserver(sync).observe(document.body, { childList: true });
+      setTimeout(function () { fab.classList.add("show"); }, 1200);
+    }
   }
 
   // ── Вікно чату (створюється при першому відкритті) ─────────────────
@@ -304,6 +337,7 @@
     toast.innerHTML = "<i>" + ICON_CHAT + "</i><span><b>Відповідь адвоката</b><em></em></span>";
     toast.querySelector("em").textContent = text.length > 90 ? text.slice(0, 88) + "…" : text;
     toast.classList.add("show");
+    if (fab) fab.classList.add("hc-away");
   }
 
   // ── Відкрити / закрити ─────────────────────────────────────────────
@@ -312,6 +346,7 @@
     document.querySelectorAll(".hm-cw.open").forEach(function (w) { w.classList.remove("open"); });
     if (toast) toast.classList.remove("show");
     panel.classList.add("open");
+    if (fab) fab.classList.add("hc-away");
     document.documentElement.classList.add("hc-lock");
     loadTS();
     if (st.sid) { ta.placeholder = "Напишіть повідомлення…"; poll(); }
@@ -322,6 +357,7 @@
   function close() {
     if (!panel) return;
     panel.classList.remove("open");
+    if (fab) fab.classList.remove("hc-away");
     document.documentElement.classList.remove("hc-lock");
     var last = 0;
     for (var k in rendered) if (+k > last && rendered[k].classList.contains("hc-adv")) last = +k;
@@ -344,5 +380,6 @@
   document.addEventListener("visibilitychange", function () { if (!document.hidden) poll(); else clearTimeout(timer); });
 
   addEntries();
+  addLauncher();
   if (st.sid) schedule(4000);
 })();
