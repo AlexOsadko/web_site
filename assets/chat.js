@@ -46,15 +46,17 @@
       b.textContent = "Чат на сайті";
       box.appendChild(b);
     });
-    // Ряди кнопок месенджерів на «Контактах» і сторінках послуг — окремий рядок під ними
+    // Ряди кнопок месенджерів на сторінках послуг і «Контактах» — окрема кнопка «Чат на сайті»
     document.querySelectorAll(".lp-btn-vb").forEach(function (vb) {
       var row = vb.parentNode;
-      if (!row || (row.nextElementSibling && row.nextElementSibling.classList.contains("lp-chatlink"))) return;
+      if (!row || row.querySelector(".lp-btn-chat") || (row.nextElementSibling && row.nextElementSibling.classList.contains("lp-btn-chat"))) return;
       var b = document.createElement("button");
       b.type = "button";
-      b.className = "lp-chatlink js-chat";
-      b.innerHTML = ICON_CHAT + "<span>Або напишіть у чат прямо тут, на сайті</span>";
-      row.parentNode.insertBefore(b, row.nextSibling);
+      b.className = "lp-btn lp-btn-chat js-chat";
+      b.innerHTML = ICON_CHAT + "<span>Чат на сайті</span>";
+      // На «Контактах» ряд вузький — кнопка окремим рядком на всю ширину
+      if (row.classList.contains("contacts-cta")) { b.classList.add("lp-btn-chat-wide"); row.parentNode.insertBefore(b, row.nextSibling); }
+      else row.appendChild(b);
     });
   }
 
