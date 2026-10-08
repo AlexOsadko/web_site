@@ -204,6 +204,7 @@
   // ── Мережа ─────────────────────────────────────────────────────────
   function post(data) {
     data.page = location.href;
+    data.title = pageTitle();
     return fetch(ENDPOINT + "/chat/send", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
     }).then(function (r) {
@@ -212,6 +213,14 @@
         return j;
       });
     });
+  }
+
+  // Назва сторінки для адвоката: «Головна», «Спори з ТЦК та мобілізація», …
+  function pageTitle() {
+    var path = location.pathname.replace(/index\.html$/, "");
+    if (path === "/" || path === "") return "Головна";
+    var t = (document.title || "").split(/ [—|–] /)[0].replace(/^Адвокат:\s*/i, "").trim();
+    return t ? t.charAt(0).toUpperCase() + t.slice(1) : "";
   }
 
   function loadTS() {

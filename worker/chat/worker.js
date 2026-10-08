@@ -178,8 +178,11 @@ async function onSend(req, env) {
   const lines = [];
   if (s.isNew) {
     lines.push(`💬 <b>Чат із сайту</b> · #${s.code}`);
-    const pp = pagePath(s.page);
-    if (pp) lines.push(`📄 ${esc(pp)}`);
+    const label = clean(b.title, 120) || pagePath(s.page);
+    if (label) {
+      const link = /^https:\/\/(www\.)?osadko\.online\//.test(s.page) ? s.page : '';
+      lines.push(link ? `📄 Сторінка: <a href="${esc(link).replace(/"/g, '&quot;')}">${esc(label)}</a>` : `📄 Сторінка: ${esc(label)}`);
+    }
     lines.push('');
     lines.push(esc(text));
     if (contact) lines.push(`📞 Контакт: <code>${esc(contact)}</code>`);
