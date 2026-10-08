@@ -14,6 +14,15 @@ const MAX_LEN = 2000;          // символів в одному повідо�
 const RETAIN_DAYS = 30;        // листування старше — видаляється
 const ACTIVE_MIN = 30;         // «активна» розмова для відповіді без реплаю
 const DEFAULT_ORIGINS = 'https://osadko.online,https://www.osadko.online';
+// Кнопки внизу чату з ботом
+const BTN_LIST = '📋 Розмови';
+const BTN_HELP = '❓ Як відповідати';
+const MENU = { keyboard: [[{ text: BTN_LIST }, { text: BTN_HELP }]], resize_keyboard: true, is_persistent: true };
+const HELP = 'Бот чату на сайті працює ✅\n\nНові повідомлення з сайту приходять сюди. Щоб відповісти — зробіть <b>реплай</b> на повідомлення клієнта. Якщо зараз активна лише одна розмова, можна писати і без реплаю.\n\n' +
+  '<b>📋 Розмови</b> — останні розмови; натисніть на потрібну, щоб побачити все листування.\n' +
+  'Під кожним новим зверненням — кнопки <b>📋 Уся розмова</b> і <b>🗑 Видалити</b>.\n' +
+  'Також працюють команди /list, /view і /del (реплаєм на повідомлення клієнта).';
+const convButtons = (sid) => ({ inline_keyboard: [[{ text: '📋 Уся розмова', callback_data: 'v:' + sid }, { text: '🗑 Видалити', callback_data: 'd:' + sid }]] });
 
 class HttpError extends Error {
   constructor(status, message) { super(message); this.status = status; }
@@ -199,7 +208,8 @@ async function onSend(req, env) {
   let delivered = true;
   if (lines.length) {
     const res = await tg(env, 'sendMessage', {
-      chat_id: env.OWNER_CHAT, text: lines.join('\n'), parse_mode: 'HTML', link_preview_options: { is_disabled: true }
+      chat_id: env.OWNER_CHAT, text: lines.join('\n'), parse_mode: 'HTML', link_preview_options: { is_disabled: true },
+      ...(s.isNew ? { reply_markup: convButtons(s.id) } : {})
     });
     delivered = !!res.ok;
     if (res.ok) await env.DB.prepare('INSERT OR REPLACE INTO tgmap (tg, sid) VALUES (?1, ?2)').bind(res.result.message_id, s.id).run();
@@ -215,6 +225,38 @@ async function onPoll(url, env) {
   const after = Math.max(0, parseInt(url.searchParams.get('after') || '0', 10) || 0);
   const r = await env.DB.prepare('SELECT id, who, text, t FROM msgs WHERE sid = ?1 AND id > ?2 ORDER BY id LIMIT 100').bind(sid, after).all();
   return { msgs: r.results || [] };
+}
+
+// ── Натискання на кнопки під повідомленнями ────────────────────────
+async function onButton(env, cq) {
+  const ack = (text) => tg(env, 'answerCallbackQuery', { callback_query_id: cq.id, ...(text ? { text } : {}) });
+  const chatId = cq.message && String(cq.message.chat.id);
+  if (!env.OWNER_CHAT || String(cq.from.id) !== String(env.OWNER_CHAT) || chatId !== String(env.OWNER_CHAT)) return ack('Недоступно');
+  const [act, sid] = String(cq.data || '').split(':');
+  if (act === 'x') {
+    await ack();
+    return tg(env, 'editMessageText', { chat_id: chatId, message_id: cq.message.message_id, text: 'Скасовано.' });
+  }
+  const s = sid && await env.DB.prepare('SELECT * FROM sessions WHERE id = ?1').bind(sid).first();
+  if (!s) return ack('Розмову не знайдено — можливо, її вже видалено');
+  if (act === 'v') { await ack(); return sendTranscript(env, chatId, s); }
+  if (act === 'd') {
+    await ack();
+    return tg(env, 'sendMessage', {
+      chat_id: chatId, parse_mode: 'HTML', text: `Видалити розмову <b>#${s.code}</b>? Листування буде стерто з сервера, клієнт його більше не побачить.`,
+      reply_markup: { inline_keyboard: [[{ text: '🗑 Так, видалити', callback_data: 'D:' + s.id }, { text: 'Скасувати', callback_data: 'x' }]] }
+    });
+  }
+  if (act === 'D') {
+    await deleteSession(env, s.id);
+    await ack('Видалено');
+    return tg(env, 'editMessageText', { chat_id: chatId, message_id: cq.message.message_id, parse_mode: 'HTML', text: `🗑 Розмову <b>#${s.code}</b> видалено з сервера.` });
+  }
+  return ack();
+}
+
+function setHook(env, origin) {
+  return tg(env, 'setWebhook', { url: `${origin}/tg`, secret_token: env.WEBHOOK_SECRET, allowed_updates: ['message', 'callback_query'] });
 }
 
 // ── Перегляд усієї розмови в Telegram ──────────────────────────────
@@ -246,8 +288,12 @@ async function sendTranscript(env, chatId, s) {
   }
   if (cur) chunks.push(cur);
   let lastId = 0;
-  for (const c of chunks) {
-    const res = await tg(env, 'sendMessage', { chat_id: chatId, text: c, parse_mode: 'HTML', link_preview_options: { is_disabled: true } });
+  for (let i = 0; i < chunks.length; i++) {
+    const last = i === chunks.length - 1;
+    const res = await tg(env, 'sendMessage', {
+      chat_id: chatId, text: chunks[i], parse_mode: 'HTML', link_preview_options: { is_disabled: true },
+      ...(last ? { reply_markup: { inline_keyboard: [[{ text: '🗑 Видалити розмову', callback_data: 'd:' + s.id }]] } } : {})
+    });
     if (res.ok) lastId = res.result.message_id;
   }
   // Реплай на останню частину — відповідь піде в цю розмову
@@ -295,6 +341,7 @@ async function onTelegram(req, env) {
     return new Response('forbidden', { status: 403 });
   }
   const u = await req.json().catch(() => ({}));
+  if (u.callback_query) { await onButton(env, u.callback_query); return new Response('ok'); }
   const m = u.message;
   if (!m || !m.chat) return new Response('ok');
   const chatId = String(m.chat.id);
@@ -308,11 +355,11 @@ async function onTelegram(req, env) {
     return new Response('ok');
   }
 
-  const say = (text) => tg(env, 'sendMessage', { chat_id: chatId, text, parse_mode: 'HTML', reply_parameters: { message_id: m.message_id, allow_sending_without_reply: true } });
+  const say = (text, extra) => tg(env, 'sendMessage', { chat_id: chatId, text, parse_mode: 'HTML', reply_parameters: { message_id: m.message_id, allow_sending_without_reply: true }, ...(extra || {}) });
 
-  if (m.text && /^\/(start|help)\b/.test(m.text)) {
-    await setCommands(env);
-    await say('Бот чату на сайті працює ✅\nНові повідомлення з сайту приходять сюди. Щоб відповісти — зробіть <b>реплай</b> на повідомлення клієнта. Якщо зараз активна лише одна розмова, можна писати і без реплаю.\n\n/list — останні розмови\n/view (реплаєм на повідомлення клієнта) — уся розмова\n/del (реплаєм на повідомлення клієнта) — видалити розмову');
+  if (m.text && (/^\/(start|help)\b/.test(m.text) || m.text === BTN_HELP)) {
+    if (m.text !== BTN_HELP) { await setCommands(env); await setHook(env, new URL(req.url).origin); }
+    await say(HELP, { reply_markup: MENU });
     return new Response('ok');
   }
   if (m.text && /^\/del\b/.test(m.text)) {
@@ -336,13 +383,14 @@ async function onTelegram(req, env) {
     await sendTranscript(env, chatId, s);
     return new Response('ok');
   }
-  if (m.text && /^\/list\b/.test(m.text)) {
-    const r = await env.DB.prepare('SELECT code, last, contact, page FROM sessions ORDER BY last DESC LIMIT 8').all();
+  if (m.text && (/^\/list\b/.test(m.text) || m.text === BTN_LIST)) {
+    const r = await env.DB.prepare('SELECT id, code, last, contact FROM sessions ORDER BY last DESC LIMIT 10').all();
     const rows = (r.results || []).map((x) => {
       const ago = Math.round((now() - x.last) / 6e4);
-      return `#${x.code} · ${ago < 60 ? ago + ' хв' : ago < 2880 ? Math.round(ago / 60) + ' год' : Math.round(ago / 1440) + ' дн'} тому${x.contact ? ' · ' + esc(x.contact) : ''}\n   переглянути: /view_${x.code}`;
+      const when = ago < 60 ? ago + ' хв' : ago < 2880 ? Math.round(ago / 60) + ' год' : Math.round(ago / 1440) + ' дн';
+      return [{ text: `#${x.code} · ${when} тому${x.contact ? ' · ' + x.contact : ''}`.slice(0, 60), callback_data: 'v:' + x.id }];
     });
-    await say(rows.length ? rows.join('\n') : 'Розмов ще немає.');
+    await say(rows.length ? 'Останні розмови — натисніть, щоб переглянути:' : 'Розмов ще немає.', rows.length ? { reply_markup: { inline_keyboard: rows } } : { reply_markup: MENU });
     return new Response('ok');
   }
 
@@ -385,7 +433,7 @@ async function onSetup(env, url) {
   if (!env.WEBHOOK_SECRET || url.searchParams.get('key') !== env.WEBHOOK_SECRET) return new Response('forbidden', { status: 403 });
   const me = await tg(env, 'getMe', {});
   const hook = await tg(env, 'setWebhook', {
-    url: `${url.origin}/tg`, secret_token: env.WEBHOOK_SECRET, allowed_updates: ['message'], drop_pending_updates: true
+    url: `${url.origin}/tg`, secret_token: env.WEBHOOK_SECRET, allowed_updates: ['message', 'callback_query'], drop_pending_updates: true
   });
   await setCommands(env);
   const ok = me.ok && hook.ok;
