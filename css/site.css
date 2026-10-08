@@ -514,3 +514,21 @@ button.hm-opt { width: 100%; border: 0; background: none; font: inherit; text-al
 }
 /* Місце під кнопку чату, щоб вона не перекривала нижній рядок підвалу */
 body.hm .hm-ft { padding-bottom: 100px; }
+/* Чат: меню «⋯» (нова розмова / видалити) і підтвердження */
+.hc-more-w { position: relative; display: none; flex: none; }
+.hc-panel.hc-has .hc-more-w { display: block; }
+.hc-more { width: 38px; height: 38px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .1); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+.hc-more:hover { background: rgba(255, 255, 255, .2); }
+.hc-more svg { width: 18px; height: 18px; fill: #fff; }
+.hc-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 2; min-width: 200px; padding: 6px; border-radius: 14px; background: #fff; box-shadow: 0 16px 40px rgba(8, 20, 40, .3); opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .15s, transform .18s, visibility .18s; }
+.hc-more-w.open .hc-menu { opacity: 1; visibility: visible; transform: none; }
+.hc-menu button { display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: 10px; background: none; color: #111a28; font: inherit; font-size: .92rem; text-align: left; cursor: pointer; }
+.hc-menu button:hover { background: #eef1f6; }
+.hc-menu .hc-danger { color: #b42323; }
+.hc-confirm { padding: 12px 14px; background: var(--hm-card, #f8f9fc); border-top: 1px solid var(--hm-line, #d9dfe8); }
+.hc-confirm p { margin: 0 0 10px; font-size: .88rem; line-height: 1.4; text-align: left; }
+.hc-confirm div { display: flex; gap: 8px; }
+.hc-confirm button { flex: 1; padding: 10px 12px; border: 0; border-radius: 12px; font: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; background: var(--hm-blue-soft, #dfe7f6); color: var(--hm-link, #1f56c3); }
+.hc-confirm .hc-yes { background: var(--hm-blue, #1f56c3); color: #fff; }
+.hc-confirm .hc-yes.hc-danger { background: #c62f2f; }
+.hc-confirm button:disabled { opacity: .6; }

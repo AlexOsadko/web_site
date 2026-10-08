@@ -104,6 +104,8 @@
       '<div class="hc-top">' +
         '<img src="' + BASE + 'assets/logo-mark.png" alt="" width="40" height="40">' +
         '<div class="hc-who"><b>Олександр Осадько</b><span>Адвокат · відповідаю тут, у чаті</span></div>' +
+        '<div class="hc-more-w"><button type="button" class="hc-more" aria-label="Дії з розмовою" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>' +
+          '<div class="hc-menu" role="menu"><button type="button" role="menuitem" data-act="new">Нова розмова</button><button type="button" role="menuitem" data-act="del" class="hc-danger">Видалити розмову</button></div></div>' +
         '<button type="button" class="hc-x" aria-label="Закрити чат"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>' +
       "</div>" +
       '<div class="hc-body" aria-live="polite"></div>' +
@@ -122,13 +124,88 @@
     tsBox = panel.querySelector(".hc-ts");
 
     panel.querySelector(".hc-x").addEventListener("click", close);
+    var moreW = panel.querySelector(".hc-more-w"), moreB = panel.querySelector(".hc-more");
+    moreB.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var on = !moreW.classList.contains("open");
+      moreW.classList.toggle("open", on);
+      moreB.setAttribute("aria-expanded", on ? "true" : "false");
+    });
+    panel.addEventListener("click", function (e) {
+      if (!e.target.closest(".hc-more-w")) { moreW.classList.remove("open"); moreB.setAttribute("aria-expanded", "false"); }
+    });
+    panel.querySelector(".hc-menu").addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-act]");
+      if (!b) return;
+      moreW.classList.remove("open");
+      confirmAct(b.getAttribute("data-act"));
+    });
     form.addEventListener("submit", function (e) { e.preventDefault(); send(); });
     ta.addEventListener("keydown", function (e) {
       if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); }
     });
     ta.addEventListener("input", grow);
 
+    greet();
+    syncMore();
+  }
+
+  function greet() {
     sys("Добрий день! Опишіть коротко, що сталося, — я відповім тут, щойно побачу повідомлення.", "hc-greet");
+  }
+
+  // Меню «⋯» показуємо лише тоді, коли розмова вже є
+  function syncMore() {
+    if (panel) panel.classList.toggle("hc-has", !!st.sid);
+  }
+
+  // ── Нова розмова / видалення ───────────────────────────────────────
+  function confirmAct(act) {
+    var old = panel.querySelector(".hc-confirm");
+    if (old) old.remove();
+    var c = document.createElement("div");
+    c.className = "hc-confirm";
+    c.innerHTML = "<p></p><div><button type=\"button\" class=\"hc-yes\"></button><button type=\"button\" class=\"hc-no\">Скасувати</button></div>";
+    c.querySelector("p").textContent = act === "del"
+      ? "Видалити розмову? Листування буде стерто з сервера, відновити його не вийде."
+      : "Почати нову розмову? Поточне листування зникне з цього вікна (адвокат його бачитиме).";
+    var yes = c.querySelector(".hc-yes");
+    yes.textContent = act === "del" ? "Видалити" : "Почати нову";
+    if (act === "del") yes.classList.add("hc-danger");
+    c.querySelector(".hc-no").addEventListener("click", function () { c.remove(); });
+    yes.addEventListener("click", function () {
+      yes.disabled = true;
+      if (act === "new") { c.remove(); reset(); return; }
+      fetch(ENDPOINT + "/chat/delete", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid: st.sid })
+      }).then(function (r) {
+        if (!r.ok && r.status !== 404) throw new Error("http");
+        c.remove(); reset();
+        sys("Розмову видалено.");
+        if (window.osadkoTrack) window.osadkoTrack("chat_delete");
+      }).catch(function () {
+        yes.disabled = false;
+        c.querySelector("p").textContent = "Не вдалося видалити розмову. Спробуйте ще раз трохи згодом.";
+      });
+    });
+    form.parentNode.insertBefore(c, form);
+  }
+
+  function reset() {
+    clearTimeout(timer);
+    st = {};
+    save();
+    rendered = {};
+    body.innerHTML = "";
+    greet();
+    ta.value = ""; grow();
+    ta.placeholder = "Коротко опишіть вашу ситуацію…";
+    tsToken = "";
+    if (window.turnstile && tsWidget) { try { window.turnstile.reset(tsWidget); } catch (e) {} }
+    else { tsWidget = null; loadTS(); }
+    if (toast) toast.classList.remove("show");
+    syncMore();
+    ta.focus();
   }
 
   function grow() {
@@ -272,7 +349,7 @@
     }).then(function (j) {
       el.classList.remove("hc-pending");
       if (j.id) { rendered[j.id] = el; el.setAttribute("data-id", j.id); }
-      if (j.sid) { st.sid = j.sid; }
+      if (j.sid) { st.sid = j.sid; syncMore(); }
       ta.placeholder = "Напишіть повідомлення…";
       st.act = Date.now();
       save();

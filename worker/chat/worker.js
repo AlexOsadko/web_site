@@ -33,6 +33,10 @@ export default {
         return json(await onSend(req, env), cors);
       }
       if (url.pathname === '/chat/poll' && req.method === 'GET') return json(await onPoll(url, env), cors);
+      if (url.pathname === '/chat/delete' && req.method === 'POST') {
+        if (!cors['Access-Control-Allow-Origin']) throw new HttpError(403, 'origin');
+        return json(await onDelete(req, env), cors);
+      }
       if (url.pathname === '/chat/seen' && req.method === 'POST') {
         if (!cors['Access-Control-Allow-Origin']) throw new HttpError(403, 'origin');
         return json(await onSeen(req, env), cors);
@@ -213,6 +217,62 @@ async function onPoll(url, env) {
   return { msgs: r.results || [] };
 }
 
+// ── Перегляд усієї розмови в Telegram ──────────────────────────────
+function kyivTime(t) {
+  try {
+    return new Date(t).toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  } catch (e) { return new Date(t).toISOString().slice(5, 16).replace('T', ' '); }
+}
+
+async function sendTranscript(env, chatId, s) {
+  const r = await env.DB.prepare('SELECT who, text, t FROM msgs WHERE sid = ?1 ORDER BY id LIMIT 300').bind(s.id).all();
+  const msgs = r.results || [];
+  const head = [`📋 <b>Розмова #${s.code}</b> · почата ${esc(kyivTime(s.created))}`];
+  if (s.contact) head.push(`📞 Контакт: <code>${esc(s.contact)}</code>`);
+  const pp = pagePath(s.page);
+  if (pp) head.push(`📄 Сторінка: ${pp === '/' || pp === '/index.html' ? 'Головна' : esc(pp)}`);
+  const parts = [head.join('\n')];
+  for (const x of msgs) {
+    parts.push(`${x.who === 'adv' ? '⚖️ <b>Ви</b>' : '👤 <b>Клієнт</b>'} · ${esc(kyivTime(x.t))}\n${esc(x.text)}`);
+  }
+  if (!msgs.length) parts.push('<i>Повідомлень немає.</i>');
+  // Telegram: до 4096 символів в одному повідомленні — ділимо
+  const chunks = [];
+  let cur = '';
+  for (const p of parts) {
+    const piece = p.length > 3900 ? p.slice(0, 3900) + '…' : p;
+    if ((cur + '\n\n' + piece).length > 3900) { chunks.push(cur); cur = piece; }
+    else cur = cur ? cur + '\n\n' + piece : piece;
+  }
+  if (cur) chunks.push(cur);
+  let lastId = 0;
+  for (const c of chunks) {
+    const res = await tg(env, 'sendMessage', { chat_id: chatId, text: c, parse_mode: 'HTML', link_preview_options: { is_disabled: true } });
+    if (res.ok) lastId = res.result.message_id;
+  }
+  // Реплай на останню частину — відповідь піде в цю розмову
+  if (lastId) await env.DB.prepare('INSERT OR REPLACE INTO tgmap (tg, sid) VALUES (?1, ?2)').bind(lastId, s.id).run();
+}
+
+// ── Видалення розмови (відвідувачем на сайті або адвокатом через /del) ─
+async function deleteSession(env, sid) {
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM msgs WHERE sid = ?1').bind(sid),
+    env.DB.prepare('DELETE FROM tgmap WHERE sid = ?1').bind(sid),
+    env.DB.prepare('DELETE FROM sessions WHERE id = ?1').bind(sid)
+  ]);
+}
+
+async function onDelete(req, env) {
+  const b = await req.json().catch(() => null);
+  if (!b || typeof b.sid !== 'string' || !/^[\w-]{20,40}$/.test(b.sid)) throw new HttpError(400, 'sid');
+  const s = await env.DB.prepare('SELECT id, code FROM sessions WHERE id = ?1').bind(b.sid).first();
+  if (!s) throw new HttpError(404, 'gone');
+  await deleteSession(env, s.id);
+  await tg(env, 'sendMessage', { chat_id: env.OWNER_CHAT, parse_mode: 'HTML', text: `🗑 <b>#${s.code}</b>: клієнт видалив розмову на сайті. Відповідати в неї вже не можна.` });
+  return { ok: true };
+}
+
 // ── Відвідувач побачив відповіді → позначка 👀 на них у Telegram ────
 async function onSeen(req, env) {
   const b = await req.json().catch(() => null);
@@ -251,14 +311,36 @@ async function onTelegram(req, env) {
   const say = (text) => tg(env, 'sendMessage', { chat_id: chatId, text, parse_mode: 'HTML', reply_parameters: { message_id: m.message_id, allow_sending_without_reply: true } });
 
   if (m.text && /^\/(start|help)\b/.test(m.text)) {
-    await say('Бот чату на сайті працює ✅\nНові повідомлення з сайту приходять сюди. Щоб відповісти — зробіть <b>реплай</b> на повідомлення клієнта. Якщо зараз активна лише одна розмова, можна писати і без реплаю.\n\n/list — активні розмови');
+    await setCommands(env);
+    await say('Бот чату на сайті працює ✅\nНові повідомлення з сайту приходять сюди. Щоб відповісти — зробіть <b>реплай</b> на повідомлення клієнта. Якщо зараз активна лише одна розмова, можна писати і без реплаю.\n\n/list — останні розмови\n/view (реплаєм на повідомлення клієнта) — уся розмова\n/del (реплаєм на повідомлення клієнта) — видалити розмову');
+    return new Response('ok');
+  }
+  if (m.text && /^\/del\b/.test(m.text)) {
+    const rep = m.reply_to_message;
+    const row = rep && await env.DB.prepare('SELECT sid FROM tgmap WHERE tg = ?1').bind(rep.message_id).first();
+    const s = row && await env.DB.prepare('SELECT id, code FROM sessions WHERE id = ?1').bind(row.sid).first();
+    if (!s) { await say('Щоб видалити розмову, надішліть /del <b>реплаєм</b> на повідомлення клієнта.'); return new Response('ok'); }
+    await deleteSession(env, s.id);
+    await say(`🗑 Розмову #${s.code} видалено з сервера. Клієнт її більше не побачить.`);
+    return new Response('ok');
+  }
+  if (m.text && /^\/view/.test(m.text)) {
+    let s = null;
+    const mc = m.text.match(/^\/view_([A-Z0-9]{4})\b/);
+    if (mc) s = await env.DB.prepare('SELECT * FROM sessions WHERE code = ?1 ORDER BY last DESC').bind(mc[1]).first();
+    else if (m.reply_to_message) {
+      const row = await env.DB.prepare('SELECT sid FROM tgmap WHERE tg = ?1').bind(m.reply_to_message.message_id).first();
+      if (row) s = await env.DB.prepare('SELECT * FROM sessions WHERE id = ?1').bind(row.sid).first();
+    }
+    if (!s) { await say('Розмову не знайдено. Надішліть /view <b>реплаєм</b> на повідомлення клієнта або виберіть розмову в /list.'); return new Response('ok'); }
+    await sendTranscript(env, chatId, s);
     return new Response('ok');
   }
   if (m.text && /^\/list\b/.test(m.text)) {
     const r = await env.DB.prepare('SELECT code, last, contact, page FROM sessions ORDER BY last DESC LIMIT 8').all();
     const rows = (r.results || []).map((x) => {
       const ago = Math.round((now() - x.last) / 6e4);
-      return `#${x.code} · ${ago < 60 ? ago + ' хв' : Math.round(ago / 60) + ' год'} тому${x.contact ? ' · ' + esc(x.contact) : ''}`;
+      return `#${x.code} · ${ago < 60 ? ago + ' хв' : ago < 2880 ? Math.round(ago / 60) + ' год' : Math.round(ago / 1440) + ' дн'} тому${x.contact ? ' · ' + esc(x.contact) : ''}\n   переглянути: /view_${x.code}`;
     });
     await say(rows.length ? rows.join('\n') : 'Розмов ще немає.');
     return new Response('ok');
@@ -294,6 +376,10 @@ async function onTelegram(req, env) {
   return new Response('ok');
 }
 
+function setCommands(env) {
+  return tg(env, 'setMyCommands', { commands: [{ command: 'list', description: 'Останні розмови' }, { command: 'view', description: 'Уся розмова (реплаєм)' }, { command: 'del', description: 'Видалити розмову (реплаєм)' }, { command: 'help', description: 'Як відповідати' }] });
+}
+
 // ── Разове налаштування вебхука: відкрити /setup?key=WEBHOOK_SECRET ─
 async function onSetup(env, url) {
   if (!env.WEBHOOK_SECRET || url.searchParams.get('key') !== env.WEBHOOK_SECRET) return new Response('forbidden', { status: 403 });
@@ -301,7 +387,7 @@ async function onSetup(env, url) {
   const hook = await tg(env, 'setWebhook', {
     url: `${url.origin}/tg`, secret_token: env.WEBHOOK_SECRET, allowed_updates: ['message'], drop_pending_updates: true
   });
-  await tg(env, 'setMyCommands', { commands: [{ command: 'list', description: 'Активні розмови' }, { command: 'help', description: 'Як відповідати' }] });
+  await setCommands(env);
   const ok = me.ok && hook.ok;
   const lines = [
     ok ? '✅ Готово.' : '❌ Помилка — перевірте CHAT_BOT_TOKEN.',
