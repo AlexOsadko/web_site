@@ -196,12 +196,13 @@
 "https://lexinform.com.ua/sudova-praktyka/ukladennya-kompaniyeyu-z-upravlinnya-aktyvamy-pravochynu-shhodo-aktyviv-korporatyvnogo-fondu-z-perevyshhennyam-ustanovlenogo-limitu-tyagne-vyznannya-takogo-pravochynu-nedijsnym/",
 "https://jurliga.ligazakon.net/news/246633_chi-mozhe-sud-zmenshiti-podatkoviy-shtraf-ustanovleniy-zakonom-visnovok-spl",
 "https://unba.org.ua/publications/12365-advokats-kij-zapit-i-vidpovidal-nist-za-jogo-ignoruvannya-problemi-praktiki-ta-shlyahi-vdoskonalennya-proceduri.html",
-"https://protocol.ua/ua/oglyad_praktiki_vs_vid_rostislava_kravtsya_shcho_opublikovana_z_03_veresnya_po_09_govtnya_2026_roku/"
+"https://protocol.ua/ua/oglyad_praktiki_vs_vid_rostislava_kravtsya_shcho_opublikovana_z_03_veresnya_po_09_govtnya_2026_roku/",
+"https://suspilne.media/1424997-ssa-ne-maut-davati-putinu-finansovij-rativnij-krug-zaava-senatoriv/"
 ],
-"day": "2026-10-11",
-"count": 2,
-"total": 198,
-"seq": 227,
+"day": "2026-10-12",
+"count": 1,
+"total": 199,
+"seq": 228,
 "orig_recent": [
 "інструкція:Вас викликають на допит як свідка: що ро",
 "міф:Винним визнає лише суд» — а поліція на м",
@@ -305,7 +306,7 @@
 }
 },
 "update_offset": 527643341,
-"last_content_ts": 1791740373.165051,
+"last_content_ts": 1791752616.748151,
 "awaiting_edit": "",
 "stats": {
 "generated": 6,
@@ -322,5 +323,5 @@
 "headline": "Чоловік/дружина виїхав і забрав дитину без вашої згоди: що робити"
 }
 ],
-"general": 9
+"general": 10
 }
