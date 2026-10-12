@@ -22,12 +22,7 @@ const HELP = 'Бот чату на сайті працює ✅\n\nНові по�
   '<b>📋 Розмови</b> — останні розмови; натисніть на потрібну, щоб побачити все листування.\n' +
   'Під кожним новим зверненням — кнопки <b>📋 Уся розмова</b> і <b>🗑 Видалити</b>.\n' +
   'Також працюють команди /list, /view і /del (реплаєм на повідомлення клієнта).';
-const REVIEW_URL = 'https://osadko.online/vidguk/';
-const REVIEW_TEXT = 'Дякую за довіру! Якщо вам зручно, залиште, будь ласка, короткий відгук про нашу співпрацю — це займе хвилину й допоможе іншим людям обрати адвоката: ' + REVIEW_URL;
-const convButtons = (sid) => ({ inline_keyboard: [
-  [{ text: '📋 Уся розмова', callback_data: 'v:' + sid }, { text: '🗑 Видалити', callback_data: 'd:' + sid }],
-  [{ text: '⭐ Попросити відгук', callback_data: 'r:' + sid }]
-] });
+const convButtons = (sid) => ({ inline_keyboard: [[{ text: '📋 Уся розмова', callback_data: 'v:' + sid }, { text: '🗑 Видалити', callback_data: 'd:' + sid }]] });
 
 class HttpError extends Error {
   constructor(status, message) { super(message); this.status = status; }
@@ -245,17 +240,6 @@ async function onButton(env, cq) {
   const s = sid && await env.DB.prepare('SELECT * FROM sessions WHERE id = ?1').bind(sid).first();
   if (!s) return ack('Розмову не знайдено — можливо, її вже видалено');
   if (act === 'v') { await ack(); return sendTranscript(env, chatId, s); }
-  if (act === 'r') {
-    const t = now();
-    const sent = await tg(env, 'sendMessage', { chat_id: chatId, parse_mode: 'HTML', link_preview_options: { is_disabled: true },
-      text: `⭐ <b>#${s.code}</b>: клієнту в чат надіслано прохання про відгук:\n<i>${esc(REVIEW_TEXT)}</i>` });
-    await env.DB.batch([
-      env.DB.prepare("INSERT INTO msgs (sid, who, text, t, tg) VALUES (?1, 'adv', ?2, ?3, ?4)").bind(s.id, REVIEW_TEXT, t, sent.ok ? sent.result.message_id : null),
-      env.DB.prepare('UPDATE sessions SET last = ?2 WHERE id = ?1').bind(s.id, t),
-      ...(sent.ok ? [env.DB.prepare('INSERT OR REPLACE INTO tgmap (tg, sid) VALUES (?1, ?2)').bind(sent.result.message_id, s.id)] : [])
-    ]);
-    return ack('Прохання про відгук надіслано');
-  }
   if (act === 'd') {
     await ack();
     return tg(env, 'sendMessage', {
@@ -308,7 +292,7 @@ async function sendTranscript(env, chatId, s) {
     const last = i === chunks.length - 1;
     const res = await tg(env, 'sendMessage', {
       chat_id: chatId, text: chunks[i], parse_mode: 'HTML', link_preview_options: { is_disabled: true },
-      ...(last ? { reply_markup: { inline_keyboard: [[{ text: '⭐ Попросити відгук', callback_data: 'r:' + s.id }, { text: '🗑 Видалити розмову', callback_data: 'd:' + s.id }]] } } : {})
+      ...(last ? { reply_markup: { inline_keyboard: [[{ text: '🗑 Видалити розмову', callback_data: 'd:' + s.id }]] } } : {})
     });
     if (res.ok) lastId = res.result.message_id;
   }

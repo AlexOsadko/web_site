@@ -107,7 +107,7 @@
         '<img src="' + BASE + 'assets/logo-mark.png" alt="" width="40" height="40">' +
         '<div class="hc-who"><b>Олександр Осадько</b><span>Адвокат · відповідаю тут, у чаті</span></div>' +
         '<div class="hc-more-w"><button type="button" class="hc-more" aria-label="Дії з розмовою" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>' +
-          '<div class="hc-menu" role="menu"><a class="hc-rev" role="menuitem" href="' + BASE + 'vidguk/" target="_blank" rel="noopener">⭐ Залишити відгук</a><button type="button" role="menuitem" data-act="new">Нова розмова</button><button type="button" role="menuitem" data-act="del" class="hc-danger">Видалити розмову</button></div></div>' +
+          '<div class="hc-menu" role="menu"><button type="button" role="menuitem" data-act="new">Нова розмова</button><button type="button" role="menuitem" data-act="del" class="hc-danger">Видалити розмову</button></div></div>' +
         '<button type="button" class="hc-x" aria-label="Закрити чат"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>' +
       "</div>" +
       '<div class="hc-body" aria-live="polite"></div>' +
@@ -137,7 +137,6 @@
       if (!e.target.closest(".hc-more-w")) { moreW.classList.remove("open"); moreB.setAttribute("aria-expanded", "false"); }
     });
     panel.querySelector(".hc-menu").addEventListener("click", function (e) {
-      if (e.target.closest(".hc-rev")) { moreW.classList.remove("open"); if (window.osadkoTrack) window.osadkoTrack("chat_review"); return; }
       var b = e.target.closest("button[data-act]");
       if (!b) return;
       moreW.classList.remove("open");
@@ -226,8 +225,7 @@
     var el = document.createElement("div");
     el.className = "hc-msg " + (who === "me" ? "hc-me" : "hc-adv");
     var p = document.createElement("p");
-    if (who === "me") p.textContent = text;
-    else linkify(p, text);
+    p.textContent = text;
     el.appendChild(p);
     if (t) {
       var s = document.createElement("small");
@@ -238,19 +236,6 @@
     body.appendChild(el);
     body.scrollTop = body.scrollHeight;
     return el;
-  }
-
-  // Посилання у відповідях адвоката — клікабельні (без вставки HTML)
-  function linkify(p, text) {
-    var re = /https?:\/\/[^\s<>"]+[^\s<>".,;:!?)\]]/g, last = 0, m;
-    while ((m = re.exec(text))) {
-      if (m.index > last) p.appendChild(document.createTextNode(text.slice(last, m.index)));
-      var a = document.createElement("a");
-      a.href = m[0]; a.textContent = m[0]; a.target = "_blank"; a.rel = "noopener nofollow";
-      p.appendChild(a);
-      last = m.index + m[0].length;
-    }
-    if (last < text.length) p.appendChild(document.createTextNode(text.slice(last)));
   }
 
   function sys(text, cls) {
