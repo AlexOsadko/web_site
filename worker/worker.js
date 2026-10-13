@@ -63,6 +63,7 @@ function courtMenuKb() {
     [{ text: '⚖️ Справи адвоката', callback_data: 'crep' }],
     [{ text: '🔔 Нагадування', callback_data: 'crem' }],
     [{ text: '🔄 Терміновий прогін зараз', callback_data: 'crun' }],
+    [{ text: '🔎 Пошук практики', callback_data: 'cvs' }, { text: '📰 Свіжа практика', callback_data: 'cdig' }],
   ] };
 }
 
@@ -72,9 +73,9 @@ function courtReplyKb() {
     keyboard: [
       [{ text: '📑 Повний список' }],
       [{ text: '👥 Справи клієнтів' }, { text: '⚖️ Справи адвоката' }],
-      [{ text: '🔎 Пошук практики ВС' }, { text: '📋 Список клієнтів' }],
-      [{ text: '🔔 Нагадування' }, { text: '➕ Додати клієнта' }],
-      [{ text: '🔄 Терміновий прогін' }],
+      [{ text: '🔎 Пошук практики' }, { text: '📰 Свіжа практика' }],
+      [{ text: '📋 Список клієнтів' }, { text: '🔔 Нагадування' }],
+      [{ text: '➕ Додати клієнта' }, { text: '🔄 Терміновий прогін' }],
     ],
     resize_keyboard: true,
     input_field_placeholder: 'Оберіть дію (меню можна згорнути ☰)',
@@ -109,7 +110,8 @@ async function setupCommands(env) {
     { command: 'list', description: '📋 Список клієнтів' },
     { command: 'add', description: '➕ Додати клієнта' },
     { command: 'restart', description: '🔄 Терміновий прогін' },
-    { command: 'vs', description: '🔎 Практика ВС за темою' },
+    { command: 'vs', description: '🔎 Практика судів за темою' },
+    { command: 'digest', description: '📰 Свіжа практика зараз' },
     { command: 'start', description: '▶️ Старт / головне меню' },
     { command: 'cancel', description: '↩️ Скасувати' },
     { command: 'help', description: 'ℹ️ Довідка' },
@@ -572,16 +574,42 @@ async function triggerVsPractice(env, query) {
   }
 }
 
-// Запускає пошук практики ВС за темою й відповідає адвокату.
+// Запускає пошук практики за темою й відповідає адвокату.
 async function runVsSearch(env, query) {
   const ok = await triggerVsPractice(env, query);
   return tg(env, 'sendMessage', {
     chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
     text: ok
-      ? `🔎 Шукаю практику ВС за темою «${esc(query)}». За хвилину надішлю сюди розбір `
-        + `(або повідомлю, що серед свіжих публікацій ВС нічого релевантного немає).`
+      ? `🔎 Шукаю практику за темою «${esc(query)}» серед публікацій ВС, Пленуму ВС і КСУ. `
+        + `За 2–5 хв надішлю сюди до 3 розборів (або повідомлю, що нічого релевантного немає).`
       : '⚠️ Не вдалося запустити пошук. Перевірте, що у Worker додано секрет '
         + '<code>GH_DISPATCH_TOKEN</code>.',
+  });
+}
+
+// «📰 Свіжа практика» — позачерговий запуск щоденної добірки (practice-digest.yml).
+async function runDigest(env) {
+  let ok = false;
+  if (env.GH_DISPATCH_TOKEN) {
+    try {
+      const r = await fetch(
+        `https://api.github.com/repos/${env.GH_REPO || 'AlexOsadko/web_site'}/actions/workflows/practice-digest.yml/dispatches`,
+        { method: 'POST', headers: {
+            'Authorization': `Bearer ${env.GH_DISPATCH_TOKEN}`,
+            'Accept': 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+            'User-Agent': 'osadko-telegram-bot',
+            'Content-Type': 'application/json',
+          }, body: JSON.stringify({ ref: 'main', inputs: { dry: false } }) });
+      ok = r.status === 204;
+    } catch (e) { ok = false; }
+  }
+  return tg(env, 'sendMessage', {
+    chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+    text: ok
+      ? '📰 Шукаю свіжу практику ВС, Пленуму ВС і КСУ. Якщо є нові вартісні рішення — за кілька хвилин '
+        + 'надішлю сюди до 3 розборів; якщо нічого нового — промовчу. (Щоранку добірка приходить сама.)'
+      : '⚠️ Не вдалося запустити добірку. Перевірте, що у Worker додано секрет <code>GH_DISPATCH_TOKEN</code>.',
   });
 }
 
@@ -628,9 +656,16 @@ async function handleUpdate(update, env) {
     // --- меню бота відстеження судових справ ---
     if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crepall', 'crun',
          'chide', 'cunhide', 'chidden', 'cunhide1', 'cpurge1', 'cpurge',
-         'crem', 'cremdel', 'crempg', 'crepp', 'cnoop'].includes(action)) {
+         'crem', 'cremdel', 'crempg', 'crepp', 'cnoop', 'cvs', 'cdig'].includes(action)) {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
       if (action === 'cnoop') return;
+      if (action === 'cdig') return runDigest(env);
+      if (action === 'cvs') {
+        await env.KV.put('court_await', 'vs');
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+          text: '🔎 Напишіть тему для пошуку практики (ВС, Пленум ВС, КСУ) — напр. '
+            + '<code>відмова від огляду ст. 130</code>. Скасувати — /cancel.' });
+      }
       if (action === 'cmenu') return showCourtMenu(env);
       if (action === 'crep') return showCourtReport(env, 'advocate', 0);
       if (action === 'crepc') return showCourtReport(env, 'clients', 0);
@@ -786,7 +821,8 @@ async function handleUpdate(update, env) {
           '/advocate — ⚖️ справи адвоката\n/reminders — 🔔 нагадування\n' +
           '/list — 📋 список клієнтів\n' +
           '/add — ➕ додати клієнта\n/restart — 🔄 терміновий прогін\n' +
-          '/vs &lt;тема&gt; — 🔎 практика ВС за темою (або кнопка «🔎 Пошук практики ВС»)\n' +
+          '/vs &lt;тема&gt; — 🔎 практика судів за темою (або кнопка «🔎 Пошук практики»)\n' +
+          '/digest — 📰 свіжа практика зараз (щоранку приходить сама)\n' +
           '/cancel — ↩️ скасувати', reply_markup: courtReplyKb() });
     }
 
@@ -822,13 +858,19 @@ async function handleUpdate(update, env) {
       return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt });
     }
 
-    // Кнопка «🔎 Пошук практики ВС» — просимо тему (стан court_await='vs').
-    if (/^🔎/.test(body) || /^пошук практики вс$/i.test(body)) {
+    // Кнопка «🔎 Пошук практики» — просимо тему (стан court_await='vs').
+    if (/^🔎/.test(body) || /^пошук практики( вс)?$/i.test(body)) {
       await env.KV.put('court_await', 'vs');
       return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-        text: '🔎 Напишіть тему для пошуку практики ВС — напр. '
-          + '<code>поділ майна подружжя</code>, <code>стягнення аліментів</code>, '
-          + '<code>ст. 130 КУпАП</code>. Скасувати — /cancel.' });
+        text: '🔎 Напишіть тему для пошуку практики (ВС, Пленум ВС, КСУ) — напр. '
+          + '<code>відмова від огляду ст. 130</code>, <code>аліменти на повнолітню дитину</code>, '
+          + '<code>обшук без ухвали</code>. Скасувати — /cancel.' });
+    }
+
+    // Кнопка «📰 Свіжа практика» / команда /digest — позачергова добірка.
+    if (/^📰/.test(body) || /^\/digest$/i.test(body)) {
+      await env.KV.delete('court_await');
+      return runDigest(env);
     }
 
     // Команда /вс <тема> — те саме напряму (без \b: у JS вона не працює після
@@ -840,7 +882,7 @@ async function handleUpdate(update, env) {
         if (!query) {
           await env.KV.put('court_await', 'vs');
           return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-            text: '🔎 Напишіть тему для пошуку практики ВС (напр. '
+            text: '🔎 Напишіть тему для пошуку практики (напр. '
               + '<code>поділ майна подружжя</code>). Скасувати — /cancel.' });
         }
         await env.KV.delete('court_await');
