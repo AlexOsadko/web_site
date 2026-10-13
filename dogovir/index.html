@@ -526,7 +526,6 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
           <button class="btn btn-primary" id="cat_add" type="button">Додати позначені до переліку</button>
           <button class="btn btn-ghost" id="cat_reset" type="button">Зняти позначки</button>
           <button class="btn btn-ghost" id="svc_wipe" type="button">Спорожнити перелік</button>
-          <button class="btn btn-ghost" id="svc_preset" type="button">Типовий прайс</button>
           <label class="cat-chk"><input type="checkbox" id="cat_with_code" checked> дописувати код («Г-04. …»)</label>
           <span class="reg-count" id="cat_count">Позначено: <b>0</b></span>
         </div>
@@ -1059,18 +1058,7 @@ function isHourUnit(u){ return String(u||"").indexOf("година")>=0; }
 
 /* ---------- state ---------- */
 /* Перелік порожній: пункти вносяться під час заповнення — з каталогу
-   (Додаток № 1) або вручну. Типовий прайс лишається як необовʼязкова
-   заготовка, що завантажується кнопкою «Типовий прайс». */
-const SVC_PRESET = [
-  {t:"Консультації щодо можливості та доцільності вирішення Справи у судовому порядку", h:"3", a:"12 000,00", manual:true, unit:"1 година"},
-  {t:"Складання позову про стягнення заборгованості", h:"5", a:"20 000,00", manual:true, unit:"1 документ"},
-  {t:"Підготовка до подачі позову до Суду", h:"2", a:"8 000,00", manual:true, unit:"1 доручення"},
-  {t:"Складання відповіді на відзив", h:"", a:"6 000,00", manual:true, unit:"1 документ"},
-  {t:"Складання будь-яких заяв, заперечень, клопотань, тощо", h:"", a:"4 000,00", manual:true, unit:"1 документ"},
-  {t:"Представництво інтересів Клієнта у Суді в одному судовому засіданні", h:"", a:"10 000,00", manual:true, unit:"1 засідання"},
-  {t:"Перегляд справи в суді апеляційної інстанції", h:"", a:"від 15 000,00", manual:true, unit:"1 доручення"},
-  {t:"Перегляд справи в Верховному Суді", h:"", a:"від 20 000,00", manual:true, unit:"1 доручення"}
-];;
+   (Додаток № 1) або вручну. */
 const emptySvc = () => ({t:"",h:"",a:"",manual:false});
 let services = [emptySvc(), emptySvc(), emptySvc()];
 let shortEdited=false, wordsEdited=false, rateEdited=false, payEdited=false;
@@ -1243,13 +1231,6 @@ if($("#cat_hours_only")) $("#cat_hours_only").addEventListener("change",renderCa
 if($("#cat_all_cats")) $("#cat_all_cats").addEventListener("change",renderCatList);
 if($("#cat_add")) $("#cat_add").addEventListener("click",addPickedToServices);
 if($("#cat_reset")) $("#cat_reset").addEventListener("click",()=>{ catPicked.clear(); renderCatList(); });
-if($("#svc_preset")) $("#svc_preset").addEventListener("click",()=>{
-  const filled=services.filter(x=>String(x.t).trim()).length;
-  if(filled && !confirm("Замінити наявні "+filled+" "+plural(filled,["пункт","пункти","пунктів"])+" типовим прайсом?")) return;
-  services=SVC_PRESET.map(x=>Object.assign({},x));
-  renderServices(); syncTotals(); updateRecap();
-  toast("Завантажено типовий прайс — "+SVC_PRESET.length+" пунктів. Відкоригуйте години та гонорар.");
-});
 if($("#svc_wipe")) $("#svc_wipe").addEventListener("click",()=>{
   if(!confirm("Вилучити всі пункти з переліку правничої допомоги?")) return;
   services=[emptySvc(), emptySvc(), emptySvc()];
@@ -2817,7 +2798,7 @@ updateRecap();
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-06.2";
+const GEN_VERSION="2026-10-13.1";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
