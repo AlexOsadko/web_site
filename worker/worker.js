@@ -552,7 +552,7 @@ async function handleRegister(request, env) {
 // (fine-grained PAT з правом Actions: read+write на цей репозиторій).
 async function triggerVsPractice(env, query) {
   const token = env.GH_DISPATCH_TOKEN;
-  if (!token) return false;
+  if (!token) return 0;
   const repo = env.GH_REPO || 'AlexOsadko/web_site';
   try {
     const r = await fetch(
@@ -568,28 +568,28 @@ async function triggerVsPractice(env, query) {
         },
         body: JSON.stringify({ ref: 'main', inputs: { query } }),
       });
-    return r.status === 204;
+    return r.status;
   } catch (e) {
-    return false;
+    return 0;
   }
 }
 
 // Запускає пошук практики за темою й відповідає адвокату.
 async function runVsSearch(env, query) {
-  const ok = await triggerVsPractice(env, query);
+  const status = await triggerVsPractice(env, query);
+  const ok = status === 204;
   return tg(env, 'sendMessage', {
     chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
     text: ok
       ? `🔎 Шукаю практику за темою «${esc(query)}» серед публікацій ВС, Пленуму ВС і КСУ. `
         + `За 2–5 хв надішлю сюди до 3 розборів (або повідомлю, що нічого релевантного немає).`
-      : '⚠️ Не вдалося запустити пошук. Перевірте, що у Worker додано секрет '
-        + '<code>GH_DISPATCH_TOKEN</code>.',
+      : '⚠️ Не вдалося запустити пошук: ' + ghWhy(env, status),
   });
 }
 
 // «📰 Свіжа практика» — позачерговий запуск щоденної добірки (practice-digest.yml).
 async function runDigest(env) {
-  let ok = false;
+  let ok = false, status = 0;
   if (env.GH_DISPATCH_TOKEN) {
     try {
       const r = await fetch(
@@ -601,6 +601,7 @@ async function runDigest(env) {
             'User-Agent': 'osadko-telegram-bot',
             'Content-Type': 'application/json',
           }, body: JSON.stringify({ ref: 'main', inputs: { dry: false } }) });
+      status = r.status;
       ok = r.status === 204;
     } catch (e) { ok = false; }
   }
@@ -609,8 +610,17 @@ async function runDigest(env) {
     text: ok
       ? '📰 Шукаю свіжу практику ВС, Пленуму ВС і КСУ. Якщо є нові вартісні рішення — за кілька хвилин '
         + 'надішлю сюди до 3 розборів; якщо нічого нового — промовчу. (Щоранку добірка приходить сама.)'
-      : '⚠️ Не вдалося запустити добірку. Перевірте, що у Worker додано секрет <code>GH_DISPATCH_TOKEN</code>.',
+      : '⚠️ Не вдалося запустити добірку: ' + ghWhy(env, status),
   });
+}
+
+// Зрозуміла причина, чому GitHub не прийняв запуск воркфлоу.
+function ghWhy(env, status) {
+  if (!env.GH_DISPATCH_TOKEN) return 'у Worker немає секрету <code>GH_DISPATCH_TOKEN</code>.';
+  if (status === 401) return 'токен <code>GH_DISPATCH_TOKEN</code> недійсний або прострочений.';
+  if (status === 403) return 'у токена <code>GH_DISPATCH_TOKEN</code> немає права Actions: Read and write.';
+  if (status === 404 || status === 422) return 'GitHub не знайшов воркфлоу в main (оновлення ще не опубліковано) або в токена немає доступу до репозиторію.';
+  return status ? `GitHub відповів ${status}.` : 'немає зв\'язку з GitHub.';
 }
 
 async function handleUpdate(update, env) {
