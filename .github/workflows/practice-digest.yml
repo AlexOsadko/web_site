@@ -35,7 +35,8 @@ jobs:
         run: pip install -r tools/requirements-bot.txt
       - name: Добірка практики
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          # окремий бот практики (не бот сповіщень про засідання)
+          TELEGRAM_BOT_TOKEN: ${{ secrets.PRACTICE_BOT_TOKEN }}
           PRACTICE_CHAT: ${{ secrets.PRACTICE_CHAT }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           PRACTICE_MAX: "3"

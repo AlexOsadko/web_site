@@ -1,7 +1,8 @@
-name: Практика ВС за запитом
+name: Практика судів за запитом
 
-# Приватний помічник: за темою читає новини Верховного Суду про постанови,
-# робить AI-розбір на основі реального тексту й надсилає ПРИВАТНО адвокату.
+# Бот практики: адвокат пише боту тему → воркер osadko-practice запускає цей
+# воркфлоу → офіційні публікації ВС, Пленуму ВС і КСУ за темою → AI-розбір
+# на основі реального тексту → відповідь у чат з ботом практики.
 # Спершу можна запустити в режимі «структура» (dry) без AI/надсилання.
 
 on:
@@ -31,9 +32,10 @@ jobs:
         run: pip install -r tools/requirements-bot.txt
       - name: Практика ВС
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.PRACTICE_BOT_TOKEN }}
           TELEGRAM_REVIEW_CHAT: ${{ secrets.TELEGRAM_REVIEW_CHAT }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           VS_QUERY: ${{ github.event.inputs.query }}
+          VS_MAX: "3"
           VS_DRY: ${{ github.event.inputs.dry == 'true' && '1' || '' }}
         run: python3 tools/vs_practice_query.py

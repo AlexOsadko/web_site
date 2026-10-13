@@ -152,11 +152,14 @@ def article_date(html, src):
 
 
 def relevance(text, query):
-    q = [w for w in re.split(r"\W+", query.lower()) if len(w) > 3]
-    if not q:
+    # Пошук за основою слова: відкидаємо закінчення (огляду → огля…, аліментів → аліме…),
+    # щоб знаходити всі відмінкові форми. Числа (130, 286) — як є.
+    words = [w for w in re.split(r"\W+", query.lower()) if len(w) > 3 or w.isdigit()]
+    if not words:
         return 0
+    stems = [w if w.isdigit() else w[:max(4, len(w) - 2)] for w in words]
     low = text.lower()
-    return sum(low.count(w) for w in q)
+    return sum(low.count(st) for st in stems)
 
 
 def tg_send(text):
@@ -173,30 +176,52 @@ def tg_send(text):
         r.read()
 
 
-def analyze(title, url, text, src_name):
+MODEL = os.environ.get("PRACTICE_MODEL", "claude-opus-5-5").strip()
+
+
+def ask_claude(system, user, max_tokens=2000):
+    """Один запит до Claude. Повертає текст відповіді або '' (відмова/помилка)."""
     import anthropic
     client = anthropic.Anthropic()
+    try:
+        r = client.beta.messages.create(
+            model=MODEL,
+            max_tokens=max_tokens,
+            output_config={"effort": "medium"},
+            betas=["server-side-fallback-2026-07-01"],
+            fallbacks="default",
+            system=system,
+            messages=[{"role": "user", "content": user}],
+        )
+    except anthropic.RateLimitError:
+        print("Claude: ліміт запитів — пропускаю.")
+        return ""
+    except anthropic.APIStatusError as ex:
+        print(f"Claude: помилка API {ex.status_code} — {ex.message}")
+        return ""
+    except anthropic.APIConnectionError:
+        print("Claude: немає з'єднання.")
+        return ""
+    if r.stop_reason == "refusal":
+        print("Claude: відмова — пропускаю.")
+        return ""
+    return "".join(b.text for b in r.content if getattr(b, "type", "") == "text").strip()
+
+
+def analyze(title, url, text, src_name):
     sys_prompt = (
         "Ти — помічник адвоката. Тобі дають РЕАЛЬНИЙ текст офіційної публікації "
         f"суду ({src_name}) про його рішення/постанову. Зроби стислий розбір "
-        "УКРАЇНСЬКОЮ:\n"
-        "• Питання: у чому суть спору/правова проблема.\n"
-        "• Позиція суду: що фактично вирішено (лише те, що є в тексті).\n"
-        "• Практичний висновок: що це означає для сторони.\n"
-        "СУВОРІ ПРАВИЛА: використовуй ЛИШЕ факти з наданого тексту. Номер справи, "
-        "дату, назву палати/органу наводь тільки якщо вони є в тексті. НІЧОГО не "
-        "додумуй і не додавай посилань на інші рішення. Якщо в тексті немає "
-        "рішення по суті (організаційна новина, анонс, захід) — напиши "
-        "'НЕ_РІШЕННЯ'. Стисло, без вступів."
+        "УКРАЇНСЬКОЮ для адвоката-практика, без вступів:\n"
+        "Суть: у чому правова проблема (1–2 речення).\n"
+        "Позиція суду: що саме вирішено і чому (лише те, що є в тексті).\n"
+        "Для практики: як цим скористатися в справах клієнтів (1–3 короткі пункти з «— »).\n"
+        "Справа: номер справи, дата, палата/орган — ЛИШЕ якщо вони є в тексті; інакше пропусти рядок.\n"
+        "СУВОРІ ПРАВИЛА: використовуй тільки факти з наданого тексту, НІЧОГО не додумуй і не "
+        "посилайся на інші рішення. Без Markdown-розмітки (без **, #). Якщо в тексті немає "
+        "рішення по суті (організаційна новина, анонс, захід) — відповідай одним словом НЕ_РІШЕННЯ."
     )
-    r = client.messages.create(
-        model=os.environ.get("VS_MODEL", "claude-sonnet-5"),
-        max_tokens=700,
-        system=sys_prompt,
-        messages=[{"role": "user",
-                   "content": f"Заголовок: {title}\nДжерело: {url}\n\nТекст:\n{text[:6000]}"}],
-    )
-    return "".join(b.text for b in r.content if getattr(b, "type", "") == "text").strip()
+    return ask_claude(sys_prompt, f"Заголовок: {title}\nДжерело: {url}\n\nТекст:\n{text[:9000]}")
 
 
 def gather():
@@ -320,7 +345,7 @@ def main():
             if len(txt) < 200:
                 continue
             summary = analyze(it["title"], it["url"], txt, src["name"])
-            if "НЕ_РІШЕННЯ" in summary:
+            if not summary or "НЕ_РІШЕННЯ" in summary:
                 continue
             msg = (f"{src['name']} · <b>за темою «{_html.escape(QUERY)}»</b>\n\n"
                    f"<b>{_html.escape(it['title'])}</b>\n"
