@@ -1788,6 +1788,8 @@ function paraBounds(xml, pos){
   const e=xml.indexOf("</w:p>",pos)+6;
   return [s,e];
 }
+/* Телефон вважаємо порожнім, якщо в ньому немає цифр, окрім коду країни «+38». */
+function hasPhone(v){ return /\d/.test(String(v||"").replace(/^\s*\+?\s*38/,"")); }
 function dropParagraph(xml, marker){
   const i=xml.indexOf(marker);
   if(i<0) return xml;
@@ -2017,6 +2019,9 @@ function fillTemplateXml(xml, D){
   if(!D.kep) xml=dropParagraph(xml,"кваліфікованого електронного підпису");
   /* паспорт необовʼязковий: без нього рядок «Паспорт (id‑card): …» у реквізитах не виводимо */
   if(!String((D.vals||{})["Документ_значення"]||"").trim()) xml=dropParagraph(xml,"«Документ_значення»");
+  /* так само — порожні телефон і e-mail Клієнта */
+  if(!hasPhone((D.vals||{})["Засоби_звязку_телефон"])) xml=dropParagraph(xml,"«Засоби_звязку_телефон»");
+  if(!String((D.vals||{})["Електронна_пошта"]||"").trim()) xml=dropParagraph(xml,"«Електронна_пошта»");
 
   /* 3-біс. Рахунок: сума за Актом */
   xml=setInvoiceTotal(xml, D.totalAct);
@@ -2322,6 +2327,8 @@ function fillFopXml(xml, D){
   map["Вартість_послуг_грн"]=D.totalAct;
   /* рядок «В особі: …» лише для юридичної особи — для інших прибираємо абзац повністю */
   if(!String(map["Замовник_представник_рядок"]||"").trim()) xml=dropParagraph(xml,"«Замовник_представник_рядок»");
+  if(!hasPhone(map["Замовник_телефон"])) xml=dropParagraph(xml,"«Замовник_телефон»");
+  if(!String(map["Замовник_пошта"]||"").trim()) xml=dropParagraph(xml,"«Замовник_пошта»");
   for(const k in map){ xml=xml.split("«"+k+"»").join(val(map[k])); }
   if(!D.kep) xml=dropParagraph(xml,"кваліфікованого електронного підпису");
   if(D.sig){ xml=injectAdvocateSign(xml, D.sig.cx, D.sig.cy); xml=injectInvoiceSign(xml, D.sig.cx, D.sig.cy, "Виконавець"); }
@@ -2800,7 +2807,7 @@ updateRecap();
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-14.1";
+const GEN_VERSION="2026-10-14.2";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
