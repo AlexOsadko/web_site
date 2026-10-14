@@ -1788,6 +1788,22 @@ function paraBounds(xml, pos){
   const e=xml.indexOf("</w:p>",pos)+6;
   return [s,e];
 }
+/* Підписи під лініями «(підпис …)» набрано з ущільненим інтервалом — через це
+   пробіли між словами майже зникали («підписадвоката»). Ущільнення лишаємо для
+   літер, а кожен пробіл виносимо в окремий ран без ущільнення. */
+function widenCaptionSpaces(xml){
+  const SP=/<w:spacing w:val="-\d+"\/>/;
+  return xml.replace(/<w:p\b[^>]*>[\s\S]*?<\/w:p>/g, function(p){
+    const txt=(p.match(/<w:t\b[^>]*>[^<]*<\/w:t>/g)||[]).map(t=>t.replace(/<[^>]+>/g,"")).join("");
+    if(!/^\(підпис/.test(txt) || !SP.test(p)) return p;
+    return p.replace(/<w:r\b([^>]*)>\s*<w:rPr>([\s\S]*?)<\/w:rPr>\s*<w:t\b[^>]*>([^<]*)<\/w:t>\s*<\/w:r>/g, function(r,ra,rpr,text){
+      if(!SP.test(rpr) || !/[ \u00a0]/.test(text)) return r;
+      const rprSp=rpr.replace(SP,"");
+      return text.split(/([ \u00a0]+)/).filter(x=>x.length).map(x=>
+        "<w:r"+ra+"><w:rPr>"+(/^[ \u00a0]+$/.test(x)?rprSp:rpr)+"</w:rPr><w:t xml:space=\"preserve\">"+x+"</w:t></w:r>").join("");
+    });
+  });
+}
 /* Телефон вважаємо порожнім, якщо в ньому немає цифр, окрім коду країни «+38». */
 function hasPhone(v){ return /\d/.test(String(v||"").replace(/^\s*\+?\s*38/,"")); }
 function dropParagraph(xml, marker){
@@ -2038,7 +2054,7 @@ function fillTemplateXml(xml, D){
   if(D.sig){ xml=injectAdvocateSign(xml, D.sig.cx, D.sig.cy); xml=injectInvoiceSign(xml, D.sig.cx, D.sig.cy); }
   xml=xml.split("«КЕП_підпис»").join(D.kep ? "Підписано за допомогою КЕП" : "");
   for(const k of PLACEHOLDERS) xml=xml.split("«"+k+"»").join("");
-  return xml;
+  return widenCaptionSpaces(xml);
 }
 
 function b64ToUint8(b64){
@@ -2334,7 +2350,7 @@ function fillFopXml(xml, D){
   if(D.sig){ xml=injectAdvocateSign(xml, D.sig.cx, D.sig.cy); xml=injectInvoiceSign(xml, D.sig.cx, D.sig.cy, "Виконавець"); }
   xml=xml.split("«КЕП_підпис»").join(D.kep ? "Підписано за допомогою КЕП" : "");
   for(const k of FOP_PLACEHOLDERS) xml=xml.split("«"+k+"»").join("");
-  return xml;
+  return widenCaptionSpaces(xml);
 }
 async function prepareDocFop(){
   const t=clientType();
@@ -2807,7 +2823,7 @@ updateRecap();
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-14.2";
+const GEN_VERSION="2026-10-14.3";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
