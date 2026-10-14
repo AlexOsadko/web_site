@@ -386,7 +386,7 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
             <input type="text" id="f_rnokpp" class="mono" data-key="РНОКПП" inputmode="numeric" placeholder="10 цифр" autocomplete="off">
           </div>
           <div class="field col-2 only-fiz">
-            <label for="f_pass">Паспорт / ID-картка<span class="hint">серія, номер, ким і коли видано</span></label>
+            <label for="f_pass">Паспорт / ID-картка<span class="hint">необовʼязково · серія, номер, ким і коли видано</span></label>
             <textarea id="f_pass" class="pass" data-key="Паспорт_idcard" rows="2" placeholder="напр. серія АА № 123456, виданий Шевченківським РВ ГУ ДМС України в м. Києві 15.05.2012 (або № ID-картки та запис у Демографічному реєстрі)"></textarea>
           </div>
           <div class="field col-2 only-fop" style="display:none">
@@ -2015,6 +2015,8 @@ function fillTemplateXml(xml, D){
   }
   if(!D.propor) xml=dropParagraph(xml,"вартість послуг Адвоката є");
   if(!D.kep) xml=dropParagraph(xml,"кваліфікованого електронного підпису");
+  /* паспорт необовʼязковий: без нього рядок «Паспорт (id‑card): …» у реквізитах не виводимо */
+  if(!String((D.vals||{})["Документ_значення"]||"").trim()) xml=dropParagraph(xml,"«Документ_значення»");
 
   /* 3-біс. Рахунок: сума за Актом */
   xml=setInvoiceTotal(xml, D.totalAct);
@@ -2798,7 +2800,7 @@ updateRecap();
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-13.1";
+const GEN_VERSION="2026-10-14.1";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
