@@ -1,106 +1,94 @@
 # Сайт адвоката Олександра Осадька
 
-Сайт-візитівка та юридичний контент-хаб адвоката: головна сторінка, велика база
-SEO-статей, безкоштовні памʼятки (lead-магніти) і форми заявок із доставкою в Telegram.
+Сайт адвоката: головна, сторінки послуг, база юридичних статей, памʼятки, контакти,
+чат на сайті та форми заявок із доставкою в Telegram. Окремо — генератор договорів
+і Telegram-боти для роботи адвоката (судові засідання, судова практика).
 
 **Онлайн:** https://osadko.online
 
-Статичний сайт (без бекенду): чистий HTML/CSS/JS, збірка на Python, хостинг —
-GitHub Pages, домен через `CNAME`. Динаміку (заявки, аналітика, captcha) забезпечують
-зовнішні сервіси.
+Статичний сайт: HTML/CSS/JS, збірка на Python, хостинг — GitHub Pages з гілки `main`,
+домен через `CNAME`. Динаміку (заявки, чат, боти) забезпечують Cloudflare Workers.
 
 ## Структура
 
-- `index.html` — головна (надзаголовок, «Про мене», послуги, статті, памʼятки, контакти)
-- `content/articles/*.json` — **дані статей (єдине джерело правди)**; наразі 203 статті
-- `articles/*.html` — згенеровані сторінки статей і тематичні хаби (**не редагувати руками**)
-- `css/style.css` — стилі (світла/темна теми через CSS-змінні; кеш-версія `?v=N`)
-- `assets/` — логотип, фото, OG-банери, `ga.js` (аналітика), памʼятки `pamyatka-*.pdf`
-- `sitemap.xml`, `robots.txt` — генеруються білдером
-- `docs/` — документація й код Cloudflare Worker (див. нижче)
-- `tools/` — інструменти генерації та SEO
-- `.github/workflows/` — автодеплой і автоматизації (див. нижче)
+- `index.html` — головна (редагується вручну)
+- `content/articles/*.json` — дані статей (єдине джерело правди), понад 400 статей
+- `content/landings/*.json` — дані сторінок послуг
+- `articles/`, `poslugy/`, `kontakty/` — згенеровані сторінки (**не редагувати руками**)
+- `dogovir/` — генератор договорів про надання правничої допомоги
+- `p/` — оплата, `vidguk/` — відгук, `privacy/` — політика конфіденційності,
+  `zrazky/`, `docs/index.html` — допоміжні сторінки
+- `css/site.css` — спільні стилі (темно-синій + білий, заголовки Source Serif 4);
+  `css/style.css`, `css/fonts.css` — базові стилі та шрифти
+- `assets/` — `site.js` (спільний скрипт), `chat.js` (чат), `lead-form.js` і
+  `callback-popup.js` (форми), `ga.js` (аналітика), фото, памʼятки `pamyatka-*.pdf`
+- `sitemap.xml`, `robots.txt`, `llms.txt` — генеруються білдером
+- `tools/` — білдер, AI-генерація статей, SEO, скрипти ботів
+- `worker/` — код Cloudflare Workers (боти)
+- `docs/*.md` — внутрішні нотатки й інструкції
 
-## Статті: дані + білдер
-
-Статті зберігаються як дані у `content/articles/<slug>.json`. HTML не редагують руками —
-його генерує білдер зі спільного шаблону, тож усі статті однорідні.
+## Збірка сайту
 
 ```bash
 python3 tools/build.py
 ```
 
-Білдер створює сторінки статей і тематичні хаби, каталог, `sitemap.xml` (з реальною
-`lastmod` кожної статті), `robots.txt`, і **сам оновлює кількість статей** усюди. Що
-додається до кожної статті автоматично:
+Білдер генерує сторінки статей і тематичні хаби, сторінки послуг, контакти,
+`sitemap.xml`, `robots.txt`, `llms.txt`. До кожної статті автоматично додаються
+SEO-теги, OG, JSON-LD (`Article`, `BreadcrumbList`, `FAQPage`), хлібні крихти, FAQ,
+«Читайте також» і автоперелінкування.
 
-- SEO-теги, canonical, OG/Twitter;
-- розмітка JSON-LD: `Article` (+ `wordCount`, `articleSection`), `BreadcrumbList`, `FAQPage`;
-- хлібні крихти, блок FAQ, «Читайте також»;
-- **автоперелінкування** — перші згадки ключових фраз стають посиланнями на профільні
-  статті (до 8 на статтю, словник у `tools/build.py`).
-
-Категорії: `civil`, `family`, `labor`, `criminal`, `auto`, `realty`, `business`,
-`process`, `military`, `social`, `admin`.
+Категорії статей: `civil`, `family`, `labor`, `criminal`, `auto`, `realty`,
+`business`, `process`, `military`, `social`, `admin`.
 
 ## AI-генерація статей
 
-`tools/generate_article.py` викликає Claude і створює нову глибоку статтю за темою та
-категорією (8–11 розділів, ~1000–2000 щільних слів БЕЗ «води», 6–8 FAQ, українською,
-практичний тон). Пріоритет — щільність і предметність (типові документи, етапи, помилки),
-а не механічне «набивання» обсягу шаблонними абзацами.
+`tools/generate_article.py` створює статтю за темою й категорією через Claude.
+Через GitHub: Actions → «Створити статтю (AI)» → Run workflow
+(потрібен секрет `ANTHROPIC_API_KEY`).
 
-**Локально:**
-```bash
-pip install -r tools/requirements.txt
-export ANTHROPIC_API_KEY=...
-python3 tools/generate_article.py --topic "Банкрутство фізичної особи" --category business --build
-```
+## Генератор договорів — `dogovir/`
 
-**Через GitHub (без коду):** Actions → «Створити статтю (AI)» → Run workflow (потрібен
-секрет `ANTHROPIC_API_KEY`). Воркфлоу генерує статтю, перебудовує сайт, комітить — і Pages
-публікує оновлення.
+Односторінковий застосунок у браузері: вбудовані DOCX-шаблони (адвокат / ФОП),
+реєстр договорів, підпис і КЕП. Версія — `dogovir/version.json`.
+Дані клієнтів у репозиторії не зберігаються.
 
-## Памʼятки (lead-магніти)
+## Чат і заявки → Telegram
 
-У блоці на головній — бібліотека памʼяток «що робити прямо зараз» (`assets/pamyatka-*.pdf`:
-ст. 130 КУпАП, ТЦК/повістка, обшук, ДТП, колектори). Доступ до завантаження відкривається
-після залишення контакту. Контакт іде в Telegram, а при кліку на конкретну памʼятку —
-окреме повідомлення з її назвою (видно, що саме цікавить клієнта). Памʼятки закриті від
-індексації в `robots.txt`, щоб їх качали лише через форму.
+- **Чат на сайті** (`assets/chat.js`) — воркер `osadko-chat` + база D1,
+  бот @osadko_site_chat_bot. Код і інструкція: `worker/chat/`.
+- **Заявки з форм** — воркер `osadko-relay`, бот «osadko.online_Заявки».
+  Антиспам: Cloudflare Turnstile, honeypot, часова пастка, перевірка `Origin`.
 
-## Форми та заявки → Telegram
+## Бот «Судові засідання та практика»
 
-Заявки з форм (консультація, зворотний дзвінок, памʼятки) надсилаються на **Cloudflare
-Worker** (`docs/telegram-worker.js`), який пересилає їх у Telegram. Токен бота живе в
-секретах воркера, не в коді сайту. Антиспам: Cloudflare **Turnstile** (де є віджет),
-honeypot, часова пастка та перевірка `Origin`. Форма зворотного дзвінка — `assets/callback-popup.js`.
+Воркер `osadko-telegram-bot`, код `worker/worker.js`, інструкція `worker/README.md`.
+
+- відстеження призначених засідань у судах (щогодини);
+- «🔎 Пошук практики» — пошук судової практики за запитом;
+- «📰 Свіжа практика» і щоранкова добірка.
 
 ## Аналітика та реклама
 
-`assets/ga.js` — Google Analytics 4 з **Consent Mode v2** (банер згоди на cookie) та тег
-**Google Ads**; конверсія фіксується в момент успішного надсилання заявки.
+`assets/ga.js` — Google Analytics 4 з Consent Mode v2 і тег Google Ads.
+Основна конверсія — заявка з форми; дзвінки, месенджери й чат — другорядні.
 
-## SEO та автоматизація
-
-- `sitemap.xml` автоматично надсилається в Google, а зміни — в **IndexNow** (Bing/Yandex)
-  при кожному деплої (`tools/indexnow.py`, `tools/submit_sitemap.py` + воркфлоу).
-- Темна/світла тема — перемикач у шапці (localStorage + `prefers-color-scheme`, без блимання).
-
-### Воркфлоу (`.github/workflows/`)
+## Воркфлоу (`.github/workflows/`)
 
 - `pages.yml` — деплой на GitHub Pages при пуші в `main`
 - `generate-article.yml` — AI-генерація статті (ручний запуск)
-- `submit-sitemap.yml` — надсилання sitemap у Google
-- `indexnow.yml` — пінг IndexNow (Bing/Yandex)
+- `submit-sitemap.yml`, `indexnow.yml` — надсилання sitemap у Google і IndexNow
+- `court-watch.yml` — відстеження судових справ (щогодини)
+- `vs-practice.yml` — практика судів за запитом
+- `practice-digest.yml` — щоденна добірка практики
+- `court-healthcheck.yml`, `court-probe.yml`, `court-diag.yml` — перевірка й діагностика
+  джерел судів
+- `gcal-backfill.yml` — разова синхронізація засідань у Google Calendar
 
-Sitemap/IndexNow тригеряться і після бот-комітів генератора статей (через `workflow_run`).
+## Секрети
 
-## Налаштування (секрети)
-
-- **GitHub → Actions secrets:** `ANTHROPIC_API_KEY` (для AI-генерації).
-- **Cloudflare Worker secrets:** `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`,
-  `TURNSTILE_SECRET`, `ALLOWED_ORIGIN` (= `https://osadko.online`).
+Токени й ключі зберігаються лише в секретах GitHub Actions і Cloudflare Workers,
+у коді їх немає.
 
 ## Локальний перегляд
 
