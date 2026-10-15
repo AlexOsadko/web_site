@@ -132,7 +132,7 @@
     if (NOTIFY_ENDPOINT) {
       fetch(NOTIFY_ENDPOINT, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name, phone: phone, token: tsToken, source: "Замовити дзвінок (спливаюче вікно)", page: location.href }),
+        body: JSON.stringify({ name: name, phone: phone, token: tsToken, source: "Замовити дзвінок (спливаюче вікно)", page: location.href, attr: window.osadkoAttr ? window.osadkoAttr() : null }),
       }).then(function (r) { if (!r.ok) throw new Error("bad"); }).then(done).catch(mail);
     } else {
       mail();

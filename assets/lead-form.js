@@ -44,7 +44,8 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name, phone: phone, message: message,
-          source: source, page: location.href, token: ""
+          source: source, page: location.href, token: "",
+          attr: window.osadkoAttr ? window.osadkoAttr() : null
         })
       })
         .then(function (r) { if (!r.ok) throw new Error("bad"); return r; })

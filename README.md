@@ -24,7 +24,7 @@
   `callback-popup.js` (форми), `ga.js` (аналітика), фото, памʼятки `pamyatka-*.pdf`
 - `sitemap.xml`, `robots.txt`, `llms.txt` — генеруються білдером
 - `tools/` — білдер, AI-генерація статей, SEO, скрипти ботів
-- `worker/` — код Cloudflare Workers (боти)
+- `worker/` — код Cloudflare Workers (боти, заявки, чат)
 - `docs/*.md` — внутрішні нотатки й інструкції
 
 ## Збірка сайту
@@ -58,6 +58,8 @@ SEO-теги, OG, JSON-LD (`Article`, `BreadcrumbList`, `FAQPage`), хлібні
 - **Чат на сайті** (`assets/chat.js`) — воркер `osadko-chat` + база D1,
   бот @osadko_site_chat_bot. Код і інструкція: `worker/chat/`.
 - **Заявки з форм** — воркер `osadko-relay`, бот «osadko.online_Заявки».
+  Код і інструкція: `worker/relay/`. У заявці видно канал (Google Ads, пошук,
+  соцмережі, напряму), звідки прийшли й першу сторінку візиту (`assets/site.js`).
   Антиспам: Cloudflare Turnstile, honeypot, часова пастка, перевірка `Origin`.
 
 ## Бот «Судові засідання та практика»
