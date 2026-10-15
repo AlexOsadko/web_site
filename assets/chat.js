@@ -43,7 +43,7 @@
       var b = document.createElement("button");
       b.type = "button";
       b.className = "hm-pill hm-soft hm-chat js-chat";
-      b.textContent = "Чат на сайті";
+      b.innerHTML = ICON_CHAT + "<span>Чат на сайті</span>";
       box.appendChild(b);
     });
     // Ряди кнопок месенджерів на сторінках послуг і «Контактах» — окрема кнопка «Чат на сайті»
