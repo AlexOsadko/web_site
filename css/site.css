@@ -221,12 +221,9 @@ body.hm {
 .hm-bigtel em { font-style: normal; font-size: .88rem; color: var(--hm-muted); }
 .hm-msgs { display: flex; flex-wrap: wrap; gap: 10px; }
 .hm-msgs .hm-pill { padding: 15px 22px; }
-/* «Чат на сайті» серед месенджерів — виділена: заливка, іконка, зелена крапка, м'яке сяйво */
-.hm-msgs .hm-chat { position: relative; background: var(--hm-blue); color: #fff; filter: none; animation: hmChatGlow 2.4s ease-in-out infinite; }
-.hm-msgs .hm-chat:hover { background: var(--hm-blue-h); color: #fff; filter: none; animation: none; }
-.hm-msgs .hm-chat::after { content: ""; position: absolute; top: 2px; right: 6px; width: 12px; height: 12px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 2px #fff; }
-@keyframes hmChatGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(90, 140, 240, .7); } 60% { box-shadow: 0 0 0 12px rgba(90, 140, 240, 0); } }
-@media (prefers-reduced-motion: reduce) { .hm-msgs .hm-chat { animation: none; } }
+/* «Чат на сайті» серед месенджерів — та сама кнопка, лише з заливкою */
+.hm-msgs .hm-chat { background: var(--hm-blue); color: #fff; }
+.hm-msgs .hm-chat:hover { background: var(--hm-blue-h); color: #fff; filter: none; }
 .hm-contact .hm-form { background: var(--hm-soft); }
 .hm-contact .hm-form input:not(.hp-field), .hm-contact .hm-form textarea { background: var(--hm-card); }
 
