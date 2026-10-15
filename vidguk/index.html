@@ -38,24 +38,6 @@
     .rv-note b{color:var(--ink)}
     .rv-alt{margin:22px 0 0;color:var(--muted);font-size:.93rem;line-height:1.55;text-align:center}
     .rv-alt a{color:var(--blue2);font-weight:600}
-    .rv-or{display:flex;align-items:center;gap:12px;margin:30px 0 18px;color:var(--muted);font-size:.9rem}
-    .rv-or::before,.rv-or::after{content:"";flex:1;height:1px;background:var(--line)}
-    .rv-form{display:grid;gap:14px}
-    .rv-form label{display:grid;gap:6px;font-weight:600;color:var(--ink);font-size:.95rem}
-    .rv-form input,.rv-form textarea{font:inherit;font-weight:400;padding:12px 14px;border:1px solid var(--line);
-      border-radius:12px;background:var(--bg);color:var(--ink)}
-    .rv-form textarea{min-height:120px;resize:vertical}
-    .rv-rate{border:0;padding:0;margin:0}
-    .rv-stars-in{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:4px}
-    .rv-rate legend{padding:0;font-weight:600;color:var(--ink);font-size:.95rem;margin-bottom:6px}
-    .rv-rate input{position:absolute;opacity:0;width:1px;height:1px}
-    .rv-rate .rv-stars-in label{font-size:32px;line-height:1;color:var(--line);cursor:pointer;font-weight:400}
-    .rv-stars-in input:checked ~ label,.rv-stars-in label:hover,.rv-stars-in label:hover ~ label{color:#f5b400}
-    .rv-rate input:focus-visible + label{outline:2px solid var(--blue2);outline-offset:2px;border-radius:4px}
-    .rv-hp{position:absolute;left:-9999px}
-    .rv-ok{display:none;padding:14px 16px;border-radius:12px;background:var(--bg);color:var(--ink);font-weight:600;text-align:center}
-    .rv-err{display:none;color:#c0392b;font-size:.92rem}
-    .rv-send{width:100%;padding:15px 22px;font-size:1.02rem}
     .rv-head{padding:18px 0}
     .rv-head .brand{display:inline-flex;align-items:center;gap:10px;font-weight:700;color:var(--ink);text-decoration:none}
     @media (max-width:520px){ .rv-card{padding:30px 22px;border-radius:18px} .rv-btn{font-size:1rem;padding:16px 14px} .rv-wrap{padding:16px 0 40px} }
@@ -99,28 +81,6 @@
         документів і прізвищ інших людей. Достатньо загальних вражень.
       </p>
 
-
-      <div class="rv-or">або напишіть відгук тут</div>
-      <p class="rv-lead" style="margin:0 0 16px;font-size:.95rem">Немає акаунта Google? Залиште відгук тут. Його побачу лише я, на сайті він не публікується.</p>
-      <form class="rv-form" id="rvForm" novalidate>
-        <fieldset class="rv-rate">
-          <legend>Ваша оцінка</legend>
-          <div class="rv-stars-in">
-          <input type="radio" name="rate" id="r5" value="5"><label for="r5" title="5">★</label>
-          <input type="radio" name="rate" id="r4" value="4"><label for="r4" title="4">★</label>
-          <input type="radio" name="rate" id="r3" value="3"><label for="r3" title="3">★</label>
-          <input type="radio" name="rate" id="r2" value="2"><label for="r2" title="2">★</label>
-          <input type="radio" name="rate" id="r1" value="1"><label for="r1" title="1">★</label>
-          </div>
-        </fieldset>
-        <label>Відгук<textarea name="text" id="rvText" maxlength="1500" required placeholder="Як проходила співпраця: комунікація, пояснення, швидкість, результат"></textarea></label>
-        <label><span>Імʼя <small style="font-weight:400;color:var(--muted)">(необовʼязково)</small></span><input name="name" id="rvName" maxlength="80" autocomplete="name"></label>
-        <input class="rv-hp" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <p class="rv-err" id="rvErr"></p>
-        <button class="btn btn-primary rv-send" type="submit">Надіслати відгук</button>
-        <p class="rv-ok" id="rvOk">Дякую! Відгук надіслано адвокату.</p>
-      </form>
-
       <p class="rv-alt">
         Є питання чи зауваження? Напишіть мені напряму в
         <a href="https://t.me/adv_osadko" rel="noopener">Telegram</a>
@@ -129,31 +89,5 @@
     </div>
   </div>
 </main>
-<script>
-(function () {
-  var f = document.getElementById("rvForm"); if (!f) return;
-  var err = document.getElementById("rvErr"), ok = document.getElementById("rvOk");
-  var btn = f.querySelector("button[type=submit]"), start = Date.now();
-  function fail(t) { err.textContent = t; err.style.display = "block"; }
-  f.addEventListener("submit", function (e) {
-    e.preventDefault(); err.style.display = "none";
-    if (f.elements.company.value || Date.now() - start < 2000) return;  // honeypot + часова пастка
-    var r = f.querySelector("input[name=rate]:checked");
-    var text = f.elements.text.value.trim(), name = f.elements.name.value.trim();
-    if (!r) return fail("Оберіть оцінку від 1 до 5 зірок.");
-    if (text.length < 5) { f.elements.text.focus(); return fail("Напишіть кілька слів про співпрацю."); }
-    var n = +r.value; btn.disabled = true;
-    fetch("https://osadko-relay.espir3.workers.dev", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name || "Без імені", phone: "", token: "",
-        source: "⭐ Відгук з сайту: " + n + "/5",
-        message: "★★★★★".slice(0, n) + "☆☆☆☆☆".slice(0, 5 - n) + "\n" + text,
-        page: location.href })
-    }).then(function (x) { if (!x.ok) throw 0; })
-      .then(function () { f.reset(); ok.style.display = "block"; btn.style.display = "none"; })
-      .catch(function () { btn.disabled = false; fail("Не вдалося надіслати. Спробуйте ще раз або напишіть у Telegram."); });
-  });
-})();
-</script>
 </body>
 </html>
