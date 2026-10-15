@@ -1,6 +1,37 @@
 /* Спільне для всіх сторінок у стилі «E»:
    — шапка на головній: прозора над першим екраном, біла після нього;
    — кнопка телефону / номер → вибір: подзвонити, Telegram, Viber, WhatsApp. */
+/* Джерело візиту для заявок: на вході на сайт запамʼятовуємо, звідки прийшли
+   (Google Ads, пошук, соцмережі, інший сайт, напряму) — лише в sessionStorage,
+   до кінця візиту. Форми додають це до заявки як поле attr (window.osadkoAttr). */
+(function () {
+  var KEY = "osadkoAttr";
+  function read() { try { return JSON.parse(sessionStorage.getItem(KEY) || "null"); } catch (e) { return null; } }
+  function host(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return ""; } }
+  var stored = read();
+  var q; try { q = new URLSearchParams(location.search); } catch (e) { q = { get: function () { return null; } }; }
+  var gclid = q.get("gclid") || q.get("gbraid") || q.get("wbraid") || "";
+  var utm = q.get("utm_source") || "";
+  var ref = document.referrer ? host(document.referrer) : "";
+  var external = ref && ref !== location.hostname.replace(/^www\./, "");
+  if (gclid || utm || external || !stored) {
+    var ch;
+    if (gclid) ch = "Google Ads";
+    else if (utm) ch = utm + (q.get("utm_medium") ? " / " + q.get("utm_medium") : "");
+    else if (!external) ch = "Напряму";
+    else if (/(^|\.)(google|bing|duckduckgo|yahoo|ecosia|yandex)\./.test(ref)) ch = "Пошук";
+    else if (/(^|\.)(facebook|fb|instagram|t|telegram|tiktok|youtube|linkedin|threads|viber)\./.test(ref)) ch = "Соцмережі";
+    else ch = "Інший сайт";
+    // «Напряму» не перезаписує вже відоме джерело цього візиту
+    if (ch !== "Напряму" || !stored) {
+      stored = { ch: ch, camp: q.get("utm_campaign") || "", ref: external ? ref : "",
+                 land: location.pathname, gclid: gclid };
+      try { sessionStorage.setItem(KEY, JSON.stringify(stored)); } catch (e) {}
+    }
+  }
+  window.osadkoAttr = function () { return read() || stored; };
+})();
+
 (function () {
   // Чат на сайті (assets/chat.js) — поруч із цим файлом, з тією ж версією
   var me = document.currentScript && document.currentScript.src;

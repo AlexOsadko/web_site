@@ -1,0 +1,172 @@
+// ─────────────────────────────────────────────────────────────────────────
+// Cloudflare Worker для сайту адвоката (osadko-relay). Два маршрути:
+//
+//   POST /            → приймає заявки з форм і надсилає їх у Telegram.
+//   GET|PUT /registry → зашифрований реєстр договорів (синхронізація між
+//                       пристроями). Воркер бачить ЛИШЕ шифротекст —
+//                       розшифрувати може тільки браузер із парольною фразою.
+//
+// НАЛАШТУВАННЯ (Cloudflare → ваш Worker → Settings):
+//   Variables and Secrets:
+//     TELEGRAM_BOT_TOKEN  — токен бота від @BotFather                     (Secret)
+//     TELEGRAM_CHAT_ID    — ваш chat_id (через @userinfobot)              (Secret)
+//     TURNSTILE_SECRET    — Secret Key віджета Turnstile                  (Secret)
+//     REGISTRY_TOKEN      — довільний довгий пароль для доступу до реєстру (Secret)
+//     ALLOWED_ORIGIN      — https://osadko.online (обмежує доступ)        (Text)
+//   Bindings → KV Namespace:
+//     REGISTRY_KV         — сховище зашифрованого реєстру
+// ─────────────────────────────────────────────────────────────────────────
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    if (url.pathname === "/registry") return handleRegistry(request, env);
+    return handleLead(request, env);
+  },
+};
+
+// ── Реєстр договорів: зберігаємо/віддаємо зашифрований блок ──────────────
+async function handleRegistry(request, env) {
+  const allow = env.ALLOWED_ORIGIN || "*";
+  const cors = {
+    "Access-Control-Allow-Origin": allow,
+    "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, X-Registry-Token",
+  };
+  if (request.method === "OPTIONS") return new Response(null, { headers: cors });
+
+  // Доступ лише з нашого сайту.
+  if (env.ALLOWED_ORIGIN) {
+    const origin = request.headers.get("Origin") || "";
+    if (origin && origin !== env.ALLOWED_ORIGIN)
+      return json({ ok: false, error: "origin" }, 403, cors);
+  }
+  // Сховище має бути прив'язане.
+  if (!env.REGISTRY_KV)
+    return json({ ok: false, error: "kv_not_configured" }, 500, cors);
+  // Секретний токен (анти-зловживання). Дані все одно зашифровані E2E.
+  if (!env.REGISTRY_TOKEN || request.headers.get("X-Registry-Token") !== env.REGISTRY_TOKEN)
+    return json({ ok: false, error: "auth" }, 403, cors);
+
+  const KEY = "registry:blob";
+  if (request.method === "GET") {
+    const blob = await env.REGISTRY_KV.get(KEY);
+    return json({ ok: true, blob: blob || null }, 200, cors);
+  }
+  if (request.method === "PUT") {
+    const body = await request.text();
+    if (body.length > 8_000_000)
+      return json({ ok: false, error: "too_large" }, 413, cors);
+    await env.REGISTRY_KV.put(KEY, body);
+    return json({ ok: true }, 200, cors);
+  }
+  return json({ ok: false, error: "method" }, 405, cors);
+}
+
+// ── Заявки з форм → Telegram ────────────────────────────────────────────
+async function handleLead(request, env) {
+  const allow = env.ALLOWED_ORIGIN || "*";
+  const cors = {
+    "Access-Control-Allow-Origin": allow,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+
+  if (request.method === "OPTIONS") return new Response(null, { headers: cors });
+  if (request.method !== "POST")
+    return new Response("Method Not Allowed", { status: 405, headers: cors });
+
+  // Антиспам №1: заявку приймаємо ЛИШЕ з нашого сайту.
+  if (env.ALLOWED_ORIGIN) {
+    const origin = request.headers.get("Origin") || "";
+    const referer = request.headers.get("Referer") || "";
+    const okOrigin =
+      origin === env.ALLOWED_ORIGIN || referer.startsWith(env.ALLOWED_ORIGIN);
+    if (!okOrigin) return json({ ok: false, error: "origin" }, 403, cors);
+  }
+
+  let data;
+  try {
+    data = await request.json();
+  } catch {
+    return json({ ok: false, error: "bad json" }, 400, cors);
+  }
+
+  // Антиспам №2: приховане поле-пастка (боти його заповнюють).
+  if (data.company) return json({ ok: true }, 200, cors); // тихо ігноруємо
+
+  // Перевірка Turnstile — лише якщо задано TURNSTILE_SECRET І заявка містить токен.
+  if (env.TURNSTILE_SECRET && data.token) {
+    const token = String(data.token || "");
+    const verify = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          secret: env.TURNSTILE_SECRET,
+          response: token,
+          remoteip: request.headers.get("CF-Connecting-IP") || "",
+        }),
+      }
+    );
+    const outcome = await verify.json().catch(() => ({ success: false }));
+    if (!outcome.success) return json({ ok: false, error: "turnstile" }, 403, cors);
+  }
+
+  const name = String(data.name || "").slice(0, 200);
+  const phone = String(data.phone || "").slice(0, 60);
+  const message = String(data.message || "").slice(0, 2000);
+  const source = String(data.source || "Заявка з сайту").slice(0, 120);
+  const page = String(data.page || "").slice(0, 300);
+
+  // Джерело візиту (assets/site.js → attr): канал, кампанія, звідки прийшли,
+  // перша сторінка, gclid. Старі версії сайту attr не надсилають — тоді рядків немає.
+  const a = data.attr && typeof data.attr === "object" ? data.attr : {};
+  const cut = (v, n) => String(v || "").slice(0, n);
+  const ch = cut(a.ch, 60);
+  const camp = cut(a.camp, 80);
+  const ref = cut(a.ref, 80);
+  const land = cut(a.land, 150);
+  const gclid = cut(a.gclid, 200);
+  const from = [ref, land].filter(Boolean).map(esc).join(" → ");
+
+  if (!name && !phone) return json({ ok: false, error: "empty" }, 400, cors);
+
+  const text =
+    `🔔 <b>${esc(source)}</b>\n` +
+    `👤 Імʼя: ${esc(name) || "—"}\n` +
+    `📞 Телефон: ${esc(phone) || "—"}` +
+    (message ? `\n📝 ${esc(message)}` : "") +
+    (ch ? `\n📣 Канал: <b>${esc(ch)}</b>` + (camp ? ` · кампанія «${esc(camp)}»` : "") : "") +
+    (from ? `\n↩️ Звідки: ${from}` : "") +
+    (page ? `\n🔗 ${esc(page)}` : "") +
+    (gclid ? `\n🆔 <tg-spoiler>${esc(gclid)}</tg-spoiler>` : "");
+
+  const tg = await fetch(
+    `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: env.TELEGRAM_CHAT_ID,
+        text,
+        parse_mode: "HTML",
+        disable_web_page_preview: true,
+      }),
+    }
+  );
+
+  if (!tg.ok) return json({ ok: false, error: "telegram" }, 502, cors);
+  return json({ ok: true }, 200, cors);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function json(obj, status, cors) {
+  return new Response(JSON.stringify(obj), {
+    status,
+    headers: { ...cors, "Content-Type": "application/json" },
+  });
+}
