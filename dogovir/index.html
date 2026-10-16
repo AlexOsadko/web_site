@@ -2300,7 +2300,8 @@ async function prepareDoc(){
   const safe=(s)=>String(s).replace(/[^\p{L}\p{N}\-_. ]/gu,"").replace(/\s+/g,"_").slice(0,50);
   const cnameShort = clientType()==="yur" ? (clientName()||"Клієнт") : (shortName(fName.value)||"Клієнт");
   /* позначка Виконавця в назві файлу: АДВ — договір адвоката, ФОП — договір від ФОП */
-  const suffix=`АДВ_№${safe($("#f_num").value.trim())}_${safe(cnameShort)}`;
+  /* договір з КЕП (ЄЦП) — позначка в назві: «Договір_АДВ_КЕП (ЄЦП) №БН_…» */
+  const suffix=`АДВ_${D.kep?"КЕП (ЄЦП) ":""}№${safe($("#f_num").value.trim())}_${safe(cnameShort)}`;
   D.sig = await prepareAdvocateSign(zip, D.kep, xml);
   return {zip, filled: fillTemplateXml(xml, D), suffix};
 }
@@ -2425,7 +2426,7 @@ async function prepareDocFop(){
     }
   };
   const safe=(s)=>String(s).replace(/[^\p{L}\p{N}\-_. ]/gu,"").replace(/\s+/g,"_").slice(0,50);
-  const suffix=`ФОП_№${safe($("#f_num").value.trim())}_${safe(zamShort||"Замовник")}`;
+  const suffix=`ФОП_${D.kep?"КЕП (ЄЦП) ":""}№${safe($("#f_num").value.trim())}_${safe(zamShort||"Замовник")}`;
   D.sig = await prepareAdvocateSign(zip, D.kep, xml);
   return {zip, filled: fillFopXml(xml, D), suffix};
 }
@@ -3294,7 +3295,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-16.3";
+const GEN_VERSION="2026-10-16.4";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
