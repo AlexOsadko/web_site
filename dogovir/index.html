@@ -2889,6 +2889,15 @@ const DocImport = (function(){
   }
   const DATE_RE = /\d{1,2}\s*[.\/\s-]\s*\d{1,2}\s*[.\/\s-]\s*\d{4}/g;
   function dmy(isoStr){ const p = isoStr.split("-"); return p[2] + "." + p[1] + "." + p[0]; }
+  // контрольна цифра MRZ (ICAO 9303): ваги 7-3-1, «<» = 0, A = 10…
+  function mrzCheck(s){
+    let sum = 0;
+    for(let i = 0; i < s.length; i++){
+      const c = s[i], v = c === "<" ? 0 : /\d/.test(c) ? +c : c.charCodeAt(0) - 55;
+      sum += v * [7, 3, 1][i % 3];
+    }
+    return String(sum % 10);
+  }
   function title(w){
     return w.toLowerCase().replace(new RegExp("(^|[\\s-])([" + L + "])", "g"), (m, a, b) => a + b.toUpperCase());
   }
@@ -2903,15 +2912,44 @@ const DocImport = (function(){
     }
     return cyr.length >= 2 && cyr.length <= 4 ? cyr.map(title).join(" ") : "";
   }
+  // латинські «двійники» в кириличному слові (OCR часто плутає Е/E, О/O, І/I…)
+  const LAT2CYR = { A:"А", B:"В", C:"С", E:"Е", H:"Н", I:"І", K:"К", M:"М", O:"О", P:"Р", T:"Т", X:"Х", Y:"У", a:"а", c:"с", e:"е", i:"і", o:"о", p:"р", x:"х", y:"у" };
+  function fixMixed(w){
+    const cyr = (w.match(new RegExp("[" + L + "]", "g")) || []).length;
+    if(!cyr || cyr < w.replace(/['\-]/g, "").length / 2) return w;
+    return w.replace(/[ABCEHIKMOPTXYaceiopxy]/g, ch => LAT2CYR[ch]).replace(/[0]/g, "О");
+  }
+  // транслітерація за постановою КМУ № 55 (так пишуть латиницею в ID-картці)
+  const TR = { А:"A",Б:"B",В:"V",Г:"H",Ґ:"G",Д:"D",Е:"E",Є:"IE",Ж:"ZH",З:"Z",И:"Y",І:"I",Ї:"I",Й:"I",К:"K",Л:"L",М:"M",Н:"N",О:"O",П:"P",Р:"R",С:"S",Т:"T",У:"U",Ф:"F",Х:"KH",Ц:"TS",Ч:"CH",Ш:"SH",Щ:"SHCH",Ь:"",Ю:"IU",Я:"IA","'":"" };
+  const TR0 = { Є:"YE", Ї:"YI", Й:"Y", Ю:"YU", Я:"YA" };
+  function translit(w){
+    w = w.toUpperCase().replace(/ЗГ/g, "З\u0000");
+    let out = "";
+    for(let i = 0; i < w.length; i++){ const c = w[i]; out += c === "\u0000" ? "GH" : (i === 0 && TR0[c]) || (TR[c] != null ? TR[c] : c); }
+    return out;
+  }
+  function lev(a, b){
+    const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+    for(let j = 1; j <= b.length; j++) d[0][j] = j;
+    for(let i = 1; i <= a.length; i++) for(let j = 1; j <= b.length; j++)
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    return d[a.length][b.length];
+  }
+  function byLatin(caps, lat){
+    let best = "", bd = 99;
+    for(const w of caps){ const dd = lev(translit(w), lat); if(dd < bd){ bd = dd; best = w; } }
+    return bd <= Math.max(1, Math.floor(lat.length / 5)) ? title(best) : "";
+  }
   const LABEL_WORDS = /^(прізвище|surname|ім'я|імя|given|names?|по|батькові|patronymic|власне|за|наявності|та)$/i;
   // значення після підпису (ID-картка, паспорт): у тому ж рядку або в наступних двох
   function afterLabel(lines, re){
     for(let i = 0; i < lines.length; i++){
       const m = lines[i].match(re);
       if(!m) continue;
-      const rest = [lines[i].slice(m.index + m[0].length)].concat(lines.slice(i + 1, i + 3));
+      const rest = [lines[i].slice(m.index + m[0].length)].concat(lines.slice(i + 1, i + 4));
       for(const part of rest){
-        for(const w of part.replace(/[’ʼ`´]/g, "'").split(/[\s\/|,:]+/)){
+        for(const raw of part.replace(/[’ʼ`´]/g, "'").split(/[\s\/|,:.]+/)){
+          const w = fixMixed(raw);
           if(WORD.test(w) && w.length >= 2 && w === w.toUpperCase() && !LABEL_WORDS.test(w)) return title(w);
         }
       }
@@ -2961,23 +2999,47 @@ const DocImport = (function(){
     // MRZ ID-картки (зворотний бік): IDUKR<номер 9><к><УНЗР> / <дата нар.>…
     const flat = lines.map(l => l.replace(/\s+/g, "").toUpperCase());
     flat.forEach((l, i) => {
-      const m = l.match(/^I[D<]UKR([0-9O]{9})\d?<?(\d{8})?(\d{5})?/);
-      if(m){
-        f.idNo = f.idNo || m[1].replace(/O/g, "0");
-        if(m[2] && m[3]) f.record = f.record || (m[2] + "-" + m[3]);
-        const n = flat[i + 1] && flat[i + 1].match(/^(\d{2})(\d{2})(\d{2})\d[MF<]/);
-        if(n && !f.birth){ const yy = +n[1]; f.birth = iso(n[3], n[2], (yy > 30 ? 1900 : 2000) + yy); }
+      const k = l.indexOf("UKR");
+      if(!/^I[D<1]?$/.test(l.slice(0, Math.max(k, 0))) || k < 1 || k > 2) return;
+      const body = l.slice(k + 3).replace(/O/g, "0");
+      const doc = body.slice(0, 9), chk = body[9];
+      // номер документа і запис беремо з MRZ лише при правильній контрольній цифрі
+      // + одразу після нього УНЗР (у ID-картках він є завжди) — при зсуві цифр OCR цей збіг ламається
+      const opt = body.slice(10).match(/^((?:19|20)\d{6})(\d{5})/);
+      if(/^\d{9}$/.test(doc) && mrzCheck(doc) === chk && opt && iso(opt[1].slice(6), opt[1].slice(4, 6), opt[1].slice(0, 4))){
+        f.mrzId = doc; f.mrzRec = opt[1] + "-" + opt[2];
+      }
+      {
+        const nm = flat[i + 2] && flat[i + 2].match(/^([A-Z]+)<<([A-Z]+)/);
+        if(nm) f.latName = nm[1] + " " + nm[2];
+        const n = flat[i + 1] && flat[i + 1].match(/^(\d{6})(\d)[MF<]/);
+        if(n && mrzCheck(n[1]) === n[2] && !f.birth){ const yy = +n[1].slice(0, 2); f.birth = iso(n[1].slice(4, 6), n[1].slice(2, 4), (yy > 30 ? 1900 : 2000) + yy); }
       }
     });
+
+    // слова кирилицею великими літерами — кандидати для звірки з латинським ім'ям з MRZ
+    f.caps = Array.from(new Set(text.split(/[\s\/|,:.]+/).map(fixMixed).filter(w => w.length >= 3 && WORD.test(w) && w === w.toUpperCase())));
 
     // ПІБ одним рядком (Дія, довідки, витяги)
     const one = text.match(/(?:прізвище,?\s*(?:власне\s*)?ім'я,?\s*(?:та\s*)?по\s*батькові(?:\s*\(за\s*наявності\))?|\bПІБ\b)\s*[:\-–]?\s*([^\n]*)\n?([^\n]*)/i);
     if(one) f.name = asName(one[1]) || asName(one[2]);
+    // ID-картка: під кожним кириличним рядком — латиниця; пари, що збігаються за транслітерацією, — прізвище та ім'я
+    const pairs = [];
+    for(let i = 0; i + 1 < lines.length && pairs.length < 2; i++){
+      const cw = lines[i].split(/\s+/).map(fixMixed).filter(w => w.length >= 2 && WORD.test(w) && w === w.toUpperCase() && !/^(УКРАЇНА|ПАСПОРТ|ГРОМАДЯНИНА)$/.test(w));
+      const lw = (lines[i + 1].match(/[A-Z][A-Z'\-]+/g) || []);
+      if(cw.length !== 1 || !lw.length) continue;
+      const t = translit(cw[0]);
+      if(lw.some(x => lev(t, x) <= Math.max(1, Math.floor(x.length / 5)))) pairs.push(title(cw[0]));
+    }
+    const patr = f.caps.find(w => /(ОВИЧ|ЕВИЧ|ЄВИЧ|ІЧ|ОВНА|ЕВНА|ЄВНА|ІВНА|ЇВНА|ІЧНА|ИЧНА)$/.test(w));
     if(!f.name){
       // окремі підписи (ID-картка: по батькові — на звороті); ім'я складається після об'єднання файлів
-      f.sur = afterLabel(lines, /прізвище(?!,)|surname/i);
-      f.giv = afterLabel(lines, /ім'?я(?!,)|given\s*names?/i);
-      f.pat = afterLabel(lines, /по\s*батькові|patronymic/i);
+      f.sur = afterLabel(lines, /пр[іiи1l|]зв[иі]щ[еe](?!,)|surname/i);
+      f.giv = afterLabel(lines, /(?:^|[^а-яіїєa-z])[іi1lI|]м'?я(?!,)|given\s*names?/i);
+      f.pat = afterLabel(lines, /по\s*ба[тt]ьков|patronymic/i);
+      if(pairs.length === 2){ f.sur = pairs[0]; f.giv = pairs[1]; }
+      if(patr && (!f.pat || !/(ИЧ|НА)$/i.test(f.pat))) f.pat = title(patr);
     }
 
     // РНОКПП: біля підпису або будь-який 10-значний з правильною контрольною цифрою
@@ -2990,7 +3052,7 @@ const DocImport = (function(){
     if(bd) f.birth = bd;
 
     // ID-картка
-    const idl = near(text, /номер\s*документа|document\s*no/i).match(/(?<![\d-])\d{9}(?![\d-])/);
+    const idl = near(text, /номер\s*документа|документ\s*№|document\s*no/i).match(/(?<![\d-])\d{9}(?![\d-])/);
     if(idl) f.idNo = idl[0];
     const rec = text.match(/(?<!\d)((?:19|20)\d{6})\s*[-–]\s*(\d{5})(?!\d)/);
     if(rec) f.record = rec[1] + "-" + rec[2];
@@ -3034,9 +3096,19 @@ const DocImport = (function(){
   }
   // після об'єднання даних з усіх файлів: ПІБ, дата народження з РНОКПП, рядок паспорта
   function finalize(f){
+    // ID-картка: прізвище та ім'я — за збігом з латиницею MRZ (найнадійніше), інакше за підписами
+    if(!f.name && f.latName && f.caps){
+      const [ls, lg] = f.latName.split(" ");
+      const s2 = byLatin(f.caps, ls), g2 = byLatin(f.caps, lg);
+      if(s2) f.sur = s2;
+      if(g2) f.giv = g2;
+    }
     if(!f.name && f.sur && f.giv) f.name = [f.sur, f.giv, f.pat].filter(Boolean).join(" ");
     // РНОКПП з правильною контрольною цифрою точно задає дату народження (OCR дати може помилятися)
     if(f.rnokpp) f.birth = birthFromRnokpp(f.rnokpp);
+    if(f.mrzRec && f.birth && f.mrzRec.slice(0, 8) !== f.birth.replace(/-/g, "")){ delete f.mrzId; delete f.mrzRec; }
+    if(f.mrzId) f.idNo = f.mrzId;            // MRZ з правильною контрольною цифрою надійніша за OCR лицьового боку
+    if(!f.record && f.mrzRec) f.record = f.mrzRec;
     // запис у Демографічному реєстрі (УНЗР) починається з дати народження РРРРММДД
     if(f.record && f.birth) f.record = f.birth.replace(/-/g, "") + f.record.slice(8);
     if(f.idNo){
@@ -3051,8 +3123,9 @@ const DocImport = (function(){
   }
   // a — вже зібране, b — новий файл; текст PDF надійніший за розпізнане фото
   function merge(a, b, bText){
+    if(b.caps) a.caps = (a.caps || []).concat(b.caps);
     for(const k in b){
-      if(!b[k]) continue;
+      if(!b[k] || k === "caps") continue;
       if(!a[k] || (bText && !a._text)) a[k] = b[k];
       else if(k === "name" && b[k].split(" ").length > a[k].split(" ").length) a[k] = b[k];
     }
@@ -3178,6 +3251,7 @@ const DocImport = (function(){
         let msg = r.filled.length ? "✓ Заповнено: " + r.filled.join(", ") + ". Перевірте підсвічені поля." : "Даних для заповнення не знайдено — перевірте якість фото або розпізнаний текст нижче.";
         if(r.kept.length) msg += "<br>Не замінено (поле вже заповнене): " + r.kept.join(", ") + ".";
         if(all.head) msg += "<br>Керівник за випискою: <b>" + esc(all.head) + "</b> — впишіть посаду і ПІБ у родовому відмінку.";
+        if(!all.name && all.latName && all.type !== "yur") msg += "<br>ПІБ українською не розпізнано (латиницею з картки: <b>" + esc(all.latName) + "</b>) — додайте фото лицьового боку або впишіть вручну.";
         if(!all.addr && !all.orgAddr && r.filled.length) msg += "<br>Адресу не знайдено — додайте витяг про місце проживання або впишіть вручну.";
         say(msg, r.filled.length ? "ok" : "warn");
       }catch(e){
@@ -3202,7 +3276,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-16.1";
+const GEN_VERSION="2026-10-16.2";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
