@@ -2940,6 +2940,8 @@ const DocImport = (function(){
     for(const w of caps){ const dd = lev(translit(w), lat); if(dd < bd){ bd = dd; best = w; } }
     return bd <= Math.max(1, Math.floor(lat.length / 5)) ? title(best) : "";
   }
+  const STOP = /^(УКРАЇНА|УКРАЇНИ|ПАСПОРТ|ГРОМАДЯНИНА|ВЛАСНІСТЮ|ОБЛАСТЬ|РАЙОН|МІСТО)$/;
+  const GEO = /(^|\s)(с|м|смт|сел|м-то)\.|област|район|raion|oblast|ukraina|місце\s*народж|place\s*of\s*birth/i;
   const LABEL_WORDS = /^(прізвище|surname|ім'я|імя|given|names?|по|батькові|patronymic|власне|за|наявності|та)$/i;
   // значення після підпису (ID-картка, паспорт): у тому ж рядку або в наступних двох
   function afterLabel(lines, re){
@@ -2950,7 +2952,7 @@ const DocImport = (function(){
       for(const part of rest){
         for(const raw of part.replace(/[’ʼ`´]/g, "'").split(/[\s\/|,:.]+/)){
           const w = fixMixed(raw);
-          if(WORD.test(w) && w.length >= 2 && w === w.toUpperCase() && !LABEL_WORDS.test(w)) return title(w);
+          if(WORD.test(w) && w.length >= 3 && w === w.toUpperCase() && !LABEL_WORDS.test(w) && !STOP.test(w)) return title(w);
         }
       }
     }
@@ -3010,8 +3012,6 @@ const DocImport = (function(){
         f.mrzId = doc; f.mrzRec = opt[1] + "-" + opt[2];
       }
       {
-        const nm = flat[i + 2] && flat[i + 2].match(/^([A-Z]+)<<([A-Z]+)/);
-        if(nm) f.latName = nm[1] + " " + nm[2];
         const n = flat[i + 1] && flat[i + 1].match(/^(\d{6})(\d)[MF<]/);
         if(n && mrzCheck(n[1]) === n[2] && !f.birth){ const yy = +n[1].slice(0, 2); f.birth = iso(n[1].slice(4, 6), n[1].slice(2, 4), (yy > 30 ? 1900 : 2000) + yy); }
       }
@@ -3020,17 +3020,35 @@ const DocImport = (function(){
     // слова кирилицею великими літерами — кандидати для звірки з латинським ім'ям з MRZ
     f.caps = Array.from(new Set(text.split(/[\s\/|,:.]+/).map(fixMixed).filter(w => w.length >= 3 && WORD.test(w) && w === w.toUpperCase())));
 
+    // 3-й рядок MRZ: ПРІЗВИЩЕ<<ІМ'Я<<<… (OCR може читати «<» як K або «)
+    for(const l of flat){
+      const z = l.replace(/[«‹(\[{]/g, "<").replace(/[^A-Z<]/g, "");
+      if((z.match(/</g) || []).length < 3 || /^I[D<1]?UKR|^\d/.test(z) || /UKR</.test(z)) continue;
+      let parts = z.split(/<+/).filter(x => x.length >= 2);
+      if(parts.length < 2 && parts[0] && /KK/.test(parts[0])) parts = parts[0].split(/K{2,}/).filter(x => x.length >= 2);
+      if(parts.length >= 2){ f.latName = parts[0] + " " + parts[1]; break; }
+    }
+
     // ПІБ одним рядком (Дія, довідки, витяги)
     const one = text.match(/(?:прізвище,?\s*(?:власне\s*)?ім'я,?\s*(?:та\s*)?по\s*батькові(?:\s*\(за\s*наявності\))?|\bПІБ\b)\s*[:\-–]?\s*([^\n]*)\n?([^\n]*)/i);
     if(one) f.name = asName(one[1]) || asName(one[2]);
     // ID-картка: під кожним кириличним рядком — латиниця; пари, що збігаються за транслітерацією, — прізвище та ім'я
+    // ID-картка: кожне кириличне ім'я має латинського «двійника» (БЕРЕЗОВСЬКИЙ / BEREZOVSKYI);
+    // перші два такі слова — прізвище та ім'я (рядки з місцем народження пропускаємо)
+    // латинські слова; кириличні «двійники» в них (ВЕREZOVSKYI) замінюємо на латиницю
+    const CYR2LAT = { А:"A", В:"B", Е:"E", К:"K", М:"M", Н:"H", О:"O", Р:"P", С:"C", Т:"T", Х:"X", І:"I", У:"Y" };
+    const latWords = (text.toUpperCase().match(/[A-ZА-ЯІЇЄҐ']{3,}/g) || [])
+      .filter(w => /[A-Z]/.test(w) && (w.match(/[A-Z]/g) || []).length >= w.length / 2)
+      .map(w => w.replace(/[АВЕКМНОРСТХІУ]/g, c => CYR2LAT[c])).filter(w => /^[A-Z']+$/.test(w));
     const pairs = [];
-    for(let i = 0; i + 1 < lines.length && pairs.length < 2; i++){
-      const cw = lines[i].split(/\s+/).map(fixMixed).filter(w => w.length >= 2 && WORD.test(w) && w === w.toUpperCase() && !/^(УКРАЇНА|ПАСПОРТ|ГРОМАДЯНИНА)$/.test(w));
-      const lw = (lines[i + 1].match(/[A-Z][A-Z'\-]+/g) || []);
-      if(cw.length !== 1 || !lw.length) continue;
-      const t = translit(cw[0]);
-      if(lw.some(x => lev(t, x) <= Math.max(1, Math.floor(x.length / 5)))) pairs.push(title(cw[0]));
+    for(const line of lines){
+      if(GEO.test(line)) continue;
+      for(const w of line.split(/[\s\/|,:.]+/).map(fixMixed)){
+        if(pairs.length >= 2) break;
+        if(w.length < 3 || !WORD.test(w) || w !== w.toUpperCase() || STOP.test(w) || LABEL_WORDS.test(w)) continue;
+        const t = translit(w);
+        if(latWords.some(x => lev(t, x) <= Math.max(1, Math.floor(x.length / 4))) && !pairs.includes(title(w))) pairs.push(title(w));
+      }
     }
     const patr = f.caps.find(w => /(ОВИЧ|ЕВИЧ|ЄВИЧ|ІЧ|ОВНА|ЕВНА|ЄВНА|ІВНА|ЇВНА|ІЧНА|ИЧНА)$/.test(w));
     if(!f.name){
@@ -3276,7 +3294,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-16.2";
+const GEN_VERSION="2026-10-16.3";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
