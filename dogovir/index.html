@@ -118,6 +118,20 @@
   input.filled,textarea.filled{background:#fff;border-color:#c3cad6}
   textarea.pass{min-height:64px;line-height:1.5;font-size:14px}
   .sub-hint{font-size:11px;color:var(--faint);margin-top:5px;line-height:1.4}
+  /* заповнення з документів */
+  .doc-import{border:1.5px dashed var(--line);border-radius:12px;padding:14px 16px;margin:0 0 18px;background:var(--field-bg);transition:border-color .15s,background .15s}
+  .doc-import.drag{border-color:var(--ink);background:#f1f3f7}
+  .doc-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .doc-row .btn{flex:none}
+  .doc-text{flex:1;min-width:220px;font-size:12.5px;color:var(--muted);line-height:1.5}
+  .doc-text b{color:var(--ok);font-weight:600}
+  .doc-status{font-size:13px;line-height:1.5;margin-top:10px;color:var(--ink-2)}
+  .doc-status:empty{display:none}
+  .doc-status.ok{color:var(--ok)} .doc-status.warn{color:var(--warn)}
+  .doc-raw details{margin-top:8px;font-size:12px;color:var(--muted)}
+  .doc-raw summary{cursor:pointer}
+  .doc-raw pre{white-space:pre-wrap;background:#fff;border:1px solid var(--line-2);border-radius:8px;padding:10px;max-height:220px;overflow:auto;font-size:11.5px}
+  input.doc-filled,textarea.doc-filled{background:#fff8d6!important;border-color:#e0c25a!important}
   .auto-badge{font-size:10.5px;color:var(--gold);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
   /* строк дії: текстове поле + кнопка-календар (нативний date-picker під іконкою) */
   .term-wrap{position:relative}
@@ -359,6 +373,17 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
               <label class="ctype-opt"><input type="radio" name="ctype" value="yur"> Юридична особа</label>
             </div>
           </div>
+        </div>
+
+        <!-- Заповнення з документів клієнта -->
+        <div class="doc-import" id="doc_import">
+          <div class="doc-row">
+            <button type="button" class="btn btn-ghost" id="doc_pick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.4 11.1l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>Заповнити з документів клієнта</button>
+            <div class="doc-text">Фото або PDF: ID-картка (обидва боки), паспорт, РНОКПП, витяг про місце проживання, виписка з ЄДР. Можна кілька файлів одразу або перетягнути сюди.<br><b>Розпізнається на цьому комп'ютері — файли нікуди не надсилаються.</b></div>
+          </div>
+          <input type="file" id="doc_files" accept="image/*,application/pdf,.pdf" multiple hidden>
+          <div class="doc-status" id="doc_status"></div>
+          <div class="doc-raw" id="doc_raw"></div>
         </div>
 
         <!-- Фізична особа -->
@@ -1731,7 +1756,8 @@ function toast(msg,isErr){
 /* ---------- clear ---------- */
 $("#btn_clear").addEventListener("click",()=>{
   if(!confirm("Очистити всі поля?")) return;
-  $$("[data-key],[data-datefull],[data-dateplain]").forEach(el=>{el.value="";el.classList.remove("filled");});
+  $$("[data-key],[data-datefull],[data-dateplain]").forEach(el=>{el.value="";el.classList.remove("filled","doc-filled");});
+  const ds=$("#doc_status"), dr=$("#doc_raw"); if(ds){ ds.textContent=""; ds.className="doc-status"; } if(dr) dr.innerHTML="";
   $("#f_agr_no").value=""; $("#f_act_no").value=""; $("#f_inv_no").value="";
   $("#date_preview").textContent="";$("#birth_preview").textContent="";
   $("#f_rate").value="";
@@ -2821,9 +2847,362 @@ updateRecap();
 })();
 </script>
 <script>
+/* Заповнення даних клієнта з документів (фото / PDF) — усе розпізнається в цьому браузері,
+   файли нікуди не надсилаються. PDF із текстом читається pdf.js; фото та скани — Tesseract (OCR).
+   Бібліотеки й мовні моделі вантажаться з CDN лише при першому використанні. */
+const DocImport = (function(){
+  const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+  const TESS = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+
+  // ── Розбір тексту документів ────────────────────────────────────────
+  const L = "А-ЩЬЮЯҐЄІЇа-щьюяґєії";
+  const WORD = new RegExp("^[" + L + "][" + L + "'\\-]*[" + L + "]$");
+  const MONTHS = ["січ","лют","бер","квіт","трав","черв","лип","серп","вер","жовт","лист","груд"];
+  const RN_W = [-1, 5, 7, 9, 4, 6, 10, 5, 7];
+
+  function rnokppOk(s){
+    if(!/^\d{10}$/.test(s)) return false;
+    let sum = 0; for(let i = 0; i < 9; i++) sum += +s[i] * RN_W[i];
+    return (sum % 11) % 10 === +s[9];
+  }
+  // перші 5 цифр РНОКПП — кількість днів від 31.12.1899
+  function birthFromRnokpp(s){
+    const d = new Date(Date.UTC(1899, 11, 31)); d.setUTCDate(d.getUTCDate() + +s.slice(0, 5));
+    return d.toISOString().slice(0, 10);
+  }
+  function iso(d, m, y){
+    d = +d; m = +m; y = +y;
+    if(y < 1900 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31) return "";
+    return y + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+  }
+  function findDate(s){
+    let m = s.match(/(\d{1,2})\s*[.\/\s-]\s*(\d{1,2})\s*[.\/\s-]\s*(\d{4})/);
+    if(m){ const r = iso(m[1], m[2], m[3]); if(r) return r; }
+    m = s.toLowerCase().match(new RegExp("(\\d{1,2})\\s+([" + L + "]{3,})\\.?\\s+(\\d{4})"));
+    if(m){ const i = MONTHS.findIndex(p => m[2].startsWith(p)); if(i >= 0) return iso(m[1], i + 1, m[3]); }
+    return "";
+  }
+  // текст одразу після підпису (значення може стояти в наступному рядку, під підписом)
+  function near(text, re, len){
+    const m = text.match(re);
+    return m ? text.slice(m.index + m[0].length, m.index + m[0].length + (len || 80)) : "";
+  }
+  const DATE_RE = /\d{1,2}\s*[.\/\s-]\s*\d{1,2}\s*[.\/\s-]\s*\d{4}/g;
+  function dmy(isoStr){ const p = isoStr.split("-"); return p[2] + "." + p[1] + "." + p[0]; }
+  function title(w){
+    return w.toLowerCase().replace(new RegExp("(^|[\\s-])([" + L + "])", "g"), (m, a, b) => a + b.toUpperCase());
+  }
+  // «Петренко Олена Іванівна» з рядка, якщо там 2–4 слова кирилицею
+  function asName(s){
+    if(!s) return "";
+    const words = s.replace(/[’ʼ`´]/g, "'").replace(/[,;:()]/g, " ").split(/\s+/).filter(Boolean);
+    const cyr = [];
+    for(const w of words){
+      // слова імені починаються з великої літери (або написані капсом)
+      if(WORD.test(w) && w.charAt(0) !== w.charAt(0).toLowerCase()) cyr.push(w); else if(cyr.length) break; else if(WORD.test(w)) return "";
+    }
+    return cyr.length >= 2 && cyr.length <= 4 ? cyr.map(title).join(" ") : "";
+  }
+  const LABEL_WORDS = /^(прізвище|surname|ім'я|імя|given|names?|по|батькові|patronymic|власне|за|наявності|та)$/i;
+  // значення після підпису (ID-картка, паспорт): у тому ж рядку або в наступних двох
+  function afterLabel(lines, re){
+    for(let i = 0; i < lines.length; i++){
+      const m = lines[i].match(re);
+      if(!m) continue;
+      const rest = [lines[i].slice(m.index + m[0].length)].concat(lines.slice(i + 1, i + 3));
+      for(const part of rest){
+        for(const w of part.replace(/[’ʼ`´]/g, "'").split(/[\s\/|,:]+/)){
+          if(WORD.test(w) && w.length >= 2 && w === w.toUpperCase() && !LABEL_WORDS.test(w)) return title(w);
+        }
+      }
+    }
+    return "";
+  }
+  // текст після підпису до наступного «підпису» (для адрес, назв)
+  function block(text, re, maxLen){
+    const m = text.match(re);
+    if(!m) return "";
+    let rest = text.slice(m.index + m[0].length).replace(/^[\s:–—-]+/, "");
+    const out = [];
+    const parts = rest.split("\n");
+    // продовження самого підпису в тому ж рядку («…та скорочене у разі наявності») — пропускаємо
+    if(new RegExp("^[(а-щьюяґєії]").test(parts[0].trim())) parts.shift();
+    for(const line of parts){
+      const t = line.trim();
+      if(!t){ if(out.length) break; else continue; }
+      if(out.length && (/^[^,]{3,60}:/.test(t) || /^(дата|підстава|орган|відомості|номер|телефон|прізвище|ідентифікаційний|код|керівник|види|стан|e-?mail)/i.test(t))) break;
+      out.push(t);
+      if(out.join(" ").length > (maxLen || 220)) break;
+    }
+    return out.join(" ").replace(/\s+/g, " ").replace(/\s+,/g, ",").trim();
+  }
+  function cleanAddr(a){
+    return a.replace(/^україна\s*,\s*/i, "").replace(/[.;]$/, "").trim();
+  }
+  // «ТОВАРИСТВО З ОБМЕЖЕНОЮ ВІДПОВІДАЛЬНІСТЮ "РОМАШКА"» → «Товариство з обмеженою відповідальністю «РОМАШКА»»
+  function orgName(s){
+    s = s.replace(/[“”„"]([^“”„"]+)[“”„"]/g, "«$1»").trim();
+    const cut = s.indexOf("»,"); if(cut > 0) s = s.slice(0, cut + 1);   // без скороченої назви після коми
+    const q = s.indexOf("«");
+    const form = q > 0 ? s.slice(0, q) : s, rest = q > 0 ? s.slice(q) : "";
+    if(form === form.toUpperCase()){
+      const f = form.toLowerCase().trim();
+      return (f.charAt(0).toUpperCase() + f.slice(1) + (rest ? " " + rest : "")).trim();
+    }
+    return s;
+  }
+
+  function parse(raw){
+    const text = raw.replace(/\r/g, "").replace(/[’ʼ`´‘]/g, "'").replace(/[ \t]+/g, " ");
+    const lines = text.split("\n").map(s => s.trim()).filter(Boolean);
+    const low = text.toLowerCase();
+    const f = {};
+
+    // MRZ ID-картки (зворотний бік): IDUKR<номер 9><к><УНЗР> / <дата нар.>…
+    const flat = lines.map(l => l.replace(/\s+/g, "").toUpperCase());
+    flat.forEach((l, i) => {
+      const m = l.match(/^I[D<]UKR([0-9O]{9})\d?<?(\d{8})?(\d{5})?/);
+      if(m){
+        f.idNo = f.idNo || m[1].replace(/O/g, "0");
+        if(m[2] && m[3]) f.record = f.record || (m[2] + "-" + m[3]);
+        const n = flat[i + 1] && flat[i + 1].match(/^(\d{2})(\d{2})(\d{2})\d[MF<]/);
+        if(n && !f.birth){ const yy = +n[1]; f.birth = iso(n[3], n[2], (yy > 30 ? 1900 : 2000) + yy); }
+      }
+    });
+
+    // ПІБ одним рядком (Дія, довідки, витяги)
+    const one = text.match(/(?:прізвище,?\s*(?:власне\s*)?ім'я,?\s*(?:та\s*)?по\s*батькові(?:\s*\(за\s*наявності\))?|\bПІБ\b)\s*[:\-–]?\s*([^\n]*)\n?([^\n]*)/i);
+    if(one) f.name = asName(one[1]) || asName(one[2]);
+    if(!f.name){
+      // окремі підписи (ID-картка: по батькові — на звороті); ім'я складається після об'єднання файлів
+      f.sur = afterLabel(lines, /прізвище(?!,)|surname/i);
+      f.giv = afterLabel(lines, /ім'?я(?!,)|given\s*names?/i);
+      f.pat = afterLabel(lines, /по\s*батькові|patronymic/i);
+    }
+
+    // РНОКПП: біля підпису або будь-який 10-значний з правильною контрольною цифрою
+    const rl = text.match(/(?:РНОКПП|RNTRC|реєстраційн\S*\s*номер\S*\s*облікової\s*картки|ідентифікаційн\S*\s*номер)[^\d]{0,80}(\d[\d\s]{9,13})/i);
+    if(rl){ const d = rl[1].replace(/\s/g, "").slice(0, 10); if(rnokppOk(d)) f.rnokpp = d; }
+    if(!f.rnokpp){ const all = text.match(/(?<!\d)\d{10}(?!\d)/g) || []; f.rnokpp = all.find(rnokppOk) || ""; }
+
+    // Дата народження
+    const bd = findDate(near(text, /дата\s*народження|date\s*of\s*birth/i));
+    if(bd) f.birth = bd;
+
+    // ID-картка
+    const idl = near(text, /номер\s*документа|document\s*no/i).match(/(?<![\d-])\d{9}(?![\d-])/);
+    if(idl) f.idNo = idl[0];
+    const rec = text.match(/(?<!\d)((?:19|20)\d{6})\s*[-–]\s*(\d{5})(?!\d)/);
+    if(rec) f.record = rec[1] + "-" + rec[2];
+    // «Дата видачі / Орган, що видав» — підписи в одному рядку, значення під ними: «20 05 2020 8031»
+    const auth = near(text, /орган,?\s*що|authority/i, 60).replace(DATE_RE, " ").match(/(?<!\d)\d{4}(?!\d)/);
+    if(auth) f.authority = auth[0];
+    const iss = findDate(near(text, /дата\s*видачі|date\s*of\s*issue/i, 90));
+    if(iss) f.issued = iss;
+    if(!f.idNo && (f.record || /id-?карт|identity\s*card/i.test(text))){
+      const n9 = text.match(/(?<![\d-])\d{9}(?![\d-])/); if(n9) f.idNo = n9[0];
+    }
+    // Паспорт-книжечка: серія і номер
+    const ser = text.match(new RegExp("(?<![" + L + "])([А-ЯІЇЄҐ]{2})\\s*№?\\s*(\\d{6})(?!\\d)"));
+    if(ser && !f.idNo) f.series = ser[1] + " № " + ser[2];
+    const byWhom = text.match(/(?:виданий|видан|ким\s*виданий)\s*[:\-–]?\s*([^\n]{6,120})/i);
+    if(byWhom && f.series){
+      f.issuer = byWhom[1].replace(/\s*\d{1,2}[.\s]\d{1,2}[.\s]\d{4}.*$/, "").trim();
+      if(!f.issued) f.issued = findDate(byWhom[1]);
+    }
+
+    // Адреса місця проживання / реєстрації
+    const addr = block(text, /(?:адреса\s*)?(?:задекларован\S*|зареєстрован\S*)?\s*місц\S*\s*проживання(?:\s*\(перебування\))?|адреса\s*реєстрації|місце\s*реєстрації/i);
+    if(addr && /\d/.test(addr)) f.addr = cleanAddr(addr);
+
+    // Виписка з ЄДР: юридична особа / ФОП
+    const isFop = /фізичн\S*\s+особ\S*\s*[-–]\s*підприєм/i.test(text);
+    const orgN = block(text, /(?:повне\s*)?найменування\s*(?:юридичної\s*особи)?(?:\s*\(?повне\)?)?/i, 200);
+    const edr = text.match(/(?:ідентифікаційний\s*код|код\s*(?:за\s*)?ЄДРПОУ)[^\d]{0,60}(\d{8})(?!\d)/i);
+    if(edr && orgN && !isFop){
+      f.type = "yur"; f.edrpou = edr[1]; f.org = orgName(orgN);
+      const oa = block(text, /місцезнаходження(?:\s*юридичної\s*особи)?/i);
+      if(oa) f.orgAddr = cleanAddr(oa);
+      const ch = text.match(/керівник[^\n:]*[:\-–]?\s*([^\n]*)\n?([^\n]*)/i);
+      if(ch){ const n = asName(ch[1]) || asName(ch[2]); if(n) f.head = n; }
+    } else if(isFop){
+      f.type = "fop";
+      if(!f.addr){ const a = block(text, /місцезнаходження/i); if(a && /\d/.test(a)) f.addr = cleanAddr(a); }
+    }
+
+    return f;
+  }
+  // після об'єднання даних з усіх файлів: ПІБ, дата народження з РНОКПП, рядок паспорта
+  function finalize(f){
+    if(!f.name && f.sur && f.giv) f.name = [f.sur, f.giv, f.pat].filter(Boolean).join(" ");
+    // РНОКПП з правильною контрольною цифрою точно задає дату народження (OCR дати може помилятися)
+    if(f.rnokpp) f.birth = birthFromRnokpp(f.rnokpp);
+    // запис у Демографічному реєстрі (УНЗР) починається з дати народження РРРРММДД
+    if(f.record && f.birth) f.record = f.birth.replace(/-/g, "") + f.record.slice(8);
+    if(f.idNo){
+      f.pass = "паспорт громадянина України у формі ID-картки № " + f.idNo +
+        (f.authority ? ", орган, що видав, " + f.authority : "") +
+        (f.issued ? ", дата видачі " + dmy(f.issued) : "") +
+        (f.record ? ", запис у Демографічному реєстрі № " + f.record : "");
+    } else if(f.series){
+      f.pass = "серія " + f.series + (f.issuer ? ", виданий " + f.issuer : "") + (f.issued ? " " + dmy(f.issued) : "");
+    }
+    return f;
+  }
+  // a — вже зібране, b — новий файл; текст PDF надійніший за розпізнане фото
+  function merge(a, b, bText){
+    for(const k in b){
+      if(!b[k]) continue;
+      if(!a[k] || (bText && !a._text)) a[k] = b[k];
+      else if(k === "name" && b[k].split(" ").length > a[k].split(" ").length) a[k] = b[k];
+    }
+    if(bText) a._text = true;
+    return a;
+  }
+
+  // ── Читання файлів ──────────────────────────────────────────────────
+  const loaded = {};
+  function loadScript(src){
+    return loaded[src] || (loaded[src] = new Promise((ok, fail) => {
+      const s = document.createElement("script"); s.src = src; s.onload = ok;
+      s.onerror = () => { delete loaded[src]; fail(new Error("Не вдалося завантажити " + src + ". Перевірте інтернет.")); };
+      document.head.appendChild(s);
+    }));
+  }
+  async function pdfDoc(file){
+    await loadScript(PDFJS + "pdf.min.js");
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js";
+    return window.pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+  }
+  async function pdfText(doc){
+    let out = "";
+    for(let p = 1; p <= doc.numPages; p++){
+      const c = await (await doc.getPage(p)).getTextContent();
+      let lastY = null;
+      for(const it of c.items){
+        const y = it.transform[5];
+        if(lastY !== null && Math.abs(y - lastY) > 2) out += "\n"; else if(lastY !== null) out += " ";
+        out += it.str; lastY = y;
+        if(it.hasEOL){ out += "\n"; lastY = null; }
+      }
+      out += "\n";
+    }
+    return out;
+  }
+  async function pdfImages(doc){
+    const imgs = [];
+    for(let p = 1; p <= Math.min(doc.numPages, 4); p++){
+      const page = await doc.getPage(p), vp = page.getViewport({ scale: 2.5 });
+      const c = document.createElement("canvas"); c.width = vp.width; c.height = vp.height;
+      await page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+      imgs.push(c);
+    }
+    return imgs;
+  }
+  let worker = null;
+  async function ocr(img, onPct){
+    if(!worker){
+      await loadScript(TESS);
+      worker = await window.Tesseract.createWorker(["ukr", "eng"], 1, {
+        logger: m => { if(m.status === "recognizing text" && onPct.cb) onPct.cb(Math.round(m.progress * 100)); }
+      });
+    }
+    const { data } = await worker.recognize(img);
+    return data.text || "";
+  }
+  async function readFile(file, onPct){
+    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    if(isPdf){
+      const doc = await pdfDoc(file);
+      const t = await pdfText(doc);
+      if(t.replace(/\s/g, "").length > 40) return { text: t, isText: true };
+      let out = "";
+      for(const c of await pdfImages(doc)) out += await ocr(c, onPct) + "\n";
+      return { text: out, isText: false };
+    }
+    return { text: await ocr(file, onPct), isText: false };
+  }
+
+  // ── Підстановка у форму ─────────────────────────────────────────────
+  const MAP = [
+    ["name", "#f_name", "ПІБ"], ["birth", "#f_birth", "дата народження"], ["addr", "#f_addr", "адреса"],
+    ["rnokpp", "#f_rnokpp", "РНОКПП"], ["pass", "#f_pass", "паспорт / ID-картка"],
+    ["org", "#f_org", "назва юр. особи"], ["edrpou", "#f_edrpou", "ЄДРПОУ"], ["orgAddr", "#f_orgaddr", "місцезнаходження"]
+  ];
+  function apply(f){
+    const filled = [], kept = [];
+    if(f.type){
+      const r = document.querySelector('input[name="ctype"][value="' + f.type + '"]');
+      if(r && !r.checked){ r.checked = true; r.dispatchEvent(new Event("change", { bubbles: true })); }
+    }
+    for(const [k, sel, label] of MAP){
+      const v = f[k], el = document.querySelector(sel);
+      if(!v || !el) continue;
+      if(el.value.trim() && el.value.trim() !== v){ kept.push(label); continue; }
+      el.value = v;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+      el.classList.add("doc-filled");
+      el.addEventListener("input", () => el.classList.remove("doc-filled"), { once: true });
+      filled.push(label);
+    }
+    return { filled, kept };
+  }
+
+  function init(){
+    const box = document.getElementById("doc_import"); if(!box) return;
+    const inp = box.querySelector("#doc_files"), btn = box.querySelector("#doc_pick"), st = box.querySelector("#doc_status"), raw = box.querySelector("#doc_raw");
+    const say = (html, cls) => { st.innerHTML = html; st.className = "doc-status" + (cls ? " " + cls : ""); };
+    async function run(files){
+      files = Array.from(files).filter(f => /^image\//.test(f.type) || f.type === "application/pdf" || /\.pdf$/i.test(f.name));
+      if(!files.length) return;
+      btn.disabled = true; raw.innerHTML = "";
+      const docs = [];
+      try{
+        for(let i = 0; i < files.length; i++){
+          const name = files[i].name, pref = files.length > 1 ? (i + 1) + "/" + files.length + " · " : "";
+          const onPct = { cb: p => say("Розпізнаю " + pref + esc(name) + " — " + p + "%") };
+          say("Читаю " + pref + esc(name) + (worker ? "…" : "… (перший раз завантажуються моделі розпізнавання, ~8 МБ)"));
+          const { text, isText } = await readFile(files[i], onPct);
+          docs.push({ f: parse(text), isText });
+          const d = document.createElement("details");
+          d.innerHTML = "<summary>Розпізнаний текст: " + esc(name) + "</summary><pre></pre>";
+          d.querySelector("pre").textContent = text.trim() || "(текст не знайдено)";
+          raw.appendChild(d);
+        }
+        // спершу PDF з текстом (надійніше), потім розпізнані фото
+        const all = {};
+        docs.filter(d => d.isText).concat(docs.filter(d => !d.isText)).forEach(d => merge(all, d.f, d.isText));
+        finalize(all);
+        const r = apply(all);
+        let msg = r.filled.length ? "✓ Заповнено: " + r.filled.join(", ") + ". Перевірте підсвічені поля." : "Даних для заповнення не знайдено — перевірте якість фото або розпізнаний текст нижче.";
+        if(r.kept.length) msg += "<br>Не замінено (поле вже заповнене): " + r.kept.join(", ") + ".";
+        if(all.head) msg += "<br>Керівник за випискою: <b>" + esc(all.head) + "</b> — впишіть посаду і ПІБ у родовому відмінку.";
+        if(!all.addr && !all.orgAddr && r.filled.length) msg += "<br>Адресу не знайдено — додайте витяг про місце проживання або впишіть вручну.";
+        say(msg, r.filled.length ? "ok" : "warn");
+      }catch(e){
+        say("Помилка: " + esc(e.message || String(e)), "warn");
+      }finally{
+        btn.disabled = false; inp.value = "";
+        if(worker){ worker.terminate(); worker = null; }
+      }
+    }
+    btn.addEventListener("click", () => inp.click());
+    inp.addEventListener("change", () => run(inp.files));
+    box.addEventListener("dragover", e => { e.preventDefault(); box.classList.add("drag"); });
+    box.addEventListener("dragleave", () => box.classList.remove("drag"));
+    box.addEventListener("drop", e => { e.preventDefault(); box.classList.remove("drag"); run(e.dataTransfer.files); });
+  }
+  function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+  return { parse, finalize, merge, init, rnokppOk };
+})();
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", DocImport.init); else DocImport.init();
+</script>
+<script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-14.3";
+const GEN_VERSION="2026-10-16.1";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
