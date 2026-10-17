@@ -131,6 +131,12 @@
   .doc-raw details{margin-top:8px;font-size:12px;color:var(--muted)}
   .doc-raw summary{cursor:pointer}
   .doc-raw pre{white-space:pre-wrap;background:#fff;border:1px solid var(--line-2);border-radius:8px;padding:10px;max-height:220px;overflow:auto;font-size:11.5px}
+  .sign-box{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--field-bg)}
+  .sign-prev{width:180px;height:80px;background:#fff;border:1px solid var(--line-2);border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none}
+  .sign-prev img{max-width:168px;max-height:70px}
+  .sign-prev span{font-size:12px;color:var(--warn)}
+  .sign-ctl{flex:1;min-width:220px}
+  .sign-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
   input.doc-filled,textarea.doc-filled{background:#fff8d6!important;border-color:#e0c25a!important}
   .auto-badge{font-size:10.5px;color:var(--gold);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
   /* строк дії: текстове поле + кнопка-календар (нативний date-picker під іконкою) */
@@ -425,6 +431,17 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
               Клієнт підписує документи через КЕП (кваліфікований електронний підпис)
             </label>
             <div class="sub-hint">Додає до розділу «Заключні положення» пункт: Договір і документи на його виконання можуть підписуватись КЕП (ст. 18 ЗУ «Про електронні довірчі послуги»); у полі Клієнта — позначка «Підписано за допомогою КЕП», а в полі Адвоката проставляється його підпис (електронний вигляд). За замовчуванням вимкнено.</div>
+            <div class="sign-box" id="sign_box" hidden>
+              <div class="sign-prev" id="sign_prev"><span>Підпис не завантажено</span></div>
+              <div class="sign-ctl">
+                <div class="sign-btns">
+                  <button type="button" class="btn btn-ghost" id="sign_pick">Завантажити підпис адвоката</button>
+                  <button type="button" class="btn btn-ghost" id="sign_del" hidden>Видалити</button>
+                </div>
+                <div class="sub-hint">Фото або скан підпису на білому аркуші (PNG, JPG). Фон стає прозорим автоматично. <b>Зберігається лише в цьому браузері</b> і нікуди не надсилається; на іншому комп'ютері завантажте ще раз.</div>
+              </div>
+              <input type="file" id="sign_file" accept="image/png,image/jpeg,image/webp" hidden>
+            </div>
           </div>
         </div>
 
@@ -1769,6 +1786,7 @@ $("#btn_clear").addEventListener("click",()=>{
   $("#f_pay_preset").value="A";
   catPicked.clear(); renderCatList();
   applyDefaults(); applyProvider(); applyClientType(); applyPayMode();
+  if(window.signRender) window.signRender();
   window.scrollTo({top:0,behavior:"smooth"});
 });
 
@@ -2092,10 +2110,11 @@ function b64ToUint8(b64){
 /* ---------- підпис адвоката (для е-підписання) ----------
    Коли ввімкнено «Клієнт підписує документи через КЕП» (тобто договір
    підписується в електронному вигляді), у поле підпису Адвоката
-   вставляється зображення його підпису (файл dogovir/sign.png).
-   Якщо файлу немає або він не завантажився — підпис просто не додається,
-   а договір формується як звичайно (жодних помилок). */
-const SIGN_URL="sign.png", SIGN_REL_ID="rId900", SIGN_MEDIA="word/media/sign_adv.png";
+   вставляється зображення його підпису. Зображення адвокат завантажує сам
+   (кнопка під галочкою КЕП); воно зберігається лише в localStorage цього
+   браузера і не лежить на сайті чи в репозиторії. Якщо підпису немає —
+   він просто не додається, а договір формується як звичайно. */
+const SIGN_LS_KEY="osadko_sign_png", SIGN_REL_ID="rId900", SIGN_MEDIA="word/media/sign_adv.png";
 const SIGN_WIDTH_CM=4.2;        /* ширина підпису (договір/акт/дод.угода) */
 const SIGN_INVOICE_CM=3.6;      /* ширина підпису у рахунку (трохи менша — органічніше) */
 const SIGN_LINE_EMU=360000;     /* де приблизно лінія підпису нижче верху абзацу (EMU); підбір вертикалі (більше = нижче) */
@@ -2103,9 +2122,9 @@ let _signCache; /* undefined — ще не пробували; null — недо
 async function loadSignature(){
   if(_signCache!==undefined) return _signCache;
   try{
-    const r=await fetch(SIGN_URL,{cache:"force-cache"});
-    if(!r.ok) throw 0;
-    const bytes=new Uint8Array(await r.arrayBuffer());
+    let url=null; try{ url=localStorage.getItem(SIGN_LS_KEY); }catch(e){}
+    if(!url || url.indexOf("data:image/png;base64,")!==0) throw 0;
+    const bytes=b64ToUint8(url.slice(22));
     if(!(bytes[0]===0x89 && bytes[1]===0x50 && bytes[2]===0x4E && bytes[3]===0x47)) throw 0; /* не PNG */
     const w=(bytes[16]<<24|bytes[17]<<16|bytes[18]<<8|bytes[19])>>>0;
     const h=(bytes[20]<<24|bytes[21]<<16|bytes[22]<<8|bytes[23])>>>0;
@@ -2217,6 +2236,63 @@ async function prepareAdvocateSign(zip, kep, xml){
   await addSignatureAssets(zip, sig.bytes);
   return {cx:sig.cx, cy:sig.cy};
 }
+
+/* завантаження підпису: фон → прозорий, обрізка по краях, PNG до 1000 px завширшки */
+function processSignature(file){
+  return new Promise((ok,fail)=>{
+    const img=new Image(), u=URL.createObjectURL(file);
+    img.onload=()=>{
+      URL.revokeObjectURL(u);
+      const k=Math.min(1, 2000/Math.max(img.width,img.height));
+      const w=Math.round(img.width*k), h=Math.round(img.height*k);
+      const c=document.createElement("canvas"); c.width=w; c.height=h;
+      const g=c.getContext("2d"); g.drawImage(img,0,0,w,h);
+      const d=g.getImageData(0,0,w,h), px=d.data;
+      let x0=w, y0=h, x1=-1, y1=-1;
+      for(let i=0;i<px.length;i+=4){
+        const lum=0.299*px[i]+0.587*px[i+1]+0.114*px[i+2];
+        // світлий папір → прозорий, плавний перехід для країв штриха
+        const a = lum>200 ? 0 : lum<140 ? 255 : Math.round((200-lum)/60*255);
+        px[i+3]=Math.min(px[i+3], a);
+        if(px[i+3]>40){ const p=i/4, x=p%w, y=(p-x)/w; if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
+      }
+      if(x1<0) return fail(new Error("На зображенні не знайдено підпису — потрібен темний підпис на світлому тлі."));
+      g.putImageData(d,0,0);
+      const pad=8; x0=Math.max(0,x0-pad); y0=Math.max(0,y0-pad); x1=Math.min(w-1,x1+pad); y1=Math.min(h-1,y1+pad);
+      const cw=x1-x0+1, ch=y1-y0+1, s2=Math.min(1, 1000/cw);
+      const o=document.createElement("canvas"); o.width=Math.round(cw*s2); o.height=Math.round(ch*s2);
+      o.getContext("2d").drawImage(c,x0,y0,cw,ch,0,0,o.width,o.height);
+      ok(o.toDataURL("image/png"));
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(u); fail(new Error("Не вдалося відкрити зображення.")); };
+    img.src=u;
+  });
+}
+(function(){
+  const box=$("#sign_box"), kep=$("#f_kep"), prev=$("#sign_prev"), del=$("#sign_del"), file=$("#sign_file");
+  if(!box) return;
+  function get(){ try{ return localStorage.getItem(SIGN_LS_KEY); }catch(e){ return null; } }
+  function render(){
+    const u=get();
+    prev.innerHTML = u ? '<img alt="Підпис адвоката">' : "<span>Підпис не завантажено</span>";
+    if(u) prev.querySelector("img").src=u;
+    del.hidden=!u;
+    box.hidden=!kep.checked;
+  }
+  kep.addEventListener("change",render);
+  $("#sign_pick").addEventListener("click",()=>file.click());
+  file.addEventListener("change",async()=>{
+    const f=file.files[0]; file.value=""; if(!f) return;
+    try{
+      const url=await processSignature(f);
+      try{ localStorage.setItem(SIGN_LS_KEY,url); }catch(e){ throw new Error("Браузер не дозволив зберегти підпис (приватний режим?)."); }
+      _signCache=undefined; render(); toast("Підпис збережено в цьому браузері");
+    }catch(e){ toast(e.message||String(e),true); }
+  });
+  del.addEventListener("click",()=>{ try{ localStorage.removeItem(SIGN_LS_KEY); }catch(e){} _signCache=undefined; render(); toast("Підпис видалено з цього браузера"); });
+  render();
+  window.signRender=render;
+})();
 
 /* ---------- generate docx ---------- */
 /* Формує .docx і повертає {blob, fname}.
@@ -2616,6 +2692,7 @@ function applySnapshot(o){
   if(pv) pv.checked=true;
   SNAP_IDS.forEach(id=>{ const e=$("#"+id); if(e && o.fields && id in o.fields){ e.value=o.fields[id]; markFilled(e); } });
   for(const id in (o.flags||{})){ const e=$("#"+id); if(e) e.checked=!!o.flags[id]; }
+  if(window.signRender) window.signRender();
   services=(o.services||[]).map(x=>{
     const r={t:x.t||"",h:x.h||"",a:x.a||"",manual:!!x.manual,unit:x.unit||"",code:x.code||""};
     if(typeof x.act==="boolean") r.act=x.act;
@@ -3349,7 +3426,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-16.5";
+const GEN_VERSION="2026-10-17.1";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
