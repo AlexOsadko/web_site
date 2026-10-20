@@ -131,6 +131,13 @@
   .doc-raw details{margin-top:8px;font-size:12px;color:var(--muted)}
   .doc-raw summary{cursor:pointer}
   .doc-raw pre{white-space:pre-wrap;background:#fff;border:1px solid var(--line-2);border-radius:8px;padding:10px;max-height:220px;overflow:auto;font-size:11.5px}
+  .pass-kind{margin-top:2px}
+  .pass-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 12px;margin-top:10px}
+  .pass-grid[hidden]{display:none}
+  .pass-grid .pass-wide{grid-column:span 4}
+  .pass-out{margin-top:12px}
+  #p_bk_ser{text-transform:uppercase}
+  @media (max-width:640px){ .pass-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .pass-grid .pass-wide{grid-column:span 2} }
   .rp-box{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:10px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--field-bg)}
   .rp-box .rp-wide{grid-column:1/-1}
   .rp-box[hidden],.sign-box[hidden]{display:none}   /* інакше display:grid/flex перебиває атрибут hidden */
@@ -423,8 +430,25 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
             <input type="text" id="f_rnokpp" class="mono" data-key="РНОКПП" inputmode="numeric" placeholder="10 цифр" autocomplete="off">
           </div>
           <div class="field col-2 only-fiz">
-            <label for="f_pass">Паспорт / ID-картка<span class="hint">необовʼязково · серія, номер, ким і коли видано</span></label>
-            <textarea id="f_pass" class="pass" data-key="Паспорт_idcard" rows="2" placeholder="напр. серія АА № 123456, виданий Шевченківським РВ ГУ ДМС України в м. Києві 15.05.2012 (або № ID-картки та запис у Демографічному реєстрі)"></textarea>
+            <label>Паспорт<span class="hint">необовʼязково</span></label>
+            <div class="ctype pass-kind">
+              <label class="ctype-opt on"><input type="radio" name="pass_kind" value="id" checked> ID-картка</label>
+              <label class="ctype-opt"><input type="radio" name="pass_kind" value="book"> Паспорт-книжечка</label>
+            </div>
+            <div class="pass-grid" id="pass_id">
+              <div class="field"><label for="p_id_no">Номер документа</label><input type="text" id="p_id_no" class="mono" data-key="ID_номер" inputmode="numeric" maxlength="9" placeholder="9 цифр" autocomplete="off"></div>
+              <div class="field"><label for="p_id_auth">Орган, що видав</label><input type="text" id="p_id_auth" class="mono" data-key="ID_орган" inputmode="numeric" maxlength="4" placeholder="4 цифри" autocomplete="off"></div>
+              <div class="field"><label for="p_id_date">Дата видачі</label><input type="date" id="p_id_date" data-key="ID_дата"></div>
+              <div class="field"><label for="p_id_rec">Запис у Демографічному реєстрі</label><input type="text" id="p_id_rec" class="mono" data-key="ID_запис" maxlength="14" placeholder="РРРРММДД-ННННН" autocomplete="off"></div>
+            </div>
+            <div class="pass-grid" id="pass_book" hidden>
+              <div class="field"><label for="p_bk_ser">Серія</label><input type="text" id="p_bk_ser" class="mono" data-key="Паспорт_серія" maxlength="2" placeholder="АА" autocomplete="off"></div>
+              <div class="field"><label for="p_bk_no">Номер</label><input type="text" id="p_bk_no" class="mono" data-key="Паспорт_номер" inputmode="numeric" maxlength="6" placeholder="6 цифр" autocomplete="off"></div>
+              <div class="field"><label for="p_bk_date">Дата видачі</label><input type="date" id="p_bk_date" data-key="Паспорт_дата"></div>
+              <div class="field pass-wide"><label for="p_bk_who">Ким виданий <span class="hint">орудний відмінок</span></label><input type="text" id="p_bk_who" data-key="Паспорт_орган" placeholder="Шевченківським РВ ГУ ДМС України в м. Києві" autocomplete="off"></div>
+            </div>
+            <label for="f_pass" class="pass-out">У договорі <span class="auto-badge">авто</span></label>
+            <textarea id="f_pass" class="pass" data-key="Паспорт_idcard" rows="2" placeholder="складається з полів вище; за потреби відредагуйте вручну"></textarea>
           </div>
           <div class="field col-2">
             <label style="display:flex;align-items:center;gap:9px;font-weight:600;cursor:pointer">
@@ -1823,6 +1847,7 @@ $("#btn_clear").addEventListener("click",()=>{
   applyDefaults(); applyProvider(); applyClientType(); applyPayMode();
   if(window.signRender) window.signRender();
   { const r=$("#f_rp_on"); if(r) r.checked=false; if(window.rpRender) window.rpRender(); }
+  { const pk=document.querySelector('input[name="pass_kind"][value="id"]'); if(pk) pk.checked=true; if(window.passRender) window.passRender(); }
   window.scrollTo({top:0,behavior:"smooth"});
 });
 
@@ -2330,6 +2355,48 @@ function processSignature(file){
   window.signRender=render;
 })();
 
+/* ---------- паспорт: ID-картка або книжечка → текст для договору ---------- */
+(function(){
+  const out=$("#f_pass"); if(!out) return;
+  const IDS=["p_id_no","p_id_auth","p_id_date","p_id_rec","p_bk_ser","p_bk_no","p_bk_date","p_bk_who"];
+  const g=id=>{ const e=$("#"+id); return e ? e.value.trim() : ""; };
+  const dm=iso=>iso ? iso.split("-").reverse().join(".") : "";
+  const kind=()=>{ const r=document.querySelector('input[name="pass_kind"]:checked'); return r ? r.value : "id"; };
+  function compose(){
+    if(!IDS.some(id=>g(id))) return;          // поля порожні — текст (напр. з реєстру) не чіпаємо
+    let t="";
+    if(kind()==="id"){
+      const no=g("p_id_no");
+      if(no) t="паспорт громадянина України у формі ID‑картки № "+no
+        +(g("p_id_auth")?", орган, що видав, "+g("p_id_auth"):"")
+        +(g("p_id_date")?", дата видачі "+dm(g("p_id_date")):"")
+        +(g("p_id_rec")?", запис у Демографічному реєстрі № "+g("p_id_rec"):"");
+    }else{
+      const ser=g("p_bk_ser").toUpperCase(), no=g("p_bk_no"), who=g("p_bk_who"), d=dm(g("p_bk_date"));
+      if(ser||no) t="паспорт громадянина України серії "+ser+" № "+no+((who||d)?", виданий "+[who,d].filter(Boolean).join(" "):"");
+    }
+    out.value=t; markFilled(out); autoGrow(out);
+  }
+  function render(){
+    $("#pass_id").hidden = kind()!=="id";
+    $("#pass_book").hidden = kind()!=="book";
+    $$(".pass-kind .ctype-opt").forEach(o=>o.classList.toggle("on", o.querySelector("input").checked));
+  }
+  $$('input[name="pass_kind"]').forEach(r=>r.addEventListener("change",()=>{ render(); compose(); }));
+  IDS.forEach(id=>{ const e=$("#"+id); if(e){ e.addEventListener("input",compose); e.addEventListener("change",compose); } });
+  /* заповнення з документів: {kind, no, auth, date, rec, ser, who} */
+  window.passSet=function(o){
+    const r=document.querySelector('input[name="pass_kind"][value="'+o.kind+'"]'); if(r) r.checked=true;
+    const set=(id,v)=>{ const e=$("#"+id); if(e && v){ e.value=v; markFilled(e); e.classList.add("doc-filled"); e.addEventListener("input",()=>e.classList.remove("doc-filled"),{once:true}); } };
+    if(o.kind==="id"){ set("p_id_no",o.no); set("p_id_auth",o.auth); set("p_id_date",o.date); set("p_id_rec",o.rec); }
+    else { set("p_bk_ser",o.ser); set("p_bk_no",o.no); set("p_bk_date",o.date); set("p_bk_who",o.who); }
+    render(); compose(); out.classList.add("doc-filled");
+  };
+  window.passKind=kind;
+  window.passRender=render;
+  render();
+})();
+
 /* ---------- представник Клієнта (фіз. особа / ФОП) за довіреністю або договором доручення ---------- */
 const RP_PRESETS={
   dov:"довіреності від __.__.____, посвідченої ____________________, зареєстрованої в реєстрі за № ____",
@@ -2763,9 +2830,10 @@ const SNAP_IDS=["f_num","f_date","f_name","f_short","f_birth","f_addr","f_rnokpp
   "f_org","f_edrpou","f_repr_short","f_orgaddr","f_repr_pos","f_repr_pib","f_basis","f_repr_rnokpp",
   "f_phone","f_email","f_term","f_agr_no","f_act_no","f_case","f_inv_no","f_cost","f_cost_words",
   "f_rate","f_pay_preset","f_pay_adv","f_pay_d1","f_pay_d2","f_pay_dw","f_pay_day","f_pay_text",
-  "f_rp_name","f_rp_short","f_rp_rnokpp","f_rp_basis"];
+  "f_rp_name","f_rp_short","f_rp_rnokpp","f_rp_basis",
+  "p_id_no","p_id_auth","p_id_date","p_id_rec","p_bk_ser","p_bk_no","p_bk_date","p_bk_who"];
 function snapshot(){
-  const o={v:1, ctype:clientType(), paymode:payMode(), provider:providerMode(), fields:{},
+  const o={v:1, ctype:clientType(), paymode:payMode(), provider:providerMode(), passKind:(window.passKind?window.passKind():"id"), fields:{},
            services:services.map(x=>({t:x.t,h:x.h,a:x.a,manual:!!x.manual,
                                       unit:x.unit||"",code:x.code||"",
                                       act:(typeof x.act==="boolean"?x.act:null)})), flags:{}};
@@ -2785,6 +2853,7 @@ function applySnapshot(o){
   for(const id in (o.flags||{})){ const e=$("#"+id); if(e) e.checked=!!o.flags[id]; }
   if(window.signRender) window.signRender();
   if(window.rpRender) window.rpRender();
+  { const pk=document.querySelector('input[name="pass_kind"][value="'+(o.passKind||"id")+'"]'); if(pk) pk.checked=true; if(window.passRender) window.passRender(); }
   services=(o.services||[]).map(x=>{
     const r={t:x.t||"",h:x.h||"",a:x.a||"",manual:!!x.manual,unit:x.unit||"",code:x.code||""};
     if(typeof x.act==="boolean") r.act=x.act;
@@ -3327,7 +3396,7 @@ const DocImport = (function(){
     }
     // Паспорт-книжечка: серія і номер
     const ser = text.match(new RegExp("(?<![" + L + "])([А-ЯІЇЄҐ]{2})\\s*№?\\s*(\\d{6})(?!\\d)"));
-    if(ser && !f.idNo) f.series = ser[1] + " № " + ser[2];
+    if(ser && !f.idNo){ f.series = ser[1] + " № " + ser[2]; f.bookSer = ser[1]; f.bookNo = ser[2]; }
     const byWhom = text.match(/(?:виданий|видан|ким\s*виданий)\s*[:\-–]?\s*([^\n]{6,120})/i);
     if(byWhom && f.series){
       f.issuer = byWhom[1].replace(/\s*\d{1,2}[.\s]\d{1,2}[.\s]\d{4}.*$/, "").trim();
@@ -3393,12 +3462,12 @@ const DocImport = (function(){
     // запис у Демографічному реєстрі (УНЗР) починається з дати народження РРРРММДД
     if(f.record && f.birth) f.record = f.birth.replace(/-/g, "") + f.record.slice(8);
     if(f.idNo){
-      f.pass = "паспорт громадянина України у формі ID-картки № " + f.idNo +
+      f.pass = "паспорт громадянина України у формі ID‑картки № " + f.idNo +
         (f.authority ? ", орган, що видав, " + f.authority : "") +
         (f.issued ? ", дата видачі " + dmy(f.issued) : "") +
         (f.record ? ", запис у Демографічному реєстрі № " + f.record : "");
     } else if(f.series){
-      f.pass = "серія " + f.series + (f.issuer ? ", виданий " + f.issuer : "") + (f.issued ? " " + dmy(f.issued) : "");
+      f.pass = "паспорт громадянина України серії " + f.series + ((f.issuer || f.issued) ? ", виданий " + [f.issuer, f.issued ? dmy(f.issued) : ""].filter(Boolean).join(" ") : "");
     }
     return f;
   }
@@ -3490,7 +3559,18 @@ const DocImport = (function(){
       const r = document.querySelector('input[name="ctype"][value="' + f.type + '"]');
       if(r && !r.checked){ r.checked = true; r.dispatchEvent(new Event("change", { bubbles: true })); }
     }
+    // паспорт — у структуровані поля (ID-картка / книжечка), текст для договору складе генератор
+    if(window.passSet && (f.idNo || f.bookNo)){
+      const out = document.querySelector("#f_pass");
+      if(out && out.value.trim() && out.value.trim() !== f.pass) kept.push("паспорт / ID-картка");
+      else {
+        window.passSet(f.idNo ? { kind: "id", no: f.idNo, auth: f.authority, date: f.issued, rec: f.record }
+                              : { kind: "book", ser: f.bookSer, no: f.bookNo, date: f.issued, who: f.issuer });
+        filled.push("паспорт / ID-картка");
+      }
+    }
     for(const [k, sel, label] of MAP){
+      if(k === "pass" && window.passSet) continue;
       const v = f[k], el = document.querySelector(sel);
       if(!v || !el) continue;
       if(el.value.trim() && el.value.trim() !== v){ kept.push(label); continue; }
@@ -3558,7 +3638,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-20.2";
+const GEN_VERSION="2026-10-20.3";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
