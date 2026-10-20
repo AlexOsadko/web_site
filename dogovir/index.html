@@ -2361,6 +2361,13 @@ function processSignature(file){
   const IDS=["p_id_no","p_id_auth","p_id_date","p_id_rec","p_bk_ser","p_bk_no","p_bk_date","p_bk_who"];
   const g=id=>{ const e=$("#"+id); return e ? e.value.trim() : ""; };
   const dm=iso=>iso ? iso.split("-").reverse().join(".") : "";
+  /* запис у Демографічному реєстрі завжди через дефіс: РРРРММДД-ННННН */
+  const rec=v=>{ const d=String(v||"").replace(/\D/g,""); return d.length>8 ? d.slice(0,8)+"-"+d.slice(8,13) : v; };
+  const recEl=$("#p_id_rec");
+  if(recEl){
+    recEl.addEventListener("input",()=>{ const d=recEl.value.replace(/\D/g,""); if(d.length>8 && recEl.value!==rec(d)){ recEl.value=rec(d); } });
+    recEl.addEventListener("blur",()=>{ recEl.value=rec(recEl.value); });
+  }
   const kind=()=>{ const r=document.querySelector('input[name="pass_kind"]:checked'); return r ? r.value : "id"; };
   function compose(){
     if(!IDS.some(id=>g(id))) return;          // поля порожні — текст (напр. з реєстру) не чіпаємо
@@ -2370,7 +2377,7 @@ function processSignature(file){
       if(no) t="паспорт громадянина України у формі ID‑картки № "+no
         +(g("p_id_auth")?", орган, що видав, "+g("p_id_auth"):"")
         +(g("p_id_date")?", дата видачі "+dm(g("p_id_date")):"")
-        +(g("p_id_rec")?", запис у Демографічному реєстрі № "+g("p_id_rec"):"");
+        +(g("p_id_rec")?", запис у Демографічному реєстрі № "+rec(g("p_id_rec")):"");
     }else{
       const ser=g("p_bk_ser").toUpperCase(), no=g("p_bk_no"), who=g("p_bk_who"), d=dm(g("p_bk_date"));
       if(ser||no) t="паспорт громадянина України серії "+ser+" № "+no+((who||d)?", виданий "+[who,d].filter(Boolean).join(" "):"");
@@ -2388,7 +2395,7 @@ function processSignature(file){
   window.passSet=function(o){
     const r=document.querySelector('input[name="pass_kind"][value="'+o.kind+'"]'); if(r) r.checked=true;
     const set=(id,v)=>{ const e=$("#"+id); if(e && v){ e.value=v; markFilled(e); e.classList.add("doc-filled"); e.addEventListener("input",()=>e.classList.remove("doc-filled"),{once:true}); } };
-    if(o.kind==="id"){ set("p_id_no",o.no); set("p_id_auth",o.auth); set("p_id_date",o.date); set("p_id_rec",o.rec); }
+    if(o.kind==="id"){ set("p_id_no",o.no); set("p_id_auth",o.auth); set("p_id_date",o.date); set("p_id_rec",rec(o.rec)); }
     else { set("p_bk_ser",o.ser); set("p_bk_no",o.no); set("p_bk_date",o.date); set("p_bk_who",o.who); }
     render(); compose(); out.classList.add("doc-filled");
   };
@@ -3638,7 +3645,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-20.3";
+const GEN_VERSION="2026-10-20.4";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
