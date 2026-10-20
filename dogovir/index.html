@@ -131,6 +131,11 @@
   .doc-raw details{margin-top:8px;font-size:12px;color:var(--muted)}
   .doc-raw summary{cursor:pointer}
   .doc-raw pre{white-space:pre-wrap;background:#fff;border:1px solid var(--line-2);border-radius:8px;padding:10px;max-height:220px;overflow:auto;font-size:11.5px}
+  .rp-box{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:10px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--field-bg)}
+  .rp-box .rp-wide{grid-column:1/-1}
+  .rp-presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .rp-presets .btn{padding:7px 12px;font-size:12.5px}
+  @media (max-width:640px){ .rp-box{grid-template-columns:1fr} }
   .sign-box{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--field-bg)}
   .sign-prev{width:180px;height:80px;background:#fff;border:1px solid var(--line-2);border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none}
   .sign-prev img{max-width:168px;max-height:70px}
@@ -419,6 +424,35 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
           <div class="field col-2 only-fiz">
             <label for="f_pass">Паспорт / ID-картка<span class="hint">необовʼязково · серія, номер, ким і коли видано</span></label>
             <textarea id="f_pass" class="pass" data-key="Паспорт_idcard" rows="2" placeholder="напр. серія АА № 123456, виданий Шевченківським РВ ГУ ДМС України в м. Києві 15.05.2012 (або № ID-картки та запис у Демографічному реєстрі)"></textarea>
+          </div>
+          <div class="field col-2">
+            <label style="display:flex;align-items:center;gap:9px;font-weight:600;cursor:pointer">
+              <input type="checkbox" id="f_rp_on" style="width:16px;height:16px;accent-color:var(--seal)">
+              Договір підписує представник Клієнта (за довіреністю або договором доручення)
+            </label>
+            <div class="rp-box" id="rp_box" hidden>
+              <div class="field rp-wide">
+                <label for="f_rp_name">Представник — прізвище, ім'я, по батькові<span class="hint">називний відмінок</span></label>
+                <input type="text" id="f_rp_name" data-key="Представник_клієнта_ПІБ" placeholder="напр. Петренко Петро Петрович" autocomplete="off">
+              </div>
+              <div class="field">
+                <label for="f_rp_short">Скорочено для підписів <span class="auto-badge">авто</span></label>
+                <input type="text" id="f_rp_short" data-key="Представник_клієнта_іні" placeholder="Петренко П. П." autocomplete="off">
+              </div>
+              <div class="field">
+                <label for="f_rp_rnokpp">РНОКПП представника<span class="hint">необовʼязково</span></label>
+                <input type="text" id="f_rp_rnokpp" class="mono" data-key="Представник_клієнта_РНОКПП" inputmode="numeric" placeholder="10 цифр" autocomplete="off">
+              </div>
+              <div class="field rp-wide">
+                <label for="f_rp_basis">Діє на підставі<span class="hint">род. відмінок</span></label>
+                <div class="rp-presets">
+                  <button type="button" class="btn btn-ghost" data-rp="dov">Нотаріальна довіреність</button>
+                  <button type="button" class="btn btn-ghost" data-rp="dor">Договір доручення</button>
+                </div>
+                <textarea id="f_rp_basis" class="pass" data-key="Представник_клієнта_підстава" rows="2" placeholder="напр. довіреності від 01.10.2026, посвідченої приватним нотаріусом Київського міського нотаріального округу Іваненко І. І., зареєстрованої в реєстрі за № 1234"></textarea>
+                <div class="sub-hint">У договорі, додатковій угоді й акті: «…РНОКПП: …, від імені якого (‑ї) діє представник <i>ПІБ</i>, на підставі <i>цього значення</i> (надалі – «Клієнт»)». Представник додається в реквізити й підписує документи; згода на обробку ПД надається від імені Клієнта через представника.</div>
+              </div>
+            </div>
           </div>
           <div class="field col-2 only-fop" style="display:none">
             <label for="f_basis_fop">Діє на підставі<span class="hint">за замовчуванням — запис в ЄДР</span></label>
@@ -1787,6 +1821,7 @@ $("#btn_clear").addEventListener("click",()=>{
   catPicked.clear(); renderCatList();
   applyDefaults(); applyProvider(); applyClientType(); applyPayMode();
   if(window.signRender) window.signRender();
+  { const r=$("#f_rp_on"); if(r) r.checked=false; if(window.rpRender) window.rpRender(); }
   window.scrollTo({top:0,behavior:"smooth"});
 });
 
@@ -1932,7 +1967,7 @@ const PLACEHOLDERS=[
   "Засоби_звязку_телефон","Електронна_пошта",
   "Підстава_діяльності","Представник_посада","Представник_ПІБ","Підстава_представництва",
   "Вартість_послуг_грн","Вартість_послуг_прописом","Ставка","Загальний_час","Порядок_оплати",
-  "Номер_рахунку","Згода_ПІБ","Згода_РНОКПП",
+  "Номер_рахунку","Згода_ПІБ","Згода_РНОКПП","Представник_вступ","Представник_згода","Представник_реквізити",
   "Рядок_№","Рядок_послуга","Рядок_одиниця","Рядок_час","Рядок_сума","Разом_сума"
 ];
 
@@ -2294,6 +2329,52 @@ function processSignature(file){
   window.signRender=render;
 })();
 
+/* ---------- представник Клієнта (фіз. особа / ФОП) за довіреністю або договором доручення ---------- */
+const RP_PRESETS={
+  dov:"довіреності від __.__.____, посвідченої ____________________, зареєстрованої в реєстрі за № ____",
+  dor:"договору доручення від __.__.____ № ____"
+};
+function repInfo(){
+  const on=$("#f_rp_on"); if(!on || !on.checked || clientType()==="yur") return null;
+  const g=id=>{ const e=$("#"+id); return e ? e.value.trim() : ""; };
+  const name=g("f_rp_name"); if(!name) return null;
+  return { name, short:g("f_rp_short")||shortName(name), rnokpp:g("f_rp_rnokpp"), basis:g("f_rp_basis")||"довіреності" };
+}
+function repClause(r){ return r ? `, від імені якого (‑ї) діє представник ${r.name}${r.rnokpp?`, РНОКПП ${r.rnokpp}`:""}, на підставі ${r.basis}` : ""; }
+function repRequisites(r){ return r ? `${r.name}${r.rnokpp?`, РНОКПП ${r.rnokpp}`:""}, діє на підставі ${r.basis}` : ""; }
+/* шаблон адвоката: місця для представника — у вступі (перед «(надалі… «Клієнт»)»), у згоді на обробку ПД
+   і окремий рядок у реквізитах Клієнта (копія абзацу з адресою) */
+function applyRepresentative(xml, r){
+  if(!r) return xml;
+  xml=xml.split('<w:t xml:space="preserve"> (надалі за текстом – «Клієнт').join('<w:t xml:space="preserve">«Представник_вступ» (надалі за текстом – «Клієнт');
+  xml=xml.split("«Згода_РНОКПП»").join("«Згода_РНОКПП»«Представник_згода»");
+  let done=false;
+  xml=xml.replace(/<w:p\b[^>]*>(?:(?!<\/w:p>)[\s\S])*?<\/w:p>/g, para=>{
+    // абзац реквізитів з адресою: «…за адресою: «Адреса_значення»;» (крапка з комою може бути окремим фрагментом)
+    if(done || !/за адресою:\s*«Адреса_значення»\s*;/.test(para.replace(/<[^>]+>/g,""))) return para;
+    done=true;
+    let first=true;
+    const copy=para.replace(/<w:t(\s[^>]*)?>[^<]*<\/w:t>/g, ()=>{ if(first){ first=false; return '<w:t xml:space="preserve">Представник: «Представник_реквізити»;</w:t>'; } return "<w:t></w:t>"; });
+    return para+copy;
+  });
+  return xml;
+}
+(function(){
+  const on=$("#f_rp_on"), box=$("#rp_box"), name=$("#f_rp_name"), short=$("#f_rp_short");
+  if(!on) return;
+  let shortEd=false;
+  function render(){ box.hidden=!on.checked; }
+  on.addEventListener("change",render);
+  name.addEventListener("input",()=>{ if(!shortEd){ short.value=shortName(name.value); markFilled(short); } });
+  short.addEventListener("input",()=>{ shortEd = short.value.trim()!==""; });
+  $$("[data-rp]").forEach(b=>b.addEventListener("click",()=>{
+    const t=$("#f_rp_basis"); t.value=RP_PRESETS[b.dataset.rp]; markFilled(t); autoGrow(t); t.focus();
+    const i=t.value.indexOf("__"); if(i>=0) t.setSelectionRange(i, i+10);
+  }));
+  render();
+  window.rpRender=()=>{ shortEd=!!short.value.trim(); render(); };
+})();
+
 /* ---------- generate docx ---------- */
 /* Формує .docx і повертає {blob, fname}.
    Оформлення повністю задане шаблоном: код лише підставляє значення,
@@ -2314,6 +2395,7 @@ async function prepareDoc(){
   }
 
   const v = id => { const el=$("#"+id); return el ? el.value.trim() : ""; };
+  const rp=repInfo();
   const rows=activeRows();
   const hourly=isHourly();
   const pb=isProBono();
@@ -2369,9 +2451,15 @@ async function prepareDoc(){
       "Ставка":                  hourly ? fmtMoney(rateVal()) : "",
       "Номер_рахунку":           v("f_inv_no")||"001",
       "Згода_ПІБ":               t==="yur" ? v("f_repr_short") : v("f_name"),
-      "Згода_РНОКПП":            t==="yur" ? v("f_repr_rnokpp"): v("f_rnokpp")
+      "Згода_РНОКПП":            t==="yur" ? v("f_repr_rnokpp"): v("f_rnokpp"),
+      "Представник_вступ":       repClause(rp),
+      "Представник_згода":       repClause(rp),
+      "Представник_реквізити":   repRequisites(rp)
     }
   };
+  /* підписує представник Клієнта */
+  if(rp) D.vals["Підпис_короткий"]=rp.short+", представник";
+  xml=applyRepresentative(xml, rp);
 
   const safe=(s)=>String(s).replace(/[^\p{L}\p{N}\-_. ]/gu,"").replace(/\s+/g,"_").slice(0,50);
   const cnameShort = clientType()==="yur" ? (clientName()||"Клієнт") : (shortName(fName.value)||"Клієнт");
@@ -2473,7 +2561,8 @@ async function prepareDocFop(){
   const costStr=(function(){ const c=parseNum(v("f_cost")); return (c!=null && c>0) ? fmtMoney(c) : v("f_cost"); })();
   const yur=t==="yur";
   const zamNazva = yur ? v("f_org") : v("f_name");
-  const zamShort = yur ? (v("f_repr_short")||v("f_org")) : (shortName(fName.value)||v("f_name"));
+  const rp=repInfo();
+  const zamShort = yur ? (v("f_repr_short")||v("f_org")) : rp ? rp.short+", представник" : (shortName(fName.value)||v("f_name"));
   const D={
     kep: ($("#f_kep") ? $("#f_kep").checked : false),
     agrNo: v("f_agr_no")||"1",
@@ -2484,7 +2573,7 @@ async function prepareDocFop(){
     actRows: actNamed,
     totalAgr: pb ? "0,00" : (hourly ? fmtMoney(sumRows(rows)) : costStr),
     totalAct: pb ? "0,00" : (hourly ? fmtMoney(sumRows(act))  : costStr),
-    zamIntro: zamovnykIntro(t, v),
+    zamIntro: zamovnykIntro(t, v)+repClause(rp),
     vals:{
       "Номер_договору":          v("f_num"),
       "Дата_укладання_договору": fmtDate($("#f_date").value,true),
@@ -2494,7 +2583,7 @@ async function prepareDocFop(){
       "Замовник_назва":          zamNazva,
       "Замовник_адреса":         yur ? v("f_orgaddr") : v("f_addr"),
       "Замовник_ідентифікатор":  yur ? v("f_edrpou")  : v("f_rnokpp"),
-      "Замовник_представник_рядок": yur ? ("В особі: "+v("f_repr_pos")+" "+v("f_repr_pib")).trim() : "",
+      "Замовник_представник_рядок": yur ? ("В особі: "+v("f_repr_pos")+" "+v("f_repr_pib")).trim() : rp ? "Представник: "+repRequisites(rp) : "",
       "Замовник_телефон":        v("f_phone"),
       "Замовник_пошта":          v("f_email"),
       "Замовник_підпис_підпис":  yur ? "Керівник" : "Замовник",
@@ -2672,14 +2761,15 @@ function loadRegistry(){
 const SNAP_IDS=["f_num","f_date","f_name","f_short","f_birth","f_addr","f_rnokpp","f_pass","f_basis_fop",
   "f_org","f_edrpou","f_repr_short","f_orgaddr","f_repr_pos","f_repr_pib","f_basis","f_repr_rnokpp",
   "f_phone","f_email","f_term","f_agr_no","f_act_no","f_case","f_inv_no","f_cost","f_cost_words",
-  "f_rate","f_pay_preset","f_pay_adv","f_pay_d1","f_pay_d2","f_pay_dw","f_pay_day","f_pay_text"];
+  "f_rate","f_pay_preset","f_pay_adv","f_pay_d1","f_pay_d2","f_pay_dw","f_pay_day","f_pay_text",
+  "f_rp_name","f_rp_short","f_rp_rnokpp","f_rp_basis"];
 function snapshot(){
   const o={v:1, ctype:clientType(), paymode:payMode(), provider:providerMode(), fields:{},
            services:services.map(x=>({t:x.t,h:x.h,a:x.a,manual:!!x.manual,
                                       unit:x.unit||"",code:x.code||"",
                                       act:(typeof x.act==="boolean"?x.act:null)})), flags:{}};
   SNAP_IDS.forEach(id=>{ const e=$("#"+id); if(e) o.fields[id]=e.value; });
-  ["f_pay_propor","f_auto_calc","f_kep"].forEach(id=>{ const e=$("#"+id); if(e) o.flags[id]=e.checked; });
+  ["f_pay_propor","f_auto_calc","f_kep","f_rp_on"].forEach(id=>{ const e=$("#"+id); if(e) o.flags[id]=e.checked; });
   return o;
 }
 function applySnapshot(o){
@@ -2693,6 +2783,7 @@ function applySnapshot(o){
   SNAP_IDS.forEach(id=>{ const e=$("#"+id); if(e && o.fields && id in o.fields){ e.value=o.fields[id]; markFilled(e); } });
   for(const id in (o.flags||{})){ const e=$("#"+id); if(e) e.checked=!!o.flags[id]; }
   if(window.signRender) window.signRender();
+  if(window.rpRender) window.rpRender();
   services=(o.services||[]).map(x=>{
     const r={t:x.t||"",h:x.h||"",a:x.a||"",manual:!!x.manual,unit:x.unit||"",code:x.code||""};
     if(typeof x.act==="boolean") r.act=x.act;
@@ -2726,7 +2817,7 @@ function addRegistryRow(){
     "Клієнт": clientName(),
     "ЄДРПОУ / РНОКПП": yur ? $("#f_edrpou").value.trim() : $("#f_rnokpp").value.trim(),
     "Адреса": yur ? $("#f_orgaddr").value.trim() : $("#f_addr").value.trim(),
-    "Представник": yur ? ($("#f_repr_pos").value.trim()+" "+$("#f_repr_pib").value.trim()).trim() : "",
+    "Представник": yur ? ($("#f_repr_pos").value.trim()+" "+$("#f_repr_pib").value.trim()).trim() : (repInfo() ? repInfo().name+" (на підставі "+repInfo().basis+")" : ""),
     "Телефон": $("#f_phone").value.trim(),
     "Ел. пошта": $("#f_email").value.trim(),
     "№ дод. угоди": $("#f_agr_no").value.trim()||"1",
@@ -3426,7 +3517,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-17.1";
+const GEN_VERSION="2026-10-20.1";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
