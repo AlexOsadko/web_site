@@ -15,6 +15,10 @@ on:
         description: "Прізвище для пошуку"
         type: string
         default: "Осадько"
+      clients:
+        description: "Звірити зі списком клієнтів бота (у лог лише ініціали)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -32,6 +36,10 @@ jobs:
           DIAG_CODE: ${{ github.event.inputs.code }}
           DIAG_DATE: ${{ github.event.inputs.date }}
           DIAG_SURNAME: ${{ github.event.inputs.surname }}
+          DIAG_CLIENTS: ${{ github.event.inputs.clients }}
+          COURT_WATCH: ${{ secrets.COURT_WATCH }}
+          BOT_WORKER_URL: ${{ secrets.BOT_WORKER_URL }}
+          BOT_WORKER_SECRET: ${{ secrets.BOT_WORKER_SECRET }}
           COURT_FETCH_TIMEOUT: "12"
           COURT_FETCH_TRIES: "3"
         run: python3 tools/court_diag.py
