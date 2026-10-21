@@ -103,6 +103,17 @@ def clients():
                 why.append("ім'я/по батькові написані інакше (описка чи відмінок)")
         if stem_day and not sur_day:
             why.append("прізвище в іншому відмінку чи з опискою")
+        # схожі прізвища: лише закінчення після кореня і чи збігаються ініціали імені/по батькові
+        stems = []
+        for r in stem_day:
+            for m in re.finditer(r"(?<![а-яіїєґ'])" + re.escape(sur[:-2]) + r"([а-яіїєґ']*)((?:\s+[а-яіїєґ'.]+){0,2})",
+                                 b._norm(r.get("involved", ""))):
+                rest = m.group(2).split()
+                ini = [w[0] for w in rest]
+                want = [w[0].lower() for w in words[1:3]]
+                stems.append(f"…{m.group(1) or '∅'} (ініціали {'збіг' if ini[:2] == want else 'ні'})")
+        if stems:
+            print(f"   #{k} схожі прізвища на {DATE}: " + "; ".join(sorted(set(stems))))
         print(f"#{k} {_initials(nm)}: повний збіг у суді (усі дати): {full_all}; "
               f"на {DATE}: повний {full_day}, за прізвищем {len(sur_day)}, за коренем {len(stem_day)}"
               + (f" · причина: {', '.join(sorted(set(why)))}" if why else ""))
