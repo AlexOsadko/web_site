@@ -915,6 +915,10 @@ def main():
     first_time = not seen  # перший запуск: фіксуємо поточні засідання
     advocate_hits = []     # окремий звіт «справи адвоката»
     client_hits = []       # окремий звіт «справи клієнтів»
+    # ПІБ клієнтів без самого адвоката: за ними справа йде у «Справи клієнтів»
+    # навіть тоді, коли адвокат теж зазначений у сторонах.
+    _own = {n.lower() for n in [ADVOCATE_NAME] + ADVOCATE_ALIASES}
+    client_names = [n for n in names if n.lower() not in _own]
 
     # Шардинг: цей прогін сканує лише частину судів (решта — наступними прогонами).
     # scanned_ok — назви судів, які цього прогону завантажилися УСПІШНО. Саме їх
@@ -988,11 +992,12 @@ def main():
                 who = ADVOCATE_NAME
             if who:
                 matches.append((rec, who))
-                # У «Справи клієнтів» — лише коли збіг за КЛІЄНТСЬКИМ ПІБ (не сам
-                # адвокат): власні справи мають окремий звіт «Справи адвоката».
-                if not adv:
+                # У «Справи клієнтів» — коли є збіг за КЛІЄНТСЬКИМ ПІБ, навіть якщо
+                # адвокат теж у сторонах (тоді справа є в обох звітах).
+                cli = who if not adv else name_matches(inv, client_names)
+                if cli:
                     client_hits.append({
-                        "court": court["name"], "matched": who,
+                        "court": court["name"], "matched": cli,
                         "number": rec.get("number", ""), "date": rec.get("date", ""),
                         "judge": rec.get("judge", ""), "involved": rec.get("involved", ""),
                         "description": rec.get("description", ""), "forma": rec.get("forma", ""),
