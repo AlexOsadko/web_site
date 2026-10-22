@@ -80,6 +80,26 @@ SHARD_SIZE = int(os.environ.get("COURT_SHARD_SIZE", "0") or "0")
 # Швидка відмова недоступних судів (щоб шард не «залипав»).
 FETCH_TIMEOUT = int(os.environ.get("COURT_FETCH_TIMEOUT", "12") or "12")
 FETCH_TRIES = int(os.environ.get("COURT_FETCH_TRIES", "2") or "2")
+# Пріоритетні суди — скануються в КОЖНОМУ прогоні, поза чергою шардів:
+# усі суди м. Києва (26xx) і Київської області (10xx), плюс Київський
+# апеляційний, господарські суди Києва/області й апеляційний господарський.
+PRIORITY_PREFIXES = tuple(p.strip() for p in os.environ.get(
+    "COURT_PRIORITY_PREFIXES", "10,26").split(",") if p.strip())
+PRIORITY_CODES = {c.strip().zfill(4) for c in os.environ.get(
+    "COURT_PRIORITY_CODES", "4824,5011,5012,5033").split(",") if c.strip()}
+# Суд, що не відповів DEAD_AFTER прогонів поспіль (ТОТ, релокація), далі
+# пропускаємо й перепробовуємо раз на DEAD_RETRY_DAYS — щоб він не з'їдав
+# час кожного прогону. Пріоритетні суди не пропускаються ніколи.
+DEAD_AFTER = int(os.environ.get("COURT_DEAD_AFTER", "3") or "3")
+DEAD_RETRY_DAYS = float(os.environ.get("COURT_DEAD_RETRY_DAYS", "7") or "7")
+# Ліміт часу на сканування (хв): після нього бот зупиняє обхід і штатно
+# зберігає знайдене (GitHub обриває job через 6 год — тоді губилось усе).
+TIME_BUDGET_MIN = float(os.environ.get("COURT_TIME_BUDGET_MIN", "0") or "0")
+
+
+def is_priority(court):
+    code = str(court.get("code") or "").zfill(4)
+    return code in PRIORITY_CODES or (code[:2] in PRIORITY_PREFIXES and len(code) == 4)
 
 
 def _day_word(n):
@@ -927,31 +947,49 @@ def main():
     # Це рятує від катастрофи, коли court.gov.ua блокує масу запитів і повний
     # прогін «знаходить 0» — тепер порожнеча не затирає накопичений перелік.
     scanned_ok = []
-    courts_to_scan = courts
+    t_start = time.time()
+    fails = st.setdefault("court_fail", {})  # код суду → {"n": поспіль невдач, "ts": остання спроба}
+    priority = [c for c in courts if is_priority(c)]
+    rotation = [c for c in courts if not is_priority(c)]
+    courts_to_scan = priority + rotation
     # Ручна перевірка окремих судів: COURT_ONLY_CODES="4824,4811" — без шардингу.
     only = {c.strip().zfill(4) for c in os.environ.get("COURT_ONLY_CODES", "").split(",")
             if c.strip()}
     if only:
         courts_to_scan = [c for c in courts if str(c.get("code") or "").zfill(4) in only]
         print(f"Лише вибрані суди: {len(courts_to_scan)}")
-    elif SHARD_SIZE > 0 and len(courts) > SHARD_SIZE:
-        cur = int(st.get("shard_cursor", 0)) % len(courts)
+    elif SHARD_SIZE > 0 and len(rotation) > SHARD_SIZE:
+        cur = int(st.get("shard_cursor", 0)) % len(rotation)
         end = cur + SHARD_SIZE
-        courts_to_scan = courts[cur:end]
-        if end > len(courts):                      # перенос через кінець списку
-            courts_to_scan = courts_to_scan + courts[:end - len(courts)]
-        st["shard_cursor"] = end % len(courts)
-        print(f"Шард: {len(courts_to_scan)} судів (позиція {cur}), "
-              f"наступний курсор {st['shard_cursor']}; повне коло за "
-              f"{-(-len(courts)//SHARD_SIZE)} прогонів")
+        shard = rotation[cur:end]
+        if end > len(rotation):                    # перенос через кінець списку
+            shard = shard + rotation[:end - len(rotation)]
+        st["shard_cursor"] = end % len(rotation)
+        courts_to_scan = priority + shard
+        print(f"Пріоритетні (Київ і область): {len(priority)} · шард: {len(shard)} "
+              f"судів (позиція {cur}), наступний курсор {st['shard_cursor']}; "
+              f"повне коло за {-(-len(rotation)//SHARD_SIZE)} прогонів")
+    else:
+        print(f"Повний прогін: пріоритетні {len(priority)} + решта {len(rotation)}")
 
     # Спершу обробляємо клієнтські справи, які адвокат підтвердив кнопкою у боті
     # (Worker тримає чергу) — додаємо їх у Google Calendar і позначаємо «✅».
     drain_gcal_approved()
 
+    skipped_dead = 0
     for court in courts_to_scan:
         url = csz_url_for(court)
         if not url:
+            continue
+        if TIME_BUDGET_MIN and time.time() - t_start > TIME_BUDGET_MIN * 60:
+            print(f"Ліміт часу {TIME_BUDGET_MIN:g} хв вичерпано — решту судів "
+                  f"просканують наступні прогони.")
+            break
+        code = str(court.get("code") or court["name"])
+        f = fails.get(code)
+        if (not only and not is_priority(court) and f and f.get("n", 0) >= DEAD_AFTER
+                and time.time() - f.get("ts", 0) < DEAD_RETRY_DAYS * 86400):
+            skipped_dead += 1
             continue
         try:
             if court.get("kind") == "kas":
@@ -960,7 +998,9 @@ def main():
                 records = fetch_court_retry(url)
         except Exception as e:
             print(f"[{court['name']}] помилка завантаження: {e}")
+            fails[code] = {"n": (f or {}).get("n", 0) + 1, "ts": int(time.time())}
             continue
+        fails.pop(code, None)
         scanned_ok.append(court["name"])  # суд завантажився — його справи актуальні
         time.sleep(REQUEST_PAUSE)  # ввічлива пауза між судами
 
@@ -1095,6 +1135,9 @@ def main():
     # Worker зливає ЛИШЕ справи успішно завантажених судів (scanned_ok); решту
     # (не завантажені або з інших шардів) зберігає. Якщо цього прогону не вдалося
     # ЖОДЕН суд — звіт НЕ чіпаємо взагалі, щоб порожнеча не стерла накопичене.
+    if skipped_dead:
+        print(f"Пропущено недоступних судів (не відповідали {DEAD_AFTER}+ разів поспіль, "
+              f"повторна спроба раз на {DEAD_RETRY_DAYS:g} дн.): {skipped_dead}")
     adv, cli = [], []
     if not scanned_ok:
         print("Жодного суду не проскановано успішно — звіт не оновлюю "
