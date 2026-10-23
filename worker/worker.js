@@ -35,30 +35,42 @@ async function putNames(env, arr) {
   await env.KV.put('court_names', JSON.stringify(arr));
 }
 
+// Кнопки згруповано за розділами: 📅 Засідання · 📚 Практика · 🗂 Клієнти · 🤖 Агент.
+const GROUPS = {
+  sess: { title: '📅 <b>Засідання</b>', rows: [
+    [{ text: '📑 Повний список', callback_data: 'crepall' }],
+    [{ text: '👥 Справи клієнтів', callback_data: 'crepc' }, { text: '⚖️ Справи адвоката', callback_data: 'crep' }],
+    [{ text: '🔔 Нагадування', callback_data: 'crem' }, { text: '🔄 Терміновий прогін', callback_data: 'crun' }],
+  ] },
+  prac: { title: '📚 <b>Практика</b>', rows: [
+    [{ text: '🔎 Пошук практики', callback_data: 'cvs' }, { text: '📰 Свіжа практика', callback_data: 'cdig' }],
+  ] },
+  cli: { title: '🗂 <b>Клієнти під наглядом</b>', rows: [
+    [{ text: '📋 Список клієнтів', callback_data: 'clist' }, { text: '➕ Додати клієнта', callback_data: 'cadd' }],
+  ] },
+};
+
 function courtMenuKb() {
   return { inline_keyboard: [
-    [{ text: '➕ Додати клієнта', callback_data: 'cadd' }],
-    [{ text: '📋 Список / кількість', callback_data: 'clist' }],
-    [{ text: '📑 Повний список', callback_data: 'crepall' }],
-    [{ text: '👥 Справи клієнтів', callback_data: 'crepc' }],
-    [{ text: '⚖️ Справи адвоката', callback_data: 'crep' }],
-    [{ text: '🔔 Нагадування', callback_data: 'crem' }],
-    [{ text: '🔄 Терміновий прогін зараз', callback_data: 'crun' }],
-    [{ text: '🔎 Пошук практики', callback_data: 'cvs' }, { text: '📰 Свіжа практика', callback_data: 'cdig' }],
     [{ text: '🤖 Завдання агенту (документи + AI)', callback_data: 'cagent' }],
+    ...GROUPS.sess.rows, ...GROUPS.prac.rows, ...GROUPS.cli.rows,
   ] };
 }
 
-// Постійна клавіатура-меню, закріплена біля поля вводу.
+// Підменю розділу (кнопка закріпленої клавіатури або callback cgrp:<розділ>).
+async function showGroup(env, g) {
+  const gr = GROUPS[g];
+  if (!gr) return showCourtMenu(env);
+  return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+    text: gr.title, reply_markup: { inline_keyboard: gr.rows } });
+}
+
+// Постійна клавіатура-меню, закріплена біля поля вводу: часті дії + розділи.
 function courtReplyKb() {
   return {
     keyboard: [
-      [{ text: '📑 Повний список' }],
-      [{ text: '👥 Справи клієнтів' }, { text: '⚖️ Справи адвоката' }],
-      [{ text: '🔎 Пошук практики' }, { text: '📰 Свіжа практика' }],
-      [{ text: '🤖 Завдання агенту' }],
-      [{ text: '📋 Список клієнтів' }, { text: '🔔 Нагадування' }],
-      [{ text: '➕ Додати клієнта' }, { text: '🔄 Терміновий прогін' }],
+      [{ text: '📑 Повний список' }, { text: '🤖 Завдання агенту' }],
+      [{ text: '📅 Засідання' }, { text: '📚 Практика' }, { text: '🗂 Клієнти' }],
     ],
     resize_keyboard: true,
     input_field_placeholder: 'Оберіть дію (меню можна згорнути ☰)',
@@ -800,6 +812,7 @@ async function handleUpdate(update, env) {
         return showReminders(env);
       }
       if (action === 'cagent') return askAgent(env);
+      if (action === 'cgrp') return showGroup(env, pid);
       if (action === 'crun') {
         const txt = await urgentScan(env);
         return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt });
@@ -843,7 +856,7 @@ async function handleUpdate(update, env) {
     // AI-агент: будь-який файл (Word/PDF/фото) іде в роботу агенту; текст після
     // кнопки «🤖» або поки є завантажені файли — це завдання.
     if (file) return onAgentFile(env, m, file, body);
-    const isMenu = /^(📑|👥|⚖️|🔎|📰|📋|🔔|➕|🔄|🤖)/.test(body)
+    const isMenu = /^(📑|👥|⚖️|🔎|📰|📋|🔔|➕|🔄|🤖|📅|📚|🗂)/.test(body)
       || /^(\/|cancel$|скасувати$|меню$)/i.test(body);
     if (courtAwait === 'agent' && body && !isMenu) {
       if (body.length < 10) {
@@ -918,6 +931,20 @@ async function handleUpdate(update, env) {
         text: '🔎 Напишіть тему для пошуку практики (ВС, Пленум ВС, КСУ) — напр. '
           + '<code>відмова від огляду ст. 130</code>, <code>аліменти на повнолітню дитину</code>, '
           + '<code>обшук без ухвали</code>. Скасувати — /cancel.' });
+    }
+
+    // Розділи закріпленої клавіатури → підменю з кнопками.
+    if (/^📅/.test(body) || /^засідання$/i.test(body)) {
+      await env.KV.delete('court_await');
+      return showGroup(env, 'sess');
+    }
+    if (/^📚/.test(body) || /^практика$/i.test(body)) {
+      await env.KV.delete('court_await');
+      return showGroup(env, 'prac');
+    }
+    if (/^🗂/.test(body) || /^клієнти під наглядом$/i.test(body)) {
+      await env.KV.delete('court_await');
+      return showGroup(env, 'cli');
     }
 
     // AI-агент: кнопка «🤖 Завдання агенту» закріпленої клавіатури / команда /agent.
