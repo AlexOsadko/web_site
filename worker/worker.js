@@ -573,29 +573,32 @@ function agentKb(caption) {
   return { inline_keyboard: rows };
 }
 
-// Перелік файлів у роботі — один ключ agent_files (масив message_id). KV.list
-// бачить щойно записані ключі із затримкою до хвилини, тож на нього не
-// покладаємось; в індекс пише лише одна сторона (див. onAgentFile).
-async function agentIndex(env) {
-  return (await env.KV.get('agent_files', 'json')) || [];
-}
-async function agentFiles(env) {
+// Файли в роботі: кожен — окремий ключ agent_file_<message_id> (до 2 год).
+// Спільного списку немає: паралельні альбоми (Telegram ділить 200 фото на
+// альбоми по 10) перезаписували б його один одному, а KV.list бачить нові ключі
+// із затримкою. Тож файли збираємо перебором message_id назад від опорного
+// (id у чаті йдуть поспіль). Використані не видаляємо (зайві записи в KV) —
+// відсікаємо межею agent_floor; самі ключі зникають за 2 год.
+const AGENT_MAX = 200;   // файлів на одне завдання
+const SCAN = 300;        // скільки id назад переглядати
+async function agentFiles(env, ref = 0) {
+  const last = parseInt((await env.KV.get('agent_last')) || '0', 10);
+  const floor = parseInt((await env.KV.get('agent_floor')) || '0', 10);
+  const top = Math.max(ref, last + 30);
   const out = [];
-  for (const mid of await agentIndex(env)) {
-    const f = await env.KV.get('agent_file_' + mid, 'json');
-    if (f) out.push({ key: 'agent_file_' + mid, ...f });
+  for (let hi = top; hi > top - SCAN && hi > floor; hi -= 50) {
+    const ids = [];
+    for (let id = hi; id > hi - 50 && id > floor; id--) ids.push(id);
+    const got = await Promise.all(ids.map((id) => env.KV.get('agent_file_' + id, 'json')));
+    got.forEach((f, i) => { if (f) out.push({ key: 'agent_file_' + ids[i], ...f }); });
   }
-  return out.sort((a, b) => (a.mid || 0) - (b.mid || 0));
+  return out.sort((x, y) => (x.mid || 0) - (y.mid || 0));
 }
-async function addToIndex(env, mids) {
-  const idx = await agentIndex(env);
-  for (const m of mids) if (!idx.includes(m)) idx.push(m);
-  await env.KV.put('agent_files', JSON.stringify(idx), { expirationTtl: 7200 });
-  return idx.length;
-}
-async function clearAgentFiles(env) {
-  for (const mid of await agentIndex(env)) await env.KV.delete('agent_file_' + mid);
-  await env.KV.delete('agent_files');
+// Межа: усі файли з id ≤ floor вважаються використаними (наступні id — нові).
+async function clearAgentFiles(env, ref = 0, files = null) {
+  files = files || await agentFiles(env, ref);
+  const floor = Math.max(ref, ...files.map((f) => f.mid || 0));
+  await env.KV.put('agent_floor', String(floor), { expirationTtl: 7200 });
   await env.KV.delete('agent_caption');
 }
 
@@ -627,11 +630,10 @@ function msgFile(m) {
   return null;
 }
 
-// Прийом файлу. Одиночний: в індекс; з підписом — одразу в роботу.
-// Альбом (кожне фото — окреме оновлення, що приходять паралельно): відповідає
-// лише «лідер» — повідомлення, перед яким немає файлу з того ж альбому. Він
-// чекає, поки збережуться інші фото, збирає їх (id ідуть поспіль) і пише в
-// індекс один раз; запізнілі фото дописують себе самі.
+// Прийом файлу. Одиночний із підписом — одразу в роботу. Альбом (кожне фото —
+// окреме оновлення, вони приходять паралельно): відповідає лише «лідер» —
+// повідомлення, перед яким немає файлу з того ж альбому; він чекає, поки
+// збережуться інші фото, і рахує їх (id ідуть поспіль).
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function onAgentFile(env, m, file, caption) {
   if (file.size > 20 * 1024 * 1024) {
@@ -642,47 +644,48 @@ async function onAgentFile(env, m, file, caption) {
   const gid = m.media_group_id || '';
   await env.KV.put('agent_file_' + mid, JSON.stringify({ ...file, mid, gid, caption: caption || '' }),
     { expirationTtl: 7200 });
-  await env.KV.put('court_await', 'agent');
+  // agent_last/court_await пише лише одиночний файл або лідер альбому (менше записів у KV)
+  const mark = async (top) => {
+    const last = parseInt((await env.KV.get('agent_last')) || '0', 10);
+    if (top > last) await env.KV.put('agent_last', String(top), { expirationTtl: 7200 });
+    if ((await env.KV.get('court_await')) !== 'agent') await env.KV.put('court_await', 'agent');
+  };
   if (!gid) {
-    const n = await addToIndex(env, [mid]);
-    if (caption) return startAgent(env, caption);
-    return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-      text: `📎 Отримано. Файлів у роботі: <b>${n}</b>.\n`
-        + 'Надішліть ще файли або напишіть завдання своїми словами чи оберіть кнопку:',
-      reply_markup: agentKb(false) });
+    await mark(mid);
+    if (caption) return startAgent(env, caption, mid);
   }
-  await sleep(2500);
-  const prev = await env.KV.get('agent_file_' + (mid - 1), 'json');
-  if (prev && prev.gid === gid) {
-    // не лідер: якщо лідер мене не врахував (я запізнився) — дописуюсь сам
-    await sleep(3000);
-    if (!(await agentIndex(env)).includes(mid)) await addToIndex(env, [mid]);
-    return;
-  }
-  const mids = [mid];
+  let k = 1;
   let cap = caption || '';
-  for (let k = 1; k < 10; k++) {
-    const f = await env.KV.get('agent_file_' + (mid + k), 'json');
-    if (!f || f.gid !== gid) break;
-    mids.push(mid + k);
-    if (!cap && f.caption) cap = f.caption;
+  if (gid) {
+    await sleep(2500);
+    const prev = await env.KV.get('agent_file_' + (mid - 1), 'json');
+    if (prev && prev.gid === gid) return;           // не лідер альбому — мовчимо
+    for (; k < 10; k++) {
+      const f = await env.KV.get('agent_file_' + (mid + k), 'json');
+      if (!f || f.gid !== gid) break;
+      if (!cap && f.caption) cap = f.caption;
+    }
+    await mark(mid + k - 1);
+    if (cap) await env.KV.put('agent_caption', cap, { expirationTtl: 7200 });
   }
-  const n = await addToIndex(env, mids);
-  if (cap) await env.KV.put('agent_caption', cap, { expirationTtl: 7200 });
-  else await env.KV.delete('agent_caption');
+  const n = (await agentFiles(env, mid + k)).length;
+  const over = n > AGENT_MAX ? `\n⚠️ Понад ${AGENT_MAX} — в роботу підуть останні ${AGENT_MAX}.` : '';
   return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-    text: `📎 Отримано альбом (${mids.length} шт.). Файлів у роботі: <b>${n}</b>.\n`
+    text: `📎 Отримано${gid ? ` альбом (${k} шт.)` : ''}. Файлів у роботі: <b>${n}</b>.${over}\n`
       + (cap ? `Завдання з підпису: <i>${esc(cap.slice(0, 200))}</i>\n` : '')
-      + 'Надішліть ще файли або напишіть завдання своїми словами чи оберіть кнопку:',
+      + 'Надішліть ще файли (до 200) або напишіть завдання своїми словами чи оберіть кнопку:',
     reply_markup: agentKb(!!cap) });
 }
 
-async function startAgent(env, text) {
+async function startAgent(env, text, ref = 0) {
   if (!env.GH_DISPATCH_TOKEN) {
     return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
       text: '⚠️ Не вдалося запустити: ' + ghWhy(env, 0) });
   }
-  const files = (await agentFiles(env)).map(({ key, ...f }) => f);
+  // невелика пауза: файли щойно надісланого альбому можуть ще зберігатися
+  await sleep(1500);
+  const found = await agentFiles(env, ref);
+  const files = found.slice(-AGENT_MAX).map(({ key, gid, caption, mid, ...f }) => f);
   const id = crypto.randomUUID().replace(/-/g, '');
   await env.KV.put('agent_job_' + id, JSON.stringify({ text, files }), { expirationTtl: 3600 });
   let status = 0;
@@ -703,7 +706,7 @@ async function startAgent(env, text) {
     return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
       text: '⚠️ Не вдалося запустити: ' + ghWhy(env, status) + '\nФайли збережено — спробуйте ще раз.' });
   }
-  await clearAgentFiles(env);
+  await clearAgentFiles(env, ref, found);
   await env.KV.delete('court_await');
   return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
     text: `⏳ Працюю над завданням${files.length ? ` (файлів: ${files.length})` : ''}. `
@@ -734,15 +737,15 @@ async function handleUpdate(update, env) {
     if (action === 'ag') {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
       if (pid === 'reset') {
-        await clearAgentFiles(env);
+        await clearAgentFiles(env, mid);
         await env.KV.delete('court_await');
         return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, text: '🗑 Файли скинуто.' });
       }
-      const files = await agentFiles(env);
+      const files = await agentFiles(env, mid);
       if (pid === 'cap') {
         const cap = await env.KV.get('agent_caption');
         if (!cap) return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, text: 'Підпис застарів — напишіть завдання ще раз.' });
-        return startAgent(env, cap);
+        return startAgent(env, cap, mid);
       }
       const pr = AGENT_PRESETS[pid];
       if (!pr) return;
@@ -750,7 +753,7 @@ async function handleUpdate(update, env) {
         return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
           text: 'Файлів немає (минуло понад 2 год або вже використані) — надішліть документи ще раз.' });
       }
-      return startAgent(env, pr.task);
+      return startAgent(env, pr.task, mid);
     }
 
     // --- підтвердження додавання клієнтської справи в Google Calendar ---
@@ -929,13 +932,13 @@ async function handleUpdate(update, env) {
         return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
           text: 'Напишіть завдання детальніше (або /cancel).' });
       }
-      return startAgent(env, body);
+      return startAgent(env, body, m.message_id);
     }
 
     // Скасування введення (ПІБ клієнта, тема пошуку практики)
     if (/^(\/cancel|cancel|скасувати)$/i.test(body)) {
       await env.KV.delete('court_await');
-      if (courtAwait === 'agent') await clearAgentFiles(env);
+      if (courtAwait === 'agent') await clearAgentFiles(env, m.message_id);
       return showCourtMenu(env, courtAwait ? '↩️ Скасовано.\n\n' : '');
     }
 
