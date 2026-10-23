@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Пошук у Єдиному державному реєстрі судових рішень (reyestr.court.gov.ua).
+
+  search(query, **filters) → [{id, url, kind, reg_date, law_date, form, case, court, judge}]
+  decision_text(id)        → повний текст рішення (з textarea#txtdepository)
+
+Форма пошуку — POST на головну сторінку реєстру (ASP.NET, cookie сесії з GET).
+Режим проби (python3 tools/edrsr.py "запит"): друкує лише технічні дані —
+коди відповіді, назви полів форми, кількість результатів і довжину тексту
+першого рішення (рішення публічні, але лог тримаємо стислим).
+"""
+import html as _html
+import http.cookiejar
+import os
+import re
+import sys
+import time
+import urllib.parse
+import urllib.request
+
+BASE = "https://reyestr.court.gov.ua"
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+TIMEOUT = int(os.environ.get("EDRSR_TIMEOUT", "40") or "40")
+
+# Форма судочинства (CSType) і вид рішення (VRType) — коди реєстру.
+CS_TYPES = {"civil": "1", "criminal": "2", "commercial": "3", "admin": "4", "adminoffense": "5"}
+VR_TYPES = {"verdict": "1", "resolution": "2", "decision": "3", "order": "4", "ruling": "5"}
+
+_jar = http.cookiejar.CookieJar()
+_opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(_jar))
+
+
+def _req(url, data=None, referer=None):
+    hdr = {"User-Agent": UA, "Accept-Language": "uk,en;q=0.8",
+           "Accept": "text/html,application/xhtml+xml,*/*;q=0.8"}
+    if referer:
+        hdr["Referer"] = referer
+    body = None
+    if data is not None:
+        body = urllib.parse.urlencode(data).encode("utf-8")
+        hdr["Content-Type"] = "application/x-www-form-urlencoded"
+        hdr["Origin"] = BASE
+    r = _opener.open(urllib.request.Request(url, data=body, headers=hdr), timeout=TIMEOUT)
+    raw = r.read()
+    return r.status, raw.decode("utf-8", "replace")
+
+
+def _strip(s):
+    s = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", s)
+    s = re.sub(r"(?is)<br\s*/?>|</p>|</div>", "\n", s)
+    s = re.sub(r"(?s)<[^>]+>", " ", s)
+    s = _html.unescape(s)
+    s = re.sub(r"[ \t\xa0]+", " ", s)
+    return re.sub(r"\n\s*\n+", "\n\n", s).strip()
+
+
+def form_fields(page):
+    """Назви полів форми пошуку (для проби / підлаштування)."""
+    return sorted(set(re.findall(r'name="([A-Za-z][\w.\[\]]*)"', page)))
+
+
+def search(query, cs_type="", vr_type="", date_from="", date_to="", per_page=25):
+    """Пошук за текстом рішення. Дати — ДД.ММ.РРРР (дата ухвалення рішення)."""
+    status, page = _req(BASE + "/")
+    data = {
+        "SearchExpression": query,
+        "UserCourtCode": "", "ChairmenName": "", "RegNumber": "",
+        "RegDateBegin": date_from, "RegDateEnd": date_to,
+        "ImportDateBegin": "", "ImportDateEnd": "",
+        "CSType": CS_TYPES.get(cs_type, cs_type), "VRType": VR_TYPES.get(vr_type, vr_type),
+        "CourtRegion": "", "INSType": "", "CaseNumber": "",
+        "Sort": "1", "PagingInfo.ItemsPerPage": str(per_page), "Liga": "true",
+    }
+    # приховані поля сторінки (токени тощо) — підставляємо, якщо є
+    for name, val in re.findall(r'<input[^>]+type="hidden"[^>]+name="([^"]+)"[^>]*value="([^"]*)"', page):
+        data.setdefault(name, _html.unescape(val))
+    status, res = _req(BASE + "/", data, referer=BASE + "/")
+    return parse_results(res), status, res
+
+
+def parse_results(page):
+    out = []
+    for row in re.findall(r"(?is)<tr[^>]*>(.*?)</tr>", page):
+        m = re.search(r'href="/Review/(\d+)"', row)
+        if not m:
+            continue
+        cells = [_strip(c) for c in re.findall(r"(?is)<td[^>]*>(.*?)</td>", row)]
+        # Типовий порядок колонок: № рішення, Форма рішення, Дата ухвалення,
+        # Дата набрання законної сили, Форма судочинства, № справи, Суд, Суддя.
+        cells += [""] * (8 - len(cells))
+        out.append({"id": m.group(1), "url": f"{BASE}/Review/{m.group(1)}",
+                    "kind": cells[1], "reg_date": cells[2], "law_date": cells[3],
+                    "form": cells[4], "case": cells[5], "court": cells[6], "judge": cells[7]})
+    return out
+
+
+def decision_text(doc_id):
+    status, page = _req(f"{BASE}/Review/{doc_id}", referer=BASE + "/")
+    m = re.search(r'(?is)<textarea[^>]*id="txtdepository"[^>]*>(.*?)</textarea>', page)
+    if m:
+        return _strip(_html.unescape(m.group(1)))
+    m = re.search(r'(?is)<div[^>]*id="divdocument"[^>]*>(.*?)</div>\s*</div>', page)
+    return _strip(m.group(1)) if m else ""
+
+
+def probe(query):
+    t = time.time()
+    try:
+        status, page = _req(BASE + "/")
+    except Exception as e:
+        print(f"GET /: помилка {type(e).__name__}: {str(e)[:120]}")
+        return
+    print(f"GET /: {status}, {len(page)} символів, {time.time() - t:.1f} с")
+    print("captcha на сторінці:", bool(re.search(r"(?i)captcha|recaptcha|turnstile", page)))
+    print("Поля форми:", ", ".join(form_fields(page))[:1500])
+    forms = re.findall(r'(?is)<form[^>]*>', page)
+    print("Форми:", [re.sub(r"\s+", " ", f)[:160] for f in forms][:5])
+    try:
+        rows, status, res = search(query)
+    except Exception as e:
+        print(f"POST пошук: помилка {type(e).__name__}: {str(e)[:120]}")
+        return
+    print(f"POST пошук: {status}, {len(res)} символів, результатів розібрано: {len(rows)}")
+    if not rows:
+        print("Фрагмент відповіді:", re.sub(r"\s+", " ", _strip(res))[:600])
+        return
+    r0 = rows[0]
+    print("Перший результат — колонки:", {k: (len(v) if k not in ("id", "kind", "form", "reg_date") else v)
+                                          for k, v in r0.items() if k != "url"})
+    m = re.search(r"(?is)знайдено[^<]{0,80}", res)
+    print("Лічильник:", _strip(m.group(0)) if m else "—")
+    try:
+        txt = decision_text(r0["id"])
+        print(f"Текст рішення: {len(txt)} символів; початок: {txt[:120]!r}")
+    except Exception as e:
+        print(f"Текст рішення: помилка {type(e).__name__}")
+
+
+if __name__ == "__main__":
+    probe(" ".join(sys.argv[1:]) or "огляд на стан сп'яніння 130 КУпАП")
