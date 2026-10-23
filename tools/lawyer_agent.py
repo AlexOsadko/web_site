@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AI-агенти адвоката (бот «Судові засідання та практика»).
+AI-агент адвоката (бот «Судові засідання та практика», кнопка «🤖 Завдання агенту»).
 
-  draft   — «✍️ Чернетка документа»: за описом (і, за бажанням, файлом) складає
-            процесуальний документ і надсилає DOCX (оформлення за ДСТУ 4163-2020)
-            та перелік того, що адвокату треба перевірити.
-  analyze — «📄 Аналіз документа»: розбір рішення/ухвали/позову/протоколу:
-            суть, що вирішено, строк і порядок оскарження, слабкі місця, що робити.
+Адвокат надсилає документи (Word DOC/DOCX, PDF, фото; один чи кілька) і ставить
+завдання своїми словами або кнопкою-шаблоном: аналіз, відзив, заперечення,
+апеляційна скарга, клопотання тощо. Агент сам визначає форму результату:
+  • документ  — DOCX (оформлення за ДСТУ 4163-2020) + перелік «що перевірити»;
+  • відповідь — розбір/висновок текстом у чат.
 
-Завдання воркфлоу отримує лише як id (AGENT_JOB); сам опис і file_id забирає
+Завдання воркфлоу отримує лише як id (AGENT_JOB); текст і file_id забирає
 з Worker (/agent_job, одноразово). Репозиторій публічний, логи відкриті — тому
-сюди НЕ друкуємо ні тексту справи, ні ПІБ, ні назв файлів: лише тип і лічильники.
+сюди НЕ друкуємо ні тексту справи, ні ПІБ, ні назв файлів: лише лічильники.
 
 Env: AGENT_JOB, BOT_WORKER_URL, BOT_WORKER_SECRET, TELEGRAM_BOT_TOKEN,
      TELEGRAM_REVIEW_CHAT, ANTHROPIC_API_KEY, AGENT_MODEL (необов'язково).
@@ -21,6 +21,7 @@ import io
 import json
 import os
 import re
+import subprocess
 import sys
 import time
 import urllib.parse
@@ -35,51 +36,48 @@ MODEL = os.environ.get("AGENT_MODEL", "claude-opus-5-5").strip()
 ADVOCATE = "Осадько Олександр Олексійович"
 
 SEP = "===ПЕРЕВІРИТИ==="
+MODE_DOC = "РЕЖИМ: ДОКУМЕНТ"
+MODE_ANS = "РЕЖИМ: ВІДПОВІДЬ"
 
-DRAFT_SYSTEM = f"""Ти — досвідчений помічник українського адвоката ({ADVOCATE}). Складаєш
-ЧЕРНЕТКИ процесуальних документів (позови, апеляційні/касаційні скарги, клопотання,
-заяви, заперечення, відзиви, пояснення, скарги у справах про адмінправопорушення тощо)
-українською мовою, за чинним законодавством України (ЦПК, ГПК, КАС, КПК, КУпАП, ЦК,
-СК, КЗпП тощо) з урахуванням вимог процесуального закону до форми і змісту документа.
+SYSTEM = f"""Ти — досвідчений помічник українського адвоката ({ADVOCATE}). Адвокат
+надсилає документи справи (рішення, ухвали, позови, скарги, протоколи, договори тощо)
+і ставить завдання. Виконай його українською мовою за чинним законодавством України
+(ЦПК, ГПК, КАС, КПК, КУпАП, ЦК, СК, КЗпП тощо), спираючись на зміст наданих документів.
 
-Правила:
+Спершу визнач форму результату і ПЕРШИМ рядком відповіді напиши рівно одне:
+  {MODE_DOC}   — якщо треба скласти процесуальний чи інший документ (відзив,
+                 заперечення, позов, апеляційна/касаційна скарга, клопотання, заява,
+                 пояснення, лист, претензія тощо);
+  {MODE_ANS}  — якщо треба проаналізувати, відповісти на питання, оцінити перспективи.
+
+Загальні правила:
 - Посилайся на конкретні статті (частини, пункти) законів. Позиції Верховного Суду
   наводь лише ті, у яких упевнений (номер справи і дата); якщо не впевнений — не
-  вигадуй, а напиши загально «усталена практика ВС» і внеси пункт у перелік перевірки.
-- Невідомі дані (ПІБ, адреси, РНОКПП, номери справ, дати, суми) не вигадуй — став
-  місце для заповнення у квадратних дужках: [ПІБ позивача], [дата постанови].
-- Представник — адвокат {ADVOCATE}; реквізити ордера/договору — у дужках для заповнення.
-- Пиши ділово, аргументовано, без води; структуруй мотивувальну частину.
+  вигадуй, а напиши «усталена практика ВС» і внеси це в перелік перевірки.
+- Факти бери з документів; невідомі дані (ПІБ, адреси, РНОКПП, номери, дати, суми)
+  не вигадуй — став місце для заповнення у квадратних дужках: [ПІБ позивача].
+- Представник — адвокат {ADVOCATE}; реквізити ордера/договору — у дужках.
+- Враховуй строки: для документа-відповіді зазнач строк його подання, для рішень —
+  строк і порядок оскарження (з якого моменту рахується).
 
-Формат відповіді — ЛИШЕ текст документа простою розміткою, без markdown-зірочок:
+Якщо {MODE_DOC}: далі — ЛИШЕ текст документа простою розміткою, без markdown-зірочок:
   >> рядок         — шапка праворуч (суд, сторони, адреси, номер справи), по рядку
   # НАЗВА          — назва документа (по центру, великими)
   ## Підзаголовок  — назва розділу (по центру)
   - пункт          — пункт переліку («ПРОШУ:», «Додатки:»)
   звичайний рядок  — абзац (по ширині, з відступом)
   _[дата] | О. О. Осадько_ — останній рядок: дата ліворуч, підпис праворуч
-Після документа окремим рядком напиши {SEP}, а після нього — 3–8 коротких пунктів
-(кожен з «- »): що адвокату треба перевірити або дописати перед поданням
-(строки, судовий збір, докази, сумнівні посилання)."""
+Документ — повний, аргументований, з мотивувальною частиною, що спростовує доводи
+іншої сторони по пунктах. Після документа окремим рядком напиши {SEP}, а далі —
+3–8 пунктів (кожен з «- »): що перевірити чи дописати перед поданням (строки,
+судовий збір, докази, сумнівні посилання).
 
-ANALYZE_SYSTEM = f"""Ти — досвідчений помічник українського адвоката ({ADVOCATE}). Тобі
-надсилають процесуальний документ (рішення, постанову, ухвалу, позов, протокол тощо).
-Зроби стислий практичний розбір УКРАЇНСЬКОЮ для адвоката, без вступів, за схемою:
-
-<b>📄 Що це</b> — вид документа, суд/орган, дата, номер справи (як у документі).
-<b>⚖️ Суть</b> — сторони (процесуальні ролі), предмет, ключові обставини (3–6 речень).
-<b>🧾 Що вирішено / чого просять</b> — резолютивна частина або вимоги.
-<b>⏰ Строк і порядок оскарження</b> — норма закону, строк, з якого моменту рахується,
-  куди і через кого подається; якщо в документі є дата — порахуй кінцеву дату
-  (зазнач, що строк треба звірити з датою вручення/отримання).
-<b>🎯 Слабкі місця і аргументи</b> — процесуальні порушення, недоведені обставини,
-  неправильне застосування норм; з посиланням на статті. Позиції ВС — лише ті, у яких
-  упевнений (номер справи); інакше не вигадуй.
-<b>✅ Що зробити</b> — 3–5 конкретних кроків.
-
-Якщо адвокат поставив питання — спершу коротко дай відповідь на нього.
-Відповідай лише на основі наданого документа; чого в ньому немає — так і пиши.
-Формат: Telegram HTML — лише теги <b>, <i>; без markdown, без таблиць."""
+Якщо {MODE_ANS}: стислий практичний розбір без вступів. Для аналізу рішення чи
+позову — за схемою: <b>📄 Що це</b>, <b>⚖️ Суть</b>, <b>🧾 Що вирішено / чого просять</b>,
+<b>⏰ Строки</b> (норма, з якого моменту, кінцева дата, якщо видно дату),
+<b>🎯 Слабкі місця і аргументи</b>, <b>✅ Що зробити</b>. Якщо поставлено питання —
+спершу коротка відповідь на нього. Формат: Telegram HTML — лише теги <b> та <i>,
+без markdown і таблиць."""
 
 
 def log(msg):
@@ -148,32 +146,59 @@ def tg_download(file_id):
 
 
 # ───────────────────────────── вміст для Claude ─────────────────────────────
-def file_blocks(file):
-    """Файл із Telegram → блоки повідомлення для Claude (PDF / фото / DOCX / текст)."""
-    if not file:
-        return []
+def doc_to_text(raw):
+    """Старий Word (.doc) → текст через antiword (ставимо за потреби)."""
+    import shutil
+    import tempfile
+    if not shutil.which("antiword"):
+        subprocess.run(["sudo", "apt-get", "install", "-y", "-qq", "antiword"],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+    with tempfile.NamedTemporaryFile(suffix=".doc") as f:
+        f.write(raw)
+        f.flush()
+        try:
+            r = subprocess.run(["antiword", "-m", "UTF-8.txt", "-w", "0", f.name],
+                               capture_output=True, timeout=60)
+        except (OSError, subprocess.TimeoutExpired):
+            raise RuntimeError("не вдалося прочитати .doc — збережіть як DOCX або PDF")
+    return r.stdout.decode("utf-8", "replace")
+
+
+def file_blocks(file, n):
+    """Файл із Telegram → блоки повідомлення для Claude (PDF / фото / Word / текст)."""
     raw, path = tg_download(file["file_id"])
     name = (file.get("name") or path).lower()
     mime = (file.get("mime") or "").lower()
-    log(f"Файл: {len(raw) // 1024} КБ, тип {mime or name.rsplit('.', 1)[-1]}")
+    ext = name.rsplit(".", 1)[-1] if "." in name else mime
+    log(f"Файл {n}: {len(raw) // 1024} КБ, тип {ext}")
+    label = {"type": "text", "text": f"Документ {n} ({file.get('name') or 'файл'}):"}
     if name.endswith(".pdf") or mime == "application/pdf":
-        return [{"type": "document", "source": {"type": "base64", "media_type": "application/pdf",
-                                                "data": base64.b64encode(raw).decode()}}]
+        return [label, {"type": "document", "source": {
+            "type": "base64", "media_type": "application/pdf",
+            "data": base64.b64encode(raw).decode()}}]
     if mime.startswith("image/") or re.search(r"\.(jpe?g|png|webp|gif)$", name):
-        mt = mime if mime.startswith("image/") else "image/jpeg"
-        if mt == "image/jpg":
-            mt = "image/jpeg"
-        return [{"type": "image", "source": {"type": "base64", "media_type": mt,
-                                             "data": base64.b64encode(raw).decode()}}]
-    if name.endswith(".docx"):
+        mt = mime if mime in ("image/jpeg", "image/png", "image/webp", "image/gif") else "image/jpeg"
+        return [label, {"type": "image", "source": {
+            "type": "base64", "media_type": mt, "data": base64.b64encode(raw).decode()}}]
+    if name.endswith(".docx") or "wordprocessingml" in mime:
         import docx
         d = docx.Document(io.BytesIO(raw))
-        text = "\n".join(p.text for p in d.paragraphs)
-        return [{"type": "text", "text": "Текст доданого документа (DOCX):\n\n" + text[:150000]}]
-    try:
-        return [{"type": "text", "text": "Текст доданого файлу:\n\n" + raw.decode("utf-8")[:150000]}]
-    except UnicodeDecodeError:
-        raise RuntimeError("непідтримуваний тип файлу")
+        parts = [p.text for p in d.paragraphs]
+        for t in d.tables:
+            for row in t.rows:
+                parts.append(" | ".join(c.text for c in row.cells))
+        text = "\n".join(parts)
+    elif name.endswith(".doc") or mime == "application/msword":
+        text = doc_to_text(raw)
+    else:
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            raise RuntimeError("непідтримуваний тип файлу")
+    if not text.strip():
+        raise RuntimeError("не вдалося прочитати текст файлу")
+    return [{"type": "text", "text": f"Документ {n} ({file.get('name') or 'файл'}), текст:\n\n"
+             + text[:150000]}]
 
 
 def ask_claude(system, content, max_tokens):
@@ -273,15 +298,10 @@ def safe_filename(title):
 
 
 # ─────────────────────────────────── main ───────────────────────────────────
-def run_draft(job):
-    content = file_blocks(job.get("file"))
-    content.append({"type": "text", "text": "Завдання адвоката:\n" + (
-        job.get("text") or "Склади відповідний процесуальний документ за доданим файлом.")})
-    out = ask_claude(DRAFT_SYSTEM, content, 16000)
-    doc, _, check = out.partition(SEP)
+def send_document(doc, check):
     title = doc_title(doc)
     data = build_docx(doc)
-    cap = f"✍️ <b>Чернетка:</b> {title}\nПеревірте й доповніть перед поданням."
+    cap = f"📝 <b>{title}</b> — чернетка.\nПеревірте й доповніть перед поданням."
     tg_api("sendDocument", {"chat_id": CHAT, "caption": cap[:1000], "parse_mode": "HTML"},
            files={"document": (safe_filename(title), data,
                                "application/vnd.openxmlformats-officedocument."
@@ -290,17 +310,25 @@ def run_draft(job):
     if items:
         esc = lambda x: x.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         tg_text("🔍 <b>Що перевірити:</b>\n" + "\n".join(f"• {esc(x)}" for x in items))
-    log(f"Чернетка: {len(doc)} символів, пунктів перевірки: {len(items)}")
+    log(f"Документ: {len(doc)} символів, пунктів перевірки: {len(items)}")
 
 
-def run_analyze(job):
-    content = file_blocks(job.get("file"))
-    q = (job.get("text") or "").strip()
-    content.append({"type": "text", "text": (f"Питання адвоката: {q}" if q else
-                                             "Зроби розбір документа.")})
-    out = ask_claude(ANALYZE_SYSTEM, content, 6000)
-    tg_text(out)
-    log(f"Аналіз: {len(out)} символів")
+def run(job):
+    files = job.get("files") or []
+    content = []
+    for i, f in enumerate(files, 1):
+        content += file_blocks(f, i)
+    task = (job.get("text") or "").strip() or "Проаналізуй додані документи."
+    content.append({"type": "text", "text": "Завдання адвоката:\n" + task})
+    out = ask_claude(SYSTEM, content, 16000)
+    first, _, rest = out.partition("\n")
+    if MODE_DOC in first:
+        doc, _, check = rest.partition(SEP)
+        send_document(doc, check)
+    else:
+        text = rest if MODE_ANS in first else out
+        tg_text(text.strip())
+        log(f"Відповідь: {len(text)} символів")
 
 
 def main():
@@ -313,22 +341,16 @@ def main():
     except Exception as e:
         log(f"Завдання не знайдено або вже виконане: {type(e).__name__}")
         sys.exit(1)
-    kind = job.get("kind")
-    log(f"Агент: {kind} · опис {len(job.get('text') or '')} символів · "
-        f"файл: {'так' if job.get('file') else 'ні'}")
+    log(f"Завдання: {len(job.get('text') or '')} символів · файлів: {len(job.get('files') or [])}")
     try:
-        if kind == "draft":
-            run_draft(job)
-        elif kind == "analyze":
-            run_analyze(job)
-        else:
-            raise RuntimeError("невідомий тип завдання")
+        run(job)
     except Exception as e:
         # У лог — лише тип помилки (повідомлення може містити фрагменти даних).
         log(f"Помилка: {type(e).__name__}")
+        reason = str(e) if isinstance(e, RuntimeError) else type(e).__name__
         tg_api("sendMessage", {"chat_id": CHAT, "text":
-                               f"⚠️ Не вдалося виконати ({type(e).__name__}). "
-                               "Спробуйте ще раз або надішліть файл в іншому форматі."})
+                               f"⚠️ Не вдалося виконати завдання ({reason}). "
+                               "Спробуйте ще раз або надішліть файл в іншому форматі (PDF чи DOCX)."})
         sys.exit(1)
 
 

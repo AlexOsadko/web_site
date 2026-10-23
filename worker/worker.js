@@ -45,7 +45,7 @@ function courtMenuKb() {
     [{ text: '🔔 Нагадування', callback_data: 'crem' }],
     [{ text: '🔄 Терміновий прогін зараз', callback_data: 'crun' }],
     [{ text: '🔎 Пошук практики', callback_data: 'cvs' }, { text: '📰 Свіжа практика', callback_data: 'cdig' }],
-    [{ text: '✍️ Чернетка документа', callback_data: 'cdraft' }, { text: '📄 Аналіз документа', callback_data: 'cana' }],
+    [{ text: '🤖 Завдання агенту (документи + AI)', callback_data: 'cagent' }],
   ] };
 }
 
@@ -56,7 +56,7 @@ function courtReplyKb() {
       [{ text: '📑 Повний список' }],
       [{ text: '👥 Справи клієнтів' }, { text: '⚖️ Справи адвоката' }],
       [{ text: '🔎 Пошук практики' }, { text: '📰 Свіжа практика' }],
-      [{ text: '✍️ Чернетка документа' }, { text: '📄 Аналіз документа' }],
+      [{ text: '🤖 Завдання агенту' }],
       [{ text: '📋 Список клієнтів' }, { text: '🔔 Нагадування' }],
       [{ text: '➕ Додати клієнта' }, { text: '🔄 Терміновий прогін' }],
     ],
@@ -95,8 +95,7 @@ async function setupCommands(env) {
     { command: 'restart', description: '🔄 Терміновий прогін' },
     { command: 'vs', description: '🔎 Практика судів за темою' },
     { command: 'digest', description: '📰 Свіжа практика зараз' },
-    { command: 'draft', description: '✍️ Чернетка документа (AI)' },
-    { command: 'analyze', description: '📄 Аналіз документа (AI)' },
+    { command: 'agent', description: '🤖 Завдання агенту (документи + AI)' },
     { command: 'start', description: '▶️ Старт / головне меню' },
     { command: 'cancel', description: '↩️ Скасувати' },
     { command: 'help', description: 'ℹ️ Довідка' },
@@ -519,24 +518,61 @@ async function runDigest(env) {
   });
 }
 
-// ── AI-агенти адвоката: «✍️ Чернетка документа» і «📄 Аналіз документа» ──
-// Завдання (опис і file_id з Telegram) лежить у KV під випадковим id лише до
-// запуску; воркфлоу agent.yml отримує ЛИШЕ цей id (вхідні дані запуску в
-// публічному репозиторії видно всім), забирає завдання через /agent_job
-// і видаляє його. Текст справи не потрапляє ні в репозиторій, ні в логи.
-const AGENT_ASK = {
-  draft: '✍️ <b>Чернетка документа</b>\nОпишіть, що скласти, і суть справи — напр.:\n'
-    + '<i>апеляційна скарга на постанову по ст. 130 КУпАП: огляд без двох понятих і відеозапису, '
-    + 'постанова від 01.10.2026, Шевченківський райсуд</i>.\n'
-    + 'Можна прикріпити PDF/фото/DOCX (рішення, протокол) з описом у підписі. Скасувати — /cancel.',
-  analyze: '📄 <b>Аналіз документа</b>\nНадішліть PDF, фото або DOCX (рішення, ухвала, позов, '
-    + 'протокол). У підписі можна поставити питання — напр. <i>чи є підстави для апеляції</i>. '
-    + 'Скасувати — /cancel.',
+// ── AI-агент адвоката: документи (Word/PDF/фото) + завдання ──
+// Адвокат надсилає один або кілька файлів (можна альбомом) і пише завдання:
+// аналіз, заперечення, відзив, апеляція, клопотання… — або тисне кнопку-шаблон.
+// Кожен файл лежить у KV окремим ключем agent_file_<message_id> (без гонок при
+// альбомах), до 2 год. Завдання (текст + file_id) — у KV під випадковим id лише
+// до запуску; воркфлоу agent.yml отримує ЛИШЕ цей id (вхідні дані запуску в
+// публічному репозиторії видно всім), забирає завдання через /agent_job і
+// видаляє. Текст справи не потрапляє ні в репозиторій, ні в логи.
+const AGENT_PRESETS = {
+  an: { label: '🔍 Аналіз', task: 'Проаналізуй додані документи: суть, що вирішено або чого просять, '
+    + 'строк і порядок оскарження, слабкі місця, аргументи, що робити далі.' },
+  ob: { label: '🛡 Заперечення / відзив', task: 'Підготуй процесуальну відповідь на доданий документ '
+    + '(відзив на позов, заперечення на апеляційну скаргу чи клопотання, пояснення — що доречно за процесуальним законом).' },
+  ap: { label: '📝 Апеляційна скарга', task: 'Підготуй апеляційну скаргу на додане рішення / постанову / ухвалу.' },
+  mo: { label: '📨 Клопотання', task: 'Підготуй клопотання, доречне у цій справі за доданими документами '
+    + '(запропонуй вид клопотання, якщо з документів це видно).' },
 };
 
-async function askAgent(env, kind) {
-  await env.KV.put('court_await', 'agent:' + kind);
-  return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: AGENT_ASK[kind] });
+function agentKb(caption) {
+  const rows = [
+    [{ text: AGENT_PRESETS.an.label, callback_data: 'ag:an' }, { text: AGENT_PRESETS.ob.label, callback_data: 'ag:ob' }],
+    [{ text: AGENT_PRESETS.ap.label, callback_data: 'ag:ap' }, { text: AGENT_PRESETS.mo.label, callback_data: 'ag:mo' }],
+  ];
+  if (caption) rows.unshift([{ text: '▶️ Виконати завдання з підпису', callback_data: 'ag:cap' }]);
+  rows.push([{ text: '🗑 Скинути файли', callback_data: 'ag:reset' }]);
+  return { inline_keyboard: rows };
+}
+
+async function agentFiles(env) {
+  const l = await env.KV.list({ prefix: 'agent_file_' });
+  const out = [];
+  for (const k of l.keys) {
+    const f = await env.KV.get(k.name, 'json');
+    if (f) out.push({ key: k.name, ...f });
+  }
+  return out.sort((a, b) => (a.mid || 0) - (b.mid || 0));
+}
+async function clearAgentFiles(env) {
+  const l = await env.KV.list({ prefix: 'agent_file_' });
+  for (const k of l.keys) await env.KV.delete(k.name);
+  await env.KV.delete('agent_caption');
+}
+
+async function askAgent(env) {
+  await env.KV.put('court_await', 'agent');
+  const n = (await agentFiles(env)).length;
+  return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+    text: '🤖 <b>Завдання агенту</b>\n'
+      + '1) Надішліть документи — Word (DOC/DOCX), PDF або фото; можна кілька чи альбомом.\n'
+      + '2) Напишіть завдання своїми словами — напр. <i>підготуй відзив на позов, наголоси на пропуску '
+      + 'позовної давності</i> — або оберіть кнопку.\n'
+      + 'Без файлів теж можна: опишіть справу й що скласти.'
+      + (n ? `\n\n📎 Уже завантажено файлів: <b>${n}</b>.` : '')
+      + '\nСкасувати — /cancel.',
+    reply_markup: n ? agentKb(false) : undefined });
 }
 
 // Файл із повідомлення Telegram: документ або найбільше фото.
@@ -552,17 +588,38 @@ function msgFile(m) {
   return null;
 }
 
-async function startAgent(env, kind, text, file) {
+// Прийом файлу: зберегти; одиночний файл із підписом — одразу в роботу;
+// альбом — одна відповідь на групу з кнопками (підпис альбому запам'ятовуємо).
+async function onAgentFile(env, m, file, caption) {
+  if (file.size > 20 * 1024 * 1024) {
+    return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
+      text: '⚠️ Файл більший за 20 МБ — Telegram не дає боту його завантажити. Надішліть менший файл.' });
+  }
+  await env.KV.put('agent_file_' + m.message_id, JSON.stringify({ ...file, mid: m.message_id }),
+    { expirationTtl: 7200 });
+  await env.KV.put('court_await', 'agent');
+  if (caption && !m.media_group_id) return startAgent(env, caption);
+  if (caption) await env.KV.put('agent_caption', caption, { expirationTtl: 7200 });
+  if (m.media_group_id) {
+    const g = 'agent_grp_' + m.media_group_id;
+    if (await env.KV.get(g)) return;
+    await env.KV.put(g, '1', { expirationTtl: 600 });
+  }
+  const n = (await agentFiles(env)).length;
+  return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+    text: `📎 Отримано${m.media_group_id ? ' альбом' : ''}. Файлів у роботі: <b>${n}</b>.\n`
+      + 'Надішліть ще файли або напишіть завдання своїми словами чи оберіть кнопку:',
+    reply_markup: agentKb(!!caption || !!(await env.KV.get('agent_caption'))) });
+}
+
+async function startAgent(env, text) {
   if (!env.GH_DISPATCH_TOKEN) {
     return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
       text: '⚠️ Не вдалося запустити: ' + ghWhy(env, 0) });
   }
-  if (file && file.size > 20 * 1024 * 1024) {
-    return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
-      text: '⚠️ Файл більший за 20 МБ — Telegram не дає боту його завантажити. Надішліть менший файл.' });
-  }
+  const files = (await agentFiles(env)).map(({ key, ...f }) => f);
   const id = crypto.randomUUID().replace(/-/g, '');
-  await env.KV.put('agent_job_' + id, JSON.stringify({ kind, text, file }), { expirationTtl: 3600 });
+  await env.KV.put('agent_job_' + id, JSON.stringify({ text, files }), { expirationTtl: 3600 });
   let status = 0;
   try {
     const r = await fetch(
@@ -579,12 +636,13 @@ async function startAgent(env, kind, text, file) {
   if (status !== 204) {
     await env.KV.delete('agent_job_' + id);
     return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-      text: '⚠️ Не вдалося запустити: ' + ghWhy(env, status) });
+      text: '⚠️ Не вдалося запустити: ' + ghWhy(env, status) + '\nФайли збережено — спробуйте ще раз.' });
   }
+  await clearAgentFiles(env);
+  await env.KV.delete('court_await');
   return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-    text: kind === 'draft'
-      ? '⏳ Складаю чернетку. За 2–4 хв надішлю сюди DOCX і перелік того, що треба перевірити.'
-      : '⏳ Аналізую документ. За 1–3 хв надішлю розбір сюди.' });
+    text: `⏳ Працюю над завданням${files.length ? ` (файлів: ${files.length})` : ''}. `
+      + 'За 1–5 хв надішлю сюди результат: розбір текстом або готовий DOCX із переліком того, що перевірити.' });
 }
 
 // Зрозуміла причина, чому GitHub не прийняв запуск воркфлоу.
@@ -606,6 +664,29 @@ async function handleUpdate(update, env) {
     const parts = (cq.data || '').split(':');
     const action = parts[0];
     const pid = parts[1];
+
+    // --- AI-агент: кнопки-шаблони завдань над завантаженими файлами ---
+    if (action === 'ag') {
+      await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
+      if (pid === 'reset') {
+        await clearAgentFiles(env);
+        await env.KV.delete('court_await');
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, text: '🗑 Файли скинуто.' });
+      }
+      const files = await agentFiles(env);
+      if (pid === 'cap') {
+        const cap = await env.KV.get('agent_caption');
+        if (!cap) return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, text: 'Підпис застарів — напишіть завдання ще раз.' });
+        return startAgent(env, cap);
+      }
+      const pr = AGENT_PRESETS[pid];
+      if (!pr) return;
+      if (!files.length) {
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
+          text: 'Файлів немає (минуло понад 2 год або вже використані) — надішліть документи ще раз.' });
+      }
+      return startAgent(env, pr.task);
+    }
 
     // --- підтвердження додавання клієнтської справи в Google Calendar ---
     if (action === 'gcaladd' || action === 'gcalskip') {
@@ -717,8 +798,7 @@ async function handleUpdate(update, env) {
         }
         return showReminders(env);
       }
-      if (action === 'cdraft') return askAgent(env, 'draft');
-      if (action === 'cana') return askAgent(env, 'analyze');
+      if (action === 'cagent') return askAgent(env);
       if (action === 'crun') {
         const txt = await urgentScan(env);
         return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt });
@@ -759,28 +839,23 @@ async function handleUpdate(update, env) {
     const courtAwait = await env.KV.get('court_await');
     const file = msgFile(m);
 
-    // Завдання для AI-агента: опис (і/або файл) після кнопки ✍️/📄.
-    // Файл, надісланий без кнопки, — одразу на аналіз.
-    const isMenu = /^(📑|👥|⚖️|🔎|📰|📋|🔔|➕|🔄|✍️|📄)/.test(body)
+    // AI-агент: будь-який файл (Word/PDF/фото) іде в роботу агенту; текст після
+    // кнопки «🤖» або поки є завантажені файли — це завдання.
+    if (file) return onAgentFile(env, m, file, body);
+    const isMenu = /^(📑|👥|⚖️|🔎|📰|📋|🔔|➕|🔄|🤖)/.test(body)
       || /^(\/|cancel$|скасувати$|меню$)/i.test(body);
-    if (courtAwait && courtAwait.startsWith('agent:') && (file || (body && !isMenu))) {
-      const kind = courtAwait.slice(6);
-      if (kind === 'analyze' && !file) {
+    if (courtAwait === 'agent' && body && !isMenu) {
+      if (body.length < 10) {
         return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
-          text: 'Надішліть файл (PDF, фото або DOCX) або /cancel.' });
+          text: 'Напишіть завдання детальніше (або /cancel).' });
       }
-      if (kind === 'draft' && !file && body.length < 15) {
-        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
-          text: 'Опишіть детальніше, що скласти і суть справи (або /cancel).' });
-      }
-      await env.KV.delete('court_await');
-      return startAgent(env, kind, body, file);
+      return startAgent(env, body);
     }
-    if (file && !courtAwait) return startAgent(env, 'analyze', body, file);
 
     // Скасування введення (ПІБ клієнта, тема пошуку практики)
     if (/^(\/cancel|cancel|скасувати)$/i.test(body)) {
       await env.KV.delete('court_await');
+      if (courtAwait === 'agent') await clearAgentFiles(env);
       return showCourtMenu(env, courtAwait ? '↩️ Скасовано.\n\n' : '');
     }
 
@@ -799,8 +874,7 @@ async function handleUpdate(update, env) {
           '/add — ➕ додати клієнта\n/restart — 🔄 терміновий прогін\n' +
           '/vs &lt;тема&gt; — 🔎 практика судів за темою (або кнопка «🔎 Пошук практики»)\n' +
           '/digest — 📰 свіжа практика зараз (щоранку приходить сама)\n' +
-          '/draft — ✍️ чернетка документа (AI)\n' +
-          '/analyze — 📄 аналіз документа (AI; або просто надішліть файл)\n' +
+          '/agent — 🤖 завдання агенту: надішліть Word/PDF і напишіть, що зробити\n' +
           '/cancel — ↩️ скасувати', reply_markup: courtReplyKb() });
     }
 
@@ -845,12 +919,9 @@ async function handleUpdate(update, env) {
           + '<code>обшук без ухвали</code>. Скасувати — /cancel.' });
     }
 
-    // AI-агенти: кнопки ✍️/📄 закріпленої клавіатури та команди /draft, /analyze.
-    if (/^✍️/.test(body) || /^\/draft$/i.test(body) || /^чернетка документа$/i.test(body)) {
-      return askAgent(env, 'draft');
-    }
-    if (/^📄/.test(body) || /^\/analy[sz]e$/i.test(body) || /^аналіз документа$/i.test(body)) {
-      return askAgent(env, 'analyze');
+    // AI-агент: кнопка «🤖 Завдання агенту» закріпленої клавіатури / команда /agent.
+    if (/^🤖/.test(body) || /^\/agent$/i.test(body) || /^завдання агенту$/i.test(body)) {
+      return askAgent(env);
     }
 
     // Кнопка «📰 Свіжа практика» / команда /digest — позачергова добірка.
