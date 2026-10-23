@@ -80,7 +80,9 @@ SCAN_WORKERS = max(1, int(os.environ.get("VS_SCAN_WORKERS", "6") or "6"))
 
 QUERY = os.environ.get("VS_QUERY", "").strip()
 DRY = os.environ.get("VS_DRY", "").strip() in ("1", "true", "yes")
-MAX_ARTICLES = int(os.environ.get("VS_MAX", "5") or "5")
+MAX_ARTICLES = int(os.environ.get("VS_MAX", "5") or "5")   # скільки розборів надіслати
+# Кандидатів більше, ніж розборів: AI відсіює ті, що не стосуються теми запиту.
+CANDIDATES = int(os.environ.get("VS_CANDIDATES", "8") or "8")
 
 
 def fetch(url, timeout=30, tries=3):
@@ -109,6 +111,8 @@ def decode(raw):
 
 def strip_tags(s):
     s = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", s)
+    s = re.sub(r"(?s)<!--.*?-->", " ", s)
+    s = re.sub(r"<!--|-->", " ", s)  # обрізані коментарі (напр. у заголовках)
     s = re.sub(r"(?s)<[^>]+>", " ", s)
     s = _html.unescape(s)
     return re.sub(r"\s+", " ", s).strip()
@@ -154,12 +158,21 @@ def article_date(html, src):
 def relevance(text, query):
     # Пошук за основою слова: відкидаємо закінчення (огляду → огля…, аліментів → аліме…),
     # щоб знаходити всі відмінкові форми. Числа (130, 286) — як є.
+    # Головне — ПОКРИТТЯ запиту (скільки різних слів знайдено), а не частота:
+    # раніше довгий текст, де багато разів трапляються «особа» й «КУпАП», вигравав
+    # у справді релевантного. Номери статей мають бути в тексті обов'язково.
     words = [w for w in re.split(r"\W+", query.lower()) if len(w) > 3 or w.isdigit()]
     if not words:
         return 0
-    stems = [w if w.isdigit() else w[:max(4, len(w) - 2)] for w in words]
     low = text.lower()
-    return sum(low.count(st) for st in stems)
+    nums = [w for w in words if w.isdigit()]
+    if any(not re.search(r"(?<!\d)" + n + r"(?!\d)", low) for n in nums):
+        return 0
+    stems = [w if w.isdigit() else w[:max(4, len(w) - 2)] for w in words]
+    found = [st for st in stems if st in low]
+    if len(found) * 2 < len(stems):   # знайдено менше половини слів запиту
+        return 0
+    return len(found) * 10 + min(10, sum(low.count(st) for st in found))
 
 
 def tg_send(text):
@@ -208,7 +221,7 @@ def ask_claude(system, user, max_tokens=2000):
     return "".join(b.text for b in r.content if getattr(b, "type", "") == "text").strip()
 
 
-def analyze(title, url, text, src_name):
+def analyze(title, url, text, src_name, query=""):
     sys_prompt = (
         "Ти — помічник адвоката. Тобі дають РЕАЛЬНИЙ текст офіційної публікації "
         f"суду ({src_name}) про його рішення/постанову. Зроби стислий розбір "
@@ -220,6 +233,9 @@ def analyze(title, url, text, src_name):
         "СУВОРІ ПРАВИЛА: використовуй тільки факти з наданого тексту, НІЧОГО не додумуй і не "
         "посилайся на інші рішення. Без Markdown-розмітки (без **, #). Якщо в тексті немає "
         "рішення по суті (організаційна новина, анонс, захід) — відповідай одним словом НЕ_РІШЕННЯ."
+        + (f" Адвокат шукає практику за темою: «{query}». Якщо матеріал ПРЯМО не стосується "
+           "цієї теми (лише згадує ту саму статтю чи кодекс в іншому питанні) — відповідай "
+           "одним словом НЕ_РЕЛЕВАНТНО." if query else "")
     )
     return ask_claude(sys_prompt, f"Заголовок: {title}\nДжерело: {url}\n\nТекст:\n{text[:9000]}")
 
@@ -264,6 +280,7 @@ def select(items, query):
     (цінні — старіші, змістовні постанови), паралельно пулом потоків. З кожного
     джерела беремо щонайбільше PER_SOURCE матеріалів; далі — ліміт MAX_ARTICLES."""
     picked = []
+    per_source = max(PER_SOURCE, 4)   # ширший відбір — фінально фільтрує AI
     for src in SOURCES:
         sub = [it for it in items if it["_src"] is src]
         if src.get("scan_body"):
@@ -279,11 +296,11 @@ def select(items, query):
                 it["_score"] = relevance(it["title"], query)
             scored = sorted((it for it in sub if it["_score"] > 0),
                             key=lambda it: it["_score"], reverse=True)
-        top = scored[:PER_SOURCE]
+        top = scored[:per_source]
         print(f"{src['name']}: релевантних {len(scored)}, беремо {len(top)}")
         picked.extend(top)
     picked.sort(key=lambda it: it["_score"], reverse=True)
-    return picked[:MAX_ARTICLES]
+    return picked[:CANDIDATES]
 
 
 def main():
@@ -333,6 +350,8 @@ def main():
 
     sent = 0
     for it in top:
+        if sent >= MAX_ARTICLES:
+            break
         try:
             src = it["_src"]
             # тіло могли вже завантажити на етапі відбору (scan_body)
@@ -344,8 +363,9 @@ def main():
                 date = article_date(art, src)
             if len(txt) < 200:
                 continue
-            summary = analyze(it["title"], it["url"], txt, src["name"])
-            if not summary or "НЕ_РІШЕННЯ" in summary:
+            summary = analyze(it["title"], it["url"], txt, src["name"], QUERY)
+            if not summary or "НЕ_РІШЕННЯ" in summary or "НЕ_РЕЛЕВАНТНО" in summary:
+                print("Кандидат відсіяно (не рішення або не за темою).")
                 continue
             msg = (f"{src['name']} · <b>за темою «{_html.escape(QUERY)}»</b>\n\n"
                    f"<b>{_html.escape(it['title'])}</b>\n"
@@ -357,8 +377,9 @@ def main():
         except Exception as ex:
             print("Помилка обробки", it["url"], ex)
     if not sent:
-        tg_send(f"🔎 <b>Практика судів</b>\nЗа темою «{_html.escape(QUERY)}» релевантні "
-                f"публікації є, але серед них немає розборів рішень по суті.")
+        tg_send(f"🔎 <b>Практика судів</b>\nЗа темою «{_html.escape(QUERY)}» серед публікацій "
+                f"ВС, Пленуму ВС і КСУ немає рішень, що прямо стосуються питання. "
+                f"Спробуйте сформулювати ширше (напр. лише статтю й ключове слово).")
     print(f"Надіслано розборів: {sent}")
 
 
