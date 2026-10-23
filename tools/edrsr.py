@@ -119,10 +119,18 @@ def probe(query):
         return
     print(f"GET /: {status}, {len(page)} символів, {time.time() - t:.1f} с")
     print("captcha на сторінці:", bool(re.search(r"(?i)captcha|recaptcha|turnstile", page)))
-    for m in list(re.finditer(r"(?i)captcha", page))[:6]:
-        print("  …", re.sub(r"\s+", " ", page[max(0, m.start() - 160):m.end() + 160]))
     print("Скрипти:", re.findall(r'<script[^>]+src="([^"]+)"', page)[:12])
     print("Поля форми:", ", ".join(form_fields(page))[:1500])
+    for name, body in re.findall(r'(?is)<select[^>]*name="([^"]+)"[^>]*>(.*?)</select>', page):
+        if name in ("Sort", "INSType", "CSType", "VRType", "PagingInfo.ItemsPerPage", "Liga", "ProviderItem", "SideStatus"):
+            opts = [(v, _strip(t)) for v, t in re.findall(r'(?is)<option[^>]*value="([^"]*)"[^>]*>(.*?)</option>', body)]
+            print(f"select {name}:", opts[:20])
+    for name in ("INSType", "CSType", "VRType", "CourtRegion"):
+        m = re.search(r'(?is)name="' + name + r'".{0,3000}', page)
+        if m and "<select" not in m.group(0)[:200]:
+            ids = re.findall(r'(?is)<li[^>]*>.*?value="([^"]*)".*?<label[^>]*>(.*?)</label>', m.group(0))[:12]
+            if ids:
+                print(f"{name} (multiselect):", [(v, _strip(t)) for v, t in ids])
     forms = re.findall(r'(?is)<form[^>]*>', page)
     print("Форми:", [re.sub(r"\s+", " ", f)[:160] for f in forms][:5])
     try:
