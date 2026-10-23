@@ -334,11 +334,55 @@ def send_document(doc, check):
     log(f"Документ: {len(doc)} символів, пунктів перевірки: {len(items)}")
 
 
+PHOTO_DIRECT = 20   # до стількох фото — прямо в завдання; більше — спершу переписуємо текст
+PHOTO_BATCH = 20
+
+TRANSCRIBE_SYSTEM = """Тобі надіслано фото сторінок документів (справа адвоката). Перепиши
+ТЕКСТ кожної сторінки максимально точно, без скорочень і без коментарів: номери справ,
+дати, суми, ПІБ, печатки й підписи (як «[підпис]», «[печатка: …]»). Перед кожною
+сторінкою пиши «--- Фото N ---» (N — номер, як у підписі до фото). Нерозбірливе
+позначай «[нерозбірливо]». Нічого не додавай від себе."""
+
+
+def transcribe_photos(photos):
+    """Багато фото (> PHOTO_DIRECT): частинами по PHOTO_BATCH → текст сторінок.
+    Так проходить і 200 фото: модель приймає до 100 зображень за запит, а
+    фінальне завдання далі працює з текстом."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    def one(b):
+        part = photos[b:b + PHOTO_BATCH]
+        content = []
+        for n, blocks in part:
+            content += [{"type": "text", "text": f"Фото {n}:"}, blocks[-1]]
+        content.append({"type": "text", "text": "Перепиши текст цих сторінок."})
+        text = ask_claude(TRANSCRIBE_SYSTEM, content, 16000)
+        log(f"Переписано фото {b + 1}–{b + len(part)} з {len(photos)}")
+        return text
+
+    with ThreadPoolExecutor(max_workers=4) as ex:   # частини паралельно, порядок зберігається
+        return "\n\n".join(ex.map(one, range(0, len(photos), PHOTO_BATCH)))
+
+
 def run(job):
     files = job.get("files") or []
-    content = []
+    content, photos = [], []
     for i, f in enumerate(files, 1):
-        content += file_blocks(f, i)
+        blocks = file_blocks(f, i)
+        if blocks[-1].get("type") == "image":
+            photos.append((i, blocks))
+        else:
+            content += blocks
+    if len(photos) > PHOTO_DIRECT:
+        tg_api("sendMessage", {"chat_id": CHAT, "text":
+                               f"📷 Фото: {len(photos)} — спершу переписую текст сторінок "
+                               f"(частинами по {PHOTO_BATCH}), потім виконаю завдання. "
+                               "Це займе трохи довше."})
+        content.append({"type": "text", "text": "Текст сторінок із фото (переписано з зображень):\n\n"
+                        + transcribe_photos(photos)})
+    else:
+        for _, blocks in photos:
+            content += blocks
     task = (job.get("text") or "").strip() or "Проаналізуй додані документи."
     content.append({"type": "text", "text": "Завдання адвоката:\n" + task})
     out = ask_claude(SYSTEM, content, 16000)
