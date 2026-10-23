@@ -566,7 +566,8 @@ async function askAgent(env) {
   const n = (await agentFiles(env)).length;
   return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
     text: '🤖 <b>Завдання агенту</b>\n'
-      + '1) Надішліть документи — Word (DOC/DOCX), PDF або фото; можна кілька чи альбомом.\n'
+      + '1) Надішліть документи — Word (DOC/DOCX), PDF або фото сторінок (JPG, PNG, HEIC з iPhone); '
+      + 'можна кілька файлів чи альбомом фото.\n'
       + '2) Напишіть завдання своїми словами — напр. <i>підготуй відзив на позов, наголоси на пропуску '
       + 'позовної давності</i> — або оберіть кнопку.\n'
       + 'Без файлів теж можна: опишіть справу й що скласти.'
