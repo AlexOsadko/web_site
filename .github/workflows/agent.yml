@@ -1,0 +1,43 @@
+name: AI-агенти адвоката
+
+# Бот засідань: кнопки «✍️ Чернетка документа» і «📄 Аналіз документа» →
+# воркер кладе завдання в KV і запускає цей воркфлоу, передаючи ЛИШЕ id
+# завдання (вхідні дані запуску в публічному репозиторії видно всім).
+# Скрипт забирає опис і файл через воркер (одноразово), звертається до Claude
+# і надсилає результат приватно в чат із ботом. У лог — лише лічильники.
+
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "id завдання (створює бот; вручну не запускати)"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-${{ github.event.inputs.job }}
+  cancel-in-progress: false
+
+jobs:
+  agent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Залежності
+        run: pip install --quiet "anthropic>=0.40" python-docx
+      - name: Агент
+        env:
+          AGENT_JOB: ${{ github.event.inputs.job }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_REVIEW_CHAT: ${{ secrets.TELEGRAM_REVIEW_CHAT }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BOT_WORKER_URL: ${{ secrets.BOT_WORKER_URL }}
+          BOT_WORKER_SECRET: ${{ secrets.BOT_WORKER_SECRET }}
+        run: python3 tools/lawyer_agent.py

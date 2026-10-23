@@ -11,7 +11,7 @@
 //     AUTH_TOKEN          — спільний секрет із GitHub (BOT_WORKER_SECRET) для службових ендпоінтів
 //     WEBHOOK_SECRET      — (опц.) секрет вебхука Telegram (setWebhook secret_token)
 //     GH_TOKEN            — токен GitHub для термінового прогону court-watch
-//     GH_DISPATCH_TOKEN   — токен GitHub для пошуку практики й добірки
+//     GH_DISPATCH_TOKEN   — токен GitHub для пошуку практики, добірки й AI-агентів
 
 const esc = (s = '') =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -45,6 +45,7 @@ function courtMenuKb() {
     [{ text: '🔔 Нагадування', callback_data: 'crem' }],
     [{ text: '🔄 Терміновий прогін зараз', callback_data: 'crun' }],
     [{ text: '🔎 Пошук практики', callback_data: 'cvs' }, { text: '📰 Свіжа практика', callback_data: 'cdig' }],
+    [{ text: '✍️ Чернетка документа', callback_data: 'cdraft' }, { text: '📄 Аналіз документа', callback_data: 'cana' }],
   ] };
 }
 
@@ -55,6 +56,7 @@ function courtReplyKb() {
       [{ text: '📑 Повний список' }],
       [{ text: '👥 Справи клієнтів' }, { text: '⚖️ Справи адвоката' }],
       [{ text: '🔎 Пошук практики' }, { text: '📰 Свіжа практика' }],
+      [{ text: '✍️ Чернетка документа' }, { text: '📄 Аналіз документа' }],
       [{ text: '📋 Список клієнтів' }, { text: '🔔 Нагадування' }],
       [{ text: '➕ Додати клієнта' }, { text: '🔄 Терміновий прогін' }],
     ],
@@ -93,6 +95,8 @@ async function setupCommands(env) {
     { command: 'restart', description: '🔄 Терміновий прогін' },
     { command: 'vs', description: '🔎 Практика судів за темою' },
     { command: 'digest', description: '📰 Свіжа практика зараз' },
+    { command: 'draft', description: '✍️ Чернетка документа (AI)' },
+    { command: 'analyze', description: '📄 Аналіз документа (AI)' },
     { command: 'start', description: '▶️ Старт / головне меню' },
     { command: 'cancel', description: '↩️ Скасувати' },
     { command: 'help', description: 'ℹ️ Довідка' },
@@ -515,6 +519,74 @@ async function runDigest(env) {
   });
 }
 
+// ── AI-агенти адвоката: «✍️ Чернетка документа» і «📄 Аналіз документа» ──
+// Завдання (опис і file_id з Telegram) лежить у KV під випадковим id лише до
+// запуску; воркфлоу agent.yml отримує ЛИШЕ цей id (вхідні дані запуску в
+// публічному репозиторії видно всім), забирає завдання через /agent_job
+// і видаляє його. Текст справи не потрапляє ні в репозиторій, ні в логи.
+const AGENT_ASK = {
+  draft: '✍️ <b>Чернетка документа</b>\nОпишіть, що скласти, і суть справи — напр.:\n'
+    + '<i>апеляційна скарга на постанову по ст. 130 КУпАП: огляд без двох понятих і відеозапису, '
+    + 'постанова від 01.10.2026, Шевченківський райсуд</i>.\n'
+    + 'Можна прикріпити PDF/фото/DOCX (рішення, протокол) з описом у підписі. Скасувати — /cancel.',
+  analyze: '📄 <b>Аналіз документа</b>\nНадішліть PDF, фото або DOCX (рішення, ухвала, позов, '
+    + 'протокол). У підписі можна поставити питання — напр. <i>чи є підстави для апеляції</i>. '
+    + 'Скасувати — /cancel.',
+};
+
+async function askAgent(env, kind) {
+  await env.KV.put('court_await', 'agent:' + kind);
+  return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: AGENT_ASK[kind] });
+}
+
+// Файл із повідомлення Telegram: документ або найбільше фото.
+function msgFile(m) {
+  if (m.document) {
+    return { file_id: m.document.file_id, name: m.document.file_name || 'document',
+      mime: m.document.mime_type || '', size: m.document.file_size || 0 };
+  }
+  if (Array.isArray(m.photo) && m.photo.length) {
+    const p = m.photo[m.photo.length - 1];
+    return { file_id: p.file_id, name: 'photo.jpg', mime: 'image/jpeg', size: p.file_size || 0 };
+  }
+  return null;
+}
+
+async function startAgent(env, kind, text, file) {
+  if (!env.GH_DISPATCH_TOKEN) {
+    return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+      text: '⚠️ Не вдалося запустити: ' + ghWhy(env, 0) });
+  }
+  if (file && file.size > 20 * 1024 * 1024) {
+    return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
+      text: '⚠️ Файл більший за 20 МБ — Telegram не дає боту його завантажити. Надішліть менший файл.' });
+  }
+  const id = crypto.randomUUID().replace(/-/g, '');
+  await env.KV.put('agent_job_' + id, JSON.stringify({ kind, text, file }), { expirationTtl: 3600 });
+  let status = 0;
+  try {
+    const r = await fetch(
+      `https://api.github.com/repos/${env.GH_REPO || 'AlexOsadko/web_site'}/actions/workflows/agent.yml/dispatches`,
+      { method: 'POST', headers: {
+          'Authorization': `Bearer ${env.GH_DISPATCH_TOKEN}`,
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+          'User-Agent': 'osadko-telegram-bot',
+          'Content-Type': 'application/json',
+        }, body: JSON.stringify({ ref: 'main', inputs: { job: id } }) });
+    status = r.status;
+  } catch (e) { status = 0; }
+  if (status !== 204) {
+    await env.KV.delete('agent_job_' + id);
+    return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+      text: '⚠️ Не вдалося запустити: ' + ghWhy(env, status) });
+  }
+  return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+    text: kind === 'draft'
+      ? '⏳ Складаю чернетку. За 2–4 хв надішлю сюди DOCX і перелік того, що треба перевірити.'
+      : '⏳ Аналізую документ. За 1–3 хв надішлю розбір сюди.' });
+}
+
 // Зрозуміла причина, чому GitHub не прийняв запуск воркфлоу.
 function ghWhy(env, status) {
   if (!env.GH_DISPATCH_TOKEN) return 'у Worker немає секрету <code>GH_DISPATCH_TOKEN</code>.';
@@ -645,6 +717,8 @@ async function handleUpdate(update, env) {
         }
         return showReminders(env);
       }
+      if (action === 'cdraft') return askAgent(env, 'draft');
+      if (action === 'cana') return askAgent(env, 'analyze');
       if (action === 'crun') {
         const txt = await urgentScan(env);
         return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt });
@@ -681,8 +755,28 @@ async function handleUpdate(update, env) {
     const m = update.message;
     const chat = m.chat && m.chat.id;
     if (String(chat) !== String(env.REVIEW_CHAT)) return;
-    const body = (m.text || '').trim();
+    const body = (m.text || m.caption || '').trim();
     const courtAwait = await env.KV.get('court_await');
+    const file = msgFile(m);
+
+    // Завдання для AI-агента: опис (і/або файл) після кнопки ✍️/📄.
+    // Файл, надісланий без кнопки, — одразу на аналіз.
+    const isMenu = /^(📑|👥|⚖️|🔎|📰|📋|🔔|➕|🔄|✍️|📄)/.test(body)
+      || /^(\/|cancel$|скасувати$|меню$)/i.test(body);
+    if (courtAwait && courtAwait.startsWith('agent:') && (file || (body && !isMenu))) {
+      const kind = courtAwait.slice(6);
+      if (kind === 'analyze' && !file) {
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
+          text: 'Надішліть файл (PDF, фото або DOCX) або /cancel.' });
+      }
+      if (kind === 'draft' && !file && body.length < 15) {
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
+          text: 'Опишіть детальніше, що скласти і суть справи (або /cancel).' });
+      }
+      await env.KV.delete('court_await');
+      return startAgent(env, kind, body, file);
+    }
+    if (file && !courtAwait) return startAgent(env, 'analyze', body, file);
 
     // Скасування введення (ПІБ клієнта, тема пошуку практики)
     if (/^(\/cancel|cancel|скасувати)$/i.test(body)) {
@@ -705,6 +799,8 @@ async function handleUpdate(update, env) {
           '/add — ➕ додати клієнта\n/restart — 🔄 терміновий прогін\n' +
           '/vs &lt;тема&gt; — 🔎 практика судів за темою (або кнопка «🔎 Пошук практики»)\n' +
           '/digest — 📰 свіжа практика зараз (щоранку приходить сама)\n' +
+          '/draft — ✍️ чернетка документа (AI)\n' +
+          '/analyze — 📄 аналіз документа (AI; або просто надішліть файл)\n' +
           '/cancel — ↩️ скасувати', reply_markup: courtReplyKb() });
     }
 
@@ -747,6 +843,14 @@ async function handleUpdate(update, env) {
         text: '🔎 Напишіть тему для пошуку практики (ВС, Пленум ВС, КСУ) — напр. '
           + '<code>відмова від огляду ст. 130</code>, <code>аліменти на повнолітню дитину</code>, '
           + '<code>обшук без ухвали</code>. Скасувати — /cancel.' });
+    }
+
+    // AI-агенти: кнопки ✍️/📄 закріпленої клавіатури та команди /draft, /analyze.
+    if (/^✍️/.test(body) || /^\/draft$/i.test(body) || /^чернетка документа$/i.test(body)) {
+      return askAgent(env, 'draft');
+    }
+    if (/^📄/.test(body) || /^\/analy[sz]e$/i.test(body) || /^аналіз документа$/i.test(body)) {
+      return askAgent(env, 'analyze');
     }
 
     // Кнопка «📰 Свіжа практика» / команда /digest — позачергова добірка.
@@ -826,6 +930,17 @@ export default {
       }
       const arr = (await env.KV.get('court_names', 'json')) || [];
       return Response.json({ names: arr });
+    }
+    // Завдання AI-агента для воркфлоу agent.yml: віддаємо один раз і видаляємо.
+    if (request.method === 'GET' && url.pathname === '/agent_job') {
+      if ((request.headers.get('X-Auth-Token') || '') !== env.AUTH_TOKEN) {
+        return new Response('forbidden', { status: 403 });
+      }
+      const id = (url.searchParams.get('id') || '').replace(/[^a-f0-9]/g, '');
+      const job = id ? await env.KV.get('agent_job_' + id, 'json') : null;
+      if (!job) return new Response('not found', { status: 404 });
+      await env.KV.delete('agent_job_' + id);
+      return Response.json(job);
     }
     // Видалені (назавжди) справи — щоб бот не надсилав по них нагадувань.
     if (request.method === 'GET' && url.pathname === '/court_blocked') {
