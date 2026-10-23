@@ -367,7 +367,8 @@ async function showCourtReport(env, kind = 'advocate', page = 0) {
 // Об'єднаний перегляд: справи адвоката + клієнтів в одному повідомленні.
 // Лише для читання (приховування/видалення — у відповідних окремих розділах),
 // щоб індекси кнопок 🗑 не плутались між двома джерелами.
-async function showCourtReportAll(env, page = 0) {
+// Об'єднаний перелік (адвокат + клієнти) без дублів, у порядку показу.
+async function allCases(env) {
   const a = await visibleReport(env, 'advocate');
   const c = await visibleReport(env, 'clients');
   const byKey = new Map();
@@ -382,8 +383,12 @@ async function showCourtReportAll(env, page = 0) {
       byKey.set(k, { ...it, _src: '👥' });
     }
   });
-  const all = [...byKey.values()].sort(caseCmp);
-  const updated = a.updated || c.updated || '';
+  return { all: [...byKey.values()].sort(caseCmp), updated: a.updated || c.updated || '',
+    hiddenCount: a.hiddenCount + c.hiddenCount };
+}
+
+async function showCourtReportAll(env, page = 0) {
+  const { all, updated, hiddenCount } = await allCases(env);
   const title = '📑 <b>Повний список справ';
   if (!all.length) {
     return tg(env, 'sendMessage', {
@@ -400,7 +405,7 @@ async function showCourtReportAll(env, page = 0) {
   const slice = all.slice(startI, startI + PER);
   let txt = `${title}: ${all.length}</b>\n<i>оновлено: ${esc(updated)}</i>` +
     (pages > 1 ? ` · стор. ${page + 1}/${pages}` : '') +
-    '\n<i>⚖️ — ваші · 👥 — клієнтів</i>\n';
+    '\n<i>⚖️ — ваші · 👥 — клієнтів · 🗑 — прибрати зі списку</i>\n';
   slice.forEach((it, j) => {
     const gi = startI + j;
     txt += `\n<b>${gi + 1}. ${it._src} № ${esc(it.number)}</b> · 📅 ${esc(it.date)}\n`;
@@ -413,6 +418,12 @@ async function showCourtReportAll(env, page = 0) {
     if (it.address) txt += `    📍 ${cut(it.address, 120)}\n`;
   });
   const rows = [];
+  let row = [];
+  slice.forEach((it, j) => {
+    row.push({ text: `🗑 ${startI + j + 1}`, callback_data: `callhide:${startI + j}:${page}` });
+    if (row.length === 4) { rows.push(row); row = []; }
+  });
+  if (row.length) rows.push(row);
   if (pages > 1) {
     const nav = [];
     if (page > 0) nav.push({ text: '◀️ Назад', callback_data: `crepall:${page - 1}` });
@@ -424,6 +435,10 @@ async function showCourtReportAll(env, page = 0) {
     { text: '⚖️ Лише мої', callback_data: 'crep' },
     { text: '👥 Лише клієнтів', callback_data: 'crepc' },
   ]);
+  if (hiddenCount) {
+    rows.push([{ text: '📂 Приховані: мої', callback_data: 'chidden:advocate' },
+      { text: '📂 Приховані: клієнтів', callback_data: 'chidden:clients' }]);
+  }
   rows.push([{ text: '↩️ Меню', callback_data: 'cmenu' }]);
   return tg(env, 'sendMessage', {
     chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt,
@@ -733,7 +748,8 @@ async function handleUpdate(update, env) {
     // --- меню бота відстеження судових справ ---
     if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crepall', 'crun',
          'chide', 'cunhide', 'chidden', 'cunhide1', 'cpurge1', 'cpurge',
-         'crem', 'cremdel', 'crempg', 'crepp', 'cnoop', 'cvs', 'cdig'].includes(action)) {
+         'crem', 'cremdel', 'crempg', 'crepp', 'cnoop', 'cvs', 'cdig',
+         'callhide', 'cagent', 'cgrp'].includes(action)) {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
       if (action === 'cnoop') return;
       if (action === 'cdig') return runDigest(env);
@@ -759,6 +775,19 @@ async function handleUpdate(update, env) {
         const page = parseInt(parts[3], 10) || 0;
         if (!isNaN(i) && visible[i]) await addHidden(env, kind, itemKey(visible[i]));
         return showCourtReport(env, kind, page);
+      }
+      // 🗑 у «Повному списку»: приховуємо в обох звітах (справа буває в обох);
+      // повернути можна з «📂 Приховані».
+      if (action === 'callhide') {
+        const { all } = await allCases(env);
+        const i = parseInt(pid, 10);
+        const page = parseInt(parts[2], 10) || 0;
+        if (!isNaN(i) && all[i]) {
+          const k = itemKey(all[i]);
+          if (all[i]._src.includes('⚖️')) await addHidden(env, 'advocate', k);
+          if (all[i]._src.includes('👥')) await addHidden(env, 'clients', k);
+        }
+        return showCourtReportAll(env, page);
       }
       if (action === 'chidden') {
         return showHidden(env, pid === 'clients' ? 'clients' : 'advocate');
