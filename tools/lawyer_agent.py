@@ -164,6 +164,27 @@ def doc_to_text(raw):
     return r.stdout.decode("utf-8", "replace")
 
 
+def photo_to_jpeg(raw):
+    """Будь-яке фото (JPEG/PNG/HEIC з iPhone/TIFF…) → JPEG для моделі: поворот за
+    EXIF, довга сторона ≤ 2400 px (дрібний текст документа лишається читабельним,
+    а розмір — у межах ліміту API на зображення)."""
+    from PIL import Image, ImageOps
+    try:
+        import pillow_heif
+        pillow_heif.register_heif_opener()
+    except ImportError:
+        pass
+    try:
+        im = Image.open(io.BytesIO(raw))
+        im = ImageOps.exif_transpose(im).convert("RGB")
+    except Exception:
+        raise RuntimeError("не вдалося відкрити фото — надішліть JPG, PNG або PDF")
+    im.thumbnail((2400, 2400))
+    buf = io.BytesIO()
+    im.save(buf, "JPEG", quality=85)
+    return buf.getvalue()
+
+
 def file_blocks(file, n):
     """Файл із Telegram → блоки повідомлення для Claude (PDF / фото / Word / текст)."""
     raw, path = tg_download(file["file_id"])
@@ -176,10 +197,10 @@ def file_blocks(file, n):
         return [label, {"type": "document", "source": {
             "type": "base64", "media_type": "application/pdf",
             "data": base64.b64encode(raw).decode()}}]
-    if mime.startswith("image/") or re.search(r"\.(jpe?g|png|webp|gif)$", name):
-        mt = mime if mime in ("image/jpeg", "image/png", "image/webp", "image/gif") else "image/jpeg"
+    if mime.startswith("image/") or re.search(r"\.(jpe?g|png|webp|gif|heic|heif|tiff?|bmp)$", name):
         return [label, {"type": "image", "source": {
-            "type": "base64", "media_type": mt, "data": base64.b64encode(raw).decode()}}]
+            "type": "base64", "media_type": "image/jpeg",
+            "data": base64.b64encode(photo_to_jpeg(raw)).decode()}}]
     if name.endswith(".docx") or "wordprocessingml" in mime:
         import docx
         d = docx.Document(io.BytesIO(raw))

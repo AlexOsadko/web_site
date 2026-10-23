@@ -31,7 +31,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Залежності
-        run: pip install --quiet "anthropic>=0.40" python-docx
+        run: pip install --quiet "anthropic>=0.40" python-docx pillow pillow-heif
       - name: Агент
         env:
           AGENT_JOB: ${{ github.event.inputs.job }}
