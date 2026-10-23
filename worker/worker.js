@@ -573,18 +573,29 @@ function agentKb(caption) {
   return { inline_keyboard: rows };
 }
 
+// Перелік файлів у роботі — один ключ agent_files (масив message_id). KV.list
+// бачить щойно записані ключі із затримкою до хвилини, тож на нього не
+// покладаємось; в індекс пише лише одна сторона (див. onAgentFile).
+async function agentIndex(env) {
+  return (await env.KV.get('agent_files', 'json')) || [];
+}
 async function agentFiles(env) {
-  const l = await env.KV.list({ prefix: 'agent_file_' });
   const out = [];
-  for (const k of l.keys) {
-    const f = await env.KV.get(k.name, 'json');
-    if (f) out.push({ key: k.name, ...f });
+  for (const mid of await agentIndex(env)) {
+    const f = await env.KV.get('agent_file_' + mid, 'json');
+    if (f) out.push({ key: 'agent_file_' + mid, ...f });
   }
   return out.sort((a, b) => (a.mid || 0) - (b.mid || 0));
 }
+async function addToIndex(env, mids) {
+  const idx = await agentIndex(env);
+  for (const m of mids) if (!idx.includes(m)) idx.push(m);
+  await env.KV.put('agent_files', JSON.stringify(idx), { expirationTtl: 7200 });
+  return idx.length;
+}
 async function clearAgentFiles(env) {
-  const l = await env.KV.list({ prefix: 'agent_file_' });
-  for (const k of l.keys) await env.KV.delete(k.name);
+  for (const mid of await agentIndex(env)) await env.KV.delete('agent_file_' + mid);
+  await env.KV.delete('agent_files');
   await env.KV.delete('agent_caption');
 }
 
@@ -616,28 +627,54 @@ function msgFile(m) {
   return null;
 }
 
-// Прийом файлу: зберегти; одиночний файл із підписом — одразу в роботу;
-// альбом — одна відповідь на групу з кнопками (підпис альбому запам'ятовуємо).
+// Прийом файлу. Одиночний: в індекс; з підписом — одразу в роботу.
+// Альбом (кожне фото — окреме оновлення, що приходять паралельно): відповідає
+// лише «лідер» — повідомлення, перед яким немає файлу з того ж альбому. Він
+// чекає, поки збережуться інші фото, збирає їх (id ідуть поспіль) і пише в
+// індекс один раз; запізнілі фото дописують себе самі.
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function onAgentFile(env, m, file, caption) {
   if (file.size > 20 * 1024 * 1024) {
     return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
       text: '⚠️ Файл більший за 20 МБ — Telegram не дає боту його завантажити. Надішліть менший файл.' });
   }
-  await env.KV.put('agent_file_' + m.message_id, JSON.stringify({ ...file, mid: m.message_id }),
+  const mid = m.message_id;
+  const gid = m.media_group_id || '';
+  await env.KV.put('agent_file_' + mid, JSON.stringify({ ...file, mid, gid, caption: caption || '' }),
     { expirationTtl: 7200 });
   await env.KV.put('court_await', 'agent');
-  if (caption && !m.media_group_id) return startAgent(env, caption);
-  if (caption) await env.KV.put('agent_caption', caption, { expirationTtl: 7200 });
-  if (m.media_group_id) {
-    const g = 'agent_grp_' + m.media_group_id;
-    if (await env.KV.get(g)) return;
-    await env.KV.put(g, '1', { expirationTtl: 600 });
+  if (!gid) {
+    const n = await addToIndex(env, [mid]);
+    if (caption) return startAgent(env, caption);
+    return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+      text: `📎 Отримано. Файлів у роботі: <b>${n}</b>.\n`
+        + 'Надішліть ще файли або напишіть завдання своїми словами чи оберіть кнопку:',
+      reply_markup: agentKb(false) });
   }
-  const n = (await agentFiles(env)).length;
+  await sleep(2500);
+  const prev = await env.KV.get('agent_file_' + (mid - 1), 'json');
+  if (prev && prev.gid === gid) {
+    // не лідер: якщо лідер мене не врахував (я запізнився) — дописуюсь сам
+    await sleep(3000);
+    if (!(await agentIndex(env)).includes(mid)) await addToIndex(env, [mid]);
+    return;
+  }
+  const mids = [mid];
+  let cap = caption || '';
+  for (let k = 1; k < 10; k++) {
+    const f = await env.KV.get('agent_file_' + (mid + k), 'json');
+    if (!f || f.gid !== gid) break;
+    mids.push(mid + k);
+    if (!cap && f.caption) cap = f.caption;
+  }
+  const n = await addToIndex(env, mids);
+  if (cap) await env.KV.put('agent_caption', cap, { expirationTtl: 7200 });
+  else await env.KV.delete('agent_caption');
   return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
-    text: `📎 Отримано${m.media_group_id ? ' альбом' : ''}. Файлів у роботі: <b>${n}</b>.\n`
+    text: `📎 Отримано альбом (${mids.length} шт.). Файлів у роботі: <b>${n}</b>.\n`
+      + (cap ? `Завдання з підпису: <i>${esc(cap.slice(0, 200))}</i>\n` : '')
       + 'Надішліть ще файли або напишіть завдання своїми словами чи оберіть кнопку:',
-    reply_markup: agentKb(!!caption || !!(await env.KV.get('agent_caption'))) });
+    reply_markup: agentKb(!!cap) });
 }
 
 async function startAgent(env, text) {
