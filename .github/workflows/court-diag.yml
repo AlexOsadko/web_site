@@ -39,7 +39,6 @@ jobs:
         if: ${{ github.event.inputs.edrsr != '' }}
         env:
           Q: ${{ github.event.inputs.edrsr }}
-          EDRSR_VARIANTS: "1"
         run: python3 tools/edrsr.py "$Q"
       - name: Діагностика
         if: ${{ github.event.inputs.edrsr == '' }}

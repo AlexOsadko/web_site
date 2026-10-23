@@ -62,37 +62,27 @@ def form_fields(page):
     return sorted(set(re.findall(r'name="([A-Za-z][\w.\[\]]*)"', page)))
 
 
-def search(query, cs_type="", vr_type="", date_from="", date_to="", per_page=25):
-    """Пошук за текстом рішення. Дати — ДД.ММ.РРРР (дата ухвалення рішення)."""
-    status, page = _req(BASE + "/")
-    data = {
-        "SearchExpression": query,
-        "UserCourtCode": "", "ChairmenName": "", "RegNumber": "",
-        "RegDateBegin": date_from, "RegDateEnd": date_to,
-        "ImportDateBegin": "", "ImportDateEnd": "",
-        "CSType": CS_TYPES.get(cs_type, cs_type), "VRType": VR_TYPES.get(vr_type, vr_type),
-        "CourtRegion": "", "INSType": "", "CaseNumber": "",
-        "Sort": "1", "PagingInfo.ItemsPerPage": str(per_page), "Liga": "true",
-    }
-    # значення полів за замовчуванням зі сторінки (Liga, Sort, ProviderItem тощо)
-    for tag in re.findall(r"(?is)<input[^>]*>", page):
-        n = re.search(r'name="([^"]+)"', tag)
-        v = re.search(r'value="([^"]*)"', tag)
-        if n and n.group(1) not in ("SearchExpression",) and not n.group(1).startswith("a"):
-            if re.search(r'type="(checkbox|radio)"', tag) and "checked" not in tag:
-                continue
-            data.setdefault(n.group(1), _html.unescape(v.group(1)) if v else "")
-    for sel in re.findall(r'(?is)<select[^>]*name="([^"]+)"[^>]*>(.*?)</select>', page):
-        opt = re.search(r'(?is)<option[^>]*selected[^>]*value="([^"]*)"', sel[1]) or \
-            re.search(r'(?is)<option[^>]*value="([^"]*)"[^>]*selected', sel[1])
-        if opt and not data.get(sel[0]):
-            data[sel[0]] = opt.group(1)
+def search(query, cs_type="", vr_type="", date_from="", date_to="", per_page=25, sort="0"):
+    """Пошук за текстом рішення. Дати — ДД.ММ.РРРР (дата ухвалення рішення).
+    Мінімальний набір полів, перевірений пробою: без PagingInfo.ItemsPerPage і
+    Sort реєстр результатів не віддає."""
+    _req(BASE + "/")   # cookie сесії
+    data = {"SearchExpression": query, "Sort": sort, "PagingInfo.ItemsPerPage": str(per_page)}
+    if cs_type:
+        data["CSType"] = CS_TYPES.get(cs_type, cs_type)
+    if vr_type:
+        data["VRType"] = VR_TYPES.get(vr_type, vr_type)
+    if date_from:
+        data["RegDateBegin"] = date_from
+    if date_to:
+        data["RegDateEnd"] = date_to
     status, res = _req(BASE + "/", data, referer=BASE + "/")
-    rows = parse_results(res)
-    if not rows:   # результати можуть віддаватися окремою сторінкою (фільтр у сесії)
-        status, res = _req(BASE + "/Page/1", referer=BASE + "/")
-        rows = parse_results(res)
-    return rows, status, res
+    return parse_results(res), status, res
+
+
+def total_found(page):
+    m = re.search(r"TotalNumber = (\d+)", page)
+    return int(m.group(1)) if m else None
 
 
 def parse_results(page):
@@ -150,6 +140,10 @@ def probe(query):
             for m in list(re.finditer(pat, res))[:2]:
                 print(f"  [{pat}] …", re.sub(r"\s+", " ", _strip(res[max(0, m.start() - 200):m.end() + 200]))[:300])
         return
+    print("Всього знайдено:", total_found(res))
+    for r in rows[:3]:
+        print("  рядок:", {"kind": r["kind"], "reg_date": r["reg_date"], "form": r["form"],
+                            "court": r["court"][:40], "case_len": len(r["case"])})
     r0 = rows[0]
     print("Перший результат — колонки:", {k: (len(v) if k not in ("id", "kind", "form", "reg_date") else v)
                                           for k, v in r0.items() if k != "url"})
