@@ -39,3 +39,13 @@ jobs:
           VS_MAX: "3"
           VS_DRY: ${{ github.event.inputs.dry == 'true' && '1' || '' }}
         run: python3 tools/vs_practice_query.py
+        continue-on-error: true
+      # Повний реєстр судових рішень: ВС (касація) і апеляція — до 3 рішень за темою.
+      - name: Практика з ЄДРСР
+        if: ${{ github.event.inputs.dry != 'true' }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_REVIEW_CHAT: ${{ secrets.TELEGRAM_REVIEW_CHAT }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          VS_QUERY: ${{ github.event.inputs.query }}
+        run: python3 tools/edrsr_practice.py
