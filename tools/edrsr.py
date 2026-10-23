@@ -118,6 +118,17 @@ def probe(query):
     for m in list(re.finditer(r"(?i)captcha", page))[:6]:
         print("  …", re.sub(r"\s+", " ", page[max(0, m.start() - 160):m.end() + 160]))
     print("Скрипти:", re.findall(r'<script[^>]+src="([^"]+)"', page)[:12])
+    i = page.find("modalcaptcha').show()")
+    if i > 0:
+        print("JS навколо капчі:", re.sub(r"\s+", " ", page[max(0, i - 2500):i + 2500]))
+    for m in re.finditer(r'(?is)<div[^>]*id="modalcaptcha"[^>]*>.*?</div>\s*</div>', page):
+        print("HTML капчі:", re.sub(r"\s+", " ", m.group(0))[:1500])
+    try:
+        _, js = _req(BASE + "/Scripts/Common.js?1")
+        for m in re.finditer(r"(?i)captcha|aSearch|\.submit|ajax|Image", js):
+            print("Common.js …", re.sub(r"\s+", " ", js[max(0, m.start() - 200):m.end() + 300]))
+    except Exception as e:
+        print("Common.js:", type(e).__name__)
     print("Поля форми:", ", ".join(form_fields(page))[:1500])
     forms = re.findall(r'(?is)<form[^>]*>', page)
     print("Форми:", [re.sub(r"\s+", " ", f)[:160] for f in forms][:5])
