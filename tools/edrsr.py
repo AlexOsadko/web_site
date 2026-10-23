@@ -115,6 +115,9 @@ def probe(query):
         return
     print(f"GET /: {status}, {len(page)} символів, {time.time() - t:.1f} с")
     print("captcha на сторінці:", bool(re.search(r"(?i)captcha|recaptcha|turnstile", page)))
+    for m in list(re.finditer(r"(?i)captcha", page))[:6]:
+        print("  …", re.sub(r"\s+", " ", page[max(0, m.start() - 160):m.end() + 160]))
+    print("Скрипти:", re.findall(r'<script[^>]+src="([^"]+)"', page)[:12])
     print("Поля форми:", ", ".join(form_fields(page))[:1500])
     forms = re.findall(r'(?is)<form[^>]*>', page)
     print("Форми:", [re.sub(r"\s+", " ", f)[:160] for f in forms][:5])
@@ -125,7 +128,10 @@ def probe(query):
         return
     print(f"POST пошук: {status}, {len(res)} символів, результатів розібрано: {len(rows)}")
     if not rows:
-        print("Фрагмент відповіді:", re.sub(r"\s+", " ", _strip(res))[:600])
+        for pat in (r"(?i)captcha", r"(?i)validation", r"(?i)помилк|невірн|введіть|код"):
+            for m in list(re.finditer(pat, res))[:3]:
+                print(f"  [{pat[4:12]}] …", re.sub(r"\s+", " ", res[max(0, m.start() - 150):m.end() + 150]))
+        print("Таблиця результатів у відповіді:", "tableSearchResult" in res or "/Review/" in res)
         return
     r0 = rows[0]
     print("Перший результат — колонки:", {k: (len(v) if k not in ("id", "kind", "form", "reg_date") else v)
