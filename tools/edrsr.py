@@ -74,11 +74,25 @@ def search(query, cs_type="", vr_type="", date_from="", date_to="", per_page=25)
         "CourtRegion": "", "INSType": "", "CaseNumber": "",
         "Sort": "1", "PagingInfo.ItemsPerPage": str(per_page), "Liga": "true",
     }
-    # приховані поля сторінки (токени тощо) — підставляємо, якщо є
-    for name, val in re.findall(r'<input[^>]+type="hidden"[^>]+name="([^"]+)"[^>]*value="([^"]*)"', page):
-        data.setdefault(name, _html.unescape(val))
+    # значення полів за замовчуванням зі сторінки (Liga, Sort, ProviderItem тощо)
+    for tag in re.findall(r"(?is)<input[^>]*>", page):
+        n = re.search(r'name="([^"]+)"', tag)
+        v = re.search(r'value="([^"]*)"', tag)
+        if n and n.group(1) not in ("SearchExpression",) and not n.group(1).startswith("a"):
+            if re.search(r'type="(checkbox|radio)"', tag) and "checked" not in tag:
+                continue
+            data.setdefault(n.group(1), _html.unescape(v.group(1)) if v else "")
+    for sel in re.findall(r'(?is)<select[^>]*name="([^"]+)"[^>]*>(.*?)</select>', page):
+        opt = re.search(r'(?is)<option[^>]*selected[^>]*value="([^"]*)"', sel[1]) or \
+            re.search(r'(?is)<option[^>]*value="([^"]*)"[^>]*selected', sel[1])
+        if opt and not data.get(sel[0]):
+            data[sel[0]] = opt.group(1)
     status, res = _req(BASE + "/", data, referer=BASE + "/")
-    return parse_results(res), status, res
+    rows = parse_results(res)
+    if not rows:   # результати можуть віддаватися окремою сторінкою (фільтр у сесії)
+        status, res = _req(BASE + "/Page/1", referer=BASE + "/")
+        rows = parse_results(res)
+    return rows, status, res
 
 
 def parse_results(page):
@@ -118,17 +132,6 @@ def probe(query):
     for m in list(re.finditer(r"(?i)captcha", page))[:6]:
         print("  …", re.sub(r"\s+", " ", page[max(0, m.start() - 160):m.end() + 160]))
     print("Скрипти:", re.findall(r'<script[^>]+src="([^"]+)"', page)[:12])
-    i = page.find("modalcaptcha').show()")
-    if i > 0:
-        print("JS навколо капчі:", re.sub(r"\s+", " ", page[max(0, i - 2500):i + 2500]))
-    for m in re.finditer(r'(?is)<div[^>]*id="modalcaptcha"[^>]*>.*?</div>\s*</div>', page):
-        print("HTML капчі:", re.sub(r"\s+", " ", m.group(0))[:1500])
-    try:
-        _, js = _req(BASE + "/Scripts/Common.js?1")
-        for m in re.finditer(r"(?i)captcha|aSearch|\.submit|ajax|Image", js):
-            print("Common.js …", re.sub(r"\s+", " ", js[max(0, m.start() - 200):m.end() + 300]))
-    except Exception as e:
-        print("Common.js:", type(e).__name__)
     print("Поля форми:", ", ".join(form_fields(page))[:1500])
     forms = re.findall(r'(?is)<form[^>]*>', page)
     print("Форми:", [re.sub(r"\s+", " ", f)[:160] for f in forms][:5])
@@ -143,6 +146,9 @@ def probe(query):
             for m in list(re.finditer(pat, res))[:3]:
                 print(f"  [{pat[4:12]}] …", re.sub(r"\s+", " ", res[max(0, m.start() - 150):m.end() + 150]))
         print("Таблиця результатів у відповіді:", "tableSearchResult" in res or "/Review/" in res)
+        for pat in (r"(?i)знайдено", r"(?i)документ", r"(?i)divresult|tableresult|SearchResult"):
+            for m in list(re.finditer(pat, res))[:2]:
+                print(f"  [{pat}] …", re.sub(r"\s+", " ", _strip(res[max(0, m.start() - 200):m.end() + 200]))[:300])
         return
     r0 = rows[0]
     print("Перший результат — колонки:", {k: (len(v) if k not in ("id", "kind", "form", "reg_date") else v)
