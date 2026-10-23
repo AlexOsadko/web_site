@@ -162,5 +162,40 @@ def probe(query):
         print(f"Текст рішення: помилка {type(e).__name__}")
 
 
+def probe_variants(query):
+    """Кілька варіантів POST — щоб знайти, який параметр заважає пошуку."""
+    _, page = _req(BASE + "/")
+    defaults = {}
+    for tag in re.findall(r"(?is)<input[^>]*>", page):
+        n = re.search(r'name="([^"]+)"', tag)
+        v = re.search(r'value="([^"]*)"', tag)
+        if n:
+            defaults[n.group(1)] = (v.group(1) if v else "") + (" [checked]" if "checked" in tag else "")
+    print("Значення input за замовчуванням:", {k: v[:40] for k, v in defaults.items()})
+    for sel in re.findall(r'(?is)<select[^>]*name="([^"]+)"', page):
+        print("select:", sel)
+    variants = {
+        "мінімум": {"SearchExpression": query},
+        "мінімум+Sort0": {"SearchExpression": query, "Sort": "0", "PagingInfo.ItemsPerPage": "25"},
+        "Liga=true": {"SearchExpression": query, "Liga": "true", "Sort": "0"},
+        "Liga=false": {"SearchExpression": query, "Liga": "false", "Sort": "0"},
+        "одне слово": {"SearchExpression": query.split()[0], "Sort": "0"},
+    }
+    for name, data in variants.items():
+        try:
+            _req(BASE + "/")
+            st, res = _req(BASE + "/", data, referer=BASE + "/")
+            tn = re.search(r"TotalNumber = (\d+)", res)
+            print(f"{name}: {st}, рядків {len(parse_results(res))}, TotalNumber={tn.group(1) if tn else '?'}, "
+                  f"'не знайдено'={'не знайдено' in res}")
+        except Exception as e:
+            print(f"{name}: помилка {type(e).__name__}")
+        time.sleep(2)
+
+
 if __name__ == "__main__":
-    probe(" ".join(sys.argv[1:]) or "огляд на стан сп'яніння 130 КУпАП")
+    q = " ".join(sys.argv[1:]) or "огляд на стан сп'яніння 130 КУпАП"
+    if os.environ.get("EDRSR_VARIANTS"):
+        probe_variants(q)
+    else:
+        probe(q)
