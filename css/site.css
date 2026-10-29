@@ -616,13 +616,7 @@ html[data-theme="dark"] { --hm-card-hi: #2d5190; }
   .hm-g:hover > a:first-child:not(:hover) { background: var(--hm-soft); box-shadow: none; }
   .hm-g:hover > a:first-child:not(:hover) h3 { color: var(--hm-head); }
 }
-/* Картка «Інші напрями» — на всю ширину сітки */
-.hm-gmore { grid-column: 1 / -1; background: var(--hm-soft); border-radius: var(--hm-r); padding: 26px 28px; }
-.hm-gmore h3 { font-weight: 700; font-size: 1.38rem; line-height: 1.2; margin: 0 0 8px; color: var(--hm-head); }
-.hm-gmore p { margin: 0 0 16px; color: var(--hm-muted); font-size: .96rem; }
-.hm-gm-links { display: flex; flex-wrap: wrap; gap: 10px; }
-.hm-gm-links a { display: inline-flex; align-items: center; padding: 10px 18px; border-radius: 30px; border: 1px solid var(--hm-link);
-  color: var(--hm-link); font-weight: 600; font-size: .95rem; text-decoration: none; transition: background-color .2s, color .2s; }
-.hm-gm-links a:hover { background: var(--hm-link); color: var(--hm-card-hi); }
-.hm-gm-links a.hm-gm-all { border-color: transparent; }
-@media (max-width: 860px) { .hm-gmore { padding: 24px; } .hm-gm-links a { flex: 1 1 100%; justify-content: center; } }
+/* Картка «Інші напрями» — на всю ширину сітки, просто перехід на всі послуги */
+.hm-g > a.hm-gmore { grid-column: 1 / -1; padding-bottom: 28px; padding-right: 90px; }
+.hm-g > a.hm-gmore i { top: 50%; bottom: auto; transform: translateY(-50%); }
+@media (max-width: 860px) { .hm-g > a.hm-gmore { padding: 24px 80px 24px 24px; } }
