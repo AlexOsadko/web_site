@@ -534,3 +534,39 @@ body.hm .hm-ft { padding-bottom: 100px; }
 .hc-confirm .hc-yes { background: var(--hm-blue, #1f56c3); color: #fff; }
 .hc-confirm .hc-yes.hc-danger { background: #c62f2f; }
 .hc-confirm button:disabled { opacity: .6; }
+
+/* ===== Мобільна версія: перший екран і нижня панель звʼязку ===== */
+/* Перший екран на телефоні: фото нижче, щоб заголовок, текст і кнопка
+   «Отримати консультацію» вміщалися без прокрутки. */
+@media (max-width: 860px) {
+  .hm-ph { height: 300px; }
+  .hm-ph img { object-position: 50% 12%; }
+  .hm-hero h1 { font-size: 2.45rem; margin-bottom: 14px; }
+  .hm-lead { font-size: 1rem; line-height: 1.5; margin-bottom: 20px; }
+}
+@media (max-width: 380px) {
+  .hm-ph { height: 250px; }
+  .hm-hero h1 { font-size: 2.2rem; }
+}
+/* Нижня панель «Подзвонити / Написати» — на всіх сторінках, лише на телефоні
+   (додає assets/site.js). Кнопку чату в куті на телефоні замінює ця панель. */
+.mbar { display: none; }
+@media (max-width: 860px) {
+  .mbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 980; display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px)); background: var(--hm-card, #fff);
+    box-shadow: 0 -6px 24px rgba(8, 20, 40, .14); transform: translateY(110%); transition: transform .25s ease; }
+  .mbar.show { transform: none; }
+  .mbar a, .mbar button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border: 0;
+    border-radius: 14px; font: 600 1rem/1 inherit; font-family: inherit; text-decoration: none; cursor: pointer; }
+  .mbar svg { width: 20px; height: 20px; fill: currentColor; }
+  .mbar .mb-call { background: var(--hm-blue, #1e50e6); color: #fff; }
+  .mbar .mb-chat { background: var(--hm-soft, #eef2fb); color: var(--hm-ink, #111a28); }
+  body.has-mbar { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+  body.has-mbar .hc-fab, body.has-mbar .fab { display: none !important; }
+  body.has-mbar .cookie-banner { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  body.has-mbar .hc-toast { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); right: 12px; }
+  /* Банер cookie на телефоні — компактніший, щоб не закривав перший екран */
+  .cookie-banner { padding: 12px 14px; border-radius: 14px; }
+  .cookie-banner p { font-size: .8rem; line-height: 1.4; margin-bottom: 10px; }
+  .cookie-actions .btn { flex: 1; min-height: 40px; padding: 8px 12px; }
+}
