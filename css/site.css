@@ -599,3 +599,9 @@ body.hm .hm-ft { padding-bottom: 100px; }
   .pr-row { flex-direction: column; align-items: flex-start; gap: 6px; }
   .pr-val { font-size: 1.1rem; }
 }
+
+/* Послуги на головній: 4 основні напрями (2×2) + рядок «Також допомагаю» */
+.hm-g2 { grid-template-columns: repeat(2, 1fr); }
+.hm-also { margin: 22px 0 0; color: var(--hm-muted); font-size: 1rem; line-height: 1.6; }
+.hm-also a { color: var(--hm-link); text-decoration: none; border-bottom: 1px solid currentColor; }
+@media (max-width: 860px) { .hm-g2 { grid-template-columns: 1fr; } .hm-also { font-size: .95rem; } }
