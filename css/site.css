@@ -605,3 +605,12 @@ body.hm .hm-ft { padding-bottom: 100px; }
 .hm-also { margin: 22px 0 0; color: var(--hm-muted); font-size: 1rem; line-height: 1.6; }
 .hm-also a { color: var(--hm-link); text-decoration: none; border-bottom: 1px solid currentColor; }
 @media (max-width: 860px) { .hm-g2 { grid-template-columns: 1fr; } .hm-also { font-size: .95rem; } }
+/* Картка послуги під курсором виділяється так само, як основна (перша) */
+.hm-g a { transition: transform .2s, box-shadow .2s, background-color .2s; }
+.hm-g a h3 { transition: color .2s; }
+@media (hover: hover) {
+  .hm-g a:hover { background: var(--hm-blue-soft); }
+  .hm-g a:hover h3 { color: var(--hm-link); }
+  .hm-g a:hover i { background: var(--hm-link); color: #fff; }
+}
+.hm-g i { transition: background-color .2s, color .2s; }
