@@ -600,17 +600,29 @@ body.hm .hm-ft { padding-bottom: 100px; }
   .pr-val { font-size: 1.1rem; }
 }
 
-/* Послуги на головній: 4 основні напрями (2×2) + рядок «Також допомагаю» */
+/* Послуги на головній: 4 основні напрями (2×2) + картка «Інші напрями» */
 .hm-g2 { grid-template-columns: repeat(2, 1fr); }
-.hm-also { margin: 22px 0 0; color: var(--hm-muted); font-size: 1rem; line-height: 1.6; }
-.hm-also a { color: var(--hm-link); text-decoration: none; border-bottom: 1px solid currentColor; }
-@media (max-width: 860px) { .hm-g2 { grid-template-columns: 1fr; } .hm-also { font-size: .95rem; } }
-/* Картка послуги під курсором виділяється так само, як основна (перша) */
-.hm-g a { transition: transform .2s, box-shadow .2s, background-color .2s; }
-.hm-g a h3 { transition: color .2s; }
+@media (max-width: 860px) { .hm-g2 { grid-template-columns: 1fr; } }
+/* Виділена картка послуги: за замовчуванням — перша (ст. 130); під курсором
+   виділення переходить на картку, на яку наведено. */
+:root { --hm-card-hi: #dfe7f6; }
+html[data-theme="dark"] { --hm-card-hi: #2d5190; }
+.hm-g > a { transition: transform .2s, box-shadow .2s, background-color .2s; }
+.hm-g > a h3, .hm-g i { transition: color .2s, background-color .2s; }
+.hm-g > a:first-child, .hm-g > a:hover { background: var(--hm-card-hi); box-shadow: inset 0 0 0 1.5px var(--hm-link); }
+.hm-g > a:first-child h3, .hm-g > a:hover h3 { color: var(--hm-link); }
+.hm-g > a:hover i { background: var(--hm-link); color: var(--hm-card-hi); }
 @media (hover: hover) {
-  .hm-g a:hover { background: var(--hm-blue-soft); }
-  .hm-g a:hover h3 { color: var(--hm-link); }
-  .hm-g a:hover i { background: var(--hm-link); color: #fff; }
+  .hm-g:hover > a:first-child:not(:hover) { background: var(--hm-soft); box-shadow: none; }
+  .hm-g:hover > a:first-child:not(:hover) h3 { color: var(--hm-head); }
 }
-.hm-g i { transition: background-color .2s, color .2s; }
+/* Картка «Інші напрями» — на всю ширину сітки */
+.hm-gmore { grid-column: 1 / -1; background: var(--hm-soft); border-radius: var(--hm-r); padding: 26px 28px; }
+.hm-gmore h3 { font-weight: 700; font-size: 1.38rem; line-height: 1.2; margin: 0 0 8px; color: var(--hm-head); }
+.hm-gmore p { margin: 0 0 16px; color: var(--hm-muted); font-size: .96rem; }
+.hm-gm-links { display: flex; flex-wrap: wrap; gap: 10px; }
+.hm-gm-links a { display: inline-flex; align-items: center; padding: 10px 18px; border-radius: 30px; border: 1px solid var(--hm-link);
+  color: var(--hm-link); font-weight: 600; font-size: .95rem; text-decoration: none; transition: background-color .2s, color .2s; }
+.hm-gm-links a:hover { background: var(--hm-link); color: var(--hm-card-hi); }
+.hm-gm-links a.hm-gm-all { border-color: transparent; }
+@media (max-width: 860px) { .hm-gmore { padding: 24px; } .hm-gm-links a { flex: 1 1 100%; justify-content: center; } }
