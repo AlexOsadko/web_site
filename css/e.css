@@ -1,0 +1,395 @@
+/* ===== Дизайн «E» (з листопада 2026) =====
+   Синій чорнильний + білий; заголовки — вузький гротеск великими літерами (Oswald),
+   текст — PT Sans, текст статей — PT Serif. Прямі кути, товсті сині лінії-роздільники.
+   Підключається на всіх сторінках ОСТАННІМ — після css/style.css і css/site.css —
+   і перевизначає їхні змінні й компоненти. Нові блоки головної — з префіксом e-. */
+
+:root {
+  --e-ink: #1b2a6b;          /* фірмовий синій: заголовки, кнопки, лінії */
+  --e-ink-h: #13205a;
+  --e-bg: #ffffff;
+  --e-grey: #f3f4f7;         /* тло вторинних блоків */
+  --e-text: #222736;
+  --e-muted: #606779;
+  --e-line: #e1e3ea;
+  --e-on-ink: #c9d0ea;       /* другорядний текст на синьому */
+  --e-head-font: 'Oswald', 'Arial Narrow', sans-serif;
+  --e-body-font: 'PT Sans', system-ui, sans-serif;
+  --e-read-font: 'PT Serif', Georgia, serif;
+
+  /* змінні css/style.css */
+  --bg: var(--e-bg); --card: #fff; --ink: var(--e-ink); --muted: var(--e-muted); --faint: #8a90a0;
+  --blue: var(--e-ink); --blue2: #3a4d94; --line: var(--e-line); --tint: #dde2f2; --text: var(--e-text);
+  --field: #fff; --header-bg: rgba(255, 255, 255, .96); --hover: var(--e-grey); --hover-soft: rgba(27, 42, 107, .06);
+  --radius: 0px; --shadow: none; --shadow-lg: 0 18px 40px rgba(27, 42, 107, .12);
+}
+:root[data-theme="dark"] {
+  --e-ink: #aebdff;          /* на темному тлі «чорнильний» стає світло-синім */
+  --e-ink-h: #c8d2ff;
+  --e-bg: #0f1530;
+  --e-grey: #182045;
+  --e-text: #dde2f0;
+  --e-muted: #a2abc6;
+  --e-line: rgba(255, 255, 255, .12);
+  --e-on-ink: #a2abc6;
+  --bg: var(--e-bg); --card: #161e40; --ink: var(--e-ink); --blue: var(--e-ink); --blue2: #c8d2ff;
+  --tint: rgba(174, 189, 255, .18); --text: var(--e-text); --field: #1b2450; --header-bg: rgba(15, 21, 48, .96);
+  --hover: var(--e-grey);
+}
+
+/* змінні css/site.css (стиль «hm») */
+body.hm {
+  --hm-hero: var(--e-ink); --hm-bg: var(--e-bg); --hm-soft: var(--e-grey); --hm-card: var(--e-bg);
+  --hm-ink: var(--e-text); --hm-head: var(--e-ink); --hm-muted: var(--e-muted); --hm-line: var(--e-line);
+  --hm-blue: #1b2a6b; --hm-blue-h: #13205a; --hm-link: var(--e-ink); --hm-blue-soft: var(--e-grey);
+  --hm-accent: #aebdff; --hm-r: 0px; --hm-disp: var(--e-head-font); --hm-card-hi: var(--e-grey);
+  background: var(--e-bg); color: var(--e-text);
+  font-family: var(--e-body-font); font-size: 18px; line-height: 1.65;
+}
+:root[data-theme="dark"] body.hm {
+  --hm-hero: #161e40; --hm-bg: var(--e-bg); --hm-soft: var(--e-grey); --hm-card: #161e40;
+  --hm-ink: var(--e-text); --hm-head: var(--e-ink); --hm-muted: var(--e-muted); --hm-line: var(--e-line);
+  --hm-blue: #3a4d94; --hm-blue-h: #4b5fa8; --hm-link: var(--e-ink); --hm-blue-soft: var(--e-grey); --hm-card-hi: var(--e-grey);
+}
+body.hm, body.hm p, body.hm li, body.hm input, body.hm textarea, body.hm button, body.hm select { font-family: var(--e-body-font); }
+
+/* Заголовки — Oswald великими літерами, рівні рядки */
+body.hm h1, body.hm h2, body.hm .e-disp, body.hm .hm-h2, body.hm .section-title {
+  font-family: var(--e-head-font); text-transform: uppercase; font-weight: 600;
+  letter-spacing: -.005em; line-height: 1; color: var(--e-ink); text-wrap: balance; hyphens: none;
+}
+body.hm h3 { font-family: var(--e-head-font); font-weight: 500; letter-spacing: 0; color: var(--e-ink); text-wrap: balance; }
+body.hm h2 span, body.hm .hm-h2 span { color: inherit; font-style: normal; display: inline; }
+body.hm p, body.hm li { text-wrap: pretty; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.hm-kick, .section-kicker { display: none !important; }   /* надписи над заголовками в дизайні E не використовуємо */
+:focus-visible { outline: 3px solid #7f95ff; outline-offset: 3px; }
+
+/* Кнопки: прямокутні, синій чорнильний, великі літери */
+body.hm .btn, body.hm .hm-pill, body.hm .e-btn, body.hm .lp-btn, body.hm button[type="submit"] {
+  border-radius: 0; font-family: var(--e-head-font); font-weight: 500; text-transform: uppercase; letter-spacing: .05em;
+  box-shadow: none; transform: none;
+}
+body.hm .btn-primary, body.hm .hm-blue, body.hm .e-btn, body.hm button[type="submit"] { background: #1b2a6b; color: #fff; border: 0; }
+body.hm .btn-primary:hover, body.hm .hm-blue:hover, body.hm .e-btn:hover, body.hm button[type="submit"]:hover { background: #13205a; color: #fff; box-shadow: none; transform: none; }
+:root[data-theme="dark"] body.hm .btn-primary, :root[data-theme="dark"] body.hm .hm-blue,
+:root[data-theme="dark"] body.hm .e-btn, :root[data-theme="dark"] body.hm button[type="submit"] { background: #3a4d94; }
+body.hm .btn-ghost, body.hm .hm-soft { background: transparent; border: 1.5px solid var(--e-ink); color: var(--e-ink); }
+body.hm .btn-ghost:hover, body.hm .hm-soft:hover { background: var(--e-ink); color: var(--e-bg); filter: none; }
+.e-btn { display: inline-flex; align-items: center; justify-content: center; padding: 18px 30px; font-size: 16px; line-height: 1; white-space: nowrap; }
+.e-tel { font: 500 26px/1 var(--e-head-font); color: var(--e-ink); white-space: nowrap; }
+body.hm input, body.hm textarea { border-radius: 0 !important; }
+
+/* ---------- Шапка ---------- */
+body.hm .hm-head, body.hm .hm-head.solid, body.hm .hm-head.scrolled {
+  background: var(--e-bg); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+  border-bottom: 5px solid var(--e-ink);
+}
+body.hm .hm-head .hm-c, body.hm .hm-head.solid .hm-c { height: 78px; }
+body.hm .hm-brand, body.hm .hm-head.solid .hm-brand { color: var(--e-ink); font: 500 21px/1 var(--e-head-font); text-transform: uppercase; letter-spacing: .01em; white-space: nowrap; }
+body.hm .hm-brand small, body.hm .hm-head.solid .hm-brand small { display: block; margin-top: 4px; font: 400 13px/1.3 var(--e-body-font); text-transform: none; letter-spacing: 0; color: var(--e-muted); }
+body.hm .hm-brand img, body.hm .hm-head.solid .hm-brand img { width: 40px; height: 40px; filter: none; }
+:root[data-theme="dark"] body.hm .hm-brand img { filter: brightness(0) invert(1); }
+body.hm .hm-head .site-nav a, body.hm .hm-head.solid .site-nav a { color: var(--e-muted); font: 400 16px/1 var(--e-body-font); background: none; border-radius: 0; white-space: nowrap; }
+body.hm .hm-head .site-nav a:hover, body.hm .hm-head.solid .site-nav a:hover { color: var(--e-ink); background: none; }
+body.hm .hm-tel, body.hm .hm-head.solid .hm-tel { display: inline-flex; background: none; color: var(--e-ink); border: 0; border-radius: 0; font: 500 22px/1 var(--e-head-font); padding: 8px 4px; box-shadow: none; }
+body.hm .hm-tel i { display: none; }
+body.hm .hm-tel-m { border-radius: 0; background: #1b2a6b; color: #fff; }
+body.hm .hm-head .theme-toggle, body.hm .hm-head.solid .theme-toggle { border-radius: 0; border: 1.5px solid var(--e-line); color: var(--e-ink); background: transparent; }
+body.hm .hm-head .nav-toggle span, body.hm .hm-head.solid .nav-toggle span { background: var(--e-ink); }
+body.hm .hm-menu { border-radius: 0; box-shadow: 0 18px 40px rgba(27, 42, 107, .18); }
+body.hm .hm-opt, body.hm .hm-opt i { border-radius: 0; }
+.scroll-progress { background: var(--e-ink) !important; }
+
+/* Головна на широкому екрані: поки видно перший екран, шапка — лише над правою колонкою */
+@media (min-width: 861px) {
+  body.home .hm-head:not(.solid) { left: 44%; border-bottom-color: transparent; background: transparent; }
+  body.home .hm-head:not(.solid) .hm-c { padding: 0 48px 0 64px; max-width: none; }
+}
+
+/* ---------- Головна: перший екран ---------- */
+.e-hero { display: grid; grid-template-columns: 44% 56%; min-height: 100vh; padding: 0; background: var(--e-bg); color: var(--e-text); }
+.e-photo { position: relative; background: #1b2a6b; overflow: hidden; }
+.e-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; filter: grayscale(.35) contrast(1.03); display: block; }
+.e-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(27, 42, 107, 0) 55%, rgba(27, 42, 107, .55) 100%); pointer-events: none; }
+.e-htxt { display: flex; flex-direction: column; justify-content: center; padding: 120px 64px 56px; }
+.e-hero h1 { font-size: clamp(60px, 7.6vw, 116px); line-height: .94; margin: 0 0 28px; }
+.e-hero h1 > span:not(.sr-only) { display: block; }
+.e-lead { max-width: 30em; color: var(--e-muted); margin: 0 0 34px; }
+.e-act { display: flex; flex-wrap: wrap; gap: 18px 24px; align-items: center; }
+.e-facts { list-style: none; margin: 40px 0 0; padding: 24px 0 0; border-top: 1px solid var(--e-line); display: flex; flex-wrap: wrap; gap: 10px 28px; font-size: 15px; color: var(--e-muted); }
+.e-facts b { color: var(--e-text); }
+
+/* ---------- Що сталося ---------- */
+.e-tri { border-top: 6px solid var(--e-ink); padding: 88px 0 96px; }
+.e-tri h2 { font-size: clamp(56px, 8vw, 120px); line-height: .92; margin: 0 0 16px; }
+.e-sub { color: var(--e-muted); font-size: 20px; margin: 0 0 40px; max-width: 40em; }
+.e-sit a { display: grid; grid-template-columns: 1fr auto 64px; gap: 28px; align-items: center; padding: 26px 0; border-top: 1px solid var(--e-line); color: inherit; text-decoration: none; transition: background-color .2s, padding .2s; }
+.e-sit a:last-child { border-bottom: 1px solid var(--e-line); }
+.e-sit b { display: block; font: 500 clamp(24px, 2.6vw, 34px)/1.1 var(--e-head-font); text-transform: uppercase; color: var(--e-ink); text-wrap: balance; }
+.e-sit small { display: block; color: var(--e-muted); font-size: 16px; margin-top: 8px; }
+.e-sit em { font-style: normal; font-weight: 700; white-space: nowrap; color: var(--e-text); }
+.e-sit i { width: 64px; height: 64px; display: grid; place-items: center; font-style: normal; font-size: 22px; border: 2px solid var(--e-ink); color: var(--e-ink); transition: background-color .2s, color .2s; }
+.e-sit a:hover { background: var(--e-grey); padding-left: 20px; padding-right: 20px; }
+.e-sit a:hover i { background: var(--e-ink); color: var(--e-bg); }
+.e-sit a.e-oth b { color: var(--e-muted); }
+
+/* ---------- Про мене ---------- */
+.e-about { padding: 96px 0; }
+.e-about .hm-c { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; }
+.e-about h2, .e-steps h2 { font-size: clamp(40px, 5vw, 72px); line-height: .98; margin: 0 0 32px; }
+.e-about p { margin: 0 0 18px; color: var(--e-muted); }
+.e-princ { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--e-line); align-self: start; }
+.e-princ li { padding: 20px 0; border-bottom: 1px solid var(--e-line); color: var(--e-muted); }
+.e-princ b { display: block; font: 500 22px/1.2 var(--e-head-font); text-transform: uppercase; color: var(--e-ink); margin-bottom: 4px; }
+.e-princ a { color: var(--e-ink); font-weight: 700; }
+
+/* ---------- Як іде справа ---------- */
+.e-steps { background: var(--e-grey); padding: 96px 0; }
+.e-steps ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); counter-reset: s; }
+.e-steps li { counter-increment: s; padding: 0 28px 0 0; color: var(--e-muted); font-size: 16px; }
+.e-steps li::before { content: counter(s); display: block; font: 600 64px/1 var(--e-head-font); color: var(--e-ink); margin-bottom: 14px; }
+.e-steps li b { display: block; font: 500 22px/1.2 var(--e-head-font); text-transform: uppercase; color: var(--e-ink); margin-bottom: 6px; }
+
+/* ---------- Статті на головній ---------- */
+body.hm .hm-arts { background: var(--e-bg); padding: 96px 0; }
+body.hm .hm-arts .hm-h2 { font-size: clamp(40px, 5vw, 72px); line-height: .98; margin-bottom: 32px; }
+body.hm .hm-ag { gap: 0 28px; border-top: 6px solid var(--e-ink); margin-top: 0; }
+body.hm .hm-ag a { background: none; border-radius: 0; padding: 26px 0 30px; border-bottom: 1px solid var(--e-line); box-shadow: none; min-height: 0; transform: none; }
+body.hm .hm-ag a:hover { background: none; box-shadow: none; transform: none; }
+body.hm .hm-ag a:hover h3 { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+body.hm .hm-ag h3 { font: 500 24px/1.15 var(--e-head-font); text-transform: uppercase; margin: 10px 0; }
+body.hm .hm-ag p { color: var(--e-muted); font-size: 16px; }
+body.hm .hm-tag { background: none; padding: 0; border-radius: 0; color: var(--e-muted); font-size: 14px; font-weight: 400; letter-spacing: 0; text-transform: none; }
+body.hm .hm-all { margin-top: 28px; }
+
+/* ---------- Памʼятки ---------- */
+body.hm .hm-memo { background: var(--e-grey); padding: 96px 0; }
+body.hm .hm-memo .hm-h2 { font-size: clamp(40px, 5vw, 64px); line-height: .98; }
+body.hm .hm-memo .hm-sub { color: var(--e-muted); }
+body.hm .hm-mbox { background: none; border-radius: 0; padding: 0; box-shadow: none; }
+body.home .magnet-card { background: var(--e-bg); border: 0; border-left: 4px solid var(--e-ink); border-radius: 0; box-shadow: none; }
+body.home .magnet-card h3 { font: 500 19px/1.2 var(--e-head-font); text-transform: uppercase; color: var(--e-ink); }
+body.hm .mc-dl { color: var(--e-ink); font-weight: 700; }
+body.hm .hm-form { background: var(--e-bg); border-radius: 0; box-shadow: none; border-top: 6px solid var(--e-ink); }
+body.hm .hm-form h3 { font: 500 24px/1.15 var(--e-head-font); text-transform: uppercase; color: var(--e-ink); }
+body.hm .hm-form input, body.hm .hm-form textarea { border: 1.5px solid var(--e-line); background: var(--field); }
+body.hm .hm-form input:focus, body.hm .hm-form textarea:focus { border-color: var(--e-ink); box-shadow: none; }
+
+/* ---------- Контакти на головній: синій блок ---------- */
+body.hm .hm-contact { background: #1b2a6b; color: #fff; padding: 96px 0; }
+:root[data-theme="dark"] body.hm .hm-contact { background: #161e40; }
+body.hm .hm-contact .hm-h2 { color: #fff; font-size: clamp(40px, 5vw, 72px); line-height: .98; }
+body.hm .hm-contact .hm-lead2, body.hm .hm-contact .hm-chk li { color: var(--e-on-ink); }
+body.hm .hm-chk li::before { border-color: #fff; background: none; }
+body.hm .hm-bigtel, body.hm .hm-bigtel b { color: #fff; font-family: var(--e-head-font); }
+body.hm .hm-bigtel i { border-radius: 0; background: rgba(255, 255, 255, .12); }
+body.hm .hm-msgs .hm-pill { background: transparent; border: 1px solid rgba(255, 255, 255, .35); color: #fff; }
+body.hm .hm-msgs .hm-pill:hover { background: #fff; color: #1b2a6b; }
+body.hm .hm-contact .hm-form { color: var(--e-text); border-top: 0; }
+:root[data-theme="dark"] body.hm .hm-contact .hm-form { background: var(--e-bg); }
+
+/* ---------- Підвал ---------- */
+body.hm .hm-ft { background: #1b2a6b; color: var(--e-on-ink); }
+:root[data-theme="dark"] body.hm .hm-ft { background: #0b1026; }
+body.hm .hm-ft .hm-brand { color: #fff; }
+body.hm .hm-ft .hm-brand small { color: var(--e-on-ink); }
+body.hm .hm-ft .hm-brand img { filter: brightness(0) invert(1); }
+body.hm .hm-ft h4 { font: 500 18px/1 var(--e-head-font); text-transform: uppercase; letter-spacing: .04em; color: #fff; }
+body.hm .hm-ft a { color: var(--e-on-ink); }
+body.hm .hm-ft a:hover { color: #fff; }
+body.hm .hm-ftel { color: #fff !important; font: 500 26px/1 var(--e-head-font); white-space: nowrap; }
+
+/* ---------- Внутрішні сторінки ---------- */
+body.hm .container { max-width: 1200px; }
+body.hm .crumbs, body.hm .crumbs a { color: var(--e-muted); font-size: 14px; }
+body.hm .lp-hero, body.hm .catalog-hero { background: var(--e-bg); border-bottom: 6px solid var(--e-ink); padding-top: 64px; padding-bottom: 56px; }
+body.hm .catalog-hero::before { display: none; }
+body.hm .lp-hero h1, body.hm .catalog-hero h1 { font-size: clamp(44px, 5.8vw, 84px); line-height: .95; font-weight: 600; margin-bottom: 22px; }
+body.hm .lp-sub, body.hm .catalog-hero p { color: var(--e-muted); font-size: 19px; }
+body.hm .lp-section h2, body.hm .lp h2 { font-size: clamp(32px, 3.6vw, 48px); line-height: 1; }
+body.hm .lp-benefit, body.hm .lp-situations li, body.hm .pr-group, body.hm .pr-terms, body.hm .contacts-card,
+body.hm .mini-card, body.hm .related-card, body.hm .lead-cta-inner, body.hm .author-box, body.hm .faq details {
+  border-radius: 0 !important; box-shadow: none !important;
+}
+body.hm .lp-benefit { background: var(--e-grey); border-top: 4px solid var(--e-ink); }
+body.hm .lp-benefit h3, body.hm .pr-group h2, body.hm .pr-terms h2 { font: 500 22px/1.2 var(--e-head-font); text-transform: uppercase; color: var(--e-ink); }
+body.hm .pr-group, body.hm .pr-terms { background: var(--e-grey); border-top: 6px solid var(--e-ink); }
+body.hm .pr-val { font-family: var(--e-head-font); font-weight: 500; font-size: 22px; color: var(--e-ink); }
+body.hm .pr-val.pr-free { color: #16a34a; }
+body.hm .mini-card, body.hm .related-card { background: var(--e-bg); border: 0; border-top: 4px solid var(--e-ink); }
+body.hm .mini-card:hover, body.hm .related-card:hover { background: var(--e-grey); transform: none; }
+body.hm .mini-card h3, body.hm .related-card h3 { font: 500 21px/1.2 var(--e-head-font); text-transform: uppercase; color: var(--e-ink); }
+body.hm .cat { border-radius: 0; background: none !important; padding-left: 0; font-weight: 600; }
+body.hm .cat::before { border-radius: 0; }
+body.hm .cat-filter button, body.hm .sort-filter button, body.hm .catalog-search input { border-radius: 0 !important; }
+body.hm .cat-filter button.active { background: var(--e-ink); border-color: var(--e-ink); color: var(--e-bg); }
+body.hm .cat-group-head h2 { font-size: clamp(28px, 3vw, 40px); }
+
+/* Стаття: текст класичним шрифтом для читання */
+body.hm .article-page { max-width: 760px; }
+body.hm .article-page h1 { font-size: clamp(40px, 5.2vw, 68px); line-height: .98; margin-bottom: 24px; }
+body.hm .article-page h2 { font-size: clamp(26px, 2.6vw, 34px); line-height: 1.05; margin: 48px 0 14px; }
+body.hm .article-page h3 { font-size: 22px; text-transform: uppercase; }
+body.hm .article-page p, body.hm .article-page li { font-family: var(--e-read-font); font-size: 19px; line-height: 1.75; color: var(--e-text); }
+body.hm .article-page p a { color: var(--e-ink); border-bottom-color: var(--e-ink); }
+body.hm .article-page .meta-line, body.hm .article-page .date { font-family: var(--e-body-font); color: var(--e-muted); }
+body.hm .author-box { background: var(--e-grey); border-top: 4px solid var(--e-ink); }
+body.hm .author-box p, body.hm .author-box .author-bio { font-family: var(--e-body-font); font-size: 16px; }
+body.hm .author-photo { border-radius: 0 !important; }
+body.hm .lead-cta-inner { background: #1b2a6b; border-top: 0; }
+:root[data-theme="dark"] body.hm .lead-cta-inner { background: #161e40; }
+body.hm .lead-cta-inner h2 { color: #fff; font-size: 30px; }
+body.hm .lead-cta-sub { color: var(--e-on-ink); text-align: left; }
+body.hm .lead-cta .btn-primary, body.hm .lead-cta button[type="submit"] { background: #fff; color: #1b2a6b; }
+body.hm .lead-cta .btn-primary:hover, body.hm .lead-cta button[type="submit"]:hover { background: var(--e-grey); color: #1b2a6b; }
+body.hm .cbtn, body.hm .lp-btn { border-radius: 0 !important; }
+body.hm .faq details { background: none; border: 0; border-bottom: 1px solid var(--e-line); }
+body.hm .faq summary { font-family: var(--e-head-font); text-transform: uppercase; font-weight: 500; font-size: 20px; color: var(--e-ink); }
+
+/* Чат і нижня панель */
+body.hm .hc-fab { border-radius: 0; background: #1b2a6b; font-family: var(--e-head-font); text-transform: uppercase; letter-spacing: .05em; font-weight: 500; }
+body.hm .hc-fab i { border-radius: 0; }
+body.hm .hc-panel, body.hm .hc-toast { border-radius: 0; }
+@media (max-width: 860px) {
+  body.hm .mbar { padding: 0; gap: 0; background: none; box-shadow: 0 -4px 18px rgba(27, 42, 107, .14); }
+  body.hm .mbar a, body.hm .mbar button { border-radius: 0; min-height: 56px; font: 500 16px/1 var(--e-head-font); text-transform: uppercase; letter-spacing: .05em; }
+  body.hm .mbar .mb-call { background: #1b2a6b; color: #fff; }
+  body.hm .mbar .mb-chat { background: var(--e-bg); color: var(--e-ink); border-top: 1px solid var(--e-line); }
+  body.has-mbar { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ---------- Телефон і планшет ---------- */
+@media (max-width: 860px) {
+  body.hm { font-size: 17px; }
+  body.hm .hm-c { padding: 0 18px; }
+  body.hm .hm-head .hm-c, body.hm .hm-head.solid .hm-c { height: 66px; }
+  body.hm .hm-brand { font-size: 18px; }
+  body.hm .hm-brand img { width: 36px; height: 36px; }
+  .e-hero { grid-template-columns: 1fr; min-height: 0; padding-top: 71px; }
+  .e-photo { height: 52vh; min-height: 300px; }
+  .e-htxt { padding: 28px 18px 40px; }
+  .e-hero h1 { font-size: 54px; margin-bottom: 22px; }
+  .e-lead { font-size: 17px; }
+  .e-tri { padding: 48px 0 56px; }
+  .e-tri h2 { font-size: 52px; }
+  .e-sub { font-size: 17px; }
+  .e-sit a { grid-template-columns: 1fr 48px; gap: 6px 16px; padding: 20px 0; }
+  .e-sit b { font-size: 23px; }
+  .e-sit small { font-size: 15px; }
+  .e-sit em { grid-column: 1; grid-row: 2; font-size: 15px; }
+  .e-sit i { width: 48px; height: 48px; grid-column: 2; grid-row: 1 / 3; }
+  .e-sit a:hover { padding-left: 0; padding-right: 0; }
+  .e-about, .e-steps, body.hm .hm-arts, body.hm .hm-memo, body.hm .hm-contact { padding: 56px 0; }
+  .e-about .hm-c { grid-template-columns: 1fr; gap: 28px; }
+  .e-about h2, .e-steps h2, body.hm .hm-arts .hm-h2, body.hm .hm-contact .hm-h2, body.hm .hm-memo .hm-h2 { font-size: 42px; }
+  .e-steps ol { grid-template-columns: 1fr 1fr; gap: 28px 16px; }
+  .e-steps li { padding-right: 0; }
+  .e-steps li::before { font-size: 48px; }
+  body.hm .hm-ftel { font-size: 24px; }
+  body.hm .lp-hero, body.hm .catalog-hero { padding-top: 32px; padding-bottom: 36px; }
+  body.hm .lp-hero h1, body.hm .catalog-hero h1 { font-size: 40px; }
+  body.hm .article-page h1 { font-size: 38px; }
+  body.hm .article-page p, body.hm .article-page li { font-size: 18px; }
+}
+@media (max-width: 380px) {
+  .e-hero h1 { font-size: 46px; }
+  .e-tri h2 { font-size: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .e-sit a, .e-sit i { transition: none; }
+}
+
+/* ---------- Доповнення: нейтралізація старих правил site.css ---------- */
+body.hm .e-hero h1 { color: var(--e-ink); letter-spacing: -.005em; font-weight: 600; }
+body.hm .e-hero h1 span { display: block; margin: 0; font-style: normal; font-weight: inherit; font-size: inherit; letter-spacing: inherit; line-height: inherit; color: inherit; }
+body.hm .e-hero h1 span.sr-only { position: absolute; }
+body.hm .hm-wide span, body.hm .hm-h2 span { font-style: normal; font-weight: inherit; color: inherit; }
+body.hm .hm-lead, body.hm .hm-sub, body.hm .hm-lead2, body.hm .lead-cta-sub, body.hm .catalog-hero p, body.hm p { text-align: left; }
+@media (min-width: 861px) {
+  body.home .hm-head:not(.solid) .hm-tel { display: none; }
+  body.home .hm-head:not(.solid) .site-nav a { padding: 8px 9px; font-size: 15px; }
+}
+body.hm .hm-head .site-nav { gap: 0; }
+/* Великий телефон у синьому блоці контактів */
+body.hm .hm-bigtel { background: none; border-radius: 0; padding: 0; margin: 0 0 22px; box-shadow: none; transform: none; }
+body.hm .hm-bigtel:hover { box-shadow: none; transform: none; }
+body.hm .hm-bigtel i { display: none; }
+body.hm .hm-bigtel b { font: 500 40px/1 var(--e-head-font); color: #fff; letter-spacing: 0; }
+body.hm .hm-bigtel em { color: var(--e-on-ink); font-family: var(--e-body-font); }
+body.hm .hm-chk li::before { width: 16px; height: 9px; margin-top: 8px; border-radius: 0; background: none; border-left: 2.5px solid #fff; border-bottom: 2.5px solid #fff; transform: rotate(-45deg); }
+@media (max-width: 860px) { body.hm .hm-bigtel b { font-size: 32px; } }
+@media (min-width: 861px) {
+  body.home .hm-head:not(.solid) .hm-c { padding: 0 28px 0 48px; }
+  body.home .hm-head:not(.solid) .hm-brand { font-size: 19px; }
+}
+body.hm .hm-brand { flex: 0 0 auto; }
+@media (max-width: 860px) {
+  body.hm .hm-tel, body.hm .hm-head.solid .hm-tel { display: none !important; }
+  body.hm .hm-tel-m { display: inline-flex !important; width: 40px; height: 40px; align-items: center; justify-content: center; }
+}
+
+/* Внутрішні сторінки: site.css перевизначає змінні style.css на body.hm:not(.home) —
+   повертаємо палітру E з тією самою специфічністю (файл підключено пізніше). */
+body.hm:not(.home) {
+  --bg: var(--e-bg); --card: var(--e-bg); --ink: var(--e-ink); --muted: var(--e-muted); --text: var(--e-text);
+  --blue: var(--e-ink); --blue2: #3a4d94; --line: var(--e-line); --tint: #dde2f2; --field: #fff;
+  --hover: var(--e-grey); --hover-soft: rgba(27, 42, 107, .06); --header-bg: rgba(255, 255, 255, .96);
+  --radius: 0px; --shadow: none;
+  background: var(--e-bg);
+}
+:root[data-theme="dark"] body.hm:not(.home) {
+  --bg: var(--e-bg); --ink: var(--e-ink); --muted: var(--e-muted); --text: var(--e-text); --blue: var(--e-ink);
+  --line: var(--e-line); --hover: var(--e-grey);
+  --card: #161e40; --blue2: #c8d2ff; --tint: rgba(174, 189, 255, .18); --field: #1b2450;
+  --hover-soft: rgba(255, 255, 255, .08); --header-bg: rgba(15, 21, 48, .96);
+}
+/* Кнопки звʼязку на сторінках послуг і в контактах — одна заповнена, решта контурні */
+body.hm .lp-btn, body.hm .cbtn { background: transparent !important; color: var(--e-ink) !important; border: 1.5px solid var(--e-ink) !important; box-shadow: none !important; }
+body.hm .lp-btn:hover, body.hm .cbtn:hover { background: var(--e-ink) !important; color: var(--e-bg) !important; }
+body.hm .lp-btn-call, body.hm .cbtn-call { background: #1b2a6b !important; color: #fff !important; border-color: #1b2a6b !important; }
+:root[data-theme="dark"] body.hm .lp-btn-call, :root[data-theme="dark"] body.hm .cbtn-call { background: #3a4d94 !important; border-color: #3a4d94 !important; }
+body.hm .lp-btn-chat { border-color: transparent !important; }
+body.hm .lp-trust li, body.hm .lp-trust span { border-radius: 0 !important; background: var(--e-grey) !important; border: 0 !important; }
+body.hm .lp-situations li::before, body.hm .lp-trust li::before { border-radius: 0 !important; }
+body.hm .lp-steps li::before, body.hm .lp-step-n { border-radius: 0 !important; background: var(--e-ink) !important; color: var(--e-bg) !important; font-family: var(--e-head-font); }
+body.hm .lp-benefit { border: 0 !important; }
+body.hm .lp-final, body.hm .lp-more { border-radius: 0 !important; }
+
+/* Синій блок заявки (статті й послуги): кнопки звʼязку — білі контурні на синьому */
+body.hm .lead-cta-inner { padding: 36px; }
+body.hm .lead-cta-inner .lead-cta-sub, body.hm .lead-cta-inner .lead-cta-or, body.hm .lead-cta-inner label { color: var(--e-on-ink); font-family: var(--e-body-font); }
+body.hm .lead-cta .cbtn { background: transparent !important; color: #fff !important; border: 1px solid rgba(255, 255, 255, .4) !important; font-family: var(--e-head-font); text-transform: uppercase; letter-spacing: .04em; font-weight: 500; }
+body.hm .lead-cta .cbtn:hover { background: #fff !important; color: #1b2a6b !important; }
+body.hm .lead-cta .cbtn-call { background: #fff !important; color: #1b2a6b !important; border-color: #fff !important; }
+body.hm .lead-cta input, body.hm .lead-cta textarea { background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .25); color: #fff; }
+body.hm .lead-cta input::placeholder, body.hm .lead-cta textarea::placeholder { color: rgba(255, 255, 255, .55); }
+/* Заключний блок сторінки послуги */
+body.hm .lp-final { background: var(--e-grey); border: 0; border-top: 6px solid var(--e-ink); }
+/* Фото автора */
+body.hm .author-photo { border: 0; box-shadow: none; filter: grayscale(.35); }
+body.hm .article-note { border-radius: 0 !important; border-left-width: 4px; }
+
+/* Контакти: перша картка — синя, друга (адреса, карта) — світла */
+body.hm .contacts-card { background: #1b2a6b; color: #fff; }
+body.hm .contacts-card h2, body.hm .contacts-card h3 { color: #fff; }
+body.hm .contacts-card p { color: var(--e-on-ink); }
+body.hm .contacts-card.contacts-info { background: var(--e-grey); color: var(--e-text); border-top: 6px solid var(--e-ink); }
+body.hm .contacts-card.contacts-info p, body.hm .contacts-card.contacts-info .label { color: var(--e-muted); }
+body.hm .contacts-card.contacts-info .value, body.hm .contacts-card.contacts-info a { color: var(--e-ink); }
+body.hm .contacts-card .how-steps li::before { border-radius: 0 !important; }
+body.hm .contacts-card .btn-primary { background: #fff; color: #1b2a6b; }
+:root[data-theme="dark"] body.hm .contacts-card:not(.contacts-info) { background: #161e40; }
+body.hm .contact-map iframe, body.hm .contact-map { border-radius: 0 !important; }
+/* Бейджі довіри на сторінці послуги — в один рядок, компактно */
+body.hm .lp-trust { gap: 8px 18px; }
+body.hm .lp-trust li, body.hm .lp-trust span { background: none !important; padding: 0 !important; font-size: 15px; }
+/* Телефон: у шапці головної без кнопки теми (вона є в меню) */
+@media (max-width: 860px) {
+  body.hm .hm-head .theme-toggle { display: none; }
+}
+/* Кнопки звʼязку всередині синьої картки контактів — білі контурні */
+body.hm .contacts-card:not(.contacts-info) .lp-btn { color: #fff !important; border-color: rgba(255, 255, 255, .45) !important; }
+body.hm .contacts-card:not(.contacts-info) .lp-btn:hover { background: #fff !important; color: #1b2a6b !important; }
+body.hm .contacts-card:not(.contacts-info) .lp-btn-call { background: #fff !important; color: #1b2a6b !important; border-color: #fff !important; }
+body.hm .pr-more { font: 500 15px/1.3 var(--e-head-font); letter-spacing: .04em; }
