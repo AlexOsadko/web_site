@@ -409,3 +409,63 @@ body.hm .hm-head .theme-toggle:hover { background: var(--e-grey); }
 body.hm .hm-brand small { font-size: 12px; letter-spacing: .02em; }
 /* Перший екран внутрішніх сторінок — рівне тло без градієнта */
 body.hm .lp-hero, :root[data-theme="dark"] body.hm .lp-hero { background: var(--e-bg); }
+
+/* Спливаючі вікна (замовити дзвінок, чат): у темній темі — світліші за сторінку, з рамкою;
+   тло сторінки під ними — затемнене сильніше, щоб вікно виділялося */
+body.hm .cb-card { border-radius: 0; border-top: 6px solid #1b2a6b; }
+:root[data-theme="dark"] body.hm .cb-card { background: #222c63; border: 1px solid #3c4a96; border-top: 6px solid #8e9dff; box-shadow: 0 30px 80px rgba(0, 0, 0, .6); }
+:root[data-theme="dark"] body.hm .cb-backdrop { background: rgba(3, 6, 18, .75); }
+:root[data-theme="dark"] body.hm .cb-card input { background: #1a2252; border-color: #4a58a6; color: #fff; }
+body.hm .hc-panel { border-radius: 0; }
+body.hm .hc-top { background: #1b2a6b; }
+body.hm .hc-msg, body.hm .hc-cform input, body.hm .hc-cform button, body.hm .hc-x { border-radius: 0; }
+:root[data-theme="dark"] body.hm .hc-panel { background: #222c63; border: 1px solid #3c4a96; box-shadow: 0 30px 80px rgba(0, 0, 0, .65); }
+:root[data-theme="dark"] body.hm .hc-top { background: #2e3b80; }
+:root[data-theme="dark"] body.hm .hc-body { background: #1b2350; }
+:root[data-theme="dark"] body.hm .hc-adv { background: #2a3572; border-color: #3f4d9c; color: #eef1ff; }
+:root[data-theme="dark"] body.hm .hc-ts, :root[data-theme="dark"] body.hm .hc-foot, :root[data-theme="dark"] body.hm .hc-form { background: #222c63; }
+:root[data-theme="dark"] body.hm .hc-panel textarea, :root[data-theme="dark"] body.hm .hc-panel input { background: #1a2252; border-color: #4a58a6; color: #fff; }
+body.hm .hc-form textarea, body.hm .hc-send, body.hm .hc-form button { border-radius: 0 !important; }
+:root[data-theme="dark"] body.hm .hc-form { border-top-color: #3c4a96; }
+
+/* Виразніші шрифти: меню — Oswald великими літерами, контрастніший другорядний текст */
+:root { --e-muted: #4d5465; }
+:root[data-theme="dark"] { --e-muted: #b9c1db; }
+body.hm .hm-head .site-nav a, body.hm .hm-head.solid .site-nav a {
+  font: 500 16px/1 var(--e-head-font); text-transform: uppercase; letter-spacing: .05em; color: var(--e-text);
+}
+body.hm .hm-head .site-nav a:hover, body.hm .hm-head.solid .site-nav a:hover { color: var(--e-ink); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+body.hm .hm-brand small { color: var(--e-muted); font-weight: 700; }
+body.hm .e-lead, body.hm .lp-sub, body.hm .e-sub { color: var(--e-text); }
+body.hm .e-sit small, body.hm .e-princ li, body.hm .e-steps li { color: var(--e-muted); }
+@media (max-width: 860px) {
+  body.hm .hm-head .site-nav a { font-size: 18px; padding: 14px 18px; }
+}
+
+/* Темна тема світліша: глибокий синій замість майже чорного */
+:root[data-theme="dark"] {
+  --e-bg: #1c2754; --e-grey: #243163; --e-line: rgba(255, 255, 255, .14); --e-rule: #3a4a9a;
+  --bg: var(--e-bg); --card: #263468; --field: #2a386f;
+}
+:root[data-theme="dark"] body.hm, :root[data-theme="dark"] body.hm:not(.home) { --hm-hero: #263468; --hm-card: #263468; --card: #263468; --field: #2a386f; }
+:root[data-theme="dark"] body.hm .hm-contact, :root[data-theme="dark"] body.hm .lead-cta-inner,
+:root[data-theme="dark"] body.hm .contacts-card:not(.contacts-info) { background: #2b3a7c; }
+:root[data-theme="dark"] body.hm .hm-ft { background: #141d42; }
+:root[data-theme="dark"] body.hm .cb-card, :root[data-theme="dark"] body.hm .hc-panel { background: #2e3d82; border-color: #5363b8; }
+:root[data-theme="dark"] body.hm .hc-body { background: #26346f; }
+:root[data-theme="dark"] body.hm .hc-top { background: #3a4a96; }
+:root[data-theme="dark"] body.hm .hc-adv { background: #34448c; border-color: #5363b8; }
+:root[data-theme="dark"] body.hm .hc-ts, :root[data-theme="dark"] body.hm .hc-form { background: #2e3d82; }
+:root[data-theme="dark"] body.hm .cb-card input, :root[data-theme="dark"] body.hm .hc-panel textarea,
+:root[data-theme="dark"] body.hm .hc-panel input { background: #233170; border-color: #5868bd; }
+:root[data-theme="dark"] body.hm .cb-backdrop { background: rgba(6, 10, 30, .72); }
+@media (min-width: 861px) {
+  body.home .hm-head:not(.solid) .site-nav a { font-size: 15px; padding: 8px 8px; letter-spacing: .04em; }
+  body.home .hm-head:not(.solid) .hm-c { padding: 0 20px 0 40px; gap: 10px; }
+}
+/* Вузький комп'ютер / планшет горизонтально: шапка на всю ширину (у правій колонці меню не вміщується) */
+@media (min-width: 861px) and (max-width: 1180px) {
+  body.home .hm-head:not(.solid) { left: 0; background: var(--e-bg); border-bottom-color: var(--e-rule); }
+  body.home .hm-head:not(.solid) .hm-c { padding: 0 24px; }
+  body.home .e-htxt { padding-top: 130px; }
+}
