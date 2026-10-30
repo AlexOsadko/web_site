@@ -192,6 +192,8 @@ body.hm .hm-contact .hm-form { color: var(--e-text); border-top: 0; }
 :root[data-theme="dark"] body.hm .hm-contact { background: #1f2a5c !important; }
 :root[data-theme="dark"] body.hm .hm-contact .hm-form { background: #2e3d82; border: 1px solid #5363b8; }
 :root[data-theme="dark"] body.hm .hm-contact .hm-form h3 { color: #fff; }
+@media (max-width: 600px) { body.hm .hm-contact .hm-form h3 { font-size: 20px; } }
+@media (max-width: 380px) { body.hm .hm-contact .hm-form h3 { font-size: 18px; } }
 :root[data-theme="dark"] body.hm .hm-contact .hm-form input, :root[data-theme="dark"] body.hm .hm-contact .hm-form textarea { background: #233170; border-color: #5868bd; }
 
 /* ---------- Підвал ---------- */
