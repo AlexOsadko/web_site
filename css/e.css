@@ -189,7 +189,10 @@ body.hm .hm-bigtel i { border-radius: 0; background: rgba(255, 255, 255, .12); }
 body.hm .hm-msgs .hm-pill { background: transparent; border: 1px solid rgba(255, 255, 255, .35); color: #fff; }
 body.hm .hm-msgs .hm-pill:hover { background: #fff; color: #1b2a6b; }
 body.hm .hm-contact .hm-form { color: var(--e-text); border-top: 0; }
-:root[data-theme="dark"] body.hm .hm-contact .hm-form { background: var(--e-bg); }
+:root[data-theme="dark"] body.hm .hm-contact { background: #1f2a5c !important; }
+:root[data-theme="dark"] body.hm .hm-contact .hm-form { background: #2e3d82; border: 1px solid #5363b8; }
+:root[data-theme="dark"] body.hm .hm-contact .hm-form h3 { color: #fff; }
+:root[data-theme="dark"] body.hm .hm-contact .hm-form input, :root[data-theme="dark"] body.hm .hm-contact .hm-form textarea { background: #233170; border-color: #5868bd; }
 
 /* ---------- Підвал ---------- */
 body.hm .hm-ft { background: #1b2a6b; color: var(--e-on-ink); }
