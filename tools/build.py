@@ -1915,7 +1915,7 @@ CONTACT_LINES = """      <div class="contact-item">
 # Порядок і ціни на сторінці «Послуги»: основні напрями — першими, решта — «Інші напрями».
 SERVICES_MAIN = ["st-130-kupap", "rozluchennia", "kryminalnyi-zahyst", "tsyvilne-pravo"]
 SERVICE_PRICE = {"st-130-kupap": "від 20 000 грн", "rozluchennia": "від 6 000 грн",
-                 "kryminalnyi-zahyst": "від 25 000 грн", "tsyvilne-pravo": "від 4 000 грн"}
+                 "kryminalnyi-zahyst": "від 25 000 грн", "tsyvilne-pravo": "від 3 000 грн"}
 
 
 def render_services_index(landings):
