@@ -141,8 +141,9 @@ body.hm .hm-opt, body.hm .hm-opt i { border-radius: 0; }
 .e-about .hm-c { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; }
 .e-about h2, .e-steps h2 { font-size: clamp(40px, 5vw, 72px); line-height: .98; margin: 0 0 32px; }
 .e-about p { margin: 0 0 18px; color: var(--e-muted); }
-.e-princ { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--e-line); align-self: start; }
-.e-princ li { padding: 20px 0; border-bottom: 1px solid var(--e-line); color: var(--e-muted); }
+.e-princ { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--e-line); align-self: stretch; display: flex; flex-direction: column; }
+.e-princ li { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 20px 0; border-bottom: 1px solid var(--e-line); color: var(--e-muted); }
+.e-about p:last-child { margin-bottom: 0; }
 .e-princ b { display: block; font: 500 22px/1.2 var(--e-head-font); text-transform: uppercase; color: var(--e-ink); margin-bottom: 4px; }
 .e-princ a { color: var(--e-ink); font-weight: 700; }
 
@@ -289,6 +290,7 @@ body.hm .hc-panel, body.hm .hc-toast { border-radius: 0; }
   .e-sit a:hover { padding-left: 0; padding-right: 0; }
   .e-about, .e-steps, body.hm .hm-arts, body.hm .hm-memo, body.hm .hm-contact { padding: 56px 0; }
   .e-about .hm-c { grid-template-columns: 1fr; gap: 28px; }
+  .e-princ li { flex: none; }
   .e-about h2, .e-steps h2, body.hm .hm-arts .hm-h2, body.hm .hm-contact .hm-h2, body.hm .hm-memo .hm-h2 { font-size: 42px; }
   .e-steps ol { grid-template-columns: 1fr 1fr; gap: 28px 16px; }
   .e-steps li { padding-right: 0; }
