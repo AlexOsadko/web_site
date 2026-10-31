@@ -144,6 +144,7 @@ body.hm .hm-opt, body.hm .hm-opt i { border-radius: 0; }
 .e-princ { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--e-line); align-self: stretch; display: flex; flex-direction: column; }
 .e-princ li { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 20px 0; border-bottom: 1px solid var(--e-line); color: var(--e-muted); }
 .e-about p:last-child { margin-bottom: 0; }
+@media (min-width: 861px) { body.hm .e-about p { text-align: justify; text-align-last: left; hyphens: auto; -webkit-hyphens: auto; } }
 .e-princ b { display: block; font: 500 22px/1.2 var(--e-head-font); text-transform: uppercase; color: var(--e-ink); margin-bottom: 4px; }
 .e-princ a { color: var(--e-ink); font-weight: 700; }
 
@@ -315,6 +316,7 @@ body.hm .e-hero h1 span { display: block; margin: 0; font-style: normal; font-we
 body.hm .e-hero h1 span.sr-only { position: absolute; }
 body.hm .hm-wide span, body.hm .hm-h2 span { font-style: normal; font-weight: inherit; color: inherit; }
 body.hm .hm-lead, body.hm .hm-sub, body.hm .hm-lead2, body.hm .lead-cta-sub, body.hm .catalog-hero p, body.hm p { text-align: left; }
+@media (min-width: 861px) { body.hm .e-about p { text-align: justify; } }
 @media (min-width: 861px) {
   body.home .hm-head:not(.solid) .hm-tel { display: none; }
   body.home .hm-head:not(.solid) .site-nav a { padding: 8px 9px; font-size: 15px; }
