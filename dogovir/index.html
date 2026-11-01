@@ -787,6 +787,25 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
           <label class="ctype-opt on"><input type="checkbox" class="p-chk" style="width:16px;height:16px;accent-color:var(--seal)" id="p_akt" checked> Акт здачі-приймання</label>
           <label class="ctype-opt on"><input type="checkbox" class="p-chk" style="width:16px;height:16px;accent-color:var(--seal)" id="p_rahunok" checked> Рахунок-фактура</label>
           <label class="ctype-opt on"><input type="checkbox" class="p-chk" style="width:16px;height:16px;accent-color:var(--seal)" id="p_zgoda" checked> <span id="p_zgoda_label">Згода на обробку ПД</span></label>
+          <label class="ctype-opt"><input type="checkbox" class="p-chk" style="width:16px;height:16px;accent-color:var(--seal)" id="p_rozirv"> Угода про розірвання</label>
+        </div>
+        <div id="tr_box" hidden style="margin-top:14px">
+          <div class="mini-h">Угода про розірвання договору</div>
+          <div class="grid">
+            <div class="field">
+              <label for="f_tr_date">Дата розірвання<span class="req">*</span><span class="hint">дата угоди; з неї договір припиняється</span></label>
+              <input type="date" id="f_tr_date" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="f_tr_cost">Вартість наданої допомоги, грн<span class="hint">фактично надано до розірвання</span></label>
+              <input type="text" id="f_tr_cost" class="mono" inputmode="decimal" placeholder="8 000,00" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="f_tr_paid">Сплачено Клієнтом, грн<span class="hint">аванс і всі оплати</span></label>
+              <input type="text" id="f_tr_paid" class="mono" inputmode="decimal" placeholder="10 000,00" autocomplete="off">
+            </div>
+          </div>
+          <div class="sub-hint" id="tr_hint" style="margin-top:8px"></div>
         </div>
         <div class="sub-hint" id="parts_hint" style="margin-top:8px"></div>
         <div class="reg-actions" style="margin-top:14px">
@@ -1787,6 +1806,7 @@ function missingFields(){
     }
   }
   if(R.needsPay && !isProBono() && !$("#f_pay_text").value.trim()) miss.push("порядок оплати");
+  if(selectedParts().includes(P_TERM) && !$("#f_tr_date").value) miss.push("дата розірвання");
   return miss;
 }
 function updateRecap(){
@@ -2005,8 +2025,10 @@ const PART_DEFS=[
   {id:"p_dodatkova",label:"Додаткова угода",      file:"Додаткова_угода"},
   {id:"p_akt",      label:"Акт",                  file:"Акт"},
   {id:"p_rahunok",  label:"Рахунок",              file:"Рахунок"},
-  {id:"p_zgoda",    label:"Згода на обробку ПД",  file:"Згода_на_обробку_ПД"}
+  {id:"p_zgoda",    label:"Згода на обробку ПД",  file:"Згода_на_обробку_ПД"},
+  {id:"p_rozirv",   label:"Угода про розірвання", file:"Угода_про_розірвання"}
 ];
+var P_TERM=5;   // угода про розірвання — остання частина документа (у ФОП — 5-та, бо Згоди немає)
 const PAGE_BREAK_P='<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
 
 /* розбір body на частини за абзацами з розривом сторінки */
@@ -2044,12 +2066,17 @@ function joinParts(sp, idxs){
   return out+sp.tail;
 }
 /* очікувана кількість частин: ФОП — 4 (без Згоди/Специфікації), адвокат — 5 */
-function expectedPartCount(){ return isFopProvider() ? 4 : PART_DEFS.length; }
+function expectedPartCount(){ return isFopProvider() ? 5 : PART_DEFS.length; }
+/* «повний договір» — усі частини, крім угоди про розірвання */
+function baseParts(){ return PART_DEFS.map((_,i)=>i).filter(i=>i!==P_TERM && !(isFopProvider() && i===4)); }
+function isFullSel(sel){ const b=baseParts(); return sel.length===b.length && b.every(i=>sel.includes(i)); }
+/* індекс частини PART_DEFS → індекс частини в документі */
+function docPart(i){ if(!isFopProvider()) return i; return i===P_TERM ? 4 : (i===4 ? -1 : i); }
 /* лишає у документі тільки вибрані частини */
 function keepParts(xml, idxs){
   const sp=splitBody(xml);
   if(!sp || sp.parts.length!==expectedPartCount()) return xml; // структура не розпізнана — повний документ
-  const keep=(idxs||[]).slice().sort((a,b)=>a-b).filter(i=>i>=0&&i<sp.parts.length);
+  const keep=(idxs||[]).map(docPart).sort((a,b)=>a-b).filter(i=>i>=0&&i<sp.parts.length);
   if(!keep.length) return xml;
   return joinParts(sp, keep);
 }
@@ -2082,21 +2109,119 @@ function updatePartsUI(){
   });
   const hint=$("#parts_hint");
   if(hint){
-    hint.textContent = sel.length===expectedPartCount()
+    hint.textContent = isFullSel(sel)
       ? "Буде сформовано повний документ — усі частини в одному файлі."
       : (sel.length ? "У файл увійдуть: "+sel.map(i=>PART_DEFS[i].label).join(", ")+"."
                     : "Не позначено жодної частини — завантаження неможливе.");
   }
   const t=$("#btn_gen_txt");
-  if(t) t.textContent = (sel.length===expectedPartCount())
+  if(t) t.textContent = isFullSel(sel)
     ? "Завантажити договір (.docx)"
     : (sel.length===1 ? `Завантажити «${PART_DEFS[sel[0]].label}» (.docx)` : `Завантажити вибране (${sel.length}) (.docx)`);
   const bp=$("#btn_parts"); if(bp) bp.disabled = sel.length<1;
+  const tb=$("#tr_box"); if(tb) tb.hidden = !sel.includes(P_TERM);
+  trHint();
 }
 $$("#parts_opts input[type=checkbox]").forEach(c=>c.addEventListener("change",()=>{ updatePartsUI(); updateRecap(); }));
-if($("#parts_all"))  $("#parts_all").addEventListener("click",()=>setParts(PART_DEFS.map(p=>p.id)));
+if($("#parts_all"))  $("#parts_all").addEventListener("click",()=>setParts(baseParts().map(i=>PART_DEFS[i].id)));
 if($("#parts_pack")) $("#parts_pack").addEventListener("click",()=>setParts(["p_dodatkova","p_akt","p_rahunok"]));
 if($("#parts_inv"))  $("#parts_inv").addEventListener("click",()=>setParts(["p_rahunok"]));
+
+/* ---------- угода про розірвання договору ----------
+   Окремої частини в шаблонах немає: збираємо її з Додаткової угоди того ж шаблону —
+   шапка (назва, місто, дата), преамбула зі сторонами й таблиця підписів лишаються
+   як є, а пункти замінюємо на умови розірвання. Додається в кінець документа
+   до заповнення, тож плейсхолдери сторін заповнюються разом з усім договором. */
+function trData(){
+  const cost=parseNum(($("#f_tr_cost")||{}).value), paid=parseNum(($("#f_tr_paid")||{}).value);
+  return {date: ($("#f_tr_date")||{}).value||"", cost, paid,
+          diff: (cost!=null && paid!=null) ? Math.round((cost-paid)*100)/100 : null};
+}
+function trHint(){
+  const h=$("#tr_hint"); if(!h) return;
+  const T=trData(), C=isFopProvider() ? "Замовник" : "Клієнт", A=isFopProvider() ? "Виконавець" : "Адвокат";
+  if(T.cost==null){ h.textContent="Без суми в угоді буде пункт, що розрахунки проведено повністю й заборгованості немає."; return; }
+  if(T.paid==null){ h.textContent="Вкажіть, скільки сплачено, — інакше в угоді буде лише вартість наданої допомоги."; return; }
+  h.textContent = T.diff>0 ? `${C} доплачує ${fmtMoney(T.diff)} грн.`
+    : T.diff<0 ? `${A} повертає надлишок авансу ${fmtMoney(-T.diff)} грн.`
+    : "Розрахунки рівні — заборгованості немає.";
+}
+["f_tr_date","f_tr_cost","f_tr_paid"].forEach(id=>{ const e=$("#"+id); if(e) e.addEventListener("input",()=>{ markFilled(e); trHint(); }); });
+function moneyWords(n){ return `${fmtMoney(n)} грн (${numToWords(n)} гривень)`; }
+function trClauses(fop){
+  const T=trData();
+  const A=fop?"Виконавець":"Адвокат", Ag=fop?"Виконавцю":"Адвокату", Aa=fop?"Виконавцем":"Адвокатом";
+  const C=fop?"Замовник":"Клієнт", Cg=fop?"Замовнику":"Клієнту", Ca=fop?"Замовником":"Клієнтом";
+  const help=fop?"юридичних послуг":"правничої (правової) допомоги";
+  const contract=fop?"Договір про надання юридичних послуг":"Договір про надання правничої (правової) допомоги";
+  const when=T.date ? "з "+fmtDate(T.date,true) : "з дати підписання цієї Угоди";
+  const out=[`Сторони за взаємною згодою вирішили розірвати ${contract} № «Номер_договору» від «Дата_укладання_договору» (надалі – Договір) ${when}. З цієї дати права та обов’язки Сторін за Договором і додатковими угодами до нього припиняються, крім зобов’язань, визначених цією Угодою.`];
+  let settled=true;
+  if(T.cost!=null){
+    out.push(`Вартість ${help}, фактично ${fop?"наданих Виконавцем":"наданої Адвокатом"} за Договором до дати його розірвання, становить ${moneyWords(T.cost)}`
+      + (T.paid!=null ? `. ${Ca} сплачено ${moneyWords(T.paid)}.` : "."));
+    if(T.diff!=null && T.diff>0){ settled=false;
+      out.push(`${C} зобов’язується сплатити ${Ag} заборгованість за ${fop?"фактично надані юридичні послуги":"фактично надану правничу (правову) допомогу"} у розмірі ${moneyWords(T.diff)} протягом 5 (п’яти) банківських днів з дня підписання цієї Угоди.`);
+    }else if(T.diff!=null && T.diff<0){ settled=false;
+      out.push(`${A} зобов’язується повернути ${Cg} надмірно сплачену частину авансу в розмірі ${moneyWords(-T.diff)} протягом 5 (п’яти) банківських днів з дня підписання цієї Угоди на банківський рахунок, зазначений ${Ca}.`);
+    }else if(T.diff!=null){
+      out.push(`Сторони підтверджують, що ${fop?"фактично надані юридичні послуги оплачено":"фактично надану правничу (правову) допомогу оплачено"} в повному обсязі і заборгованість між Сторонами відсутня.`);
+    }
+  }else{
+    out.push(`Сторони підтверджують, що на дату розірвання Договору розрахунки між ними проведено в повному обсязі і заборгованість відсутня.`);
+  }
+  out.push(fop
+    ? `Повноваження Виконавця щодо представництва інтересів Замовника за Договором припиняються з дати його розірвання. Виконавець повертає Замовнику оригінали документів, отримані для надання послуг.`
+    : `Повноваження Адвоката щодо представництва інтересів Клієнта за Договором припиняються з дати його розірвання. Адвокат повертає Клієнту оригінали документів, отримані для виконання доручення, у порядку, передбаченому Договором.`);
+  out.push(fop
+    ? `Обов’язок Виконавця щодо збереження конфіденційності інформації, отриманої від Замовника, зберігає чинність після розірвання Договору.`
+    : `Обов’язок Адвоката щодо збереження адвокатської таємниці зберігає чинність після розірвання Договору.`);
+  out.push(settled
+    ? `Сторони не мають одна до одної майнових та інших претензій за Договором.`
+    : `Після виконання зобов’язань, передбачених цією Угодою, Сторони не матимуть одна до одної майнових та інших претензій за Договором.`);
+  out.push(`Ця Угода є невід’ємною частиною Договору, складена у двох примірниках, що мають однакову юридичну силу, по одному для кожної зі Сторін, і набирає чинності з моменту її підписання Сторонами.`);
+  return out;
+}
+function buildTermPart(dod, fop){
+  /* межі: шапка з преамбулою — до першого нумерованого пункту; підписи — після останнього */
+  const n1=dod.indexOf("<w:numPr>"), n2=dod.lastIndexOf("<w:numPr>");
+  if(n1<0) return null;
+  const [h1]=paraBounds(dod,n1), [l1,l2]=paraBounds(dod,n2);
+  let head=dod.slice(0,h1);
+  const proto=dod.slice(l1,l2), tail=dod.slice(l2);
+  /* назва і дата угоди */
+  const pre=head.indexOf("уклали цю Додаткову угоду");
+  if(pre<0) return null;
+  const [p1]=paraBounds(head,pre);
+  let top=head.slice(0,p1), pream=head.slice(p1);
+  top=fop ? top.split("Додаткова угода № «Номер_дод_угоди»").join("Угода про розірвання")
+          : top.split("Додаткова угода №"+NBSP+"1").join("Угода про розірвання");
+  const di=top.lastIndexOf("«Дата_укладання_договору»");
+  if(di>=0) top=top.slice(0,di)+"«Дата_розірвання_угоди»"+top.slice(di+"«Дата_укладання_договору»".length);
+  pream=pream.split("уклали цю Додаткову угоду до Договору про таке").join("уклали цю Угоду про розірвання Договору про таке")
+             .split("уклали цю Додаткову угоду про наступне").join("уклали цю Угоду про розірвання Договору про наступне");
+  /* пункти: копія останнього пункту Додаткової угоди без автонумерації, номер — у тексті */
+  const plain=proto.replace(/<w:numPr>[\s\S]*?<\/w:numPr>/,"");
+  const paras=trClauses(fop).map((txt,k)=>{
+    let first=true;
+    return freshIds(plain).replace(/(<w:t)(?:\s[^>]*)?>[^<]*(<\/w:t>)/g,(m,a,b)=>{
+      if(first){ first=false; return a+' xml:space="preserve">'+xmlEsc(typographyText((k+1)+". "+txt))+b; }
+      return a+">"+b;
+    });
+  }).join("");
+  return freshIds(top+pream)+paras+freshIds(tail);
+}
+function addTermPart(xml, fop){
+  const sp=splitBody(xml);
+  if(!sp || sp.parts.length!==expectedPartCount()-1) return xml;
+  const part=buildTermPart(sp.parts[1], fop);
+  if(!part) return xml;
+  sp.parts.push(part);
+  sp.breaks.push(sp.breaks[0]||PAGE_BREAK_P);
+  xml=joinParts(sp, sp.parts.map((_,i)=>i));
+  const T=trData();
+  return xml.split("«Дата_розірвання_угоди»").join(val(T.date ? fmtDate(T.date,true) : "«___» ____________ 20__ року"));
+}
 
 /* ---------- головна функція ---------- */
 function fillTemplateXml(xml, D){
@@ -2468,6 +2593,7 @@ async function prepareDoc(){
   }else{
     xml=await zip.file("word/document.xml").async("string");
   }
+  xml=addTermPart(xml, false);
 
   const v = id => { const el=$("#"+id); return el ? el.value.trim() : ""; };
   const rp=repInfo();
@@ -2622,6 +2748,7 @@ async function prepareDocFop(){
   const t=clientType();
   const zip=await JSZip.loadAsync(b64ToUint8(TEMPLATE_FOP_PROVIDER_B64));
   let xml=await zip.file("word/document.xml").async("string");
+  xml=addTermPart(xml, true);
   const v = id => { const el=$("#"+id); return el ? el.value.trim() : ""; };
   /* у ФОП-договорі сторони — «Виконавець»/«Замовник»: термінологію в назвах послуг
      вирівнюємо (напр. позиції, додані з каталогу адвоката: «наданих Клієнтом») */
@@ -2681,7 +2808,7 @@ async function buildDocx(partIdxs){
   const {zip, filled, suffix}=await prepareDoc();
   zip.file("word/document.xml", keepParts(filled, idxs));
   const blob=await zipToBlob(zip);
-  const full = idxs.length===expectedPartCount() || idxs.length===0;
+  const full = isFullSel(idxs) || idxs.length===0;
   const head = full ? "Договір" : idxs.map(i=>PART_DEFS[i].file).join("_").slice(0,80);
   return {blob, fname:`${head}_${suffix}.docx`};
 }
@@ -2722,6 +2849,7 @@ async function withBusy(btn, fn){
   finally{ btn.disabled=false; btn.innerHTML=orig; }
 }
 
+function onlyTerm(sel){ return sel.length===1 && sel[0]===P_TERM; }
 function partsGuard(){
   const sel=selectedParts();
   if(!sel.length){ toast("Позначте хоча б одну частину документа у розділі 3.", true); return null; }
@@ -2734,7 +2862,7 @@ async function generate(){
   await withBusy($("#btn_gen"), async ()=>{
     const {blob,fname}=await buildDocx(sel);
     downloadBlob(blob,fname);
-    addRegistryRow();
+    if(!onlyTerm(sel)) addRegistryRow();
     toast("Документ сформовано: "+fname);
   });
 }
@@ -2746,7 +2874,7 @@ async function generateParts(){
   const sel=partsGuard(); if(!sel) return;
   await withBusy($("#btn_parts"), async ()=>{
     const {files, suffix}=await buildPartFiles(sel);
-    addRegistryRow();
+    if(!onlyTerm(sel)) addRegistryRow();
     if(files.length===1){
       downloadBlob(files[0].blob, files[0].fname);
       toast("Документ сформовано: "+files[0].fname);
@@ -2796,6 +2924,7 @@ function applyDefaults(){
   const fa=$("#f_agr_no"); if(!fa.value.trim()) fa.value="1"; markFilled(fa);
   const fk=$("#f_act_no"); if(!fk.value.trim()) fk.value="1"; markFilled(fk);
   const fi=$("#f_inv_no"); if(!fi.value.trim()) fi.value="001"; markFilled(fi);
+  const ft=$("#f_tr_date"); if(ft && !ft.value){ ft.value=todayISO(); markFilled(ft); }
   const fb=$("#f_basis_fop"); if(!fb.value.trim()) fb.value="запису в Єдиному державному реєстрі юридичних осіб, фізичних осіб-підприємців та громадських формувань"; markFilled(fb);
   const fr=$("#f_rate"); if(!fr.value.trim()){ fr.value=fmtMoney(RATE_DEFAULT); markFilled(fr); }
 }
@@ -3645,7 +3774,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-10-20.4";
+const GEN_VERSION="2026-11-01.1";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
