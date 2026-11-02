@@ -745,7 +745,7 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
         <span class="s-tag">заповнюються автоматично</span>
       </div>
       <div class="s-body">
-        <p class="s-desc" style="margin-bottom:14px">Окремих полів не потребують — усі значення беруться з розділів 1 і 2:</p>
+        <p class="s-desc" style="margin-bottom:14px">Значення беруться з розділів 1 і 2; окремо задається лише дата акта:</p>
         <div class="grid">
           <div style="font-size:13px;color:var(--ink-2);line-height:1.6">
             <b>Акт здачі-приймання</b><br>
@@ -764,7 +764,13 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
             <span style="color:var(--muted)">Незмінні — вже містяться у шаблоні.</span>
           </div>
         </div>
-        <div class="sub-hint" style="margin-top:16px">Дата в Акті («___» _____ 20__ р.) залишена порожньою для проставлення при підписанні.</div>
+        <div class="grid" style="margin-top:16px">
+          <div class="field">
+            <label for="f_act_date">Дата акта<span class="req" id="act_date_req" hidden>*</span><span class="hint">день підписання акта</span></label>
+            <input type="date" id="f_act_date" autocomplete="off">
+            <div class="sub-hint" id="act_date_hint">Без дати в Акті лишається «___» ______ 20__ р. — для проставлення ручкою при підписанні.</div>
+          </div>
+        </div>
 
         <div class="divider"></div>
 
@@ -800,6 +806,7 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
         <div class="reg-actions" style="margin-top:14px">
           <button class="btn btn-ghost" type="button" id="parts_all">Усі частини</button>
           <button class="btn btn-ghost" type="button" id="parts_pack">Угода + Акт + Рахунок</button>
+          <button class="btn btn-ghost" type="button" id="parts_act">Акт + Рахунок</button>
           <button class="btn btn-ghost" type="button" id="parts_inv">Лише рахунок</button>
           <button class="btn btn-primary" type="button" id="btn_parts">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
@@ -1796,6 +1803,7 @@ function missingFields(){
   }
   if(R.needsPay && !isProBono() && !$("#f_pay_text").value.trim()) miss.push("порядок оплати");
   if(selectedParts().includes(P_TERM) && !$("#f_tr_date").value) miss.push("дата розірвання");
+  if(selectedParts().includes(2) && $("#f_kep").checked && !$("#f_act_date").value) miss.push("дата акта");
   return miss;
 }
 function updateRecap(){
@@ -2115,6 +2123,18 @@ $$("#parts_opts input[type=checkbox]").forEach(c=>c.addEventListener("change",()
 if($("#parts_all"))  $("#parts_all").addEventListener("click",()=>setParts(baseParts().map(i=>PART_DEFS[i].id)));
 if($("#parts_pack")) $("#parts_pack").addEventListener("click",()=>setParts(["p_dodatkova","p_akt","p_rahunok"]));
 if($("#parts_inv"))  $("#parts_inv").addEventListener("click",()=>setParts(["p_rahunok"]));
+if($("#parts_act"))  $("#parts_act").addEventListener("click",()=>setParts(["p_akt","p_rahunok"]));
+/* дата акта: з КЕП — обовʼязкова (підписаний КЕП документ уже не дописати), типово сьогодні */
+function syncActDate(){
+  const kep=$("#f_kep") && $("#f_kep").checked, d=$("#f_act_date"); if(!d) return;
+  if(kep && !d.value){ d.value=todayISO(); markFilled(d); }
+  const r=$("#act_date_req"); if(r) r.hidden=!kep;
+  const h=$("#act_date_hint");
+  if(h) h.textContent = kep ? "З КЕП дата обовʼязкова: підписаний документ уже не дописати."
+                            : "Без дати в Акті лишається «___» ______ 20__ р. — для проставлення ручкою при підписанні.";
+}
+if($("#f_kep")) $("#f_kep").addEventListener("change",()=>{ syncActDate(); updateRecap(); });
+if($("#f_act_date")) $("#f_act_date").addEventListener("input",()=>{ markFilled($("#f_act_date")); updateRecap(); });
 
 /* ---------- угода про розірвання договору ----------
    Окремої частини в шаблонах немає: збираємо її з Додаткової угоди того ж шаблону —
@@ -2290,6 +2310,7 @@ function fillTemplateXml(xml, D){
   /* незаповнені плейсхолдери шаблона не лишаються в документі;
      перелік закритий — текст у лапках («Адвокат», «Клієнт», «Сторони») не чіпається */
   if(D.kep) xml=kepMarks(xml);
+  if(D.actDate) xml=xml.split("«____» __________ 20___ року").join(val(D.actDate)).split("___/ ___________________________ 20___ року").join(val(D.actDate));
   xml=xml.split("«КЕП_підпис»").join(D.kep ? KEP_MARK : "");
   for(const k of PLACEHOLDERS) xml=xml.split("«"+k+"»").join("");
   return widenCaptionSpaces(xml);
@@ -2607,6 +2628,7 @@ async function prepareDoc(){
 
   const D={
     kep: ($("#f_kep") ? $("#f_kep").checked : false),
+    actDate: fmtDate(($("#f_act_date")||{}).value||"", true),
     agrNo: v("f_agr_no")||"1",
     actNo: v("f_act_no")||"1",
     mode: pb ? "probono" : (hourly ? "hourly" : "fixed"),
@@ -2726,6 +2748,7 @@ function fillFopXml(xml, D){
   for(const k in map){ xml=xml.split("«"+k+"»").join(val(map[k])); }
   if(!D.kep) xml=dropParagraph(xml,"кваліфікованого електронного підпису");
   if(D.kep) xml=kepMarks(xml);
+  if(D.actDate) xml=xml.split("«____» __________ 20___ року").join(val(D.actDate)).split("___/ ___________________________ 20___ року").join(val(D.actDate));
   xml=xml.split("«КЕП_підпис»").join(D.kep ? KEP_MARK : "");
   for(const k of FOP_PLACEHOLDERS) xml=xml.split("«"+k+"»").join("");
   return widenCaptionSpaces(xml);
@@ -2753,6 +2776,7 @@ async function prepareDocFop(){
   const zamShort = yur ? (v("f_repr_short")||v("f_org")) : rp ? rp.short+", представник" : (shortName(fName.value)||v("f_name"));
   const D={
     kep: ($("#f_kep") ? $("#f_kep").checked : false),
+    actDate: fmtDate(($("#f_act_date")||{}).value||"", true),
     agrNo: v("f_agr_no")||"1",
     actNo: v("f_act_no")||"1",
     mode: pb ? "probono" : (hourly ? "hourly" : "fixed"),
@@ -2911,6 +2935,7 @@ function applyDefaults(){
   const fk=$("#f_act_no"); if(!fk.value.trim()) fk.value="1"; markFilled(fk);
   const fi=$("#f_inv_no"); if(!fi.value.trim()) fi.value="001"; markFilled(fi);
   const ft=$("#f_tr_date"); if(ft && !ft.value){ ft.value=todayISO(); markFilled(ft); }
+  syncActDate();
   const fb=$("#f_basis_fop"); if(!fb.value.trim()) fb.value="запису в Єдиному державному реєстрі юридичних осіб, фізичних осіб-підприємців та громадських формувань"; markFilled(fb);
   const fr=$("#f_rate"); if(!fr.value.trim()){ fr.value=fmtMoney(RATE_DEFAULT); markFilled(fr); }
 }
@@ -3760,7 +3785,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-02.3";
+const GEN_VERSION="2026-11-02.4";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
