@@ -2223,30 +2223,8 @@ function addTermPart(xml, fop){
   return xml.split("«Дата_розірвання_угоди»").join(val(T.date ? fmtDate(T.date,true) : "«___» ____________ 20__ року"));
 }
 
-/* ---------- факсиміле Адвоката / Виконавця ----------
-   Коли у документ ставиться підпис-зображення, у заключних положеннях одразу
-   після пункту про КЕП додаємо згоду сторін на факсиміле зі зразком підпису
-   (ч. 3 ст. 207 ЦК України: згода сторін має містити зразок). */
-function addFacsimileClause(xml, D, fop){
-  if(!D.sig) return xml;
-  const i=xml.indexOf("можуть бути підписані з використанням кваліфікованого електронного підпису (КЕП)");
-  if(i<0) return xml;
-  const [s,e]=paraBounds(xml,i);
-  const who=fop?"Виконавець":"Адвокат", whoG=fop?"Виконавця":"Адвоката", whoA=fop?"Виконавцем":"Адвокатом";
-  const txt=`Сторони погодили, що на цьому Договорі та документах до нього (додаткових угодах, актах, рахунках-фактурах тощо) ${who} може використовувати факсимільне відтворення свого власноручного підпису (факсиміле) відповідно до частини третьої статті 207 Цивільного кодексу України. Документ, підписаний ${whoA} з використанням факсиміле, має таку саму юридичну силу, як і документ з його власноручним підписом. Зразок факсиміле ${whoG}: `;
-  let first=true;
-  let para=freshIds(xml.slice(s,e)).replace(/(<w:t)(?:\s[^>]*)?>[^<]*(<\/w:t>)/g,(m,a,b)=>{
-    if(first){ first=false; return a+' xml:space="preserve">'+xmlEsc(typographyText(txt))+b; }
-    return a+">"+b;
-  });
-  const cy=300000, cx=Math.round(D.sig.cx*cy/D.sig.cy);
-  para=para.replace(/<\/w:p>$/, signInlineRunXml(cx,cy,980)+"</w:p>");
-  return xml.slice(0,e)+para+xml.slice(e);
-}
-
 /* ---------- головна функція ---------- */
 function fillTemplateXml(xml, D){
-  xml=addFacsimileClause(xml, D, false);
   /* 1. номери додаткової угоди, акта та рахунку */
   const agr=String(D.agrNo||"1"), act=String(D.actNo||"1");
   if(agr!=="1"){
@@ -2734,7 +2712,6 @@ function fillSpecTable(xml, rows){
   return xml.slice(0,s)+body+xml.slice(e);
 }
 function fillFopXml(xml, D){
-  xml=addFacsimileClause(xml, D, true);
   /* номери */
   xml=xml.split("«Номер_дод_угоди»").join(val(D.agrNo));
   xml=xml.split("«Номер_акта»").join(val(D.actNo));
@@ -3797,7 +3774,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-02.1";
+const GEN_VERSION="2026-11-02.2";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
