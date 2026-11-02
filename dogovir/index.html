@@ -487,20 +487,9 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
           <div class="field col-2" style="margin-top:4px">
             <label style="display:flex;align-items:center;gap:9px;font-weight:600;cursor:pointer">
               <input type="checkbox" id="f_kep" style="width:16px;height:16px;accent-color:var(--seal)">
-              Клієнт підписує документи через КЕП (кваліфікований електронний підпис)
+              Документи підписуються КЕП (кваліфікований електронний підпис) — обома сторонами
             </label>
-            <div class="sub-hint">Додає до розділу «Заключні положення» пункт: Договір і документи на його виконання можуть підписуватись КЕП (ст. 18 ЗУ «Про електронні довірчі послуги»); у полі Клієнта — позначка «Підписано за допомогою КЕП», а в полі Адвоката проставляється його підпис (електронний вигляд). За замовчуванням вимкнено.</div>
-            <div class="sign-box" id="sign_box" hidden>
-              <div class="sign-prev" id="sign_prev"><span>Підпис не завантажено</span></div>
-              <div class="sign-ctl">
-                <div class="sign-btns">
-                  <button type="button" class="btn btn-ghost" id="sign_pick">Завантажити підпис адвоката</button>
-                  <button type="button" class="btn btn-ghost" id="sign_del" hidden>Видалити</button>
-                </div>
-                <div class="sub-hint">Фото або скан підпису на білому аркуші (PNG, JPG). Фон стає прозорим автоматично. <b>Зберігається лише в цьому браузері</b> і нікуди не надсилається; на іншому комп'ютері завантажте ще раз.</div>
-              </div>
-              <input type="file" id="sign_file" accept="image/png,image/jpeg,image/webp" hidden>
-            </div>
+            <div class="sub-hint">Додає до розділу «Заключні положення» пункт: Договір і документи на його виконання можуть підписуватись КЕП (ст. 18 ЗУ «Про електронні довірчі послуги»); у полях підпису Адвоката і Клієнта — позначка «Підписано за допомогою КЕП». Зображення підпису не вставляється. За замовчуванням вимкнено.</div>
           </div>
         </div>
 
@@ -2223,6 +2212,25 @@ function addTermPart(xml, fop){
   return xml.split("«Дата_розірвання_угоди»").join(val(T.date ? fmtDate(T.date,true) : "«___» ____________ 20__ року"));
 }
 
+/* ---------- КЕП: позначка в полі підпису Адвоката / Виконавця ----------
+   У рядку підписів з «КЕП_підпис» перша (порожня) комірка — лінія підпису
+   Адвоката: ставимо туди ту саму позначку, що й у Клієнта. У Згоді перша
+   комірка заповнена (дата) — там Адвокат не підписує, пропускаємо.
+   У Рахунку лінію «____» після «Виписав …» замінюємо позначкою. */
+const KEP_MARK="Підписано за допомогою КЕП";
+function kepMarks(xml){
+  xml=xml.replace(/<w:tr\b[^>]*>(?:(?!<\/w:tr>)[\s\S])*?«КЕП_підпис»(?:(?!<\/w:tr>)[\s\S])*?<\/w:tr>/g, row=>{
+    const rm=row.match(/<w:r>(<w:rPr>[\s\S]*?<\/w:rPr>)<w:t>«КЕП_підпис»<\/w:t><\/w:r>/);
+    const rPr=rm ? rm[1] : "";
+    return row.replace(/(<w:tc>\s*<w:tcPr>[\s\S]*?<\/w:tcPr>\s*<w:p\b[^>]*>)([\s\S]*?)(<\/w:p>)/, (m,a,b,c)=>{
+      if(b.indexOf("«")>=0 || /<w:t[^>]*>[^<]*\S[^<]*<\/w:t>/.test(b)) return m;
+      const pPr=/<w:jc\b[^>]*\/>/.test(b) ? b.replace(/<w:jc\b[^>]*\/>/,'<w:jc w:val="center"/>') : b.replace("<w:pPr>",'<w:pPr><w:jc w:val="center"/>');
+      return a+pPr+"<w:r>"+rPr+"<w:t>"+KEP_MARK+"</w:t></w:r>"+c;
+    });
+  });
+  return xml.replace(/(Виписав (?:Адвокат|Виконавець)[\s\S]*?)________________________/, "$1"+KEP_MARK);
+}
+
 /* ---------- головна функція ---------- */
 function fillTemplateXml(xml, D){
   /* 1. номери додаткової угоди, акта та рахунку */
@@ -2281,8 +2289,8 @@ function fillTemplateXml(xml, D){
   }
   /* незаповнені плейсхолдери шаблона не лишаються в документі;
      перелік закритий — текст у лапках («Адвокат», «Клієнт», «Сторони») не чіпається */
-  if(D.sig){ xml=injectAdvocateSign(xml, D.sig.cx, D.sig.cy); xml=injectInvoiceSign(xml, D.sig.cx, D.sig.cy); }
-  xml=xml.split("«КЕП_підпис»").join(D.kep ? "Підписано за допомогою КЕП" : "");
+  if(D.kep) xml=kepMarks(xml);
+  xml=xml.split("«КЕП_підпис»").join(D.kep ? KEP_MARK : "");
   for(const k of PLACEHOLDERS) xml=xml.split("«"+k+"»").join("");
   return widenCaptionSpaces(xml);
 }
@@ -2416,6 +2424,7 @@ async function addSignatureAssets(zip, bytes){
 /* якщо ввімкнено КЕП і підпис доступний — готує пакет і повертає {cx,cy};
    інакше null. Викликати з prepareDoc/prepareDocFop перед заповненням. */
 async function prepareAdvocateSign(zip, kep, xml){
+  return null;   /* лише КЕП: зображення підпису не вставляємо */
   if(!kep || xml.indexOf("«КЕП_підпис»")<0) return null;
   const sig=await loadSignature();
   if(!sig) return null;
@@ -2454,31 +2463,8 @@ function processSignature(file){
     img.src=u;
   });
 }
-(function(){
-  const box=$("#sign_box"), kep=$("#f_kep"), prev=$("#sign_prev"), del=$("#sign_del"), file=$("#sign_file");
-  if(!box) return;
-  function get(){ try{ return localStorage.getItem(SIGN_LS_KEY); }catch(e){ return null; } }
-  function render(){
-    const u=get();
-    prev.innerHTML = u ? '<img alt="Підпис адвоката">' : "<span>Підпис не завантажено</span>";
-    if(u) prev.querySelector("img").src=u;
-    del.hidden=!u;
-    box.hidden=!kep.checked;
-  }
-  kep.addEventListener("change",render);
-  $("#sign_pick").addEventListener("click",()=>file.click());
-  file.addEventListener("change",async()=>{
-    const f=file.files[0]; file.value=""; if(!f) return;
-    try{
-      const url=await processSignature(f);
-      try{ localStorage.setItem(SIGN_LS_KEY,url); }catch(e){ throw new Error("Браузер не дозволив зберегти підпис (приватний режим?)."); }
-      _signCache=undefined; render(); toast("Підпис збережено в цьому браузері");
-    }catch(e){ toast(e.message||String(e),true); }
-  });
-  del.addEventListener("click",()=>{ try{ localStorage.removeItem(SIGN_LS_KEY); }catch(e){} _signCache=undefined; render(); toast("Підпис видалено з цього браузера"); });
-  render();
-  window.signRender=render;
-})();
+/* підпис-зображення більше не використовується: прибираємо збережений раніше з браузера */
+try{ localStorage.removeItem(SIGN_LS_KEY); }catch(e){}
 
 /* ---------- паспорт: ID-картка або книжечка → текст для договору ---------- */
 (function(){
@@ -2739,8 +2725,8 @@ function fillFopXml(xml, D){
   if(!String(map["Замовник_пошта"]||"").trim()) xml=dropParagraph(xml,"«Замовник_пошта»");
   for(const k in map){ xml=xml.split("«"+k+"»").join(val(map[k])); }
   if(!D.kep) xml=dropParagraph(xml,"кваліфікованого електронного підпису");
-  if(D.sig){ xml=injectAdvocateSign(xml, D.sig.cx, D.sig.cy); xml=injectInvoiceSign(xml, D.sig.cx, D.sig.cy, "Виконавець"); }
-  xml=xml.split("«КЕП_підпис»").join(D.kep ? "Підписано за допомогою КЕП" : "");
+  if(D.kep) xml=kepMarks(xml);
+  xml=xml.split("«КЕП_підпис»").join(D.kep ? KEP_MARK : "");
   for(const k of FOP_PLACEHOLDERS) xml=xml.split("«"+k+"»").join("");
   return widenCaptionSpaces(xml);
 }
@@ -3774,7 +3760,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-02.2";
+const GEN_VERSION="2026-11-02.3";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
