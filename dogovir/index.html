@@ -2254,13 +2254,18 @@ function kepMarks(xml){
       return a+pPr+"<w:r>"+rPr+"<w:t>"+KEP_MARK+"</w:t></w:r>"+c;
     });
   });
-  /* Рахунок: позначку ставимо окремим рядком над лінією підпису — лінія лишається */
+  /* Рахунок: позначка замість «____», а лінія — нижньою межею комірки (як у договорі) */
   const v=xml.search(/Виписав (?:Адвокат|Виконавець)/);
   const u=v<0 ? -1 : xml.indexOf("________________________", v);
   if(u<0) return xml;
-  const [ps,pe]=paraBounds(xml,u);
-  const mark=freshIds(xml.slice(ps,pe)).replace("________________________", KEP_MARK);
-  return xml.slice(0,ps)+mark+xml.slice(ps);
+  const tc=xml.lastIndexOf("<w:tc>", u), tpe=xml.indexOf("</w:tcPr>", tc);
+  xml=xml.slice(0,u)+KEP_MARK+xml.slice(u+24);
+  if(tc>=0 && tpe>tc && tpe<u){
+    const tcPr=xml.slice(tc,tpe);
+    if(tcPr.indexOf("<w:tcBorders>")<0)
+      xml=xml.slice(0,tpe)+'<w:tcBorders><w:bottom w:val="single" w:sz="4" w:space="0" w:color="auto"/></w:tcBorders>'+xml.slice(tpe);
+  }
+  return xml;
 }
 
 /* ---------- передоплата: у Акті — що оплату вже отримано ---------- */
@@ -3013,6 +3018,13 @@ const SNAP_SHEET="Дані для повторного формування";
 /* registry: [{row:{…для Excel…}, snap:{…повний стан форми…}|null}] */
 let registry=[];
 const regKey=r=>["Номер договору","Дата укладення","Клієнт"].map(k=>String(r[k]||"").trim()).join("|");
+const regUpsertKey=r=>regKey(r)+"|"+["Виконавець","ЄДРПОУ / РНОКПП","№ дод. угоди"].map(k=>String(r[k]||"").trim()).join("|");
+/* прибирає дублі (однаковий договір і додаткова угода) — лишає найновіший запис */
+function dedupeRegistry(arr){
+  const seen=new Set(), out=[];
+  for(let i=arr.length-1;i>=0;i--){ const k=regUpsertKey(arr[i].row); if(seen.has(k)) continue; seen.add(k); out.unshift(arr[i]); }
+  return out;
+}
 
 /* ---- автозбереження реєстру у браузері (localStorage, під доменом сайту) ---- */
 const REG_LS_KEY="osadko_dogovir_registry_v1";
@@ -3034,7 +3046,7 @@ function loadRegistry(){
     const raw=localStorage.getItem(REG_LS_KEY);
     if(!raw) return;
     const arr=JSON.parse(raw);
-    if(Array.isArray(arr)) registry=arr.filter(e=>e && e.row);
+    if(Array.isArray(arr)) registry=dedupeRegistry(arr.filter(e=>e && e.row));
   }catch(err){ /* пошкоджені дані — ігноруємо */ }
 }
 
@@ -3116,7 +3128,9 @@ function addRegistryRow(){
     "Сума прописом": pb ? "" : $("#f_cost_words").value.trim(),
     "Порядок оплати": pb ? "Pro bono — правнича допомога надається безоплатно" : $("#f_pay_text").value.trim()
   };
-  registry.push({row, snap:snapshot()});
+  /* той самий договір (і та сама додаткова угода) — оновлюємо запис, а не додаємо новий */
+  const k=regUpsertKey(row), i=registry.findIndex(e=>e && e.row && regUpsertKey(e.row)===k);
+  if(i>=0) registry[i]={row, snap:snapshot()}; else registry.push({row, snap:snapshot()});
   renderRegistry();
 }
 
@@ -3851,7 +3865,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-04.6";
+const GEN_VERSION="2026-11-04.8";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
