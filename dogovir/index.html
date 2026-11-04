@@ -2254,7 +2254,13 @@ function kepMarks(xml){
       return a+pPr+"<w:r>"+rPr+"<w:t>"+KEP_MARK+"</w:t></w:r>"+c;
     });
   });
-  return xml.replace(/(Виписав (?:Адвокат|Виконавець)[\s\S]*?)________________________/, "$1"+KEP_MARK);
+  /* Рахунок: позначку ставимо окремим рядком над лінією підпису — лінія лишається */
+  const v=xml.search(/Виписав (?:Адвокат|Виконавець)/);
+  const u=v<0 ? -1 : xml.indexOf("________________________", v);
+  if(u<0) return xml;
+  const [ps,pe]=paraBounds(xml,u);
+  const mark=freshIds(xml.slice(ps,pe)).replace("________________________", KEP_MARK);
+  return xml.slice(0,ps)+mark+xml.slice(ps);
 }
 
 /* ---------- передоплата: у Акті — що оплату вже отримано ---------- */
@@ -3841,7 +3847,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-04.4";
+const GEN_VERSION="2026-11-04.5";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
