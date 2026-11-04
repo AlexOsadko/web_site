@@ -2357,6 +2357,9 @@ function fillTemplateXml(xml, D){
 
   /* 3-біс. Рахунок: сума за Актом */
   xml=setInvoiceTotal(xml, D.totalAct);
+  /* Рахунок адвоката: одержувач — Адвокат; «вартість послуг» підходить і для передоплати */
+  xml=xml.split("на рахунок Виконавця, без ПДВ:").join("на рахунок Адвоката, без ПДВ:")
+         .split("Загальна сума наданих послуг, без ПДВ*:").join("Загальна вартість послуг, без ПДВ*:");
 
   /* 4. значення */
   const map=Object.assign({}, D.vals);
@@ -2797,6 +2800,7 @@ function fillFopXml(xml, D){
   }
   /* Рахунок: сума за Актом */
   xml=setInvoiceTotal(xml, D.totalAct);
+  xml=xml.split("Загальна сума наданих послуг, без ПДВ*:").join("Загальна вартість послуг, без ПДВ*:");
   /* значення */
   const map=Object.assign({}, D.vals);
   map["Замовник_вступ"]=D.zamIntro;
@@ -3847,7 +3851,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-04.5";
+const GEN_VERSION="2026-11-04.6";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
