@@ -587,9 +587,9 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
             <div class="sub-hint">Номер рахунку-фактури, напр. 001, 002.</div>
           </div>
           <div class="field">
-            <label for="f_case">Номер судової справи <span style="font-weight:400;color:var(--muted)">(для Акта)</span></label>
+            <label for="f_case">Номер судової справи <span style="font-weight:400;color:var(--muted)">(для Додаткової угоди й Акта)</span></label>
             <input type="text" id="f_case" class="mono" placeholder="напр. 910/1234/26" autocomplete="off">
-            <div class="sub-hint">Дописується до кожної позиції Акта: «…у справі № …». Критично для стягнення витрат на правничу допомогу (ст. 134 ГПК / 137 ЦПК / 134 КАС). Позасудові справи — лишіть порожнім.</div>
+            <div class="sub-hint">У Додатковій угоді — у п. 1: «…допомогу у справі № …, а саме:»; в Акті — до кожної позиції: «…у справі № …». Критично для стягнення витрат на правничу допомогу (ст. 134 ГПК / 137 ЦПК / 134 КАС). Позасудові справи — лишіть порожнім.</div>
           </div>
         </div>
 
@@ -2279,6 +2279,8 @@ function fillTemplateXml(xml, D){
     xml=xml.split("допомоги №"+NBSP+"1").join("допомоги №"+NBSP+xmlEsc(act));
   }
 
+  /* № справи — у п. 1 Додаткової угоди */
+  if(D.caseNo) xml=xml.split("надати Клієнту правничу (правову) допомогу, а"+NBSP+"саме:").join("надати Клієнту правничу (правову) допомогу у справі №"+NBSP+xmlEsc(D.caseNo)+", а"+NBSP+"саме:");
   if(D.prepaid) xml=insertParaAfter(xml,"Інші супутні дії, необхідні для належного виконання доручення",
     `Вартість наданої правничої (правової) допомоги оплачена Клієнтом у повному обсязі авансом відповідно до Додаткової угоди № ${agr}; заборгованість Клієнта перед Адвокатом відсутня.`);
 
@@ -2648,6 +2650,7 @@ async function prepareDoc(){
     kep: ($("#f_kep") ? $("#f_kep").checked : false),
     actDate: fmtDate(($("#f_act_date")||{}).value||"", true),
     prepaid: isPrepaid(),
+    caseNo: caseNo,
     agrNo: v("f_agr_no")||"1",
     actNo: v("f_act_no")||"1",
     mode: pb ? "probono" : (hourly ? "hourly" : "fixed"),
@@ -2742,6 +2745,7 @@ function fillFopXml(xml, D){
   /* номери */
   xml=xml.split("«Номер_дод_угоди»").join(val(D.agrNo));
   xml=xml.split("«Номер_акта»").join(val(D.actNo));
+  if(D.caseNo) xml=xml.split("що надаються за Договором:").join("що надаються за Договором у справі №"+NBSP+xmlEsc(D.caseNo)+":");
   if(D.prepaid) xml=xml.split("Всього до сплати – «Вартість_послуг_грн» грн.").join(
     xmlEsc(typographyText(`Вартість послуг оплачена Замовником у повному обсязі авансом відповідно до Додаткової угоди № ${D.agrNo}; заборгованість Замовника перед Виконавцем відсутня.`)));
   /* таблиці: перша — Додаткова угода, друга — Акт */
@@ -2799,6 +2803,7 @@ async function prepareDocFop(){
     kep: ($("#f_kep") ? $("#f_kep").checked : false),
     actDate: fmtDate(($("#f_act_date")||{}).value||"", true),
     prepaid: isPrepaid(),
+    caseNo: caseNo,
     agrNo: v("f_agr_no")||"1",
     actNo: v("f_act_no")||"1",
     mode: pb ? "probono" : (hourly ? "hourly" : "fixed"),
@@ -3807,7 +3812,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-03.1";
+const GEN_VERSION="2026-11-04.1";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
