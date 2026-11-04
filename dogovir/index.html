@@ -607,7 +607,7 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
         <p class="s-desc" style="margin:-4px 0 12px">Перемикайте категорію, позначайте потрібні позиції — і додавайте їх до переліку нижче. Коди та одиниці обліку відповідають Додатку № 1 «Перелік видів правової допомоги (адвокатських послуг) та одиниць їх обліку»; наведіть курсор на одиницю, щоб побачити її визначення.</p>
         <div class="ctype" id="cat_tabs" style="flex-wrap:wrap;margin-bottom:12px"></div>
         <div class="cat-tools">
-          <input type="search" id="cat_search" placeholder="Пошук за назвою або кодом — напр. «відзив» або Г-04" autocomplete="off">
+          <input type="search" id="cat_search" placeholder="Пошук у всіх категоріях — напр. «матеріали справи», «відзив» або Г-04" autocomplete="off">
           <label class="cat-chk"><input type="checkbox" id="cat_hours_only"> лише погодинні</label>
           <label class="cat-chk"><input type="checkbox" id="cat_all_cats"> шукати в усіх категоріях</label>
         </div>
@@ -1285,13 +1285,17 @@ function renderCatTabs(){
 function catFiltered(){
   const q=($("#cat_search")?$("#cat_search").value:"").trim().toLowerCase();
   const hoursOnly=$("#cat_hours_only") && $("#cat_hours_only").checked;
-  const allCats=!!($("#cat_all_cats") && $("#cat_all_cats").checked);
+  /* з пошуковим запитом шукаємо в усіх категоріях; слова запиту — за основою
+     (перші 5 літер), у будь-якому порядку: «матеріали справи» знайде «з матеріалами судової справи» */
+  const allCats=!!q || !!($("#cat_all_cats") && $("#cat_all_cats").checked);
   const cat=activeCatalog();
   const src=(allCats ? cat.flatMap(c=>c.items) : (cat[catActive]||cat[0]).items);
+  const words=q.split(/[\s,.;:()«»"]+/).filter(Boolean).map(w=>/^[a-zа-яіїєґ]+$/i.test(w) && w.length>5 ? w.slice(0,5) : w);
   return src.filter(it=>{
     if(hoursOnly && !isHourUnit(it[2])) return false;
     if(!q) return true;
-    return it[0].toLowerCase().indexOf(q)>=0 || it[1].toLowerCase().indexOf(q)>=0;
+    const hay=(it[0]+" "+it[1]).toLowerCase().replace(/[’ʼ']/g,"");
+    return words.every(w=>hay.indexOf(w.replace(/[’ʼ']/g,""))>=0);
   });
 }
 function renderCatList(){
@@ -3837,7 +3841,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-04.2";
+const GEN_VERSION="2026-11-04.3";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
