@@ -2266,6 +2266,36 @@ function insertParaAfter(xml, marker, text){
 }
 function isPrepaid(){ return !isProBono() && $("#f_pay_preset") && $("#f_pay_preset").value==="C"; }
 
+/* ---------- № справи в позиціях переліку ----------
+   Не додається до позицій, що не стосуються судової справи (консультації, договори,
+   корпоративні й реєстраційні дії, досудові звернення, виконавче провадження тощо).
+   Якщо в назві вже є «справи / справі / справу» — номер ставиться одразу після цього
+   слова («Ознайомлення з матеріалами судової справи № …»), інакше дописується в кінці.
+   У кримінальних позиціях — «у кримінальному провадженні № …». */
+const CASE_SKIP=new Set([
+  ...Array.from({length:40},(_,i)=>"З-"+String(i+1).padStart(2,"0")).filter(c=>c!=="З-35"),
+  "К-01","К-02","К-03","К-32",
+  ...Array.from({length:19},(_,i)=>"В-"+String(i+1).padStart(2,"0")).filter(c=>!["В-08","В-12","В-13"].includes(c)),
+  "М-01","М-08","М-11","М-14","М-15","М-16",
+  "Г-35","Г-39","Г-40","Г-41","Г-42","Г-43","Г-44","Г-45","Г-46","Г-47","Г-48","Г-49","Г-50","Г-51",
+  "А-02","АП-02",
+  ...Array.from({length:22},(_,i)=>"Ю-"+String(i+1).padStart(2,"0")),
+  "Ю-25","Ю-33","Ю-34","Ю-35","Ю-36","Ю-37","Ю-38"
+]);
+function caseText(r, caseNo){
+  const t=String(r.t||"");
+  if(!caseNo || (r.code && CASE_SKIP.has(r.code)) || t.indexOf(caseNo)>=0) return t;
+  const no="№"+NBSP+caseNo;
+  if(/^К-/.test(r.code||"")){
+    const km=t.match(/кримінальн(?:ому|ого) провадженн(?:і|я)/);
+    if(km) return t.slice(0,km.index+km[0].length)+" "+no+t.slice(km.index+km[0].length);
+    return t.replace(/[.\s]+$/,"")+" у кримінальному провадженні "+no;
+  }
+  const m=t.match(/справ(?:и|і|у)(?![а-яіїєґʼ'’])/i);
+  if(m) return t.slice(0,m.index+m[0].length)+" "+no+t.slice(m.index+m[0].length);
+  return t.replace(/[.\s]+$/,"")+" у справі "+no;
+}
+
 /* ---------- головна функція ---------- */
 function fillTemplateXml(xml, D){
   /* 1. номери додаткової угоди, акта та рахунку */
@@ -2630,9 +2660,7 @@ async function prepareDoc(){
      дієслівне формулювання + прив'язка до справи важливі для стягнення витрат
      на правничу допомогу (ст. 134 ГПК / 137 ЦПК / 134 КАС). */
   const caseNo=v("f_case");
-  const withCase = list => caseNo
-    ? list.map(r=>({...r, t: /справ[аиіу]/i.test(r.t) ? r.t : r.t.replace(/[.\s]+$/,"")+" у справі № "+caseNo}))
-    : list;
+  const withCase = list => caseNo ? list.map(r=>({...r, t: caseText(r, caseNo)})) : list;
   const actNamed = withCase(act);
   const costStr=(function(){ const c=parseNum(v("f_cost")); return (c!=null && c>0) ? fmtMoney(c) : v("f_cost"); })();
 
@@ -2789,9 +2817,7 @@ async function prepareDocFop(){
   const pb=isProBono();
   const act=hourly ? actRows(rows) : rows;
   const caseNo=v("f_case");
-  const withCase = list => caseNo
-    ? list.map(r=>({...r, t: /справ[аиіу]/i.test(r.t) ? r.t : r.t.replace(/[.\s]+$/,"")+" у справі № "+caseNo}))
-    : list;
+  const withCase = list => caseNo ? list.map(r=>({...r, t: caseText(r, caseNo)})) : list;
   const actNamed = withCase(act);
   const costStr=(function(){ const c=parseNum(v("f_cost")); return (c!=null && c>0) ? fmtMoney(c) : v("f_cost"); })();
   const yur=t==="yur";
@@ -3811,7 +3837,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-04.1";
+const GEN_VERSION="2026-11-04.2";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
