@@ -597,3 +597,21 @@ body.hm input.f-bad, body.hm textarea.f-bad { border-color: #b3261e !important; 
   :root[data-theme="dark"] body.hm .hm-head .site-nav .nav-call { background: #3a4d94 !important; }
   :root[data-theme="dark"] body.hm .hm-head .site-nav .nav-msg { border-color: var(--e-text); color: var(--e-text) !important; }
 }
+
+/* ── Аудит: виправлення ── */
+/* 1. Номер у синьому блоці статті був синім на синьому */
+body.hm .article-page .lead-cta-or a, body.hm .lead-cta-or a { color: #fff !important; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+/* 2. «Перейти до вмісту» видно в обох темах */
+.skip-link, :root[data-theme="dark"] .skip-link { background: #1b2a6b !important; color: #fff !important; outline: 2px solid #fff; outline-offset: -4px; }
+/* 5. Хлібні крихти: контраст і зона дотику */
+body.hm .crumbs .cur { color: var(--e-muted); }
+@media (max-width: 860px) { body.hm .crumbs a { display: inline-block; padding: 11px 0; margin: -11px 0; } }
+/* 6. Поля форми заявки ≥ 44 px */
+body.hm .lead-cta input:not(.hp-field), body.hm .lead-cta textarea { min-height: 48px; }
+/* 4. Шапка на вузьких екранах (≤ 360 px) */
+@media (max-width: 360px) {
+  body.hm .hm-brand, body.hm .hm-head.solid .hm-brand, body.home .hm-head:not(.solid) .hm-brand { font-size: 15px; }
+  body.hm .hm-brand img { width: 30px; height: 30px; }
+  body.hm .hm-tel-m { flex: 0 0 44px; }
+  body.hm .hm-head .nav-toggle { flex: 0 0 auto; }
+}
