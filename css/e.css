@@ -579,3 +579,21 @@ body.hm input.f-bad, body.hm textarea.f-bad { border-color: #b3261e !important; 
 :root[data-theme="dark"] .form-fail, .lead-cta .form-fail { background: #3a1d24; border-color: #ffb4ab; color: #ffe4e0; }
 /* Кнопка заявки в синьому блоці під статтями/послугами — читабельна й у темній темі */
 :root[data-theme="dark"] body.hm .lead-cta button[type="submit"] { background: #e8ecff !important; color: #1b2a6b !important; }
+
+/* Зміст статті */
+.art-toc { margin: 8px 0 32px; padding: 20px 24px; background: var(--e-grey); border-top: 3px solid var(--e-ink); }
+.art-toc b { display: block; margin-bottom: 10px; font: 500 15px/1.2 var(--e-head-font); text-transform: uppercase; letter-spacing: .06em; color: var(--e-ink); }
+.art-toc ol { margin: 0; padding-left: 22px; list-style: decimal; }
+.art-toc li { display: list-item; list-style: decimal; margin: 0; padding: 5px 0 5px 4px; font: 400 16px/1.45 var(--e-body-font); color: var(--e-muted); }
+.art-toc a { display: inline; padding: 4px 0; color: var(--e-text); text-decoration: underline; text-decoration-color: var(--e-line); text-underline-offset: 3px; }
+.art-toc a:hover { color: var(--e-ink); text-decoration-color: currentColor; }
+.article-page h2[id] { scroll-margin-top: 96px; }
+/* Мобільне меню: дзвінок і чат прямо в меню */
+.site-nav .nav-cta { display: none; }
+@media (max-width: 860px) {
+  body.hm .hm-head .site-nav .nav-cta { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; margin: 8px 18px 0; font: 500 16px/1 var(--e-head-font); text-transform: uppercase; letter-spacing: .05em; }
+  body.hm .hm-head .site-nav .nav-call { margin-top: 18px; background: #1b2a6b !important; color: #fff !important; }
+  body.hm .hm-head .site-nav .nav-msg { background: transparent !important; border: 1.5px solid var(--e-ink); color: var(--e-ink) !important; margin-bottom: 16px; }
+  :root[data-theme="dark"] body.hm .hm-head .site-nav .nav-call { background: #3a4d94 !important; }
+  :root[data-theme="dark"] body.hm .hm-head .site-nav .nav-msg { border-color: var(--e-text); color: var(--e-text) !important; }
+}
