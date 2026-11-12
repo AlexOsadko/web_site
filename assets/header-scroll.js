@@ -32,13 +32,32 @@
 /* Перемикач теми (день/ніч). Ініціалізація теми — інлайн у <head>. */
 (function () {
   var btn = document.getElementById('themeToggle');
-  if (!btn) return;
-  btn.addEventListener('click', function () {
-    var r = document.documentElement;
+  var r = document.documentElement;
+  function toggle() {
     var next = r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     r.setAttribute('data-theme', next);
     try { localStorage.setItem('theme', next); } catch (e) {}
-  });
+    label();
+  }
+  if (btn) btn.addEventListener('click', toggle);
+  // Телефон: у шапці кнопки теми немає — перемикач у мобільному меню
+  var nav = document.getElementById('nav'), mb = null;
+  function label() {
+    if (!mb) return;
+    var dark = r.getAttribute('data-theme') === 'dark';
+    mb.innerHTML = (dark
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>Денна тема'
+      : '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>Нічна тема');
+    mb.setAttribute('aria-pressed', dark ? 'true' : 'false');
+  }
+  if (nav && btn) {
+    mb = document.createElement('button');
+    mb.type = 'button';
+    mb.className = 'nav-theme';
+    mb.addEventListener('click', toggle);
+    nav.appendChild(mb);
+    label();
+  }
 })();
 
 /* Мобільне меню: гамбургер відкриває/закриває навігацію (спільно для всіх сторінок). */
