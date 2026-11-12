@@ -619,3 +619,52 @@ body.hm .lead-cta input:not(.hp-field), body.hm .lead-cta textarea { min-height:
 body.home .reveal, body.home .reveal.in { opacity: 1 !important; animation: none !important; transform: none !important; }
 /* UX 3. Памʼятки відкриті; форма — необовʼязкове «передзвоніть» */
 body.home .magnet-form .mf-sub { margin: -4px 0 6px; font: 400 15px/1.45 var(--e-body-font); color: var(--e-muted); }
+
+/* ═══ Рух: лише як відповідь на дію людини. Вимикається при «зменшенні руху». ═══ */
+@media (prefers-reduced-motion: no-preference) {
+  /* 1. Переходи між сторінками: шапка й нижня панель стоять, вміст м'яко змінюється */
+  @view-transition { navigation: auto; }
+  body.hm .hm-head { view-transition-name: site-head; }
+  body.hm .mbar { view-transition-name: site-mbar; }
+  ::view-transition-old(root) { animation: vt-out .16s cubic-bezier(.4, 0, 1, 1) both; }
+  ::view-transition-new(root) { animation: vt-in .26s cubic-bezier(0, 0, .2, 1) both; }
+  ::view-transition-group(site-head), ::view-transition-group(site-mbar) { animation: none; }
+  @keyframes vt-out { to { opacity: 0; } }
+  @keyframes vt-in { from { opacity: 0; transform: translateY(10px); } }
+
+  /* 2. Відгук на натискання */
+  :is(.e-btn, .hm-pill, .btn, .lp-btn, .nav-cta, .hc-chip, .hc-send, .hm-tel-m, .mbar a, .mbar button, .pr-more, .hc-fab, .lead-cta button[type=submit]) {
+    transition: transform .12s cubic-bezier(.2, 0, 0, 1), background-color .2s, color .2s, border-color .2s;
+  }
+  :is(.e-btn, .hm-pill, .btn, .lp-btn, .nav-cta, .hc-chip, .hc-send, .hm-tel-m, .mbar a, .mbar button, .pr-more, .hc-fab, .lead-cta button[type=submit]):active {
+    transform: scale(.97);
+  }
+
+  /* 3. Меню на телефоні плавно виїжджає; чат виростає з кнопки (уже є — тут лише плавніша крива) */
+  @media (max-width: 860px) {
+    .site-nav.open { animation: nav-in .24s cubic-bezier(0, 0, .2, 1) both; }
+    .site-nav.open > * { animation: nav-item .3s cubic-bezier(0, 0, .2, 1) both; }
+    .site-nav.open > :nth-child(2) { animation-delay: .02s; }
+    .site-nav.open > :nth-child(3) { animation-delay: .04s; }
+    .site-nav.open > :nth-child(4) { animation-delay: .06s; }
+    .site-nav.open > :nth-child(5) { animation-delay: .08s; }
+    .site-nav.open > :nth-child(n+6) { animation-delay: .1s; }
+  }
+  @keyframes nav-in { from { opacity: 0; transform: translateY(-8px); } }
+  @keyframes nav-item { from { opacity: 0; transform: translateY(-4px); } }
+  body.hm .hc-panel { transition: opacity .18s ease-out, transform .26s cubic-bezier(.2, .9, .3, 1), visibility .26s; }
+
+  /* 4. Питання-відповіді розгортаються плавно (Chrome/Edge; інші — як раніше) */
+  .faq details { interpolate-size: allow-keywords; }
+  .faq details::details-content { height: 0; overflow: clip; transition: height .28s cubic-bezier(.2, 0, 0, 1), content-visibility .28s allow-discrete; }
+  .faq details[open]::details-content { height: auto; }
+  .faq summary::after { transition: transform .25s cubic-bezier(.2, 0, 0, 1); }
+
+  /* 5. Успішна відправка: позначка «✓» з'являється */
+  .form-ok, .cb-ok { animation: ok-in .35s cubic-bezier(.2, 0, 0, 1) both; }
+  .form-ok::before, .cb-ok::before { animation: ok-pop .45s .1s cubic-bezier(.3, 1.6, .5, 1) both; }
+  @keyframes ok-in { from { opacity: 0; transform: translateY(6px); } }
+  @keyframes ok-pop { from { transform: scale(0); } }
+}
+/* Позначка «✓» перед повідомленням про успіх (без руху теж) */
+.form-ok::before, .cb-ok::before { content: "✓"; display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 8px; border-radius: 50%; background: #15803d; color: #fff; font: 700 13px/1 system-ui, sans-serif; vertical-align: -5px; }
