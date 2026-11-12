@@ -536,3 +536,28 @@ body.hm .pr-more { display: inline-block; padding: 12px 0; }
 /* Чат: автовідповідь помічника позначена окремо від відповідей адвоката */
 .hc-bot-l { display: block; margin: 0 0 4px; font-size: 12px; font-weight: 700; color: var(--e-muted, #4d5465); letter-spacing: .02em; }
 .hc-typing { font-size: 14px; color: var(--e-muted, #4d5465); font-style: italic; }
+
+/* ---------- Сторінка «Контакти»: синій блок із формою + адреса, мапа, кроки ---------- */
+body.hm .kp-top { padding-top: 72px; }
+body.hm .hm-form .kp-fh { font: 500 24px/1.15 var(--e-head-font); text-transform: uppercase; color: var(--e-ink); margin: 0 0 14px; }
+:root[data-theme="dark"] body.hm .hm-contact .hm-form .kp-fh { color: #fff; }
+body.hm .lead-form .form-ok { display: none; }
+.kp-info { padding: 64px 0 88px; }
+.kp-lines { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 32px; border-top: 1px solid var(--e-line); }
+.kp-lines div { padding: 20px 0; border-bottom: 1px solid var(--e-line); }
+.kp-lines b { display: block; margin-bottom: 6px; font: 500 15px/1.2 var(--e-head-font); text-transform: uppercase; letter-spacing: .05em; color: var(--e-muted); }
+.kp-lines a, .kp-lines span { font-size: 18px; color: var(--e-text); text-decoration: none; }
+.kp-lines a:hover { color: var(--e-ink); text-decoration: underline; }
+.kp-map { margin-top: 28px; border: 1px solid var(--e-line); }
+.kp-map iframe { display: block; width: 100%; height: 340px; border: 0; }
+:root[data-theme="dark"] .kp-map iframe { filter: brightness(.85) contrast(1.05); }
+.kp-h2 { margin: 56px 0 18px; font: 600 clamp(26px, 2.6vw, 34px)/1.1 var(--e-head-font); text-transform: uppercase; color: var(--e-ink); }
+.kp-steps { list-style: none; margin: 0; padding: 20px 0 0; counter-reset: kp; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; border-top: 1px solid var(--e-line); }
+.kp-steps li { counter-increment: kp; color: var(--e-muted); font-size: 17px; }
+.kp-steps li::before { content: "Крок " counter(kp); display: block; margin-bottom: 6px; font: 500 15px/1.2 var(--e-head-font); text-transform: uppercase; letter-spacing: .06em; color: var(--e-ink); }
+@media (max-width: 860px) {
+  body.hm .kp-top { padding-top: 40px; }
+  .kp-info { padding: 40px 0 64px; }
+  .kp-lines, .kp-steps { grid-template-columns: 1fr; }
+  .kp-map iframe { height: 260px; }
+}
