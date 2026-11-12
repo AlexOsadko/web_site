@@ -615,3 +615,7 @@ body.hm .lead-cta input:not(.hp-field), body.hm .lead-cta textarea { min-height:
   body.hm .hm-tel-m { flex: 0 0 44px; }
   body.hm .hm-head .nav-toggle { flex: 0 0 auto; }
 }
+/* UX 7. Головна без проявлення секцій під час прокручування */
+body.home .reveal, body.home .reveal.in { opacity: 1 !important; animation: none !important; transform: none !important; }
+/* UX 3. Памʼятки відкриті; форма — необовʼязкове «передзвоніть» */
+body.home .magnet-form .mf-sub { margin: -4px 0 6px; font: 400 15px/1.45 var(--e-body-font); color: var(--e-muted); }

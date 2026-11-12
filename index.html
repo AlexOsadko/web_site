@@ -27,8 +27,8 @@
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/oswald.woff2" crossorigin>
   <link rel="stylesheet" href="css/style.css?v=148">
   <link rel="stylesheet" href="css/site.css?v=27">
-  <link rel="stylesheet" href="css/e.css?v=25">
-  <script defer src="assets/site.js?v=15"></script>
+  <link rel="stylesheet" href="css/e.css?v=26">
+  <script defer src="assets/site.js?v=16"></script>
   <script defer src="assets/header-scroll.js?v=15"></script>
   <script defer src="assets/callback-popup.js?v=23"></script>
   <script type="application/ld+json">
@@ -220,51 +220,47 @@
     </div>
   </section>
 
-  <!-- Lead-магніт: бібліотека памʼяток -->
+  <!-- Бібліотека памʼяток (вільне завантаження + форма «передзвоніть») -->
   <section class="hm-memo" id="lead-magnet">
     <div class="hm-c">
       <div class="reveal">
         <span class="hm-kick">Безкоштовно</span>
         <h2 class="hm-h2 hm-wide">Памʼятки від адвоката <span>— коли важлива кожна хвилина</span></h2>
-        <p class="hm-sub">Короткі інструкції «що робити прямо зараз». Залиште контакт один раз — і завантажте будь-яку.</p>
+        <p class="hm-sub">Короткі інструкції «що робити прямо зараз». Завантажуйте вільно, без реєстрації.</p>
       </div>
-      <div class="hm-mbox magnet" id="magnetLib">
+      <div class="hm-mbox magnet unlocked" id="magnetLib">
         <div>
           <div class="magnet-cards">
           <article class="magnet-card">
             <div class="mc-body"><h3>Забрали права / протокол за ст. 130 КУпАП</h3><p>Права під час зупинки, огляд на стан сп'яніння, помилки поліції.</p></div>
             <a class="mc-dl" href="assets/pamyatka-st-130.pdf?v=2" target="_blank" rel="noopener" download>Завантажити PDF →</a>
-            <span class="mc-lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> За контактом</span>
           </article>
           <article class="magnet-card">
             <div class="mc-body"><h3>Зупинив ТЦК або вручають повістку</h3><p>Ваші права, законна процедура, відстрочка від мобілізації.</p></div>
             <a class="mc-dl" href="assets/pamyatka-tck.pdf?v=2" target="_blank" rel="noopener" download>Завантажити PDF →</a>
-            <span class="mc-lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> За контактом</span>
           </article>
           <article class="magnet-card">
             <div class="mc-body"><h3>Що робити під час обшуку</h3><p>Права, порядок дій і як зафіксувати порушення слідства.</p></div>
             <a class="mc-dl" href="assets/pamyatka-obshuk.pdf?v=2" target="_blank" rel="noopener" download>Завантажити PDF →</a>
-            <span class="mc-lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> За контактом</span>
           </article>
           <article class="magnet-card">
             <div class="mc-body"><h3>Що робити одразу після ДТП</h3><p>Алгоритм на місці, європротокол чи поліція, що зафіксувати.</p></div>
             <a class="mc-dl" href="assets/pamyatka-dtp.pdf?v=2" target="_blank" rel="noopener" download>Завантажити PDF →</a>
-            <span class="mc-lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> За контактом</span>
           </article>
           <article class="magnet-card">
             <div class="mc-body"><h3>Якщо телефонують колектори</h3><p>Що їм заборонено, ваші права й як зупинити незаконний тиск.</p></div>
             <a class="mc-dl" href="assets/pamyatka-kolektory.pdf?v=2" target="_blank" rel="noopener" download>Завантажити PDF →</a>
-            <span class="mc-lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> За контактом</span>
           </article>
           </div>
         </div>
         <form class="hm-form magnet-form" id="magnetForm">
-          <h3>Відкрити доступ до памʼяток</h3>
+          <h3>Потрібна допомога саме з вашою ситуацією?</h3>
+          <p class="mf-sub">Памʼятка дає загальний порядок дій. Залиште номер — передзвоню і скажу, що робити у вашому випадку.</p>
           <label>Ваше імʼя<input name="name" type="text" required placeholder="Імʼя" autocomplete="name"></label>
           <label>Телефон<input name="phone" type="tel" required placeholder="+38 (0__) ___-__-__" inputmode="tel" autocomplete="tel"></label>
           <input type="text" name="company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <button class="hm-pill hm-blue" type="submit">Відкрити памʼятки</button>
-          <div class="form-ok" id="magnetOk">Готово! Памʼятки розблоковано — завантажуйте потрібні зі списку.</div>
+          <button class="hm-pill hm-blue" type="submit">Передзвоніть мені</button>
+          <div class="form-ok" id="magnetOk">Дякую! Передзвоню того ж робочого дня.</div>
           <small>Телефоную лише за потреби. Контакт не передаю третім особам.</small>
         </form>
       </div>
@@ -395,7 +391,7 @@
     e.preventDefault(); submitLead(leadForm, 'formOk', 'Заявка на консультацію');
   });
 
-  // ── Lead-магніт: контакт в обмін на пам'ятки (PDF) ──
+  // ── Блок пам'яток: PDF відкриті всім; форма — необов'язкове прохання передзвонити ──
   const magnetForm = document.getElementById('magnetForm');
   let magnetLead = null;                 // збережений контакт після надсилання форми
   const magnetSent = new Set();          // щоб не дублювати повідомлення про ту саму пам'ятку
@@ -415,11 +411,9 @@
     if (!name || !phone) return;
     magnetLead = { name, phone };
     // Заявка (контакт) — best-effort; доступ до пам'яток видаємо в будь-якому разі.
-    magnetNotify({ name, phone, message: 'Відкрив доступ до пам’яток', source: 'Lead-магніт: бібліотека пам’яток', page: location.href, token: '' });
+    magnetNotify({ name, phone, message: 'Просить дзвінок (блок пам’яток)', source: 'Блок пам’яток на головній', page: location.href, token: '' });
     const ok = document.getElementById('magnetOk');
-    const lib = document.getElementById('magnetLib');
-    if (lib) lib.classList.add('unlocked');            // розблокувати всі завантаження
-    magnetForm.querySelectorAll('input, button').forEach(el => { el.disabled = true; });
+        magnetForm.querySelectorAll('input, button').forEach(el => { el.disabled = true; });
     if (ok) ok.style.display = 'block';
     if (window.osadkoConversion) window.osadkoConversion();
   });
