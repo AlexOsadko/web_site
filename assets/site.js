@@ -88,8 +88,8 @@
 })();
 
 // Нижня панель на телефоні: «Подзвонити» і «Написати» (відкриває чат на сайті).
-// З'являється одразу на внутрішніх сторінках і після першого екрана — на головній,
-// де кнопки вже є в першому екрані.
+// З'являється, коли кнопки першого екрана (головна, сторінки послуг) прокручено;
+// на решті сторінок — одразу.
 (function () {
   if (document.querySelector(".mbar") || /\/(dogovir|p|vidguk\/kartka)\//.test(location.pathname)) return;
   var ICON_TEL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>';
@@ -101,7 +101,8 @@
       + '<button type="button" class="mb-chat js-chat">' + ICON_CHAT + 'Написати</button>';
     document.body.appendChild(bar);
     document.body.classList.add("has-mbar");
-    var hero = document.querySelector(".hm-hero");
+    // Панель не дублює кнопки першого екрана: з'являється, коли вони сховалися
+    var hero = document.querySelector(".hm-hero") || document.querySelector(".lp-cta2");
     if (!hero) { bar.classList.add("show"); return; }
     var upd = function () { bar.classList.toggle("show", hero.getBoundingClientRect().bottom < 120); };
     upd();

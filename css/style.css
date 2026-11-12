@@ -106,7 +106,7 @@ body {
 }
 
 /* Довгі слова в заголовках/тексті переносяться, а не обрізаються краєм екрана */
-h1, h2, h3, p, .section-title, .contacts-card h2, .contacts-card p, .article-card h3 {
+h1, h2, h3, p, .section-title, .contacts-card h2, .contacts-card p {
   overflow-wrap: break-word;
 }
 /* Дозволити елементам grid/flex звужуватися нижче ширини їхнього вмісту */
@@ -303,42 +303,12 @@ a:focus-visible, button:focus-visible, summary:focus-visible,
   gap: 56px;
   align-items: center;
 }
-.hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 11px;
-  font-size: .9rem;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  font-weight: 700;
-  margin-bottom: 22px;
-}
+
 /* Крапка, що пульсує колом (живий індикатор) */
-.hero-eyebrow::before {
-  content: "";
-  flex: none;
-  width: 9px; height: 9px; border-radius: 50%;
-  background: var(--blue);
-  animation: eyebrowDot 1.9s ease-out infinite;
-}
-@keyframes eyebrowDot {
-  0%   { box-shadow: 0 0 0 0 var(--dot-ring); }
-  70%  { box-shadow: 0 0 0 9px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
-}
+
 /* Градієнтний текст, що «друкується» по літері (курсор — під час набору) */
-.hero-eyebrow .he-text {
-  background: linear-gradient(92deg, var(--blue), var(--blue2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-}
-.hero-eyebrow .he-text.typing {
-  border-right: 2px solid var(--blue2);
-  padding-right: 2px;
-  animation: eyebrowCaret 1s steps(1) infinite;
-}
+
+
 @keyframes eyebrowCaret { 50% { border-right-color: transparent; } }
 @keyframes pulse { 50% { opacity: .4; } }
 
@@ -561,30 +531,14 @@ p.body-reveal,
 
 /* ===== Статті ===== */
 .articles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-.article-card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 32px;
-  color: var(--ink);
-  transition: transform .25s, box-shadow .25s, border-color .25s;
-}
-.article-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); border-color: var(--blue2); }
-.article-card .date {
-  display: inline-block;
-  background: rgba(30, 80, 230, .08);
-  color: var(--blue);
-  border-radius: 100px;
-  padding: 6px 14px;
-  font-size: .78rem;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-.article-card h3 { font-size: 1.32rem; font-weight: 600; margin-bottom: 10px; }
-.article-card p { color: var(--muted); font-size: .93rem; margin-bottom: 18px; }
-.article-card .more { color: var(--blue); font-weight: 600; font-size: .9rem; }
-.article-card .more span { display: inline-block; transition: transform .25s; }
-.article-card:hover .more span { transform: translateX(6px); }
+
+
+
+
+
+
+
+
 
 /* ===== Lead-магніт (бібліотека пам'яток) ===== */
 .magnet {
@@ -824,8 +778,8 @@ a.card:hover .more span { transform: translateX(5px); }
   .reveal { opacity: 1; }
   .reveal.in { animation: none; }
   .hero::before { animation: none; }
-  .hero-eyebrow::before { animation: none; }
-  .hero-eyebrow .he-text.typing { animation: none; border-right-color: transparent; }
+
+
   .fab-toggle .fi-phone, .fab-toggle .fi-mail { animation: none; }
   .fab:not(.open) .fab-toggle .fi-mail { opacity: 0; }
   .fab-top svg { animation: none; }
@@ -1126,14 +1080,9 @@ a.card:hover .more span { transform: translateX(5px); }
 .cat-social   { color: var(--c-social);   background: rgba(67,56,202,.10); }
 
 /* Верхня кольорова смужка на картці статті */
-.article-card { position: relative; overflow: hidden; }
-.article-card::before {
-  content: "";
-  position: absolute; top: 0; left: 0; right: 0; height: 4px;
-  background: var(--accent-c, var(--blue));
-  transform: scaleX(0); transform-origin: left; transition: transform .35s;
-}
-.article-card:hover::before { transform: scaleX(1); }
+
+
+
 .ac-civil    { --accent-c: var(--c-civil); }
 .ac-family   { --accent-c: var(--c-family); }
 .ac-labor    { --accent-c: var(--c-labor); }
@@ -1394,13 +1343,8 @@ a.card:hover .more span { transform: translateX(5px); }
 /* ===================== Анімації сторінок ===================== */
 
 /* Hero: послідовна поява елементів при завантаженні */
-.hero-text > .hero-eyebrow,
-.hero-text > h1,
-.hero-text > .hero-lead,
-.hero-text > .hero-actions,
-.hero-text > .hero-feats,
-.hero-visual { animation: heroIn .7s cubic-bezier(.2,.7,.3,1) both; }
-.hero-text > .hero-eyebrow         { animation-delay: .05s; }
+.hero-text > h1, .hero-text > .hero-lead, .hero-text > .hero-actions, .hero-text > .hero-feats, .hero-visual { animation: heroIn .7s cubic-bezier(.2,.7,.3,1) both; }
+
 .hero-text > h1            { animation-delay: .15s; }
 .hero-text > .hero-lead    { animation-delay: .27s; }
 .hero-text > .hero-actions { animation-delay: .39s; }
@@ -1462,11 +1406,7 @@ a.card:hover .more span { transform: translateX(5px); }
 .reveal-page > *:nth-child(n+7) { animation-delay: .26s; }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-text > .hero-eyebrow, .hero-text > h1, .hero-text > .hero-lead,
-  .hero-text > .hero-actions, .hero-visual,
-  .reveal-page > *,
-  .catalog-hero .back-link, .catalog-hero h1, .catalog-hero p,
-  .catalog-hero .catalog-search, .catalog-hero .cat-filter { animation: none; }
+.hero-text > h1, .hero-text > .hero-lead, .hero-text > .hero-actions, .hero-visual, .reveal-page > *, .catalog-hero .back-link, .catalog-hero h1, .catalog-hero p, .catalog-hero .catalog-search, .catalog-hero .cat-filter { animation: none; }
   .js .article-page .body-reveal { opacity: 1; transform: none; }
   .js .article-page .body-reveal.in { animation: none; }
   .faq details[open] > p { animation: none; }
