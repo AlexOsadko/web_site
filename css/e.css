@@ -668,3 +668,10 @@ body.home .magnet-form .mf-sub { margin: -4px 0 6px; font: 400 15px/1.45 var(--e
 }
 /* Позначка «✓» перед повідомленням про успіх (без руху теж) */
 .form-ok::before, .cb-ok::before { content: "✓"; display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 8px; border-radius: 50%; background: #15803d; color: #fff; font: 700 13px/1 system-ui, sans-serif; vertical-align: -5px; }
+/* Перемикач теми в мобільному меню */
+.site-nav .nav-theme { display: none; }
+@media (max-width: 860px) {
+  body.hm .hm-head .site-nav .nav-theme { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; margin: 0 18px 12px; padding: 0 16px; background: none; border: 0; cursor: pointer; font: 500 15px/1 var(--e-head-font); text-transform: uppercase; letter-spacing: .05em; color: var(--e-muted); }
+  body.hm .hm-head .site-nav .nav-theme svg { width: 18px; height: 18px; }
+  :root[data-theme="dark"] body.hm .hm-head .site-nav .nav-theme { color: var(--e-text); }
+}
