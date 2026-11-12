@@ -2105,7 +2105,7 @@ def render_contacts():
         '  </section>\n'
         '  <section class="kp-info"><div class="hm-c">\n'
         '    <div class="kp-lines">\n'
-        '      <div><b>Адреса офісу</b><a href="https://maps.google.com/?q=просп.%20Повітряних%20Сил%2C%2020%2F1%2C%20Київ" target="_blank" rel="noopener">03049, м. Київ, просп. Повітряних Сил, 20/1, оф.&nbsp;2</a></div>\n'
+        '      <div><b>Адреса офісу</b><a href="https://maps.google.com/?q=просп.%20Повітряних%20Сил%2C%2020%2F1%2C%20Київ" target="_blank" rel="noopener">03049, м. Київ, Соломʼянський район, просп.&nbsp;Повітряних Сил, 20/1, оф.&nbsp;2</a></div>\n'
         '      <div><b>Графік роботи</b><span>Пн–Пт, 9:00–18:00</span></div>\n'
         '      <div><b>E-mail</b><a href="mailto:adv.osadko@gmail.com">adv.osadko@gmail.com</a></div>\n'
         '    </div>\n'
