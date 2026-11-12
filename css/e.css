@@ -480,3 +480,55 @@ body.hm .e-sit small, body.hm .e-princ li, body.hm .e-steps li { color: var(--e-
   body.home .hm-head:not(.solid) .hm-c { padding: 0 24px; }
   body.home .e-htxt { padding-top: 130px; }
 }
+
+/* ---------- Пакет «момент звернення»: одна головна дія + «Написати» ---------- */
+body.hm .e-btn svg, body.hm .lp-btn svg { width: 18px; height: 18px; flex: none; }
+body.hm .e-call, body.hm .e-msg { gap: 10px; min-height: 56px; padding: 0 26px; }
+body.hm .e-num, body.hm .lp-num { font-variant-numeric: tabular-nums; letter-spacing: .03em; }
+body.hm .e-msg { background: transparent; color: var(--e-ink); border: 1.5px solid var(--e-ink); cursor: pointer; }
+body.hm .e-msg:hover { background: var(--e-ink); color: var(--e-bg); }
+:root[data-theme="dark"] body.hm .e-msg { background: transparent; color: var(--e-text); border-color: var(--e-text); }
+body.hm .hm-contact .e-msg-inv { color: #fff; border-color: rgba(255, 255, 255, .55); }
+body.hm .hm-contact .e-msg-inv:hover { background: #fff; color: #1b2a6b; }
+.e-note, .lp-cta-note { margin: 14px 0 0; font-size: 15px; color: var(--e-muted); }
+.e-note b, .lp-cta-note b { color: var(--e-text); }
+/* меню «Написати» відкривається й над прозорою шапкою головної */
+body.hm .hm-head .hm-cw-head.open { display: block; }
+/* сторінки послуг: дві кнопки замість п'яти */
+body.hm .lp-cta2 { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+body.hm .lp-cta2 .lp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; padding: 0 26px; cursor: pointer; font: 500 16px/1 var(--e-head-font); text-transform: uppercase; letter-spacing: .05em; }
+body.hm .lp-cta2 .lp-btn-msg { border-color: var(--e-ink) !important; }
+body.hm .lp-final .lp-cta2 { justify-content: center; }
+/* заголовок послуги: тема + підзаголовок */
+body.hm .h1-sub { display: block; margin-top: 12px; font: 400 clamp(20px, 2.2vw, 26px)/1.3 var(--e-body-font); text-transform: none; letter-spacing: 0; color: var(--e-muted); }
+/* блок заявки під статтями: телефон і «написати» одним рядком */
+body.hm .lead-cta-or a { font-weight: 700; color: inherit; }
+body.hm .lead-cta-msg { background: none; border: 0; padding: 10px 0; font: inherit; font-weight: 700; color: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+body.hm .form-note { margin: 10px 0 0; font-size: 14px; color: var(--e-muted); text-align: center; }
+body.hm .hm-contact .form-note { color: var(--e-muted); }
+body.hm .lead-cta .form-note { color: #c9d0ea; }
+body.hm .hm-brand { min-height: 44px; }
+@media (max-width: 860px) {
+  body.hm .e-act { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  body.hm .e-call, body.hm .e-msg, body.hm .lp-cta2 .lp-btn { width: 100%; }
+  body.hm .e-hero .e-photo { aspect-ratio: 4 / 3; height: auto; max-height: 46vh; overflow: hidden; }
+  body.hm .e-hero .e-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; }
+}
+
+/* ---------- Пакет «швидкі виправлення» ---------- */
+/* контраст підказок у полях форм */
+body.hm input::placeholder, body.hm textarea::placeholder { color: #6b7286; opacity: 1; }
+:root[data-theme="dark"] body.hm input::placeholder, :root[data-theme="dark"] body.hm textarea::placeholder { color: #aab3d6; }
+.lead-cta input::placeholder, .lead-cta textarea::placeholder { color: #c3c9e4 !important; }
+/* «безкоштовно» та мітки категорій — у палітрі сайту */
+body.hm .pr-val.pr-free { color: var(--e-ink); }
+body.hm { --c-civil: var(--e-ink); --c-family: var(--e-ink); --c-labor: var(--e-ink); --c-criminal: var(--e-ink); --c-auto: var(--e-ink); --c-realty: var(--e-ink); --c-business: var(--e-ink); --c-process: var(--e-ink); --c-military: var(--e-ink); --c-admin: var(--e-ink); --c-social: var(--e-ink); }
+/* статті: текст одразу видимий, без поступового проявлення */
+.js .article-page .body-reveal, .js .article-page .body-reveal.in { opacity: 1 !important; transform: none !important; animation: none !important; }
+/* часті запитання — звичайними літерами, легше читати */
+body.hm .faq summary { text-transform: none; font: 700 19px/1.35 var(--e-body-font); letter-spacing: 0; }
+/* зручні для пальця цілі на телефоні (≥44 px) */
+body.hm .hm-ft a { display: inline-block; padding: 10px 0; }
+body.hm .hm-ft li { margin: 0; }
+body.hm .pr-more { display: inline-block; padding: 12px 0; }
+@media (max-width: 860px) { body.hm .hm-tel-m { width: 44px !important; height: 44px !important; } }
