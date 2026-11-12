@@ -223,7 +223,13 @@
   function bubble(who, text, t, id) {
     if (id && rendered[id]) return null;
     var el = document.createElement("div");
-    el.className = "hc-msg " + (who === "me" ? "hc-me" : "hc-adv");
+    el.className = "hc-msg " + (who === "me" ? "hc-me" : who === "bot" ? "hc-adv hc-bot" : "hc-adv");
+    if (who === "bot") {
+      var lb = document.createElement("span");
+      lb.className = "hc-bot-l";
+      lb.textContent = "Автовідповідь помічника";
+      el.appendChild(lb);
+    }
     var p = document.createElement("p");
     p.textContent = text;
     el.appendChild(p);
@@ -361,6 +367,7 @@
       }
       if (j.delivered === false) failNote();
       else if (first) askContact();
+      if (j.ai) typing(true);
       schedule(1500);
     }).catch(function (e) {
       el.classList.remove("hc-pending");
@@ -370,6 +377,21 @@
       else failNote();
       if (first && window.turnstile && tsWidget) { try { window.turnstile.reset(tsWidget); } catch (x) {} tsToken = ""; }
     }).then(function () { sending = false; sendBtn.disabled = false; });
+  }
+
+  // «Помічник друкує…» — поки готується автовідповідь (не довше 45 с)
+  var typingEl = null, typingTo = null;
+  function typing(on) {
+    clearTimeout(typingTo);
+    if (typingEl) { typingEl.remove(); typingEl = null; }
+    if (!on || !body) return;
+    typingEl = document.createElement("div");
+    typingEl.className = "hc-msg hc-adv hc-typing";
+    typingEl.setAttribute("aria-live", "polite");
+    typingEl.textContent = "Помічник друкує…";
+    body.appendChild(typingEl);
+    body.scrollTop = body.scrollHeight;
+    typingTo = setTimeout(function () { typing(false); }, 45000);
   }
 
   // ── Опитування ─────────────────────────────────────────────────────
@@ -397,11 +419,12 @@
         var msgs = j.msgs || [];
         var fresh = 0;
         msgs.forEach(function (m) {
+          if (m.who !== "me") typing(false);
           if (panel) {
             bubble(m.who, m.text, m.t, m.id);
             st.after = Math.max(st.after || 0, m.id);
           }
-          if (m.who === "adv" && m.id > (st.seen || 0)) {
+          if ((m.who === "adv" || m.who === "bot") && m.id > (st.seen || 0)) {
             if (isOpen()) st.seen = m.id;
             else { fresh = m; }
             st.act = Date.now();
