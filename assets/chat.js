@@ -154,6 +154,45 @@
 
   function greet() {
     sys("Добрий день! Опишіть коротко, що сталося, — я відповім тут, щойно побачу повідомлення.", "hc-greet");
+    chips();
+  }
+
+  // Кнопки-підказки під привітанням: готові відповіді з сайту (без ШІ, нікуди не надсилаються)
+  var faq = null;
+  function chips() {
+    var box = document.createElement("div");
+    box.className = "hc-chips";
+    body.appendChild(box);
+    var draw = function () {
+      (faq || []).forEach(function (c) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "hc-chip";
+        b.textContent = c.q;
+        b.addEventListener("click", function () { answer(c); });
+        box.appendChild(b);
+      });
+    };
+    if (faq) { draw(); return; }
+    fetch("/assets/chat-faq.json", { cache: "no-cache" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { faq = (j && j.chips) || []; draw(); })
+      .catch(function () {});
+  }
+  function answer(c) {
+    var q = document.createElement("div");
+    q.className = "hc-msg hc-me hc-local";
+    var qp = document.createElement("p"); qp.textContent = c.q; q.appendChild(qp);
+    body.appendChild(q);
+    var el = sys(c.a, "hc-faq");
+    if (c.link) {
+      var a = document.createElement("a");
+      a.href = c.link[1]; a.textContent = c.link[0] + " →"; a.className = "hc-faq-a";
+      el.appendChild(a);
+    }
+    if (c.focus) { ta.placeholder = "+380… — ваш номер телефону"; ta.focus(); }
+    body.scrollTop = body.scrollHeight;
+    if (window.osadkoTrack) window.osadkoTrack("chat_chip", { q: c.q });
   }
 
   // Меню «⋯» показуємо лише тоді, коли розмова вже є

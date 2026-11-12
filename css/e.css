@@ -561,3 +561,9 @@ body.hm .lead-form .form-ok { display: none; }
   .kp-lines, .kp-steps { grid-template-columns: 1fr; }
   .kp-map iframe { height: 260px; }
 }
+
+/* Чат: кнопки-підказки під привітанням */
+.hc-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 6px; }
+.hc-chip { min-height: 40px; padding: 8px 14px; border: 1.5px solid var(--e-ink, #1b2a6b); background: transparent; color: var(--e-ink, #1b2a6b); font: 600 14px/1.2 var(--e-body-font, 'PT Sans', sans-serif); cursor: pointer; border-radius: 0; }
+.hc-chip:hover { background: var(--e-ink, #1b2a6b); color: var(--e-bg, #fff); }
+.hc-faq-a { display: inline-block; margin-top: 6px; font-weight: 700; color: var(--e-ink, #1b2a6b); }
