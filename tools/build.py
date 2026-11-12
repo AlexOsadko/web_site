@@ -29,6 +29,17 @@ BASE_URL = "https://osadko.online/"
 ART_BASE_URL = BASE_URL + "articles/"
 POSLUGY_BASE_URL = BASE_URL + "poslugy/"
 DATE_LABEL = "Липень 2026"
+_UK_MONTHS = ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень",
+              "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"]
+
+
+def date_label(iso):
+    """«2026-11-13» → «Листопад 2026» (дата оновлення статті); без дати — DATE_LABEL."""
+    try:
+        y, m = iso.split("-")[:2]
+        return f"{_UK_MONTHS[int(m) - 1]} {y}"
+    except Exception:
+        return DATE_LABEL
 
 # ---------- АВТОР (блок автора в статтях + розмітка Person) ----------
 # Дані свідоцтва й ЄРАУ людям на сторінках не показуються — лише в розмітці
@@ -989,7 +1000,7 @@ def render_article(a, allmeta, seealso_map=None):
         "{url}": ART_BASE_URL + a["slug"] + ".html", "{jsonld}": build_jsonld(a, faq),
         "{cat}": a["cat"], "{catname}": CATS[a["cat"]], "{crumb}": esc(a["title"]),
         "{ogimg}": BASE_URL + "assets/og-image.jpg",
-        "{h1}": esc(a["h1"]), "{date}": DATE_LABEL, "{read}": str(reading_time(body)),
+        "{h1}": esc(a["h1"]), "{date}": date_label(a.get("date_modified")), "{read}": str(reading_time(body)),
         "{body}": body, "{faq}": build_faq_html(faq), "{related}": build_related_html(a["slug"], a["cat"], allmeta),
         "{leadcta}": lead_cta_block(a["title"], a["h1"]),
         "{author}": author_box_html(),
