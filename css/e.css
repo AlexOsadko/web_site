@@ -675,3 +675,8 @@ body.home .magnet-form .mf-sub { margin: -4px 0 6px; font: 400 15px/1.45 var(--e
   body.hm .hm-head .site-nav .nav-theme svg { width: 18px; height: 18px; }
   :root[data-theme="dark"] body.hm .hm-head .site-nav .nav-theme { color: var(--e-text); }
 }
+/* Район в адресі: футер і «Контакти» */
+body.hm .hm-faddr { white-space: normal; align-items: flex-start; }
+body.hm .hm-faddr a { color: inherit; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+body.hm .kp-lines a.kp-local { display: table; margin-top: 8px; font-size: 15px; color: var(--e-ink); text-decoration: underline; text-underline-offset: 3px; }
+:root[data-theme="dark"] body.hm .kp-lines a.kp-local { color: var(--e-text); }
