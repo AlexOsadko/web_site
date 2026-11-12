@@ -27,10 +27,10 @@
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/oswald.woff2" crossorigin>
   <link rel="stylesheet" href="css/style.css?v=148">
   <link rel="stylesheet" href="css/site.css?v=27">
-  <link rel="stylesheet" href="css/e.css?v=22">
-  <script defer src="assets/site.js?v=14"></script>
+  <link rel="stylesheet" href="css/e.css?v=23">
+  <script defer src="assets/site.js?v=15"></script>
   <script defer src="assets/header-scroll.js?v=15"></script>
-  <script defer src="assets/callback-popup.js?v=22"></script>
+  <script defer src="assets/callback-popup.js?v=23"></script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -374,8 +374,9 @@
     const mailFallback = () => {
       const body = 'Джерело: ' + source + '\nІмʼя: ' + name + '\nТелефон: ' + phone +
         (message ? '\nПитання: ' + message : '');
-      window.location.href = 'mailto:adv.osadko@gmail.com?subject=' +
+      const href = 'mailto:adv.osadko@gmail.com?subject=' +
         encodeURIComponent(source) + '&body=' + encodeURIComponent(body);
+      if (window.osadkoFormFail) window.osadkoFormFail(form, href); else window.location.href = href;
     };
     if (NOTIFY_ENDPOINT) {
       fetch(NOTIFY_ENDPOINT, {

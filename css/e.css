@@ -567,3 +567,15 @@ body.hm .lead-form .form-ok { display: none; }
 .hc-chip { min-height: 40px; padding: 8px 14px; border: 1.5px solid var(--e-ink, #1b2a6b); background: transparent; color: var(--e-ink, #1b2a6b); font: 600 14px/1.2 var(--e-body-font, 'PT Sans', sans-serif); cursor: pointer; border-radius: 0; }
 .hc-chip:hover { background: var(--e-ink, #1b2a6b); color: var(--e-bg, #fff); }
 .hc-faq-a { display: inline-block; margin-top: 6px; font-weight: 700; color: var(--e-ink, #1b2a6b); }
+
+/* Форми: помилки під полем (текст + рамка, не лише колір) і повідомлення про збій */
+body.hm input.f-bad, body.hm textarea.f-bad { border-color: #b3261e !important; box-shadow: 0 0 0 1px #b3261e inset !important; }
+.f-err { display: block; margin-top: 6px; font-size: 14px; font-weight: 700; line-height: 1.35; color: #b3261e; }
+.f-err::before { content: "! "; }
+:root[data-theme="dark"] .f-err, .lead-cta .f-err { color: #ffb4ab; }
+:root[data-theme="dark"] body.hm input.f-bad, .lead-cta input.f-bad { border-color: #ffb4ab !important; box-shadow: 0 0 0 1px #ffb4ab inset !important; }
+.form-fail { margin-top: 12px; padding: 12px 14px; border: 1.5px solid #b3261e; background: #fdf1f0; color: #3b1210; font-size: 15px; line-height: 1.45; }
+.form-fail a { color: inherit; font-weight: 700; }
+:root[data-theme="dark"] .form-fail, .lead-cta .form-fail { background: #3a1d24; border-color: #ffb4ab; color: #ffe4e0; }
+/* Кнопка заявки в синьому блоці під статтями/послугами — читабельна й у темній темі */
+:root[data-theme="dark"] body.hm .lead-cta button[type="submit"] { background: #e8ecff !important; color: #1b2a6b !important; }
