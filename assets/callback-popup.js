@@ -123,11 +123,13 @@
       setTimeout(hide, 2500);
     };
     var mail = function () {
-      sessionStorage.setItem("cbDone", "1"); // людина вже надіслала — більше не турбувати
-      hide();
-      location.href = "mailto:adv.osadko@gmail.com?subject=" +
+      var href = "mailto:adv.osadko@gmail.com?subject=" +
         encodeURIComponent("Замовити дзвінок") + "&body=" +
         encodeURIComponent("Джерело: спливаюче вікно\nІмʼя: " + name + "\nТелефон: " + phone);
+      if (window.osadkoFormFail) { window.osadkoFormFail(form, href); return; }
+      sessionStorage.setItem("cbDone", "1");
+      hide();
+      location.href = href;
     };
     if (NOTIFY_ENDPOINT) {
       fetch(NOTIFY_ENDPOINT, {

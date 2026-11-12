@@ -34,8 +34,9 @@
       var mailFallback = function () {
         var body = "Джерело: " + source + "\nІмʼя: " + name + "\nТелефон: " + phone +
           (message ? "\nПитання: " + message : "");
-        window.location.href = "mailto:" + MAIL + "?subject=" +
+        var href = "mailto:" + MAIL + "?subject=" +
           encodeURIComponent(source) + "&body=" + encodeURIComponent(body);
+        if (window.osadkoFormFail) window.osadkoFormFail(form, href); else window.location.href = href;
       };
 
       if (btn) btn.disabled = true;
