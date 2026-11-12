@@ -532,3 +532,7 @@ body.hm .hm-ft a { display: inline-block; padding: 10px 0; }
 body.hm .hm-ft li { margin: 0; }
 body.hm .pr-more { display: inline-block; padding: 12px 0; }
 @media (max-width: 860px) { body.hm .hm-tel-m { width: 44px !important; height: 44px !important; } }
+
+/* Чат: автовідповідь помічника позначена окремо від відповідей адвоката */
+.hc-bot-l { display: block; margin: 0 0 4px; font-size: 12px; font-weight: 700; color: var(--e-muted, #4d5465); letter-spacing: .02em; }
+.hc-typing { font-size: 14px; color: var(--e-muted, #4d5465); font-style: italic; }
