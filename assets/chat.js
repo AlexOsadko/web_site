@@ -158,7 +158,7 @@
   }
 
   // Кнопки-підказки під привітанням: готові відповіді з сайту (без ШІ, нікуди не надсилаються)
-  var faq = null;
+  var faq = null, rules = [];
   function chips() {
     var box = document.createElement("div");
     box.className = "hc-chips";
@@ -176,9 +176,38 @@
     if (faq) { draw(); return; }
     fetch("/assets/chat-faq.json", { cache: "no-cache" })
       .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { faq = (j && j.chips) || []; draw(); })
+      .then(function (j) { faq = (j && j.chips) || []; rules = (j && j.rules) || []; draw(); })
       .catch(function () {});
   }
+  // Шаблонна довідка за ключовими словами в повідомленні відвідувача (не ШІ):
+  // одна відповідь на повідомлення, кожна тема — не більше разу за розмову
+  function autoRef(text) {
+    var t = String(text || "").toLowerCase().replace(/[’ʼ`]/g, "'");
+    st.ref = st.ref || [];
+    for (var i = 0; i < rules.length; i++) {
+      var r = rules[i];
+      if (st.ref.indexOf(r.id) >= 0) continue;
+      for (var k = 0; k < r.k.length; k++) {
+        if (t.indexOf(r.k[k].replace(/[’ʼ`]/g, "'")) >= 0) {
+          st.ref.push(r.id); save();
+          setTimeout(function () {
+            var el = sys(r.a, "hc-faq hc-auto");
+            var lb = document.createElement("span");
+            lb.className = "hc-bot-l"; lb.textContent = "Автоматична довідка";
+            el.insertBefore(lb, el.firstChild);
+            if (r.link) {
+              var a = document.createElement("a");
+              a.href = r.link[1]; a.textContent = r.link[0] + " →"; a.className = "hc-faq-a";
+              el.appendChild(a);
+            }
+            body.scrollTop = body.scrollHeight;
+          }, 700);
+          return;
+        }
+      }
+    }
+  }
+
   function answer(c) {
     var q = document.createElement("div");
     q.className = "hc-msg hc-me hc-local";
@@ -407,6 +436,7 @@
       if (j.delivered === false) failNote();
       else if (first) askContact();
       if (j.ai) typing(true);
+      else autoRef(text);
       schedule(1500);
     }).catch(function (e) {
       el.classList.remove("hc-pending");
