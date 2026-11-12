@@ -1598,8 +1598,7 @@ def write_chat_faq(landings):
 def write_robots():
     txt = ("User-agent: *\n"
            "Allow: /\n"
-           "# Памʼятки — lead-магніти: доступ лише через форму, не індексувати напряму.\n"
-           "Disallow: /assets/pamyatka-\n\n"
+           "\n"
            f"Sitemap: {BASE_URL}sitemap.xml\n")
     with open(os.path.join(ROOT, "robots.txt"), "w", encoding="utf-8") as f:
         f.write(txt)

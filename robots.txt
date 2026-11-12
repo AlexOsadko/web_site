@@ -1,6 +1,4 @@
 User-agent: *
 Allow: /
-# Памʼятки — lead-магніти: доступ лише через форму, не індексувати напряму.
-Disallow: /assets/pamyatka-
 
 Sitemap: https://osadko.online/sitemap.xml
