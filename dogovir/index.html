@@ -290,18 +290,26 @@ input,select,textarea{max-width:100%;box-sizing:border-box}
   .reg-count{margin-left:0}
 }
 .reg-empty{padding:22px;text-align:center;color:var(--muted,#8a7f6d);font-size:14px;border:1px dashed var(--line,#d9d0c2);border-radius:10px}
-.reg-tablewrap{overflow-x:auto;border:1px solid var(--line,#d9d0c2);border-radius:10px}
+.reg-tablewrap{overflow-x:auto}
 .reg-table{width:100%;border-collapse:collapse;font-size:13px}
 .reg-table th{text-align:left;padding:10px 12px;background:rgba(31,56,100,.05);color:var(--navy,#1f3864);font-weight:600;border-bottom:1px solid var(--line,#d9d0c2);white-space:nowrap}
 .reg-table td{padding:9px 12px;border-bottom:1px solid var(--line,#eee)}
 .reg-table tr:last-child td{border-bottom:none}
-.reg-table tr.reg-grp td{background:rgba(31,56,100,.06);color:var(--navy,#1f3864);padding-top:12px}
-.reg-table .reg-sub{margin-left:10px;font-size:12px;color:var(--ink-2,#5a6070)}
-.reg-table td.reg-du{white-space:nowrap;padding-left:22px}
-.reg-table td.reg-du small{display:block;font-size:12px;color:var(--ink-2,#5a6070)}
-.reg-table td.reg-what{max-width:420px;color:var(--ink-2,#4a4f5c)}
-.reg-new{font-weight:600;font-size:12px;line-height:1;padding:7px 10px;border:1px solid var(--navy,#1f3864);border-radius:6px;background:#fff;color:var(--navy,#1f3864);cursor:pointer;white-space:nowrap}
 .reg-new:hover{background:var(--navy,#1f3864);color:#fff}
+.reg-table tr.reg-gap td{height:18px;padding:0;border:0;background:transparent}
+.reg-table tr.reg-grp td{background:#eef1f8;border-top:1px solid #c9d1e4;border-bottom:1px solid #c9d1e4;padding:12px 14px}
+.reg-table tr.reg-grp td:first-child{border-left:4px solid var(--navy,#1f3864)}
+.reg-table .reg-client{display:block;font-size:15px;font-weight:700;color:var(--navy,#1f3864);margin-bottom:3px}
+.reg-table .reg-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:12.5px;color:#4a5068}
+.reg-table .reg-sub{white-space:nowrap;padding:2px 8px;border-radius:999px;background:#fff;border:1px solid #c9d1e4;font-size:12px;color:#4a5068}
+.reg-table tr.reg-row td{background:#fff;border-bottom:1px solid #eceef3}
+.reg-table tr.reg-row td:last-child,.reg-table tr.reg-grp td:last-child{border-right:1px solid #c9d1e4}
+.reg-table tr.reg-row td:first-child{border-left:4px solid #c9d1e4}
+.reg-table tr.reg-row:last-child td,.reg-table tr.reg-row:has(+ tr.reg-gap) td{border-bottom:1px solid #c9d1e4}
+.reg-table td.reg-du{white-space:nowrap;padding-left:22px;font-weight:600;color:#2a2f3d}
+.reg-table td.reg-du small{display:block;font-weight:400;font-size:12px;color:#6a7080;margin-top:2px}
+.reg-table td.reg-what{max-width:420px;color:#4a4f5c;font-size:12.5px;line-height:1.45}
+.reg-new{font-weight:600;font-size:12px;line-height:1;padding:7px 10px;border:1px solid var(--navy,#1f3864);border-radius:6px;background:#fff;color:var(--navy,#1f3864);cursor:pointer;white-space:nowrap}
 .svc-row .svc-fields{flex:1;display:flex;flex-wrap:nowrap;gap:8px;align-items:flex-start;min-width:0}
 .svc-row .svc-fields textarea{flex:1 1 0%;width:auto;min-width:0}
 .svc-fields input.svc-hrs,.svc-fields input.svc-amt{flex:0 0 auto;width:92px;min-width:0;font-family:var(--mono);font-size:13.5px;text-align:right;background:var(--field-bg);border:1px solid var(--line);border-radius:9px;padding:10px 10px;color:var(--ink)}
@@ -3185,16 +3193,18 @@ function renderRegistry(){
   const groups=new Map();
   registry.forEach((e,i)=>{ if(!e||!e.row) return; const k=gk(e.row); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(i); });
   const no=x=>parseInt(String(x||"").replace(/\D/g,""),10)||0;
-  let html="";
+  let html="", gi=0;
   groups.forEach(ids=>{
+    if(gi++) html+=`<tr class="reg-gap" aria-hidden="true"><td colspan="5"></td></tr>`;
     ids.sort((a,b)=>no(registry[a].row["№ дод. угоди"])-no(registry[b].row["№ дод. угоди"]));
     const r0=registry[ids[0]].row, prov=regProvider(registry[ids[0]]);
     const last=[...ids].reverse().find(i=>registry[i].snap);
     const provCell = prov ? `<span class="reg-prov reg-prov-${prov==="ФОП"?"fop":"adv"}">${xmlEsc(prov)}</span>` : "";
     const newBtn = last!==undefined
       ? `<button class="reg-new" type="button" data-new="${last}" title="Заповнити форму для наступної додаткової угоди до цього договору">+ Нова дод. угода</button>` : "";
-    html+=`<tr class="reg-grp"><td colspan="4"><b>Договір № ${xmlEsc(r0["Номер договору"]||"")} від ${xmlEsc(r0["Дата укладення"]||"")}</b> · ${xmlEsc(r0["Клієнт"]||"")} ${provCell}`
-        + `<span class="reg-sub">Додаткових угод: ${ids.length}</span></td><td class="reg-acts">${newBtn}</td></tr>`;
+    html+=`<tr class="reg-grp"><td colspan="4"><span class="reg-client">${xmlEsc(r0["Клієнт"]||"")}</span>`
+        + `<span class="reg-meta">Договір № ${xmlEsc(r0["Номер договору"]||"")} від ${xmlEsc(r0["Дата укладення"]||"")} ${provCell}`
+        + `<span class="reg-sub">${ids.length} дод. ${ids.length===1?"угода":(ids.length<5?"угоди":"угод")}</span></span></td><td class="reg-acts">${newBtn}</td></tr>`;
     ids.forEach(i=>{
       const e=registry[i], r=e.row;
       const acts = (e.snap
@@ -3205,7 +3215,7 @@ function renderRegistry(){
         + `<button class="icon-btn danger" data-del="${i}" title="Вилучити запис із реєстру" aria-label="Вилучити запис">✕</button>`;
       const what=String(r["Зміст додаткової угоди"]||"");
       const short=what.length>110 ? what.slice(0,108)+"…" : what;
-      html+=`<tr><td class="reg-du">Дод. угода № ${xmlEsc(r["№ дод. угоди"]||"1")}<small>від ${xmlEsc(r["Дата дод. угоди"]||r["Дата укладення"]||"")}</small></td>`
+      html+=`<tr class="reg-row"><td class="reg-du">Дод. угода № ${xmlEsc(r["№ дод. угоди"]||"1")}<small>від ${xmlEsc(r["Дата дод. угоди"]||r["Дата укладення"]||"")}</small></td>`
           + `<td class="reg-what" title="${xmlEsc(what)}">${xmlEsc(short)}</td><td>${xmlEsc(r["Модель оплати"]||"")}</td>`
           + `<td>${xmlEsc(r["Сума, грн"]||"")}</td><td class="reg-acts">${acts}</td></tr>`;
     });
@@ -3943,7 +3953,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-14.1";
+const GEN_VERSION="2026-11-14.2";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
