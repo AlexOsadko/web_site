@@ -2363,6 +2363,39 @@ function markAgrDate(xml, agr){
   return xml;
 }
 
+/* Підписи не відриваються від тексту: останній пункт (і порожні відступи перед блоком
+   підписів) отримують «не відривати від наступного» — якщо підписи не вміщуються,
+   на нову сторінку переходить і останній пункт, а не самі підписи. */
+function keepWithSignatures(xml){
+  const KEY="ПІДПИСИ СТОРІН";
+  const addKeep=p=>{
+    if(p.indexOf("<w:keepNext/>")>=0) return p;
+    if(p.indexOf("<w:pPr>")>=0) return p.replace("<w:pPr>","<w:pPr><w:keepNext/>");
+    return p.replace(/^(<w:p(?:\s[^>]*)?>)/,"$1<w:pPr><w:keepNext/></w:pPr>");
+  };
+  let from=0;
+  for(;;){
+    const k=xml.indexOf(KEY,from); if(k<0) break;
+    const ts=xml.lastIndexOf("<w:tbl>",k), te=xml.lastIndexOf("</w:tbl>",k);
+    let start = ts>te ? ts : Math.max(xml.lastIndexOf("<w:p ",k), xml.lastIndexOf("<w:p>",k));
+    /* до 3 попередніх абзаців: порожні відступи й перший абзац із текстом */
+    for(let n=0;n<3;n++){
+      const head=xml.slice(0,start).replace(/\s+$/,"");
+      if(!head.endsWith("</w:p>")) break;
+      const ps=Math.max(head.lastIndexOf("<w:p "), head.lastIndexOf("<w:p>"));
+      if(ps<0) break;
+      const para=head.slice(ps);
+      if(para.indexOf("<w:sectPr")>=0 || para.indexOf("<w:br w:type=\"page\"")>=0) break;
+      const kept=addKeep(para);
+      xml=xml.slice(0,ps)+kept+xml.slice(ps+para.length);
+      start=ps;
+      if(/<w:t(?:\s[^>]*)?>[^<]*\S[^<]*<\/w:t>/.test(para)) break;
+    }
+    from=xml.indexOf(KEY,from)+KEY.length;
+  }
+  return xml;
+}
+
 /* ---------- головна функція ---------- */
 function fillTemplateXml(xml, D){
   /* 1. номери додаткової угоди, акта та рахунку */
@@ -2433,7 +2466,7 @@ function fillTemplateXml(xml, D){
   if(D.actDate) xml=xml.split("«____» __________ 20___ року").join(val(D.actDate)).split("___/ ___________________________ 20___ року").join(val(D.actDate));
   xml=xml.split("«КЕП_підпис»").join(D.kep ? KEP_MARK : "");
   for(const k of PLACEHOLDERS) xml=xml.split("«"+k+"»").join("");
-  return widenCaptionSpaces(xml);
+  return widenCaptionSpaces(keepWithSignatures(xml));
 }
 
 function b64ToUint8(b64){
@@ -2878,7 +2911,7 @@ function fillFopXml(xml, D){
   if(D.actDate) xml=xml.split("«____» __________ 20___ року").join(val(D.actDate)).split("___/ ___________________________ 20___ року").join(val(D.actDate));
   xml=xml.split("«КЕП_підпис»").join(D.kep ? KEP_MARK : "");
   for(const k of FOP_PLACEHOLDERS) xml=xml.split("«"+k+"»").join("");
-  return widenCaptionSpaces(xml);
+  return widenCaptionSpaces(keepWithSignatures(xml));
 }
 async function prepareDocFop(){
   const t=clientType();
@@ -3993,7 +4026,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-14.3";
+const GEN_VERSION="2026-11-14.4";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
