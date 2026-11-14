@@ -296,6 +296,19 @@ input,select,textarea{max-width:100%;box-sizing:border-box}
 .reg-table td{padding:9px 12px;border-bottom:1px solid var(--line,#eee)}
 .reg-table tr:last-child td{border-bottom:none}
 .reg-new:hover{background:var(--navy,#1f3864);color:#fff}
+.reg-table tr.reg-grp{cursor:pointer}
+.reg-table tr.reg-grp:hover td{background:#e4e9f5}
+.reg-table tr.reg-grp:focus-visible td{outline:2px solid var(--navy,#1f3864);outline-offset:-2px}
+.reg-table .reg-chev{display:inline-block;width:18px;font-style:normal;font-size:12px;color:#6a7080;transition:transform .15s}
+.reg-table tr.reg-grp.open .reg-chev{transform:rotate(90deg)}
+.reg-table .reg-total{white-space:nowrap;font-size:12px;color:#4a5068}
+.reg-table tr.reg-info td{background:#f7f8fb;border-left:4px solid #c9d1e4;border-right:1px solid #c9d1e4;padding:10px 14px 10px 26px}
+.reg-table tr.reg-info dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 18px;margin:0}
+.reg-table tr.reg-info dt{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#7a8090}
+.reg-table tr.reg-info dd{margin:1px 0 0;font-size:13px;color:#2a2f3d;word-break:break-word}
+.reg-table .reg-noinfo{font-size:12.5px;color:#7a8090}
+.reg-table .reg-extra{display:block;margin-top:6px;font-size:12px;color:#5a6070}
+.reg-table .reg-extra b{font-weight:600;color:#3a3f4c}
 .reg-table tr.reg-gap td{height:18px;padding:0;border:0;background:transparent}
 .reg-table tr.reg-grp td{background:#eef1f8;border-top:1px solid #c9d1e4;border-bottom:1px solid #c9d1e4;padding:12px 14px}
 .reg-table tr.reg-grp td:first-child{border-left:4px solid var(--navy,#1f3864)}
@@ -3182,6 +3195,7 @@ function addRegistryRow(){
 }
 
 function renderRegistry(){
+  if(!window.REG_OPEN) window.REG_OPEN=new Set();
   saveRegistry();
   $("#reg_count").textContent = registry.length;
   const empty=$("#reg_empty"), tbl=$("#reg_table"), tb=$("#reg_tbody");
@@ -3202,9 +3216,20 @@ function renderRegistry(){
     const provCell = prov ? `<span class="reg-prov reg-prov-${prov==="ФОП"?"fop":"adv"}">${xmlEsc(prov)}</span>` : "";
     const newBtn = last!==undefined
       ? `<button class="reg-new" type="button" data-new="${last}" title="Заповнити форму для наступної додаткової угоди до цього договору">+ Нова дод. угода</button>` : "";
-    html+=`<tr class="reg-grp"><td colspan="4"><span class="reg-client">${xmlEsc(r0["Клієнт"]||"")}</span>`
+    const gid=gk(r0), open=REG_OPEN.has(gid), gno=gi;
+    const money=x=>parseFloat(String(x||"").replace(/\s/g,"").replace(",","."))||0;
+    const total=ids.reduce((a,i)=>a+money(registry[i].row["Сума, грн"]),0);
+    html+=`<tr class="reg-grp${open?" open":""}" data-g="${gno}" tabindex="0" role="button" aria-expanded="${open}" title="Показати / сховати повну інформацію"><td colspan="4"><span class="reg-client"><i class="reg-chev" aria-hidden="true">▸</i>${xmlEsc(r0["Клієнт"]||"")}</span>`
         + `<span class="reg-meta">Договір № ${xmlEsc(r0["Номер договору"]||"")} від ${xmlEsc(r0["Дата укладення"]||"")} ${provCell}`
-        + `<span class="reg-sub">${ids.length} дод. ${ids.length===1?"угода":(ids.length<5?"угоди":"угод")}</span></span></td><td class="reg-acts">${newBtn}</td></tr>`;
+        + `<span class="reg-sub">${ids.length} дод. ${ids.length===1?"угода":(ids.length<5?"угоди":"угод")}</span>`
+        + (total ? `<span class="reg-total">разом ${xmlEsc(fmtMoney(total))} грн</span>` : "")
+        + `</span></td><td class="reg-acts">${newBtn}</td></tr>`;
+    /* повна інформація про клієнта — видно після натискання на картку */
+    const info=[["Тип клієнта",r0["Тип клієнта"]],["РНОКПП / ЄДРПОУ",r0["ЄДРПОУ / РНОКПП"]],["Адреса",r0["Адреса"]],
+      ["Представник",r0["Представник"]],["Телефон",r0["Телефон"]],["Ел. пошта",r0["Ел. пошта"]]].filter(x=>String(x[1]||"").trim());
+    html+=`<tr class="reg-info" data-gc="${gno}"${open?"":" hidden"}><td colspan="5">`
+        + (info.length ? `<dl>${info.map(x=>`<div><dt>${xmlEsc(x[0])}</dt><dd>${xmlEsc(x[1])}</dd></div>`).join("")}</dl>` : `<span class="reg-noinfo">Реквізити клієнта в записі відсутні</span>`)
+        + `</td></tr>`;
     ids.forEach(i=>{
       const e=registry[i], r=e.row;
       const acts = (e.snap
@@ -3214,9 +3239,12 @@ function renderRegistry(){
           + `<button class="icon-btn" disabled title="${NO_SNAP}">⤓</button>`)
         + `<button class="icon-btn danger" data-del="${i}" title="Вилучити запис із реєстру" aria-label="Вилучити запис">✕</button>`;
       const what=String(r["Зміст додаткової угоди"]||"");
-      const short=what.length>110 ? what.slice(0,108)+"…" : what;
-      html+=`<tr class="reg-row"><td class="reg-du">Дод. угода № ${xmlEsc(r["№ дод. угоди"]||"1")}<small>від ${xmlEsc(r["Дата дод. угоди"]||r["Дата укладення"]||"")}</small></td>`
-          + `<td class="reg-what" title="${xmlEsc(what)}">${xmlEsc(short)}</td><td>${xmlEsc(r["Модель оплати"]||"")}</td>`
+      const extra=[["Ставка",r["Ставка, грн/год"]&&r["Ставка, грн/год"]+" грн/год"],["Годин",r["Годин разом"]],["Акт №",r["№ акта"]],
+        ["Рахунок №",r["№ рахунку"]],["Оплата",r["Порядок оплати"]]].filter(x=>String(x[1]||"").trim());
+      const full=xmlEsc(what).split("; ").join("<br>")
+        + (extra.length ? `<span class="reg-extra">${extra.map(x=>`<b>${xmlEsc(x[0])}:</b> ${xmlEsc(x[1])}`).join(" · ")}</span>` : "");
+      html+=`<tr class="reg-row" data-gc="${gno}"${open?"":" hidden"}><td class="reg-du">Дод. угода № ${xmlEsc(r["№ дод. угоди"]||"1")}<small>від ${xmlEsc(r["Дата дод. угоди"]||r["Дата укладення"]||"")}</small></td>`
+          + `<td class="reg-what">${full}</td><td>${xmlEsc(r["Модель оплати"]||"")}</td>`
           + `<td>${xmlEsc(r["Сума, грн"]||"")}</td><td class="reg-acts">${acts}</td></tr>`;
     });
   });
@@ -3224,7 +3252,19 @@ function renderRegistry(){
   tb.querySelectorAll("[data-dl]").forEach(b=>b.addEventListener("click",()=>downloadFromRegistry(+b.dataset.dl)));
   tb.querySelectorAll("[data-load]").forEach(b=>b.addEventListener("click",()=>loadFromRegistry(+b.dataset.load)));
   tb.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>removeFromRegistry(+b.dataset.del)));
-  tb.querySelectorAll("[data-new]").forEach(b=>b.addEventListener("click",()=>newAgreementFromRegistry(+b.dataset.new)));
+  tb.querySelectorAll("[data-new]").forEach(b=>b.addEventListener("click",ev=>{ ev.stopPropagation(); newAgreementFromRegistry(+b.dataset.new); }));
+  /* картка договору розгортається/згортається натисканням (або Enter/пробілом) */
+  const gids=[...groups.keys()];
+  tb.querySelectorAll("tr.reg-grp").forEach(tr=>{
+    const toggle=()=>{
+      const g=tr.dataset.g, open=!tr.classList.contains("open");
+      tr.classList.toggle("open",open); tr.setAttribute("aria-expanded",open);
+      tb.querySelectorAll(`[data-gc="${g}"]`).forEach(x=>x.hidden=!open);
+      const id=gids[+g-1]; if(open) REG_OPEN.add(id); else REG_OPEN.delete(id);
+    };
+    tr.addEventListener("click",ev=>{ if(ev.target.closest("button")) return; toggle(); });
+    tr.addEventListener("keydown",ev=>{ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); toggle(); } });
+  });
 }
 
 /* наступна додаткова угода до вже укладеного договору: дані клієнта й договору з
@@ -3953,7 +3993,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-14.2";
+const GEN_VERSION="2026-11-14.3";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
