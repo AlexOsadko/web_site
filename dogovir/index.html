@@ -295,6 +295,13 @@ input,select,textarea{max-width:100%;box-sizing:border-box}
 .reg-table th{text-align:left;padding:10px 12px;background:rgba(31,56,100,.05);color:var(--navy,#1f3864);font-weight:600;border-bottom:1px solid var(--line,#d9d0c2);white-space:nowrap}
 .reg-table td{padding:9px 12px;border-bottom:1px solid var(--line,#eee)}
 .reg-table tr:last-child td{border-bottom:none}
+.reg-table tr.reg-grp td{background:rgba(31,56,100,.06);color:var(--navy,#1f3864);padding-top:12px}
+.reg-table .reg-sub{margin-left:10px;font-size:12px;color:var(--ink-2,#5a6070)}
+.reg-table td.reg-du{white-space:nowrap;padding-left:22px}
+.reg-table td.reg-du small{display:block;font-size:12px;color:var(--ink-2,#5a6070)}
+.reg-table td.reg-what{max-width:420px;color:var(--ink-2,#4a4f5c)}
+.reg-new{font-weight:600;font-size:12px;line-height:1;padding:7px 10px;border:1px solid var(--navy,#1f3864);border-radius:6px;background:#fff;color:var(--navy,#1f3864);cursor:pointer;white-space:nowrap}
+.reg-new:hover{background:var(--navy,#1f3864);color:#fff}
 .svc-row .svc-fields{flex:1;display:flex;flex-wrap:nowrap;gap:8px;align-items:flex-start;min-width:0}
 .svc-row .svc-fields textarea{flex:1 1 0%;width:auto;min-width:0}
 .svc-fields input.svc-hrs,.svc-fields input.svc-amt{flex:0 0 auto;width:92px;min-width:0;font-family:var(--mono);font-size:13.5px;text-align:right;background:var(--field-bg);border:1px solid var(--line);border-radius:9px;padding:10px 10px;color:var(--ink)}
@@ -577,6 +584,11 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
             <div class="sub-hint">Підставляється в заголовок угоди, Акт та рахунок.</div>
           </div>
           <div class="field">
+            <label for="f_agr_date">Дата додаткової угоди<span class="hint">день підписання угоди</span></label>
+            <input type="date" id="f_agr_date" autocomplete="off">
+            <div class="sub-hint" id="agr_date_hint">Порожнє — дата договору. Для угоди, укладеної пізніше, вкажіть її дату: вона піде в угоду, Акт і рахунок.</div>
+          </div>
+          <div class="field">
             <label for="f_act_no">Номер акта<span class="req">*</span></label>
             <input type="text" id="f_act_no" class="mono" data-num="act" value="1" placeholder="1" autocomplete="off">
             <div class="sub-hint">Номер Акта здачі-приймання.</div>
@@ -844,7 +856,7 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
         <div class="reg-empty" id="reg_empty">Реєстр порожній. Сформуйте перший договір — і він з'явиться тут.</div>
         <div class="reg-tablewrap" id="reg_table" style="display:none">
           <table class="reg-table" data-norole>
-            <thead><tr><th>№ договору</th><th>Дата</th><th>Виконавець</th><th>Клієнт / Замовник</th><th>Оплата</th><th>Сума, грн</th><th style="width:122px;text-align:center">Дії</th></tr></thead>
+            <thead><tr><th>Документ</th><th>Зміст</th><th>Оплата</th><th>Сума, грн</th><th style="width:150px;text-align:center">Дії</th></tr></thead>
             <tbody id="reg_tbody"></tbody>
           </table>
         </div>
@@ -1856,7 +1868,7 @@ $("#btn_clear").addEventListener("click",()=>{
   if(!confirm("Очистити всі поля?")) return;
   $$("[data-key],[data-datefull],[data-dateplain]").forEach(el=>{el.value="";el.classList.remove("filled","doc-filled");});
   const ds=$("#doc_status"), dr=$("#doc_raw"); if(ds){ ds.textContent=""; ds.className="doc-status"; } if(dr) dr.innerHTML="";
-  $("#f_agr_no").value=""; $("#f_act_no").value=""; $("#f_inv_no").value="";
+  $("#f_agr_no").value=""; $("#f_act_no").value=""; $("#f_inv_no").value=""; if($("#f_agr_date")) $("#f_agr_date").value="";
   $("#date_preview").textContent="";$("#birth_preview").textContent="";
   $("#f_rate").value="";
   services=[emptySvc(), emptySvc(), emptySvc()];
@@ -2008,7 +2020,7 @@ function actRows(rows){
 function sumRows(rows){ return rows.reduce((x,r)=>x+(r.a||0),0); }
 
 /* Повний перелік плейсхолдерів шаблона. */
-const PLACEHOLDERS=[
+const PLACEHOLDERS=["Дата_дод_угоди",
   "Номер_договору","Дата_укладання_договору","Строк_дії_договору",
   "Клієнт_повна_назва","Підпис_короткий","Ідентифікатор_значення",
   "Документ_значення","Адреса_значення","Дата_народження",
@@ -2141,6 +2153,12 @@ function syncActDate(){
 }
 if($("#f_kep")) $("#f_kep").addEventListener("change",()=>{ syncActDate(); updateRecap(); });
 if($("#f_act_date")) $("#f_act_date").addEventListener("input",()=>{ markFilled($("#f_act_date")); updateRecap(); });
+if($("#f_agr_date")) $("#f_agr_date").addEventListener("input",()=>{ markFilled($("#f_agr_date")); updateRecap(); });
+/* друга й наступні угоди зазвичай укладаються пізніше за договір — підставляємо сьогоднішню дату */
+$("#f_agr_no").addEventListener("change",()=>{
+  const d=$("#f_agr_date"), n=$("#f_agr_no").value.trim();
+  if(d && !d.value && n && n!=="1"){ d.value=todayISO(); markFilled(d); }
+});
 
 /* ---------- угода про розірвання договору ----------
    Окремої частини в шаблонах немає: збираємо її з Додаткової угоди того ж шаблону —
@@ -2311,6 +2329,19 @@ function caseText(r, caseNo){
   return t.replace(/[.\s]+$/,"")+" у справі "+no;
 }
 
+/* Дата додаткової угоди: якщо угоду укладено пізніше за договір, її дата йде
+   в заголовок угоди, у посилання в Акті («Додаткової угоди № N від …») і в рахунок.
+   Позначаємо ці місця окремим плейсхолдером «Дата_дод_угоди». */
+function markAgrDate(xml, agr){
+  const P="«Дата_укладання_договору»", N="«Дата_дод_угоди»";
+  const swap=from=>{ const i=xml.indexOf(P,from); if(i>=0) xml=xml.slice(0,i)+N+xml.slice(i+P.length); };
+  const t=xml.indexOf("Додаткова угода №");
+  if(t>=0){ const f=xml.indexOf(P,t); if(f>=0) swap(f+P.length); }      /* 1-ше — «до Договору … від», 2-ге — дата угоди */
+  const a=xml.indexOf("Додаткової угоди №"+NBSP+agr+" від "); if(a>=0) swap(a);
+  const r=xml.indexOf("Рахунок-фактура"); if(r>=0) swap(r);
+  return xml;
+}
+
 /* ---------- головна функція ---------- */
 function fillTemplateXml(xml, D){
   /* 1. номери додаткової угоди, акта та рахунку */
@@ -2323,6 +2354,7 @@ function fillTemplateXml(xml, D){
   if(act!=="1"){
     xml=xml.split("допомоги №"+NBSP+"1").join("допомоги №"+NBSP+xmlEsc(act));
   }
+  xml=markAgrDate(xml, agr);
 
   if(D.prepaid) xml=insertParaAfter(xml,"Інші супутні дії, необхідні для належного виконання доручення",
     `Вартість наданої правничої (правової) допомоги оплачена Клієнтом у повному обсязі авансом відповідно до Додаткової угоди № ${agr}; заборгованість Клієнта перед Адвокатом відсутня.`);
@@ -2369,6 +2401,7 @@ function fillTemplateXml(xml, D){
   /* 4. значення */
   const map=Object.assign({}, D.vals);
   map["Загальний_час"]=D.hoursText||"";
+  map["Дата_дод_угоди"]=D.agrDate||map["Дата_укладання_договору"]||"";
   map["Порядок_оплати"]=D.payText||"";
   for(const k in map){
     xml=xml.split("«"+k+"»").join(val(map[k]));
@@ -2697,6 +2730,7 @@ async function prepareDoc(){
     prepaid: isPrepaid(),
 
     agrNo: v("f_agr_no")||"1",
+    agrDate: fmtDate(($("#f_agr_date")||{}).value||"", true),
     actNo: v("f_act_no")||"1",
     mode: pb ? "probono" : (hourly ? "hourly" : "fixed"),
     propor: pb ? false : ($("#f_pay_propor") ? $("#f_pay_propor").checked : false),
@@ -2750,7 +2784,7 @@ async function prepareDoc(){
    ФОП Осадько (Виконавець) — окремий шаблон і рушій заповнення.
    Термінологія: «юридичні послуги», «Виконавець»/«Замовник».
    ========================================================================== */
-const FOP_PLACEHOLDERS=[
+const FOP_PLACEHOLDERS=["Дата_дод_угоди",
   "Номер_договору","Дата_укладання_договору","Строк_дії_договору",
   "Номер_дод_угоди","Номер_акта","Номер_рахунку",
   "Замовник_вступ","Замовник_назва","Замовник_адреса","Замовник_ідентифікатор",
@@ -2790,6 +2824,7 @@ function fillFopXml(xml, D){
   /* номери */
   xml=xml.split("«Номер_дод_угоди»").join(val(D.agrNo));
   xml=xml.split("«Номер_акта»").join(val(D.actNo));
+  xml=markAgrDate(xml, String(D.agrNo||"1"));
   if(D.prepaid) xml=xml.split("Всього до сплати – «Вартість_послуг_грн» грн.").join(
     xmlEsc(typographyText(`Вартість послуг оплачена Замовником у повному обсязі авансом відповідно до Додаткової угоди № ${D.agrNo}; заборгованість Замовника перед Виконавцем відсутня.`)));
   /* таблиці: перша — Додаткова угода, друга — Акт */
@@ -2809,6 +2844,7 @@ function fillFopXml(xml, D){
   /* значення */
   const map=Object.assign({}, D.vals);
   map["Замовник_вступ"]=D.zamIntro;
+  map["Дата_дод_угоди"]=D.agrDate||map["Дата_укладання_договору"]||"";
   map["Порядок_оплати"]=D.payText||"";
   map["Вартість_послуг_грн"]=D.totalAct;
   /* рядок «В особі: …» лише для юридичної особи — для інших прибираємо абзац повністю */
@@ -2849,6 +2885,7 @@ async function prepareDocFop(){
     prepaid: isPrepaid(),
 
     agrNo: v("f_agr_no")||"1",
+    agrDate: fmtDate(($("#f_agr_date")||{}).value||"", true),
     actNo: v("f_act_no")||"1",
     mode: pb ? "probono" : (hourly ? "hourly" : "fixed"),
     payText: pb ? "" : v("f_pay_text"),
@@ -3012,12 +3049,13 @@ function applyDefaults(){
 }
 
 /* ---------- реєстр договорів (Excel) ---------- */
-const REG_WIDTHS=[{wch:16},{wch:15},{wch:12},{wch:15},{wch:34},{wch:16},{wch:32},{wch:24},{wch:16},{wch:20},{wch:9},{wch:42},{wch:13},{wch:14},{wch:11},{wch:8},{wch:10},{wch:14},{wch:28},{wch:60}];
-const REG_COLS=["Дата укладення","Номер договору","Виконавець","Тип клієнта","Клієнт","ЄДРПОУ / РНОКПП","Адреса","Представник","Телефон","Ел. пошта","№ дод. угоди","Зміст додаткової угоди","Модель оплати","Ставка, грн/год","Годин разом","№ акта","№ рахунку","Сума, грн","Сума прописом","Порядок оплати"];
+const REG_WIDTHS=[{wch:16},{wch:15},{wch:12},{wch:15},{wch:34},{wch:16},{wch:32},{wch:24},{wch:16},{wch:20},{wch:9},{wch:14},{wch:42},{wch:13},{wch:14},{wch:11},{wch:8},{wch:10},{wch:14},{wch:28},{wch:60}];
+const REG_COLS=["Дата укладення","Номер договору","Виконавець","Тип клієнта","Клієнт","ЄДРПОУ / РНОКПП","Адреса","Представник","Телефон","Ел. пошта","№ дод. угоди","Дата дод. угоди","Зміст додаткової угоди","Модель оплати","Ставка, грн/год","Годин разом","№ акта","№ рахунку","Сума, грн","Сума прописом","Порядок оплати"];
 const SNAP_SHEET="Дані для повторного формування";
 /* registry: [{row:{…для Excel…}, snap:{…повний стан форми…}|null}] */
 let registry=[];
 const regKey=r=>["Номер договору","Дата укладення","Клієнт"].map(k=>String(r[k]||"").trim()).join("|");
+const regDocKey=r=>regKey(r)+"|"+["ЄДРПОУ / РНОКПП","№ дод. угоди"].map(k=>String(r[k]||"").trim()).join("|");
 const regUpsertKey=r=>regKey(r)+"|"+["Виконавець","ЄДРПОУ / РНОКПП","№ дод. угоди"].map(k=>String(r[k]||"").trim()).join("|");
 /* прибирає дублі (однаковий договір і додаткова угода) — лишає найновіший запис */
 function dedupeRegistry(arr){
@@ -3053,7 +3091,7 @@ function loadRegistry(){
 /* ---- знімок і відновлення стану форми ---- */
 const SNAP_IDS=["f_num","f_date","f_name","f_short","f_birth","f_addr","f_rnokpp","f_pass","f_basis_fop",
   "f_org","f_edrpou","f_repr_short","f_orgaddr","f_repr_pos","f_repr_pib","f_basis","f_repr_rnokpp",
-  "f_phone","f_email","f_term","f_agr_no","f_act_no","f_case","f_inv_no","f_cost","f_cost_words",
+  "f_phone","f_email","f_term","f_agr_no","f_agr_date","f_act_no","f_case","f_inv_no","f_cost","f_cost_words",
   "f_rate","f_pay_preset","f_pay_adv","f_pay_d1","f_pay_d2","f_pay_dw","f_pay_day","f_pay_text",
   "f_rp_name","f_rp_short","f_rp_rnokpp","f_rp_basis",
   "p_id_no","p_id_auth","p_id_date","p_id_rec","p_bk_ser","p_bk_no","p_bk_date","p_bk_who"];
@@ -3116,6 +3154,7 @@ function addRegistryRow(){
     "Телефон": $("#f_phone").value.trim(),
     "Ел. пошта": $("#f_email").value.trim(),
     "№ дод. угоди": $("#f_agr_no").value.trim()||"1",
+    "Дата дод. угоди": fmtDate(($("#f_agr_date")||{}).value||$("#f_date").value,true),
     "Зміст додаткової угоди": hourly
       ? rows.map(r=>`${r.t}${r.unit?` (${r.unit})`:""}${r.h?` — ${fmtHours(r.h)} год.`:""}${r.a?` — ${r.aTxt} грн`:""}`).join("; ")
       : rows.map(r=>r.t).join("; "),
@@ -3141,23 +3180,62 @@ function renderRegistry(){
   if(registry.length===0){ empty.style.display=""; tbl.style.display="none"; tb.innerHTML=""; return; }
   empty.style.display="none"; tbl.style.display="";
   const NO_SNAP="Запис завантажено з файлу без службових даних — дія недоступна";
-  tb.innerHTML = registry.map((e,i)=>{
-    const r=e.row;
-    const acts = (e.snap
-      ? `<button class="icon-btn" data-load="${i}" title="Заповнити форму даними цього запису" aria-label="Заповнити форму">✎</button>`
-        + `<button class="icon-btn" data-dl="${i}" title="Сформувати .docx за цим записом" aria-label="Завантажити договір">⤓</button>`
-      : `<button class="icon-btn" disabled title="${NO_SNAP}">✎</button>`
-        + `<button class="icon-btn" disabled title="${NO_SNAP}">⤓</button>`)
-      + `<button class="icon-btn danger" data-del="${i}" title="Вилучити запис із реєстру" aria-label="Вилучити запис">✕</button>`;
-    const prov=regProvider(e);
-    const provCell = prov ? `<span class="reg-prov reg-prov-${prov==="ФОП"?"fop":"adv"}">${xmlEsc(prov)}</span>` : "—";
-    return `<tr><td>${xmlEsc(r["Номер договору"]||"")}</td><td>${xmlEsc(r["Дата укладення"]||"")}</td><td>${provCell}</td>`
-         + `<td>${xmlEsc(r["Клієнт"]||"")}</td><td>${xmlEsc(r["Модель оплати"]||"")}</td>`
-         + `<td>${xmlEsc(r["Сума, грн"]||"")}</td><td class="reg-acts">${acts}</td></tr>`;
-  }).join("");
+  /* групування: один договір (клієнт) — усі його додаткові угоди, за номером */
+  const gk=r=>regKey(r)+"|"+String(r["ЄДРПОУ / РНОКПП"]||"").trim();
+  const groups=new Map();
+  registry.forEach((e,i)=>{ if(!e||!e.row) return; const k=gk(e.row); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(i); });
+  const no=x=>parseInt(String(x||"").replace(/\D/g,""),10)||0;
+  let html="";
+  groups.forEach(ids=>{
+    ids.sort((a,b)=>no(registry[a].row["№ дод. угоди"])-no(registry[b].row["№ дод. угоди"]));
+    const r0=registry[ids[0]].row, prov=regProvider(registry[ids[0]]);
+    const last=[...ids].reverse().find(i=>registry[i].snap);
+    const provCell = prov ? `<span class="reg-prov reg-prov-${prov==="ФОП"?"fop":"adv"}">${xmlEsc(prov)}</span>` : "";
+    const newBtn = last!==undefined
+      ? `<button class="reg-new" type="button" data-new="${last}" title="Заповнити форму для наступної додаткової угоди до цього договору">+ Нова дод. угода</button>` : "";
+    html+=`<tr class="reg-grp"><td colspan="4"><b>Договір № ${xmlEsc(r0["Номер договору"]||"")} від ${xmlEsc(r0["Дата укладення"]||"")}</b> · ${xmlEsc(r0["Клієнт"]||"")} ${provCell}`
+        + `<span class="reg-sub">Додаткових угод: ${ids.length}</span></td><td class="reg-acts">${newBtn}</td></tr>`;
+    ids.forEach(i=>{
+      const e=registry[i], r=e.row;
+      const acts = (e.snap
+        ? `<button class="icon-btn" data-load="${i}" title="Заповнити форму даними цього запису" aria-label="Заповнити форму">✎</button>`
+          + `<button class="icon-btn" data-dl="${i}" title="Сформувати .docx за цим записом" aria-label="Завантажити документи">⤓</button>`
+        : `<button class="icon-btn" disabled title="${NO_SNAP}">✎</button>`
+          + `<button class="icon-btn" disabled title="${NO_SNAP}">⤓</button>`)
+        + `<button class="icon-btn danger" data-del="${i}" title="Вилучити запис із реєстру" aria-label="Вилучити запис">✕</button>`;
+      const what=String(r["Зміст додаткової угоди"]||"");
+      const short=what.length>110 ? what.slice(0,108)+"…" : what;
+      html+=`<tr><td class="reg-du">Дод. угода № ${xmlEsc(r["№ дод. угоди"]||"1")}<small>від ${xmlEsc(r["Дата дод. угоди"]||r["Дата укладення"]||"")}</small></td>`
+          + `<td class="reg-what" title="${xmlEsc(what)}">${xmlEsc(short)}</td><td>${xmlEsc(r["Модель оплати"]||"")}</td>`
+          + `<td>${xmlEsc(r["Сума, грн"]||"")}</td><td class="reg-acts">${acts}</td></tr>`;
+    });
+  });
+  tb.innerHTML=html;
   tb.querySelectorAll("[data-dl]").forEach(b=>b.addEventListener("click",()=>downloadFromRegistry(+b.dataset.dl)));
   tb.querySelectorAll("[data-load]").forEach(b=>b.addEventListener("click",()=>loadFromRegistry(+b.dataset.load)));
   tb.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>removeFromRegistry(+b.dataset.del)));
+  tb.querySelectorAll("[data-new]").forEach(b=>b.addEventListener("click",()=>newAgreementFromRegistry(+b.dataset.new)));
+}
+
+/* наступна додаткова угода до вже укладеного договору: дані клієнта й договору з
+   останнього запису, номер угоди й акта — наступні, дата угоди — сьогодні */
+function newAgreementFromRegistry(i){
+  const e=registry[i];
+  if(!e || !e.snap){ toast("Для цього запису немає збережених даних форми.",true); return; }
+  const gk=r=>regKey(r)+"|"+String(r["ЄДРПОУ / РНОКПП"]||"").trim();
+  const k=gk(e.row), no=x=>parseInt(String(x||"").replace(/\D/g,""),10)||0;
+  const same=registry.filter(x=>x&&x.row&&gk(x.row)===k);
+  const nextAgr=Math.max(...same.map(x=>no(x.row["№ дод. угоди"])||1))+1;
+  const nextAct=Math.max(...same.map(x=>no(x.row["№ акта"])||1))+1;
+  if(!confirm(`Підготувати Додаткову угоду № ${nextAgr} до договору № ${e.row["Номер договору"]||""} (${e.row["Клієнт"]||"клієнт"})?\n\nПоточні дані у формі буде замінено.`)) return;
+  applySnapshot(e.snap);
+  const set=(id,v)=>{ const el=$("#"+id); if(el){ el.value=v; markFilled(el); el.dispatchEvent(new Event("input",{bubbles:true})); } };
+  set("f_agr_no", String(nextAgr));
+  set("f_act_no", String(nextAct));
+  set("f_agr_date", todayISO());
+  const ad=$("#f_act_date"); if(ad){ ad.value=""; ad.dispatchEvent(new Event("input",{bubbles:true})); }
+  window.scrollTo({top:0,behavior:"smooth"});
+  toast(`Додаткова угода № ${nextAgr} від сьогодні. Змініть перелік послуг і вартість, перевірте номер рахунку.`);
 }
 
 /* вилучення запису з реєстру */
@@ -3206,7 +3284,7 @@ function registryWorkbook(){
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,"Реєстр договорів");
   // службовий аркуш: дозволяє повторно сформувати договір після завантаження реєстру
-  const snaps=registry.filter(e=>e.snap).map(e=>({"Ключ":regKey(e.row),"Дані":JSON.stringify(e.snap)}));
+  const snaps=registry.filter(e=>e.snap).map(e=>({"Ключ":regDocKey(e.row),"Дані":JSON.stringify(e.snap)}));
   if(snaps.length){
     const ws2=XLSX.utils.json_to_sheet(snaps,{header:["Ключ","Дані"]});
     ws2["!cols"]=[{wch:52},{wch:120}];
@@ -3242,13 +3320,13 @@ $("#reg_import").addEventListener("change",async ev=>{
         try{ snapMap[String(r["Ключ"]||"").trim()]=JSON.parse(r["Дані"]); }catch(e){}
       });
     }
-    const seen=new Set(registry.map(e=>regKey(e.row)));
+    const seen=new Set(registry.map(e=>regDocKey(e.row)));
     let added=0, withSnap=0;
     rows.forEach(r=>{
       const num=String(r["Номер договору"]||"").trim();
-      const k=regKey(r);
+      const k=regDocKey(r);
       if(num && !seen.has(k)){
-        const snap=snapMap[k]||null;
+        const snap=snapMap[k]||snapMap[regKey(r)]||null;
         if(snap) withSnap++;
         registry.push({row:r, snap});
         seen.add(k); added++;
@@ -3865,7 +3943,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-04.8";
+const GEN_VERSION="2026-11-14.1";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
