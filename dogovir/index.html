@@ -2367,31 +2367,61 @@ function markAgrDate(xml, agr){
    підписів) отримують «не відривати від наступного» — якщо підписи не вміщуються,
    на нову сторінку переходить і останній пункт, а не самі підписи. */
 function keepWithSignatures(xml){
-  const KEY="ПІДПИСИ СТОРІН";
+  const KEY="РЕКВІЗИТИ ТА ПІДПИ";   /* у шаблонах «ПІДПИСИ» буває розбите Word на два фрагменти */
   const addKeep=p=>{
     if(p.indexOf("<w:keepNext/>")>=0) return p;
     if(p.indexOf("<w:pPr>")>=0) return p.replace("<w:pPr>","<w:pPr><w:keepNext/>");
     return p.replace(/^(<w:p(?:\s[^>]*)?>)/,"$1<w:pPr><w:keepNext/></w:pPr>");
   };
+  const hasText=p=>/<w:t(?:\s[^>]*)?>[^<]*\S[^<]*<\/w:t>/.test(p);
+  /* ширина тексту сторінки (twips) — щоб пункт у таблиці мав ту саму ширину, що й решта */
+  const sp=xml.match(/<w:pgSz w:w="(\d+)"[\s\S]*?<w:pgMar[^>]*w:right="(\d+)"[^>]*w:left="(\d+)"/);
+  const textW=sp ? (+sp[1]-(+sp[2])-(+sp[3])) : 0;
   let from=0;
   for(;;){
     const k=xml.indexOf(KEY,from); if(k<0) break;
     const ts=xml.lastIndexOf("<w:tbl>",k), te=xml.lastIndexOf("</w:tbl>",k);
-    let start = ts>te ? ts : Math.max(xml.lastIndexOf("<w:p ",k), xml.lastIndexOf("<w:p>",k));
-    /* до 3 попередніх абзаців: порожні відступи й перший абзац із текстом */
+    const inTable=ts>te;
+    let start = inTable ? ts : Math.max(xml.lastIndexOf("<w:p ",k), xml.lastIndexOf("<w:p>",k));
+    /* попередні абзаци: порожні відступи й останній пункт */
+    const taken=[];
     for(let n=0;n<3;n++){
       const head=xml.slice(0,start).replace(/\s+$/,"");
       if(!head.endsWith("</w:p>")) break;
       const ps=Math.max(head.lastIndexOf("<w:p "), head.lastIndexOf("<w:p>"));
       if(ps<0) break;
       const para=head.slice(ps);
-      if(para.indexOf("<w:sectPr")>=0 || para.indexOf("<w:br w:type=\"page\"")>=0) break;
-      const kept=addKeep(para);
-      xml=xml.slice(0,ps)+kept+xml.slice(ps+para.length);
-      start=ps;
-      if(/<w:t(?:\s[^>]*)?>[^<]*\S[^<]*<\/w:t>/.test(para)) break;
+      if(para.indexOf("<w:sectPr")>=0 || para.indexOf('<w:br w:type="page"')>=0) break;
+      taken.unshift([ps, para]); start=ps;
+      if(hasText(para)) break;
     }
-    from=xml.indexOf(KEY,from)+KEY.length;
+    if(!taken.length || !hasText(taken[0][1])){ from=k+KEY.length; continue; }
+    if(!inTable || !textW){
+      /* підписи — звичайні абзаци: досить «не відривати від наступного» */
+      taken.slice().reverse().forEach(([ps,para])=>{ xml=xml.slice(0,ps)+addKeep(para)+xml.slice(ps+para.length); });
+      from=xml.indexOf(KEY,start)+KEY.length; continue;
+    }
+    /* підписи — таблиця: останній пункт стає її першим рядком (без рамок, на всю ширину тексту),
+       тож на нову сторінку пункт і підписи переходять лише разом — у Word і в будь-якому редакторі */
+    const cut0=taken[0][0], cut1=ts;
+    const paras=taken.map(([,p])=>addKeep(p)).join("");
+    let tbl=xml.slice(ts, xml.indexOf("</w:tbl>",ts)+8);
+    const cols=[...(tbl.match(/<w:tblGrid>([\s\S]*?)<\/w:tblGrid>/)||["",""])[1].matchAll(/<w:gridCol w:w="(\d+)"\/>/g)].map(m=>+m[1]);
+    if(!cols.length){ from=k+KEY.length; continue; }
+    const full=cols.reduce((x,y)=>x+y,0), want=textW, delta=Math.max(0,want-full);   /* режим Word 15: текст клітинки без полів = ширина тексту сторінки */
+    if(delta){
+      cols[cols.length-1]+=delta;
+      tbl=tbl.replace(/<w:tblGrid>[\s\S]*?<\/w:tblGrid>/,"<w:tblGrid>"+cols.map(w=>`<w:gridCol w:w="${w}"/>`).join("")+"</w:tblGrid>");
+      tbl=tbl.replace(new RegExp(`<w:tcW w:w="${full}" w:type="dxa"/>`,"g"),`<w:tcW w:w="${full+delta}" w:type="dxa"/>`);
+    }
+    const row=`<w:tr><w:trPr><w:cantSplit/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${full+delta}" w:type="dxa"/><w:gridSpan w:val="${cols.length}"/>`
+      +`<w:tcMar><w:left w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tcMar></w:tcPr>${paras}</w:tc></w:tr>`;
+    const fr=tbl.search(/<w:tr[ >]/);
+    if(fr<0){ from=k+KEY.length; continue; }
+    tbl=tbl.slice(0,fr)+row+tbl.slice(fr);
+    const tEnd=xml.indexOf("</w:tbl>",ts)+8;
+    xml=xml.slice(0,cut0)+tbl+xml.slice(tEnd);
+    from=xml.indexOf(KEY,cut0)+KEY.length;
   }
   return xml;
 }
@@ -4026,7 +4056,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-14.4";
+const GEN_VERSION="2026-11-14.5";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
