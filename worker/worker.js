@@ -62,6 +62,58 @@ async function showCaseList(env, prefix = '') {
       '\n\nЗасідання в цих справах приходять сповіщенням і видно в «👥 Справи клієнтів».\n🗑 — припинити стеження:',
     reply_markup: { inline_keyboard: rows } });
 }
+// ── Повістка (SUDPOVISTKA / SMS / Viber): переслане або вставлене повідомлення ──
+// «Солом'янський райсуд м.Києва,м.Київ,вул.…,т.(044)….Викликається Осадько О.О. як
+//  захисник на 17:15 18.11.2026,зал 10,провадження 760/5574/24,обвинувачений:…,суддя …»
+function parseSummons(text) {
+  const t = String(text || '').replace(/\s+/g, ' ').trim();
+  if (!/виклика[єю]ться/i.test(t)) return null;
+  const dt = t.match(/(\d{1,2})[:.](\d{2})\s*(?:год\.?\s*)?(\d{2}\.\d{2}\.\d{4})/)
+    || t.match(/(\d{2}\.\d{2}\.\d{4})\D{1,12}?(\d{1,2})[:.](\d{2})/);
+  const num = t.match(/(?:\d+-[а-яіїєґa-z]+\/)?\d{2,4}\/\d{1,7}\/\d{2}(?:-[а-яіїєґa-z]+)?/i);
+  if (!dt || !num) return null;
+  let date, time;
+  if (/^\d{2}\.\d{2}\.\d{4}$/.test(dt[3] || '')) { time = dt[1].padStart(2, '0') + ':' + dt[2]; date = dt[3]; }
+  else { date = dt[1]; time = dt[2].padStart(2, '0') + ':' + dt[3]; }
+  const court = (t.match(/^(.*?(?:суд|райсуд)[^,.]*?(?:м\.\s?[А-ЯІЇЄҐ][а-яіїєґʼ'’-]+)?)\s*,/i) || [])[1] || '';
+  const addr = (t.match(/^[^,]*,\s*(.*?)(?:,\s*т\.|\.\s*виклика)/i) || [])[1] || '';
+  const room = (t.match(/зал(?:і)?\s*№?\s*([\w\-]+)/i) || [])[1] || '';
+  const judge = (t.match(/суддя\s+([А-ЯІЇЄҐ][а-яіїєґʼ'’-]+\s*[А-ЯІЇЄҐ]\.\s*[А-ЯІЇЄҐ]\.)/) || [])[1] || '';
+  const role = (t.match(/як\s+(захисник\w*|представник\w*|свідок\w*|потерпіл\w*|обвинувачен\w*|відповідач\w*|позивач\w*)/i) || [])[1] || '';
+  const party = (t.match(/((?:обвинувачен|підозрюван|позивач|відповідач|потерпіл)[а-яіїєґ]*\s*:\s*[^,]+)/i) || [])[1] || '';
+  return { court: court.trim(), number: num[0], date, time, room, judge: judge.replace(/\s*([А-ЯІЇЄҐ]\.)\s*([А-ЯІЇЄҐ]\.)$/, ' $1$2'),
+    role, party: party.trim(), address: addr.trim() };
+}
+function shortHash(s) {
+  let h1 = 0x811c9dc5, h2 = 0x1234567;
+  for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); h1 = Math.imul(h1 ^ c, 16777619) >>> 0; h2 = Math.imul(h2 ^ c, 2246822519) >>> 0; }
+  return (h1.toString(16).padStart(8, '0') + h2.toString(16).padStart(8, '0')).slice(0, 16);
+}
+async function onSummons(env, sm) {
+  const nums = await getCaseNums(env);
+  const fresh = !nums.some((x) => x.toLowerCase() === sm.number.toLowerCase());
+  if (fresh) { nums.push(sm.number); await putCaseNums(env, nums); }
+  const lines = ['📨 <b>Повістку розпізнано</b>', '',
+    `📁 Справа: <b>${esc(sm.number)}</b>`, `📅 Дата/час: <b>${esc(sm.date)} ${esc(sm.time)}</b>`];
+  if (sm.court) lines.push(`🏛 Суд: ${esc(sm.court)}`);
+  if (sm.room) lines.push(`🚪 Зал: ${esc(sm.room)}`);
+  if (sm.judge) lines.push(`👨‍⚖️ Суддя: ${esc(sm.judge)}`);
+  if (sm.role) lines.push(`🎓 Роль: ${esc(sm.role)}`);
+  if (sm.address) lines.push(`📍 Адреса: ${esc(sm.address)}`);
+  lines.push('', fresh ? '✅ Справу поставлено на стеження — нові засідання в ній прийдуть сповіщенням.'
+    : 'ℹ️ Справа вже була на стеженні.');
+  const key = shortHash(sm.number + '|' + sm.date + ' ' + sm.time + '|' + sm.court);
+  const r = await tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: lines.join('\n'),
+    reply_markup: { inline_keyboard: [[
+      { text: '📅 Додати в календар', callback_data: `gcaladd:${key}` },
+      { text: '✖️ Ні', callback_data: `gcalskip:${key}` }]] } });
+  const res = (r && r.result) || {};
+  const rec = { number: sm.number, date: `${sm.date} ${sm.time}`, judge: sm.judge, involved: sm.party,
+    description: sm.role ? 'Виклик як ' + sm.role : 'Виклик за повісткою', forma: '', courtroom: sm.room, add_address: sm.address };
+  await env.KV.put('gcal_pending_' + key, JSON.stringify({ key, court: sm.court, chat_id: (res.chat || {}).id,
+    message_id: res.message_id, rec }), { expirationTtl: 60 * 24 * 3600 });
+}
+
 const CASE_ASK = '📌 Надішліть номер справи, напр. <code>757/12345/26-ц</code> або <code>752/1234/25</code>. '
   + 'Бот стежитиме за засіданнями в ній у всіх судах зі списку. Скасувати — /cancel.';
 
@@ -971,6 +1023,11 @@ async function handleUpdate(update, env) {
     // AI-агент: будь-який файл (Word/PDF/фото) іде в роботу агенту; текст після
     // кнопки «🤖» або поки є завантажені файли — це завдання.
     if (file) return onAgentFile(env, m, file, body);
+    // Переслана/вставлена повістка — розпізнати, поставити справу на стеження, запропонувати календар
+    {
+      const sm = parseSummons(body);
+      if (sm) { await env.KV.delete('court_await'); return onSummons(env, sm); }
+    }
     const isMenu = /^(📑|👥|⚖️|🔎|📰|📋|🔔|➕|🔄|🤖|📅|📚|🗂|📌|📁)/.test(body)
       || /^(\/|cancel$|скасувати$|меню$)/i.test(body);
     if (courtAwait === 'agent' && body && !isMenu) {
@@ -1002,6 +1059,7 @@ async function handleUpdate(update, env) {
           '/list — 📋 список клієнтів\n' +
           '/add — ➕ додати клієнта\n' +
           '/track &lt;номер&gt; — 📌 стежити за справою за номером\n/cases — 📁 справи під наглядом\n' +
+          '📨 перешліть боту повістку (SUDPOVISTKA, SMS) — справа стане на стеження, засідання — у календар\n' +
           '/restart — 🔄 терміновий прогін\n' +
           '/vs &lt;тема&gt; — 🔎 практика судів за темою (або кнопка «🔎 Пошук практики»)\n' +
           '/digest — 📰 свіжа практика зараз (щоранку приходить сама)\n' +
