@@ -189,6 +189,43 @@ def _hearing_ts(s):
         return None
 
 
+def fetch_worker_cases_tracked():
+    """Номери справ під наглядом (Telegram-меню «📌 Стежити за справою», Worker KV)."""
+    if not (WORKER_URL and WORKER_SECRET):
+        return []
+    try:
+        req = urllib.request.Request(
+            WORKER_URL.rstrip("/") + "/court_names",
+            headers={"X-Auth-Token": WORKER_SECRET, "User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            data = json.loads(r.read().decode("utf-8"))
+        return [n.strip() for n in data.get("cases", []) if str(n).strip()]
+    except Exception as e:
+        print("Список справ із Worker недоступний:", str(e)[:60])
+        return []
+
+
+def _case_base(num):
+    """«757/12345/26-ц» → «757/12345/26»: основа номера без літерного суфікса, без пробілів."""
+    n = re.sub(r"[\u2010-\u2015\u2212]", "-", str(num or "")).casefold()
+    n = re.sub(r"\s+", "", n).lstrip("№")
+    n = re.sub(r"-[^\d/]+$", "", n)          # «-ц», «-к», «-а» тощо в кінці
+    return n
+
+
+def case_matches(number, tracked):
+    """Повертає номер зі списку стеження, якщо засідання саме в цій справі. Інакше None.
+    Порівнюємо основу номера (суфікс «-ц»/«-к» необовʼязковий), номер має містити «/»."""
+    b = _case_base(number)
+    if not b or "/" not in b:
+        return None
+    for t in tracked:
+        tb = _case_base(t)
+        if tb and "/" in tb and tb == b:
+            return t
+    return None
+
+
 def fetch_worker_names():
     """ПІБ зі списку у Worker (KV). Керується з Telegram-меню бота."""
     if not (WORKER_URL and WORKER_SECRET):
@@ -917,7 +954,18 @@ def main():
         if n and n.lower() not in low:
             names.append(n)
             low.add(n.lower())
-    if not names:
+    # Справи під наглядом за номером: з Telegram-меню та з секрету COURT_WATCH ("cases")
+    tracked = fetch_worker_cases_tracked()
+    try:
+        _cfg = json.loads(os.environ.get("COURT_WATCH", "") or "{}")
+        for c in (_cfg.get("cases", []) if isinstance(_cfg, dict) else []):
+            if str(c).strip() and str(c).strip() not in tracked:
+                tracked.append(str(c).strip())
+    except Exception:
+        pass
+    if tracked:
+        print(f"Справ під наглядом за номером: {len(tracked)}")
+    if not names and not tracked:
         print("Порожній список ПІБ (додайте через меню бота: /menu) — нічого відстежувати.")
         return
     if not courts:  # список ПІБ є (напр. лише з меню) — беремо вбудований реєстр судів
@@ -1027,6 +1075,11 @@ def main():
             inv = rec.get("involved", "") or ""
             who = name_matches(inv, names)
             adv = advocate_matches(inv)
+            # Справа під наглядом за номером — незалежно від того, хто в сторонах.
+            if not who and tracked:
+                cm = case_matches(rec.get("number", ""), tracked)
+                if cm:
+                    who = "справа № " + cm
             # Власна справа адвоката з опискою в ПІБ теж має спрацьовувати.
             if adv and not who:
                 who = ADVOCATE_NAME
@@ -1034,7 +1087,8 @@ def main():
                 matches.append((rec, who))
                 # У «Справи клієнтів» — коли є збіг за КЛІЄНТСЬКИМ ПІБ, навіть якщо
                 # адвокат теж у сторонах (тоді справа є в обох звітах).
-                cli = who if not adv else name_matches(inv, client_names)
+                cli = who if not adv else (name_matches(inv, client_names)
+                                           or (who if who.startswith("справа № ") else None))
                 if cli:
                     client_hits.append({
                         "court": court["name"], "matched": cli,
@@ -1112,7 +1166,8 @@ def main():
                       f"(пропущено): {str(e)[:60]}")
                 arecs = []
             amatches = [(r, w) for r in arecs
-                        if (w := name_matches(r.get("involved", ""), names))]
+                        if (w := (name_matches(r.get("involved", ""), names)
+                                  or (("справа № " + c) if (c := case_matches(r.get("number", ""), tracked)) else None)))]
             anew = sum(1 for r, _ in amatches if auto_key(auto_url, r) not in seen)
             total_new += anew
             if arecs:
