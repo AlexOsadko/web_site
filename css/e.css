@@ -680,3 +680,6 @@ body.hm .hm-faddr { white-space: normal; align-items: flex-start; }
 body.hm .hm-faddr a { color: inherit; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 body.hm .kp-lines a.kp-local { display: table; margin-top: 8px; font-size: 15px; color: var(--e-ink); text-decoration: underline; text-underline-offset: 3px; }
 :root[data-theme="dark"] body.hm .kp-lines a.kp-local { color: var(--e-text); }
+
+/* Футер: значок пошти не прилипає до адреси (inline-block з .hm-ft a перебивав flex) */
+body.hm .hm-ft a.hm-fi { display: inline-flex; align-items: center; gap: 10px; }
