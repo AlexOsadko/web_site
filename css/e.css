@@ -105,7 +105,7 @@ body.hm .hm-opt, body.hm .hm-opt i { border-radius: 0; }
 
 /* Головна на широкому екрані: поки видно перший екран, шапка — лише над правою колонкою */
 @media (min-width: 861px) {
-  body.home .hm-head:not(.solid) { left: 44%; border-bottom-color: transparent; background: transparent; }
+  body.home .hm-head:not(.solid) { left: 44%; border-bottom-color: transparent; background: var(--e-bg); }   /* фон, а не прозорість: текст першого екрана не пропливає під іменем при прокрутці */
   body.home .hm-head:not(.solid) .hm-c { padding: 0 48px 0 64px; max-width: none; }
 }
 
