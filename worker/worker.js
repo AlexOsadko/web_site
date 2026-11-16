@@ -34,6 +34,36 @@ async function getNames(env) {
 async function putNames(env, arr) {
   await env.KV.put('court_names', JSON.stringify(arr));
 }
+// Номери справ під наглядом (стеження за конкретною справою, незалежно від ПІБ).
+async function getCaseNums(env) {
+  return (await env.KV.get('court_cases', 'json')) || [];
+}
+async function putCaseNums(env, arr) {
+  await env.KV.put('court_cases', JSON.stringify(arr));
+}
+// «757 / 12345 / 26 – ц» → «757/12345/26-ц»; номер має містити «/» і цифри.
+function normCaseNum(t) {
+  const v = String(t || '').replace(/[\u2010-\u2015\u2212]/g, '-').replace(/\s*([/-])\s*/g, '$1')
+    .replace(/^№\s*/, '').replace(/\s+/g, ' ').trim();
+  return /\d/.test(v) && v.includes('/') && v.length <= 40 ? v : '';
+}
+async function showCaseList(env, prefix = '') {
+  const arr = await getCaseNums(env);
+  if (!arr.length) {
+    return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+      text: prefix + '📁 Справ під наглядом немає. Натисніть «📌 Стежити за справою» і надішліть номер.',
+      reply_markup: { inline_keyboard: [[{ text: '📌 Стежити за справою', callback_data: 'cnadd' }]] } });
+  }
+  const rows = arr.map((n, i) => [{ text: `🗑 ${i + 1}. ${n}`.slice(0, 60), callback_data: `cndel:${i}` }]);
+  rows.push([{ text: '📌 Додати справу', callback_data: 'cnadd' }]);
+  return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+    text: prefix + `📁 <b>Справи під наглядом (${arr.length})</b>\n` +
+      arr.map((n, i) => `${i + 1}. <code>${esc(n)}</code>`).join('\n') +
+      '\n\nЗасідання в цих справах приходять сповіщенням і видно в «👥 Справи клієнтів».\n🗑 — припинити стеження:',
+    reply_markup: { inline_keyboard: rows } });
+}
+const CASE_ASK = '📌 Надішліть номер справи, напр. <code>757/12345/26-ц</code> або <code>752/1234/25</code>. '
+  + 'Бот стежитиме за засіданнями в ній у всіх судах зі списку. Скасувати — /cancel.';
 
 // Кнопки згруповано за розділами: 📅 Засідання · 📚 Практика · 🗂 Клієнти · 🤖 Агент.
 const GROUPS = {
@@ -47,6 +77,7 @@ const GROUPS = {
   ] },
   cli: { title: '🗂 <b>Клієнти під наглядом</b>', rows: [
     [{ text: '📋 Список клієнтів', callback_data: 'clist' }, { text: '➕ Додати клієнта', callback_data: 'cadd' }],
+    [{ text: '📁 Справи за номером', callback_data: 'cnlist' }, { text: '📌 Стежити за справою', callback_data: 'cnadd' }],
   ] },
 };
 
@@ -790,7 +821,7 @@ async function handleUpdate(update, env) {
     if (['cmenu', 'cadd', 'clist', 'cedit', 'cdel', 'crep', 'crepc', 'crepall', 'crun',
          'chide', 'cunhide', 'chidden', 'cunhide1', 'cpurge1', 'cpurge',
          'crem', 'cremdel', 'crempg', 'crepp', 'cnoop', 'cvs', 'cdig',
-         'callhide', 'cagent', 'cgrp'].includes(action)) {
+         'callhide', 'cagent', 'cgrp', 'cnadd', 'cnlist', 'cndel'].includes(action)) {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
       if (action === 'cnoop') return;
       if (action === 'cdig') return runDigest(env);
@@ -888,6 +919,19 @@ async function handleUpdate(update, env) {
         return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: txt });
       }
       if (action === 'clist') return showCourtList(env);
+      if (action === 'cnlist') return showCaseList(env);
+      if (action === 'cnadd') {
+        await env.KV.put('court_await', 'addnum');
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: CASE_ASK });
+      }
+      if (action === 'cndel') {
+        const nums = await getCaseNums(env);
+        const i = parseInt(pid, 10);
+        if (isNaN(i) || i < 0 || i >= nums.length) return showCaseList(env);
+        const gone = nums.splice(i, 1)[0];
+        await putCaseNums(env, nums);
+        return showCaseList(env, `🗑 Більше не стежу за справою <code>${esc(gone)}</code>.\n\n`);
+      }
       if (action === 'cadd') {
         await env.KV.put('court_await', 'add');
         return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
@@ -920,13 +964,14 @@ async function handleUpdate(update, env) {
     const chat = m.chat && m.chat.id;
     if (String(chat) !== String(env.REVIEW_CHAT)) return;
     const body = (m.text || m.caption || '').trim();
+    let body2 = '';
     const courtAwait = await env.KV.get('court_await');
     const file = msgFile(m);
 
     // AI-агент: будь-який файл (Word/PDF/фото) іде в роботу агенту; текст після
     // кнопки «🤖» або поки є завантажені файли — це завдання.
     if (file) return onAgentFile(env, m, file, body);
-    const isMenu = /^(📑|👥|⚖️|🔎|📰|📋|🔔|➕|🔄|🤖|📅|📚|🗂)/.test(body)
+    const isMenu = /^(📑|👥|⚖️|🔎|📰|📋|🔔|➕|🔄|🤖|📅|📚|🗂|📌|📁)/.test(body)
       || /^(\/|cancel$|скасувати$|меню$)/i.test(body);
     if (courtAwait === 'agent' && body && !isMenu) {
       if (body.length < 10) {
@@ -955,11 +1000,47 @@ async function handleUpdate(update, env) {
           '/menu — відкрити меню\n/clients — 👥 справи клієнтів\n' +
           '/advocate — ⚖️ справи адвоката\n/reminders — 🔔 нагадування\n' +
           '/list — 📋 список клієнтів\n' +
-          '/add — ➕ додати клієнта\n/restart — 🔄 терміновий прогін\n' +
+          '/add — ➕ додати клієнта\n' +
+          '/track &lt;номер&gt; — 📌 стежити за справою за номером\n/cases — 📁 справи під наглядом\n' +
+          '/restart — 🔄 терміновий прогін\n' +
           '/vs &lt;тема&gt; — 🔎 практика судів за темою (або кнопка «🔎 Пошук практики»)\n' +
           '/digest — 📰 свіжа практика зараз (щоранку приходить сама)\n' +
           '/agent — 🤖 завдання агенту: надішліть Word/PDF і напишіть, що зробити\n' +
           '/cancel — ↩️ скасувати', reply_markup: courtReplyKb() });
+    }
+
+    // Стеження за справою за номером: /track 757/12345/26-ц, /cases
+    {
+      const tm = body.match(/^\/(?:track|справа|стежити)(?:\s+([\s\S]*))?$/i);
+      if (tm || /^📌/.test(body)) {
+        const n = normCaseNum(tm && tm[1]);
+        if (!n) {
+          await env.KV.put('court_await', 'addnum');
+          return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: CASE_ASK });
+        }
+        await env.KV.put('court_await', 'addnum');
+        body2 = n;
+      }
+      if (/^📁/.test(body) || /^\/cases$/i.test(body)) {
+        await env.KV.delete('court_await');
+        return showCaseList(env);
+      }
+    }
+    if (body2 || (await env.KV.get('court_await')) === 'addnum' && !isMenu) {
+      const n = normCaseNum(body2 || body);
+      await env.KV.delete('court_await');
+      if (!n) {
+        await env.KV.put('court_await', 'addnum');
+        return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+          text: 'Це не схоже на номер справи (має містити «/» і цифри, напр. <code>757/12345/26-ц</code>). Надішліть ще раз або /cancel.' });
+      }
+      const nums = await getCaseNums(env);
+      if (nums.some((x) => x.toLowerCase() === n.toLowerCase())) {
+        return showCaseList(env, `Справа <code>${esc(n)}</code> уже під наглядом.\n\n`);
+      }
+      nums.push(n);
+      await putCaseNums(env, nums);
+      return showCaseList(env, `✅ Стежу за справою <code>${esc(n)}</code>. Перше сповіщення — після найближчого прогону (або натисніть «🔄 Терміновий прогін»).\n\n`);
     }
 
     // Кнопки закріпленої клавіатури-меню (натискання = звичайне повідомлення)
@@ -1098,7 +1179,8 @@ export default {
         return new Response('forbidden', { status: 403 });
       }
       const arr = (await env.KV.get('court_names', 'json')) || [];
-      return Response.json({ names: arr });
+      const cases = (await env.KV.get('court_cases', 'json')) || [];
+      return Response.json({ names: arr, cases });
     }
     // Завдання AI-агента для воркфлоу agent.yml: віддаємо один раз і видаляємо.
     if (request.method === 'GET' && url.pathname === '/agent_job') {
