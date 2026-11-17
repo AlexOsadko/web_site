@@ -163,9 +163,9 @@ function courtReplyKb() {
 }
 
 // Запуск GitHub Action «Відстеження судових справ» на вимогу (workflow_dispatch).
-async function triggerScan(env) {
+async function triggerScan(env, wfOverride, inputs) {
   const repo = env.GH_REPO || 'AlexOsadko/web_site';
-  const wf = env.GH_WORKFLOW || 'court-watch.yml';
+  const wf = wfOverride || env.GH_WORKFLOW || 'court-watch.yml';
   const r = await fetch(
     `https://api.github.com/repos/${repo}/actions/workflows/${wf}/dispatches`,
     { method: 'POST', headers: {
@@ -174,7 +174,7 @@ async function triggerScan(env) {
         'X-GitHub-Api-Version': '2022-11-28',
         'User-Agent': 'osadko-court-bot',
         'Content-Type': 'application/json',
-      }, body: JSON.stringify({ ref: 'main', inputs: { dry_run: false } }) });
+      }, body: JSON.stringify({ ref: 'main', inputs: inputs || (wfOverride ? {} : { dry_run: false }) }) });
   return r.status; // 204 = прийнято
 }
 
@@ -863,10 +863,18 @@ async function handleUpdate(update, env) {
       const ks = (await env.KV.get('gcal_approved', 'json')) || [];
       if (!ks.includes(key)) { ks.push(key); await env.KV.put('gcal_approved', JSON.stringify(ks)); }
       await tg(env, 'editMessageReplyMarkup', { chat_id: chatId, message_id: msgId, reply_markup: statusKb('⏳ Додаю в календар…') });
-      // швидкий прогін, щоб додати без очікування планового (з тротлінгом ~90с)
+      // окрема швидка задача «лише календар» (без сканування судів): подія ~за хвилину.
+      // Кілька натискань поспіль обробить один запуск (тротлінг 20 с).
       if (env.GH_TOKEN) {
-        const last = parseInt((await env.KV.get('court_run_at')) || '0', 10);
-        if (Date.now() - last >= 90000) { await triggerScan(env); await env.KV.put('court_run_at', String(Date.now())); }
+        const last = parseInt((await env.KV.get('gcal_run_at')) || '0', 10);
+        if (Date.now() - last >= 20000) {
+          const st = await triggerScan(env, 'gcal-add.yml', {});
+          await env.KV.put('gcal_run_at', String(Date.now()));
+          if (st !== 204) {   // запасний шлях — повний прогін, як раніше
+            const l2 = parseInt((await env.KV.get('court_run_at')) || '0', 10);
+            if (Date.now() - l2 >= 90000) { await triggerScan(env); await env.KV.put('court_run_at', String(Date.now())); }
+          }
+        }
       }
       return;
     }
