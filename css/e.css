@@ -683,3 +683,27 @@ body.hm .kp-lines a.kp-local { display: table; margin-top: 8px; font-size: 15px;
 
 /* Футер: значок пошти не прилипає до адреси (inline-block з .hm-ft a перебивав flex) */
 body.hm .hm-ft a.hm-fi { display: inline-flex; align-items: center; gap: 10px; }
+
+/* ---------- Сторінка «Про адвоката» ---------- */
+.ab-hero { padding: 48px 0 40px; border-bottom: 1px solid var(--e-line); }
+.ab-grid { display: grid; grid-template-columns: minmax(0, 340px) 1fr; gap: 48px; align-items: center; }
+.ab-photo img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: center 20%; }
+body.hm .ab-hero h1 { margin: 0 0 18px; }
+body.hm .ab-hero h1 .ab-sub { display: block; font-size: .5em; color: var(--e-muted); margin-top: 6px; }
+.ab-lead { font-size: 1.15rem; line-height: 1.6; max-width: 36em; margin: 0 0 24px; }
+.ab-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.ab-sec { padding: 44px 0; }
+.ab-alt { background: var(--e-grey); }
+.ab-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+body.hm .ab-h { font-size: 1.5rem; margin: 0 0 16px; }
+.ab-sec p { line-height: 1.65; margin: 0; }
+.ab-list { list-style: none; margin: 0; padding: 0; }
+.ab-list li { padding: 12px 0; border-bottom: 1px solid var(--e-line); line-height: 1.5; }
+.ab-list li:first-child { padding-top: 0; }
+.ab-list a, .ab-sec p a { color: var(--e-ink); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 760px) {
+  .ab-hero { padding: 24px 0 32px; }
+  .ab-grid, .ab-cols { grid-template-columns: 1fr; gap: 24px; }
+  .ab-photo { max-width: 260px; }
+  .ab-sec { padding: 32px 0; }
+}
