@@ -127,9 +127,11 @@ const GROUPS = {
   prac: { title: '📚 <b>Практика</b>', rows: [
     [{ text: '🔎 Пошук практики', callback_data: 'cvs' }, { text: '📰 Свіжа практика', callback_data: 'cdig' }],
   ] },
-  cli: { title: '🗂 <b>Клієнти під наглядом</b>', rows: [
+  cli: { title: '🗂 <b>Справи й клієнти під наглядом</b>\n<i>Повістку (SUDPOVISTKA, SMS) достатньо переслати боту — справа стане на стеження сама.</i>', rows: [
+    [{ text: '👥 Справи клієнтів', callback_data: 'crepc' }, { text: '⚖️ Справи адвоката', callback_data: 'crep' }],
     [{ text: '📋 Список клієнтів', callback_data: 'clist' }, { text: '➕ Додати клієнта', callback_data: 'cadd' }],
     [{ text: '📁 Справи за номером', callback_data: 'cnlist' }, { text: '📌 Стежити за справою', callback_data: 'cnadd' }],
+    [{ text: '🔄 Терміновий прогін', callback_data: 'crun' }],
   ] },
 };
 
@@ -152,8 +154,8 @@ async function showGroup(env, g) {
 function courtReplyKb() {
   return {
     keyboard: [
-      [{ text: '📑 Повний список' }, { text: '🤖 Завдання агенту' }],
-      [{ text: '📅 Засідання' }, { text: '📚 Практика' }, { text: '🗂 Клієнти' }],
+      [{ text: '📅 Усі засідання' }, { text: '🔔 Найближчі' }],
+      [{ text: '🗂 Справи й клієнти' }, { text: '📚 Практика' }, { text: '🤖 Агент' }],
     ],
     resize_keyboard: true,
     input_field_placeholder: 'Оберіть дію (меню можна згорнути ☰)',
@@ -531,11 +533,12 @@ async function showCourtReportAll(env, page = 0) {
 
 async function showCourtMenu(env, prefix = '') {
   const arr = await getNames(env);
+  const nums = await getCaseNums(env);
   // Закріплюємо меню-клавіатуру біля поля вводу + дублюємо кнопки в повідомленні.
   await tg(env, 'sendMessage', {
     chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
     text: prefix + '⚖️ <b>Меню суду</b> закріплено внизу ⬇️\nКлієнтів під наглядом: <b>' +
-      arr.length + '</b>',
+      arr.length + '</b> · справ за номером: <b>' + nums.length + '</b>',
     reply_markup: courtReplyKb(),
   });
 }
@@ -1106,7 +1109,7 @@ async function handleUpdate(update, env) {
       return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT,
         text: "➕ Надішліть ПІБ клієнта (Прізвище Ім'я По-батькові). Скасувати — /cancel." });
     }
-    if (/^📑/.test(body) || /^\/all$/i.test(body) || /повний список/i.test(body)) {
+    if (/^📑/.test(body) || /^📅\s*усі засідання/i.test(body) || /^\/all$/i.test(body) || /повний список/i.test(body)) {
       await env.KV.delete('court_await');
       return showCourtReportAll(env, 0);
     }
