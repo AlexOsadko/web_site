@@ -1,0 +1,38 @@
+name: Додати засідання в календар (швидко)
+
+# Запускає Telegram-бот (Worker) після натискання «📅 Додати в календар».
+# Не сканує суди — лише створює в Google Calendar уже підтверджені засідання,
+# тож не чекає довгого прогону «Відстеження судових справ».
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gcal-add
+  cancel-in-progress: false
+
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Залежності для календаря
+        run: pip install --quiet google-auth
+      - name: Додати підтверджені засідання
+        working-directory: tools
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          BOT_WORKER_URL: ${{ secrets.BOT_WORKER_URL }}
+          BOT_WORKER_SECRET: ${{ secrets.BOT_WORKER_SECRET }}
+          GOOGLE_CALENDAR_SA: ${{ secrets.GOOGLE_CALENDAR_SA }}
+          GOOGLE_CALENDAR_ID: ${{ secrets.GOOGLE_CALENDAR_ID }}
+        run: python3 gcal_drain.py
