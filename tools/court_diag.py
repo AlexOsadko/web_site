@@ -23,12 +23,42 @@ FULL = b.ADVOCATE_NAME
 name_re = re.compile(SUR + r"(?:\s+[А-ЯІЇЄҐ][А-Яа-яІЇЄҐіїєґ.ʼ’']*){0,2}")
 
 
+NUM = os.environ.get("DIAG_NUMBER", "").strip()
+
+
+def _mask(s):
+    """Формат без даних: цифри → N, літери → a (у публічний лог)."""
+    return re.sub(r"[A-Za-zА-Яа-яІЇЄҐіїєґ]", "a", re.sub(r"\d", "N", s or ""))
+
+
+def number_diag(recs):
+    """Чи є справа з номером NUM у списку суду і як там записано номер.
+    У лог — лише маски форматів і лічильники (номер і сторони не друкуємо)."""
+    m = re.search(r"(\d{2,4})/(\d{1,7})/(\d{2})", NUM)
+    if not m:
+        print("DIAG_NUMBER не схожий на номер справи.")
+        return
+    mid = m.group(2)
+    print("Формат шуканого номера:", _mask(NUM))
+    hits = [r for r in recs if mid in (r.get("number") or "")
+            or mid in (r.get("involved") or "") or mid in (r.get("description") or "")]
+    print("Записів, де трапляється номер справи (у номері/сторонах/суті):", len(hits))
+    for r in hits[:10]:
+        num = r.get("number") or ""
+        where = "номер" if mid in num else ("сторони" if mid in (r.get("involved") or "") else "суть")
+        print(f"   поле: {where} · формат номера в суді: {_mask(num)} · дата: {(r.get('date') or '')[:10]} "
+              f"· бот-би-зматчив: {b.case_matches(num, [NUM]) is not None}")
+
+
 def main():
     url = f"https://court.gov.ua/sud{CODE}/gromadyanam/csz"
     print(f"Суд sud{CODE} · шукаю дату {DATE} · прізвище {SUR}")
     print(f"Повне ПІБ під наглядом: «{FULL}»")
     recs = b.fetch_court_retry(url)
     print("Усього засідань у суді:", len(recs))
+    if NUM:
+        number_diag(recs)
+        return
 
     on_date = [r for r in recs if (r.get("date") or "").startswith(DATE)]
     print(f"Засідань на {DATE}:", len(on_date))
