@@ -213,15 +213,22 @@ def _case_base(num):
     return n
 
 
+def _case_core(num):
+    """Ядро номера «ККК/НННН/РР» (код суду/номер/рік). Знаходить його і в
+    «757/12345/26-ц», і в номері провадження «1-кп/760/5574/24»."""
+    m = re.search(r"(\d{2,4})/(\d{1,7})/(\d{2})(?!\d)", _case_base(num))
+    return f"{m.group(1)}/{int(m.group(2))}/{m.group(3)}" if m else ""
+
+
 def case_matches(number, tracked):
     """Повертає номер зі списку стеження, якщо засідання саме в цій справі. Інакше None.
-    Порівнюємо основу номера (суфікс «-ц»/«-к» необовʼязковий), номер має містити «/»."""
-    b = _case_base(number)
-    if not b or "/" not in b:
+    Порівнюємо ядро «код суду/номер/рік» — префікс «1-кп/» і суфікс «-ц»/«-к»
+    не заважають (суди пишуть номер справи і номер провадження по-різному)."""
+    core = _case_core(number)
+    if not core:
         return None
     for t in tracked:
-        tb = _case_base(t)
-        if tb and "/" in tb and tb == b:
+        if _case_core(t) == core:
             return t
     return None
 
@@ -829,13 +836,18 @@ def drain_gcal_approved():
     except Exception as e:
         print("Календар: черга підтверджень недоступна:", str(e)[:60])
         return
+    added = 0
+    print(f"Календар: підтверджених у черзі — {len(items)}")
     for it in items:
         rec = it.get("rec", {}) or {}
         try:
             ok = gcal.add_event(it.get("court", ""), rec)
         except Exception:
             ok = False
+        if ok is None:
+            print("Календар: подію пропущено (не розпізнано дату).")
         if ok:
+            added += 1
             _tg_edit_markup(it.get("chat_id"), it.get("message_id"),
                             "✅ Додано в календар")
             try:
