@@ -578,10 +578,11 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
               </span>
             </div>
             <div class="term-quick">
+              <button type="button" class="term-btn" data-term="3m">3 місяці</button>
               <button type="button" class="term-btn" data-term="6m">6 місяців</button>
               <button type="button" class="term-btn" data-term="year">До кінця року</button>
             </div>
-            <div class="sub-hint">Оберіть дату в календарі, натисніть «6 місяців» (від дати договору, ст. 254 ЦК) або впишіть своє формулювання. Порожнє поле — автозначення. У договорі: «…діє до <i>цього значення</i>».</div>
+            <div class="sub-hint">Оберіть дату в календарі, натисніть «3 місяці» чи «6 місяців» (від дати договору, ст. 254 ЦК) або впишіть своє формулювання. Порожнє поле — автозначення. У договорі: «…діє до <i>цього значення</i>».</div>
           </div>
         </div>
       </div>
@@ -1638,9 +1639,10 @@ function syncTerm(){
   const ft=$("#f_term"); if(!ft) return;
   const iso=$("#f_date").value;
   /* режим «6 місяців»: перераховуємо при зміні дати договору, поки значення не змінено вручну */
-  if(ft.dataset.mode==="6m" && ft.value.trim()===ft.dataset.auto){
-    const d=iso||todayISO(); const v=fmtDate(plusMonthsISO(d,6),true);
-    ft.value=v; ft.dataset.auto=v; markFilled(ft); termModeBtns("6m"); return;
+  const mm=/^(\d+)m$/.exec(ft.dataset.mode||"");
+  if(mm && ft.value.trim()===ft.dataset.auto){
+    const d=iso||todayISO(); const v=fmtDate(plusMonthsISO(d,+mm[1]),true);
+    ft.value=v; ft.dataset.auto=v; markFilled(ft); termModeBtns(ft.dataset.mode); return;
   }
   const y = /^\d{4}/.test(iso) ? iso.slice(0,4) : String(new Date().getFullYear());
   const auto=`31 грудня ${y} року`;
@@ -1656,9 +1658,10 @@ function syncTerm(){
 $$(".term-btn").forEach(b=>b.addEventListener("click",()=>{
   const ft=$("#f_term"); if(!ft) return;
   ft.dataset.mode=b.dataset.term; ft.value=""; ft.dataset.auto="";
-  if(b.dataset.term==="6m"){
-    const v=fmtDate(plusMonthsISO($("#f_date").value||todayISO(),6),true);
-    ft.value=v; ft.dataset.auto=v; markFilled(ft); termModeBtns("6m");
+  const bm=/^(\d+)m$/.exec(b.dataset.term||"");
+  if(bm){
+    const v=fmtDate(plusMonthsISO($("#f_date").value||todayISO(),+bm[1]),true);
+    ft.value=v; ft.dataset.auto=v; markFilled(ft); termModeBtns(b.dataset.term);
   }else{ ft.dataset.mode=""; syncTerm(); }
   ft.dispatchEvent(new Event("input",{bubbles:true}));
 }));
@@ -4056,7 +4059,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-14.5";
+const GEN_VERSION="2026-11-17.1";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
