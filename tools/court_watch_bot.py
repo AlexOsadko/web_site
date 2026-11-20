@@ -95,6 +95,16 @@ DEAD_RETRY_DAYS = float(os.environ.get("COURT_DEAD_RETRY_DAYS", "7") or "7")
 # Ліміт часу на сканування (хв): після нього бот зупиняє обхід і штатно
 # зберігає знайдене (GitHub обриває job через 6 год — тоді губилось усе).
 TIME_BUDGET_MIN = float(os.environ.get("COURT_TIME_BUDGET_MIN", "0") or "0")
+# Які засідання додавати в Google Calendar БЕЗ кнопки підтвердження:
+#   own     — лише власні справи адвоката (як було раніше);
+#   tracked — власні + справи під наглядом за номером (типово: номер справи
+#             однозначний, тезок бути не може);
+#   all     — усі збіги, зокрема лише за ПІБ клієнта (можливі тезки).
+# Решта приходить із кнопкою «📅 Додати в календар», як і раніше.
+GCAL_AUTO = (os.environ.get("GCAL_AUTO", "tracked").strip().lower() or "tracked")
+# Позначка «🆕 Нова справа» в календарі в день, коли бот уперше побачив справу.
+GCAL_NEW_CASE = os.environ.get("GCAL_NEW_CASE", "1").strip() not in ("0", "false", "no", "")
+MAX_NEW_CASE_EVENTS = int(os.environ.get("GCAL_NEW_CASE_MAX", "15") or "15")
 
 
 def is_priority(court):
@@ -840,8 +850,14 @@ def drain_gcal_approved():
     print(f"Календар: підтверджених у черзі — {len(items)}")
     for it in items:
         rec = it.get("rec", {}) or {}
+        is_deadline = rec.get("kind") == "deadline"
         try:
-            ok = gcal.add_event(it.get("court", ""), rec)
+            if is_deadline:
+                # Процесуальний строк із команди бота /strok — подія на весь день.
+                ok = gcal.add_deadline(rec.get("number", ""), rec.get("title", ""),
+                                       rec.get("date", ""), rec.get("note", ""))
+            else:
+                ok = gcal.add_event(it.get("court", ""), rec)
         except Exception:
             ok = False
         if ok is None:
@@ -849,7 +865,8 @@ def drain_gcal_approved():
         if ok:
             added += 1
             _tg_edit_markup(it.get("chat_id"), it.get("message_id"),
-                            "✅ Додано в календар")
+                            "✅ Строк у календарі" if is_deadline
+                            else "✅ Додано в календар")
             try:
                 ack = json.dumps({"key": it.get("key")}).encode("utf-8")
                 req = urllib.request.Request(
@@ -943,6 +960,24 @@ def build_status_message(court_name, rec, matched):
     return "\n".join(lines)
 
 
+def _case_hash(number):
+    """Знеособлений ключ справи для стану (state.json лежить у відкритому
+    репозиторії, тож самих номерів справ туди не пишемо)."""
+    core = _case_core(number) or _case_base(number)
+    if not core:
+        return ""
+    return hashlib.sha1(("case|" + core).encode("utf-8")).hexdigest()[:16]
+
+
+def gcal_auto_for(is_own, who):
+    """Чи додавати це засідання в календар без підтвердження кнопкою."""
+    if is_own:
+        return True
+    if GCAL_AUTO == "all":
+        return True
+    return GCAL_AUTO == "tracked" and str(who or "").startswith("справа № ")
+
+
 # ─────────────────────────────── main ────────────────────────────────
 def main():
     if not TOKEN and not DRY_RUN:
@@ -999,6 +1034,42 @@ def main():
     # навіть тоді, коли адвокат теж зазначений у сторонах.
     _own = {n.lower() for n in [ADVOCATE_NAME] + ADVOCATE_ALIASES}
     client_names = [n for n in names if n.lower() not in _own]
+
+    # «Нова справа»: пам'ятаємо (знеособлено) справи, які бот уже бачив. Перший
+    # запуск із цією функцією лише фіксує наявні справи (з поточних збігів і з
+    # накопиченого у Worker переліку), щоб календар не засипало позначками.
+    seed_known = "known_cases" not in st
+    known = st.setdefault("known_cases", {})
+    if seed_known and not DRY_RUN:
+        for it in fetch_worker_cases("clients") + fetch_worker_cases("advocate"):
+            h = _case_hash(it.get("number", ""))
+            if h:
+                known[h] = 1
+        print(f"Нові справи: зафіксовано вже відомих — {len(known)}")
+    new_case_marked = 0
+
+    def note_new_case(court_name, rec, who=""):
+        """Справу бачимо вперше → позначка «🆕 Нова справа» в календарі."""
+        nonlocal new_case_marked
+        h = _case_hash(rec.get("number", ""))
+        if not h or h in known or DRY_RUN:
+            return
+        if seed_known or not GCAL_NEW_CASE:
+            known[h] = 1
+            return
+        if gcal is None or not gcal.enabled():
+            return  # календар не налаштовано: позначимо, коли його ввімкнуть
+        if new_case_marked >= MAX_NEW_CASE_EVENTS:
+            return  # решта наступним прогоном
+        try:
+            # Надійний збіг: адвокат у сторонах або справа під наглядом за номером.
+            sure = (advocate_matches(rec.get("involved", ""))
+                    or str(who or "").startswith("справа № "))
+            if gcal.add_new_case(court_name, rec, unverified=not sure):
+                known[h] = 1
+                new_case_marked += 1
+        except Exception:
+            print("  Календар: помилка позначки нової справи (пропущено).")
 
     # Шардинг: цей прогін сканує лише частину судів (решта — наступними прогонами).
     # scanned_ok — назви судів, які цього прогону завантажилися УСПІШНО. Саме їх
@@ -1111,6 +1182,8 @@ def main():
                     })
         new_here = sum(1 for rec, _ in matches if rec_key(url, rec) not in seen)
         total_new += new_here
+        for rec, who in matches:
+            note_new_case(court["name"], rec, who)
         print(f"[{court['name']}] засідань: {len(records)} · "
               f"збігів: {len(matches)} · нових: {new_here}")
 
@@ -1129,7 +1202,22 @@ def main():
             is_own = advocate_matches(rec.get("involved", ""))
             markup = None
             gkey = None
-            if not is_own:
+            # Автоматичне додавання (GCAL_AUTO): власні справи завжди; справи під
+            # наглядом за номером типово; збіги лише за ПІБ — тільки в режимі all.
+            # Додаємо ДО сповіщення, щоб одразу показати статус під повідомленням.
+            # events.import ідемпотентний — повтори не дублюють подію.
+            cal_done = False
+            if gcal_auto_for(is_own, who) and gcal is not None and gcal.enabled():
+                try:
+                    cal_done = bool(gcal.add_event(court["name"], rec))
+                    if cal_done:
+                        print("  Календар: засідання додано/оновлено автоматично.")
+                except Exception:
+                    print("  Календар: помилка (пропущено).")
+            if cal_done and not is_own:
+                markup = {"inline_keyboard": [[
+                    {"text": "✅ Додано в календар", "callback_data": "cnoop"}]]}
+            elif not is_own:
                 gkey = _gcal_key(court["name"], rec)
                 markup = {"inline_keyboard": [[
                     {"text": "📅 Додати в календар", "callback_data": f"gcaladd:{gkey}"},
@@ -1142,7 +1230,7 @@ def main():
                     seen[key] = 1
                     sent += 1
                     time.sleep(0.5)
-                    if not is_own:
+                    if gkey:
                         m = res.get("result", {}) or {}
                         gcal_stash_pending(gkey, court["name"], rec,
                                            (m.get("chat") or {}).get("id"),
@@ -1151,16 +1239,8 @@ def main():
                     print("  Telegram відмовив (див. приватний чат).")
             except Exception:
                 print("  Помилка надсилання сповіщення.")
-            # Лише ВЛАСНІ справи адвоката додаємо у Google Calendar автоматично.
-            # events.import ідемпотентний — повтори не дублюють подію. Клієнтські
-            # справи потраплять у календар тільки після підтвердження кнопкою
-            # (їх обробляє drain_gcal_approved на наступному прогоні).
-            if is_own and gcal is not None and gcal.enabled():
-                try:
-                    if gcal.add_event(court["name"], rec):
-                        print("  Календар: власну справу додано/оновлено.")
-                except Exception:
-                    print("  Календар: помилка (пропущено).")
+            # Справи, не додані автоматично, потраплять у календар після
+            # підтвердження кнопкою (їх обробляє drain_gcal_approved).
         if sent >= MAX_ALERTS:
             print("  Досягнуто ліміту сповіщень за запуск — решта наступного разу.")
             break
@@ -1182,6 +1262,8 @@ def main():
                                   or (("справа № " + c) if (c := case_matches(r.get("number", ""), tracked)) else None)))]
             anew = sum(1 for r, _ in amatches if auto_key(auto_url, r) not in seen)
             total_new += anew
+            for r, w in amatches:
+                note_new_case(court["name"], r, w)
             if arecs:
                 print(f"[{court['name']}] автопризначень: {len(arecs)} · "
                       f"збігів: {len(amatches)} · нових: {anew}")
@@ -1267,6 +1349,8 @@ def main():
             except Exception:
                 print("  Помилка надсилання нагадування.")
         print(f"Нагадувань надіслано: {reminded}")
+    if new_case_marked:
+        print(f"Календар: позначок «нова справа» — {new_case_marked}")
 
     st["last_run"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     if not DRY_RUN:
