@@ -37,7 +37,7 @@ jobs:
       # На сайт потрапляють лише сторінки: внутрішні нотатки, код ботів і їхній
       # стан лишаються тільки в репозиторії.
       - name: Прибрати службові папки з публікації
-        run: rm -rf notes tools worker README.md .court-bot .practice-bot
+        run: rm -rf notes tools worker README.md .court-bot .practice-bot webapp
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
