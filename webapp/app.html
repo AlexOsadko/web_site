@@ -24,16 +24,23 @@
   --font-body:"PT Sans",system-ui,-apple-system,sans-serif;
   --font-mono:"PT Mono",ui-monospace,Menlo,monospace;
   --pad:18px;
+  color-scheme:light;
   /* сумісність зі старими назвами */
   --surface:var(--bg); --surface2:var(--grey); --ink:var(--text); --accent:var(--head); --accent-ink:var(--on-fill); --accent-soft:var(--grey);
 }
 @media (prefers-color-scheme: dark){
-  :root{
+  :root:not([data-theme="light"]){
     color-scheme:dark;
     --bg:#0f1530; --grey:#182045; --text:#dde2f0; --muted:#a2abc6; --line:rgba(255,255,255,.14);
     --head:#dfe5ff; --fill:#3a4d94; --fill-h:#4b5fa8; --on-fill:#ffffff; --on-fill-muted:#c9d0ea; --rule:#3f4fa3;
     --crit:#ff9a90; --crit-soft:#3b1d24; --warn:#f0c463; --warn-soft:#352c1c; --ok:#86d9a1; --ok-soft:#153226;
   }
+}
+:root[data-theme="dark"]{
+    color-scheme:dark;
+    --bg:#0f1530; --grey:#182045; --text:#dde2f0; --muted:#a2abc6; --line:rgba(255,255,255,.14);
+    --head:#dfe5ff; --fill:#3a4d94; --fill-h:#4b5fa8; --on-fill:#ffffff; --on-fill-muted:#c9d0ea; --rule:#3f4fa3;
+    --crit:#ff9a90; --crit-soft:#3b1d24; --warn:#f0c463; --warn-soft:#352c1c; --ok:#86d9a1; --ok-soft:#153226;
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
@@ -75,6 +82,8 @@ h2{font:500 19px/1.1 var(--font-display);text-transform:uppercase;color:var(--he
 .row .main b{font-weight:700;font-size:16px;line-height:1.25;overflow-wrap:anywhere}
 .row small{color:var(--muted);font-size:13.5px;line-height:1.3;overflow-wrap:anywhere}
 .row small.hl{color:var(--head);font-weight:700}
+.clamp{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.own{font:500 12px/1 var(--font-display);text-transform:uppercase;letter-spacing:.05em;color:var(--head)}
 .row small.wr{color:var(--warn)}
 button.row:active,.row button.main:active{background:var(--grey)}
 .date{flex:none;width:54px;text-align:center;background:var(--fill);color:var(--on-fill);padding:7px 0 6px;font:400 11px/1.15 var(--font-display);text-transform:uppercase;letter-spacing:.05em;align-self:flex-start}
@@ -166,6 +175,36 @@ button.row:active,.row button.main:active{background:var(--grey)}
 @keyframes sp{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){#toast{transition:none}.spin{animation:none}}
 
+/* таблиці (комп'ютер): один рядок на запис, без переносів, довге обрізається з підказкою */
+.tw{overflow-x:auto;margin-top:4px}
+.tb{width:100%;border-collapse:collapse;table-layout:fixed;font-size:14.5px}
+.tb th{font:500 12.5px/1 var(--font-display);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:12px 12px 9px 0;border-bottom:2px solid var(--rule);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb th.s{cursor:pointer;color:var(--head)}
+.tb th.up::after{content:" ↑"}
+.tb th.dn::after{content:" ↓"}
+.tb td{padding:10px 12px 10px 0;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.tb tbody tr[data-a]{cursor:pointer}
+.tb tbody tr:hover{background:var(--grey)}
+.tb td.num{font-family:var(--font-mono);font-size:13.5px}
+.tb td.b{font-weight:700}
+.tb td.m{color:var(--muted)}
+.tb td.act{overflow:visible;text-overflow:clip}
+.tb tr.done td{color:var(--muted)}
+.tb tr.done td.b{text-decoration:line-through}
+.tb .chip{display:inline-block}
+.tb .btn{margin:0;padding:6px 9px;font-size:12px}
+.x{color:var(--crit);font-size:15px;padding:4px 8px}
+.wr{color:var(--warn)}
+.navbar{display:flex;gap:22px;align-items:center;margin:0 calc(-1*var(--pad));padding:20px var(--pad) 0;font:500 13px/1 var(--font-display);text-transform:uppercase;letter-spacing:.05em}
+.navbar button{color:var(--head);text-decoration:underline;text-underline-offset:4px}
+.navbar button[disabled]{opacity:.35;text-decoration:none;cursor:default}
+.navbar span{margin-left:auto;color:var(--muted);text-transform:none;letter-spacing:0;font:400 13px/1 var(--font-body)}
+.navbar + .top{padding-top:12px}
+.toolbar{display:flex;gap:14px;align-items:center;margin-top:16px}
+.toolbar #q{margin-top:0;max-width:420px}
+.toolbar .filters{margin:0;padding:0;border-bottom:0;flex:1}
+.toolbar .btn{margin-top:0;white-space:nowrap}
+
 /* вузький екран: блоки йдуть один за одним у порядку важливості */
 .side{display:none}
 .evs{display:none}
@@ -181,7 +220,7 @@ button.row:active,.row button.main:active{background:var(--grey)}
   .tabs{display:none}
   .side{display:flex;flex:none;width:236px;background:var(--fill);color:var(--on-fill);flex-direction:column;padding:26px 0 20px}
   .brand{padding:0 24px 22px;border-bottom:1px solid rgba(255,255,255,.2)}
-  .brand b{display:block;font:600 24px/1.02 var(--font-display);text-transform:uppercase}
+  .brand b{display:block;font:600 19px/1.05 var(--font-display);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .brand small{display:block;margin-top:8px;color:var(--on-fill-muted);font-size:13.5px}
   .side nav{display:flex;flex-direction:column;padding:14px 0;flex:1}
   .side nav button{display:flex;align-items:center;gap:12px;padding:13px 20px;font:500 15px/1 var(--font-display);text-transform:uppercase;letter-spacing:.05em;color:var(--on-fill-muted);border-left:4px solid transparent}
@@ -203,8 +242,10 @@ button.row:active,.row button.main:active{background:var(--grey)}
   .back + .top{padding-top:10px}
   .pd > .back[data-a="back"]{display:none}
   .pd > .back[data-a="back"] + .top{padding-top:26px}
-  h1{font-size:36px}
-  .back + .top h1{font-size:28px}
+  h1{font-size:34px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}
+  .back + .top h1,.navbar + .top h1{font-size:28px}
+  .top .eyebrow{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  h2{white-space:nowrap}
   .tile b{font-size:52px}
   .cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);grid-template-areas:"hear alerts" "hear dl";grid-template-rows:auto 1fr;column-gap:40px}
   .c-hear{grid-area:hear}.c-alerts{grid-area:alerts}.c-dl{grid-area:dl}
@@ -222,6 +263,22 @@ button.row:active,.row button.main:active{background:var(--grey)}
   .grid button.sel .evs em{background:rgba(255,255,255,.16);color:var(--on-fill);border-left-color:var(--on-fill)}
   .row:hover{background:var(--grey)}
   button.row,.row button.main{cursor:pointer}
+  .pane{overflow:hidden;display:flex;flex-direction:column;padding-bottom:0}
+  .pane.free{overflow-y:auto;padding-bottom:28px}
+  .fill{flex:1;min-height:0;overflow:auto;padding-bottom:22px}
+  .stack{display:flex;flex-direction:column;min-height:0;height:100%}
+  .stack > h2,.stack > .hrow{flex:none}
+  .hrow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-top:22px;padding-top:12px;border-top:5px solid var(--rule)}
+  .hrow h2{margin:0;padding:0;border:0}
+  .hrow .btn{margin:0}
+  .two{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:40px}
+  .today2{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 430px;column-gap:40px}
+  .two > *,.today2 > *{min-height:0}
+  .fill .tb th{position:sticky;top:0;z-index:1;background:var(--bg);border-bottom:0;box-shadow:inset 0 -2px 0 var(--rule)}
+  .fill > h2:first-child,.fill > .alert:first-child{margin-top:22px}
+  .calwrap{flex:1;min-height:0;align-items:stretch}
+  .calwrap > .cal,.calwrap > .agenda{overflow:auto;min-height:0;padding-bottom:22px}
+  .agenda > .day:first-child{margin-top:16px}
   .shade{align-items:center;justify-content:center}
   .sheet{width:520px;max-width:92%}
   .login{max-width:460px;margin:0 auto}
@@ -258,7 +315,8 @@ const TPL={
  admj:[['Відзив на позов',15,'ст. 162 КАС, строк встановлює суд'],['Апеляційна скарга на рішення',30,'ст. 295 КАС'],['Апеляційна скарга на ухвалу',15,'ст. 295 КАС'],['Касаційна скарга',30,'ст. 329 КАС']]
 };
 const store={get(k){try{return localStorage.getItem(k)||''}catch(_){return ''}},set(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(_){}}};
-const S={token:store.get('cc_token'),ready:false,busy:false,err:'',updated:'',calendar:false,tab:'today',cid:null,doc:null,filter:'all',q:'',sheet:null,preset:null,
+const theme={get(){return store.get('cc_theme')},eff(){return this.get()||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')},apply(){const t=this.get();if(t)document.documentElement.dataset.theme=t},toggle(){store.set('cc_theme',this.eff()==='dark'?'light':'dark');this.apply()}};theme.apply();
+const S={token:store.get('cc_token'),ready:false,busy:false,err:'',updated:'',calendar:false,tab:'today',cid:null,doc:null,filter:'all',q:'',sort:{k:'next',d:1},sheet:null,preset:null,
  calM:new Date(T0.getFullYear(),T0.getMonth(),1),calD:null};
 let C=[],W=[],TR=[],NC=[];const DOCS={},DOC={};
 
@@ -273,14 +331,21 @@ async function api(path,body){
 }
 function logout(){S.token='';store.set('cc_token','');S.ready=false;render()}
 const caseKey=n=>{const b=String(n||'').replace(/[‐-―−]/g,'-').toLowerCase().replace(/\s+/g,'').replace(/^№+/,'').replace(/-[^\d/]+$/,'');const m=b.match(/(\d{2,4})\/(\d{1,7})\/(\d{2})(?!\d)/);return m?`${m[1]}/${+m[2]}/${m[3]}`:b};
-const typeOf=(f,num)=>{f=String(f||'').toLowerCase();if(/господар/.test(f))return 'com';if(/кримін/.test(f))return 'crim';if(/правопоруш|купап/.test(f))return 'adm';if(/адміністрат/.test(f))return 'admj';if(/цивіл/.test(f))return 'civ';
- const n=String(num||'').toLowerCase();if(/-ц$/.test(n))return 'civ';if(/-к$/.test(n))return 'crim';if(/-п$/.test(n))return 'adm';if(/-а$/.test(n))return 'admj';if(/^9\d\d\//.test(n))return 'com';return 'oth'};
+const typeOf=(f,num,desc,court,inv)=>{f=String(f||'').toLowerCase();if(/господар/.test(f))return 'com';if(/кримін/.test(f))return 'crim';if(/правопоруш|купап/.test(f))return 'adm';if(/адміністрат/.test(f))return 'admj';if(/цивіл/.test(f))return 'civ';
+ const n=String(num||'').toLowerCase();if(/-ц$/.test(n))return 'civ';if(/-к$/.test(n))return 'crim';if(/-п$/.test(n))return 'adm';if(/-а$/.test(n))return 'admj';if(/^9\d\d\//.test(n))return 'com';
+ const d=String(desc||'').toLowerCase(),c=String(court||'').toLowerCase(),p=String(inv||'').toLowerCase();
+ if(/купап|адміністративн\S* правопоруш/.test(d))return 'adm';
+ if(/господарськ/.test(c))return 'com';
+ if(/адміністративн/.test(c))return 'admj';
+ if(/обвинувач|підозрюван|потерпіл/.test(p)||/кримінальн|\bкк\b|вирок/.test(d))return 'crim';
+ if(/сімейн|шлюб|алімент|спадщ|спадк|позик|борг|стягнення|власност|відшкодуван|договор|купівлі|виселен|усиновлен|батьківськ/.test(d))return 'civ';
+ return 'oth'};
 function build(o){
  const map=new Map();
  const get=num=>{const k=caseKey(num);if(!map.has(k))map.set(k,{key:k,num:String(num),type:'oth',subj:'',parties:'',client:'',role:'',court:'',judge:'',ev:[],dl:[],tracked:false});return map.get(k)};
  const add=(it,src)=>{if(!it||!it.number)return;const c=get(it.number);
   c.court=c.court||it.court||'';c.judge=c.judge||it.judge||'';c.parties=c.parties||it.involved||'';c.subj=c.subj||it.description||'';
-  if(c.type==='oth')c.type=typeOf(it.forma,it.number);
+  if(c.type==='oth')c.type=typeOf(it.forma,it.number,it.description,it.court,it.involved);
   const m=String(it.matched||'');if(m&&!m.startsWith('справа №'))c.client=m;
   if(src==='adv')c.role='ваша справа';
   const d=/(\d{2})\.(\d{2})\.(\d{4})(?:\D+(\d{1,2}):(\d{2}))?/.exec(it.date||'');
@@ -292,8 +357,8 @@ function build(o){
  (o.tracked||[]).forEach(n=>{get(n).tracked=true});
  (o.deadlines||[]).forEach(x=>{const d=/(\d{2})\.(\d{2})\.(\d{4})/.exec(x.date||'');if(!d||!x.number)return;get(x.number).dl.push({key:x.key,t:x.title||'Строк',due:new Date(+d[3],+d[2]-1,+d[1]),b:x.note||'',done:!!x.done})});
  const list=[...map.values()];
- list.forEach(c=>{c.ev.sort((a,b)=>a.d-b.d||a.tm.localeCompare(b.tm));if(c.type==='oth')c.type=typeOf('',c.num);
-  if(!c.client)c.client=c.parties?c.parties.slice(0,70):'Справа № '+c.num;if(!c.court)c.court='Суд не визначено';if(!c.judge)c.judge='не визначено'});
+ list.forEach(c=>{c.ev.sort((a,b)=>a.d-b.d||a.tm.localeCompare(b.tm));if(c.type==='oth')c.type=typeOf('',c.num,c.subj,c.court,c.parties);
+  if(!c.client){const t=c.parties.split(/[,;]/).filter(x=>!/осадьк/i.test(x)).join(',').replace(/\s+/g,' ').replace(/^[\s,]+|[\s,]+$/g,'').trim();c.client=!t?'Справа № '+c.num:t.length<=90?t:t.slice(0,90).replace(/[\s,;:]+\S*$/,'')+'…'}if(!c.court)c.court='Суд не визначено';if(!c.judge)c.judge='не визначено'});
  list.sort((a,b)=>((a.ev[0]||{}).d||9e15)-((b.ev[0]||{}).d||9e15));
  C=list;W=o.names||[];TR=o.tracked||[];NC=o.newCases||[];S.updated=o.updated||'';S.calendar=!!o.calendar;
 }
@@ -321,6 +386,24 @@ async function loadDoc(id,text){
  render();
 }
 
+// ── скорочення для таблиць ──
+const ORG=[[/товариство з обмеженою відповідальністю/gi,'ТОВ'],[/фізична особа[\s-]*підприємець/gi,'ФОП'],[/приватне акціонерне товариство/gi,'ПрАТ'],[/публічне акціонерне товариство/gi,'ПАТ'],[/акціонерне товариство/gi,'АТ'],[/приватне підприємство/gi,'ПП'],[/комунальне підприємство/gi,'КП'],[/державне підприємство/gi,'ДП'],[/об'єднання співвласників багатоквартирного будинку/gi,'ОСББ']];
+const fdS=d=>`${p2(d.getDate())}.${p2(d.getMonth()+1)}${d.getFullYear()===T0.getFullYear()?'':'.'+String(d.getFullYear()).slice(2)}, ${WD[d.getDay()]}`;
+const sn=t=>ORG.reduce((x,[re,v])=>x.replace(re,v),String(t||'')).replace(/([А-ЯІЇЄҐ][а-яіїєґ'’ʼ-]+)\s+([А-ЯІЇЄҐ])[а-яіїєґ'’ʼ-]+\s+([А-ЯІЇЄҐ])[а-яіїєґ'’ʼ-]+/g,'$1 $2.$3.');
+const sc=t=>String(t||'').replace(/міськрайонний суд/i,'міськрайсуд').replace(/районний суд/i,'райсуд').replace(/міський суд/i,'міськсуд').replace(/\sміста\s/,' м. ').replace(/області/,'обл.');
+const cell=(v,cls)=>`<td${cls?` class="${cls}"`:''} title="${esc(v)}">${esc(v)}</td>`;
+const tbl=(cols,rows)=>`<div class="tw"><table class="tb"><colgroup>${cols.map(c=>`<col style="width:${c[1]}">`).join('')}</colgroup><thead><tr>${cols.map(c=>c[2]?`<th class="s${S.sort.k===c[2]?(S.sort.d>0?' up':' dn'):''}" data-a="sort" data-v="${c[2]}" title="Сортувати">${c[0]}</th>`:`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+const nextH=c=>c.ev.find(e=>left(e.d)>=0);
+const nextD=c=>c.dl.filter(d=>!d.done).sort((a,b)=>a.due-b.due)[0];
+function listCases(){
+ const q=S.q.trim().toLowerCase();
+ let r=C.filter(c=>(S.filter==='all'||c.type===S.filter)&&(!q||[c.num,c.client,c.parties,c.subj,c.court,c.judge].join(' ').toLowerCase().includes(q)));
+ if(WIDE.matches){const k=S.sort.k,d=S.sort.d,far=9e15;
+  const val=c=>k==='num'?c.num:k==='client'?c.client:k==='type'?TYPES[c.type]:k==='court'?c.court:k==='judge'?c.judge:k==='dl'?+((nextD(c)||{}).due||far):+((nextH(c)||{}).d||far);
+  r=r.slice().sort((a,b)=>{const x=val(a),y=val(b);return (typeof x==='string'?x.localeCompare(y,'uk'):x-y)*d})}
+ return r;
+}
+
 // ── похідні списки ──
 const byKey=k=>C.find(c=>c.key===k);
 const hearings=()=>C.flatMap(c=>c.ev.filter(e=>left(e.d)>=0).map(e=>({c,e}))).sort((a,b)=>a.e.d-b.e.d||a.e.tm.localeCompare(b.e.tm));
@@ -329,9 +412,9 @@ const mins=t=>{const[h,m]=String(t||'0:0').split(':');return h*60+ +m};
 function conflicts(hs){const r=[];for(let i=0;i<hs.length;i++)for(let j=i+1;j<hs.length;j++){const a=hs[i],b=hs[j];if(a.e.tm&&b.e.tm&&+a.e.d===+b.e.d&&a.e.court!==b.e.court&&a.c.key!==b.c.key&&Math.abs(mins(a.e.tm)-mins(b.e.tm))<120)r.push([a,b])}return r}
 function chip(n){const c=n<=2?'crit':n<=7?'warn':'ok';const t=n<0?`прострочено ${-n} дн.`:n===0?'сьогодні':n===1?'завтра':`${n} дн.`;return `<span class="chip ${c}">${t}</span>`}
 const dateBox=(d,tm)=>`<span class="date"><b>${d.getDate()}</b>${MS[d.getMonth()]}${tm?`<u>${tm}</u>`:''}</span>`;
-const hRow=({c,e},link=true)=>`<${link?'button data-a="open" data-v="'+esc(c.key)+'"':'div'} class="row">${dateBox(e.d,e.tm)}<span class="main"><b>${esc(c.client)}</b><small><span class="num">${esc(c.num)}</span></small><small>${esc(e.court||c.court)}${e.rm?', '+esc(e.rm):''}</small>${e.sure?'':'<small class="wr">Збіг лише за ПІБ – перевірте</small>'}</span>${chip(left(e.d))}</${link?'button':'div'}>`;
+const hRow=({c,e},link=true)=>`<${link?'button data-a="open" data-v="'+esc(c.key)+'"':'div'} class="row">${dateBox(e.d,e.tm)}<span class="main">${link?`<b class="clamp">${esc(c.client)}</b><small><span class="num">${esc(c.num)}</span></small><small>${esc(e.court||c.court)}${e.rm?', '+esc(e.rm):''}</small>`:`<b>${esc(e.court||c.court)}</b>${e.rm?`<small>${esc(e.rm)}</small>`:''}<small>${fh(e.d)}${e.src==='man'?' · додано вручну або з документа':''}</small>`}${e.sure?'':'<small class="wr">Збіг лише за ПІБ – перевірте</small>'}</span>${chip(left(e.d))}</${link?'button':'div'}>`;
 const dRow=({c,d},showCase=true)=>`<div class="row${d.done?' done':''}"><button class="chk${d.done?' on':''}" data-a="dldone" data-v="${esc(d.key)}" aria-label="Позначити строк виконаним"></button><button class="main" data-a="open" data-v="${esc(c.key)}"><b>${esc(d.t)}</b><small>до ${fd(d.due)}${d.b?' · '+esc(d.b):''}</small>${showCase?`<small><span class="num">${esc(c.num)}</span> · ${esc(c.client)}</small>`:''}</button>${d.done?'':chip(left(d.due))}</div>`;
-const cRow=c=>{const h=c.ev.find(e=>left(e.d)>=0);return `<button class="row${S.cid===c.key?' cur':''}" data-a="open" data-v="${esc(c.key)}"><span class="main"><b>${esc(c.client)}${c.role?` <span class="chip tag">${esc(c.role)}</span>`:''}</b><small><span class="num">${esc(c.num)}</span> · ${TYPES[c.type]}</small>${c.subj?`<small>${esc(c.subj)}</small>`:''}<small class="${h?'hl':''}">${h?`Засідання ${fd(h.d)}${h.tm?' о '+h.tm:''}`:'Засідання не призначено'}</small></span></button>`};
+const cRow=c=>{const h=c.ev.find(e=>left(e.d)>=0);return `<button class="row${S.cid===c.key?' cur':''}" data-a="open" data-v="${esc(c.key)}"><span class="main"><b class="clamp">${esc(c.client)}</b><small><span class="num">${esc(c.num)}</span> · ${TYPES[c.type]}${c.role?` · <span class="own">${esc(c.role)}</span>`:''}</small>${c.subj?`<small class="clamp">${esc(c.subj)}</small>`:''}<small class="${h?'hl':''}">${h?`Засідання ${fd(h.d)}${h.tm?' о '+h.tm:''}`:'Засідання не призначено'}</small></span></button>`};
 const fresh=()=>`<div class="fresh${S.err?' bad':''}"><i></i><span>${S.err?esc(S.err):`Бот оновив перелік ${S.updated?esc(S.updated):'(час невідомий)'}. Дату й час засідання звіряйте з ЄСІТС.`}</span><button class="btn ghost sm" data-a="reload"${S.busy?' disabled':''}>Оновити</button></div>`;
 
 // ── екрани ──
@@ -350,9 +433,11 @@ function vToday(){
  <div class="c-dl"><h2>Строки на цьому тижні</h2><div class="list">${hot.map(x=>dRow(x)).join('')||'<p class="empty">Найближчі 7 днів без строків.</p>'}</div></div></div>`;
 }
 function caseList(){
- const q=S.q.trim().toLowerCase();
- const r=C.filter(c=>(S.filter==='all'||c.type===S.filter)&&(!q||[c.num,c.client,c.parties,c.subj,c.court].join(' ').toLowerCase().includes(q)));
- return r.map(cRow).join('')||`<p class="empty">${C.length?'Нічого не знайдено. Перевірте номер або прізвище.':'Справ поки немає. Додайте клієнтів чи номери справ у «Моніторингу».'}</p>`;
+ const r=listCases();
+ if(!r.length)return `<p class="empty">${C.length?'Нічого не знайдено. Перевірте номер або прізвище.':'Справ поки немає. Додайте клієнтів чи номери справ у «Моніторингу».'}</p>`;
+ if(!WIDE.matches)return r.map(cRow).join('');
+ return tbl([['№ справи','12%','num'],['Клієнт / сторони','25%','client'],['Вид','10%','type'],['Суд','21%','court'],['Суддя','11%','judge'],['Засідання','12%','next'],['Строк','9%','dl']],
+  r.map(c=>{const h=nextH(c),d=nextD(c);return `<tr data-a="open" data-v="${esc(c.key)}">${cell(c.num,'num')}<td class="b" title="${esc(c.parties||c.client)}">${c.role?'<span class="own">моя</span> ':''}${esc(sn(c.client))}</td>${cell(TYPES[c.type],'m')}${cell(sc(c.court))}${cell(sn(c.judge),'m')}<td>${h?`${fdS(h.d)}${h.tm?' · '+h.tm:''}`:'<span class="m" style="color:var(--muted)">не призначено</span>'}</td><td>${d?`<span style="color:var(--${left(d.due)<=2?'crit':left(d.due)<=7?'warn':'text'})" title="${esc(d.t)}">${fd(d.due)}</span>`:''}</td></tr>`}));
 }
 function vCases(){
  return `<header class="top"><p class="eyebrow">${C.length} у роботі</p><h1>Справи</h1></header>
@@ -385,7 +470,7 @@ function vCase(c){
 function vDoc(c,id){
  const row=((DOCS[c.key]||{}).rows||[]).find(d=>d.id===id)||{id},X=DOC[id]||{},labels=X.labels||row.labels||[],fnd=X.findings||row.findings||[],applied=X.applied||row.applied||[];
  const url='https://reyestr.court.gov.ua/Review/'+encodeURIComponent(id);
- return `<button class="back" data-a="docback">‹ ${esc(c.num)}</button>
+ return `${WIDE.matches?navBar(c,true):`<button class="back" data-a="docback">‹ ${esc(c.num)}</button>`}
  <header class="top"><p class="eyebrow">Документ суду</p><h1>${esc(row.form||'Документ')}${row.date?' від '+esc(row.date):''}</h1></header>
  <dl class="meta"><div><dt>Справа</dt><dd class="num">${esc(row.caseNo||c.num)}</dd></div>${row.court?`<div><dt>Суд</dt><dd>${esc(row.court)}</dd></div>`:''}${row.judge?`<div><dt>Суддя</dt><dd>${esc(row.judge)}</dd></div>`:''}${row.inForce?`<div><dt>Набрання сили</dt><dd>${esc(row.inForce)}</dd></div>`:''}
  <div><dt>Реєстр</dt><dd><a href="${url}" target="_blank" rel="noopener">${url}</a></dd></div></dl>
@@ -417,7 +502,8 @@ function vCal(){
 function vDl(){
  const ds=dls(),done=C.flatMap(c=>c.dl.filter(d=>d.done).map(d=>({c,d})));
  return `<header class="top"><p class="eyebrow">${ds.length} активних</p><h1>Строки</h1></header>
- <div class="duo"><div><h2>Активні</h2><div class="list">${ds.map(x=>dRow(x)).join('')||'<p class="empty">Активних строків немає. Строк додається з картки справи або з документа суду.</p>'}</div></div>
+ <button class="btn" data-a="sheet" data-v="dlnew" style="align-self:flex-start">Додати строк</button>
+ <div class="duo"><div><h2>Активні</h2><div class="list">${ds.map(x=>dRow(x)).join('')||'<p class="empty">Активних строків немає. Додайте строк кнопкою вище, з картки справи або з документа суду.</p>'}</div></div>
  <div><h2>Виконано</h2><div class="list">${done.map(x=>dRow(x)).join('')||'<p class="empty">Поки нічого.</p>'}</div></div></div>
  <p class="empty">Рахуються календарні дні. Якщо останній день випав на суботу чи неділю, строк перенесено на понеділок. Святкові дні не враховано.</p>`;
 }
@@ -428,46 +514,99 @@ function vMon(){
  <div><h2>Справи за номером (${TR.length})</h2><div class="list">${TR.map(n=>`<div class="row"><span class="main"><b class="num">${esc(n)}</b></span><button class="btn danger sm" data-a="untrack" data-v="${esc(n)}">Прибрати</button></div>`).join('')||'<p class="empty">Список порожній.</p>'}</div>
  <form class="inline" data-f="track"><input class="field num" id="newnum" placeholder="757/12345/26-ц" aria-label="Номер справи" required><button class="btn sm">Стежити</button></form></div></div>
  <h2>Перевірка судів</h2><p class="empty">Бот перевіряє суди за розкладом кілька разів на добу. Позачерговий прогін триває кілька хвилин, після нього натисніть «Оновити» на екрані «Сьогодні».</p>
- <div class="acts"><button class="btn ghost sm" data-a="scan">Запустити прогін зараз</button><button class="btn danger sm" data-a="logout">Вийти</button></div>`;
+ <div class="acts"><button class="btn ghost sm" data-a="scan">Запустити прогін зараз</button><button class="btn ghost sm" data-a="theme">${theme.eff()==='dark'?'Денна тема':'Нічна тема'}</button><button class="btn danger sm" data-a="logout">Вийти</button></div>`;
 }
 function sheet(){
  if(!S.sheet)return '';const c=byKey(S.cid);let b='';
  if(S.sheet==='case')b=`<h3>Стежити за справою</h3><form data-f="track" style="display:contents"><label>Номер справи<input class="field num" id="newnum" placeholder="757/12345/26-ц" required></label><p>Бот шукатиме засідання в цій справі в усіх судах незалежно від ПІБ у сторонах і додаватиме їх у календар.</p><button class="btn">Стежити</button></form>`;
  if(S.sheet==='dl'&&c){const list=(S.preset?[[S.preset.title,S.preset.days,S.preset.basis]]:[]).concat(TPL[c.type]||TPL.civ);
   b=`<h3>Новий строк</h3><form data-f="dl" style="display:contents"><label>Що подаємо<select class="field" id="dltpl">${list.map((t,i)=>`<option value="${i}">${esc(t[0])} · ${t[1]} днів</option>`).join('')}</select></label><label>Від якої дати рахуємо<input class="field" id="dlfrom" type="date" value="${iso(T0)}" required></label><p>Останній день, що припав на суботу чи неділю, переноситься на понеділок. Шаблони звірте з чинною редакцією кодексу. Строк потрапить у Google Календар з нагадуваннями за 3 дні та напередодні.</p><button class="btn">Розрахувати й додати</button></form>`}
+ if(S.sheet==='dlnew'){const names=[...new Set(Object.values(TPL).flat().map(t=>t[0]))],d15=plus(T0,15);
+  b=C.length?`<h3>Новий строк</h3><form data-f="dlnew" style="display:contents"><label>Справа<select class="field" id="dncase">${C.map(x=>`<option value="${esc(x.num)}">${esc(x.num)} · ${esc(x.client.slice(0,60))}</option>`).join('')}</select></label><label>Що подаємо<input class="field" id="dntitle" list="dnlist" placeholder="Відзив на позов" required maxlength="120"><datalist id="dnlist">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></label><label>Останній день строку<input class="field" id="dndate" type="date" value="${iso(d15)}" required></label><p>Якщо строк треба порахувати від дати за шаблоном, відкрийте картку справи й натисніть «Розрахувати новий строк». Строк потрапить у Google Календар з нагадуваннями за 3 дні та напередодні.</p><button class="btn">Додати</button></form>`
+   :'<h3>Новий строк</h3><p>Спершу додайте справу: строк прив\'язується до номера справи.</p>'}
  if(S.sheet==='hear'&&c)b=`<h3>Нове засідання</h3><form data-f="hear" style="display:contents"><label>Дата<input class="field" id="hdate" type="date" value="${iso(we(new Date(T0.getFullYear(),T0.getMonth(),T0.getDate()+7)))}" required></label><label>Час<input class="field" id="htime" type="time" value="10:00" required></label><label>Зал<input class="field" id="hroom" placeholder="5"></label><p>Засідання з'явиться в справі й потрапить у Google Календар.</p><button class="btn">Додати</button></form>`;
  return `<div class="shade" data-a="close"><div class="sheet" role="dialog" aria-modal="true">${b}<button class="btn ghost" data-a="close" type="button">Скасувати</button></div></div>`;
 }
+const FILTERS=[['all','Усі'],['civ','Цивільні'],['com','Господарські'],['crim','Кримінальні'],['adm','КУпАП'],['admj','Адміністративні']];
+function wCases(){
+ return `<header class="top"><p class="eyebrow">${C.length} у роботі · клацніть рядок, щоб відкрити справу; заголовок колонки сортує</p><h1>Справи</h1></header>
+ <div class="toolbar"><input class="field" id="q" type="search" placeholder="Номер, клієнт, сторона, суд або суддя" value="${esc(S.q)}" aria-label="Пошук у справах">
+ <div class="filters">${FILTERS.map(([k,t])=>`<button class="${S.filter===k?'on':''}" data-a="filter" data-v="${k}">${t}</button>`).join('')}</div>
+ <button class="btn" data-a="sheet" data-v="case">Стежити за справою</button></div>
+ <div id="caselist" class="fill">${caseList()}</div>`;
+}
+const hearCols=[['Дата','11%'],['Час','6%'],['№ справи','12%'],['Клієнт / сторони','25%'],['Суд','24%'],['Зал','6%'],['Суддя','10%'],['Через','6%']];
+const hearTr=({c,e})=>`<tr data-a="open" data-v="${esc(c.key)}"><td>${fdS(e.d)}</td><td class="b">${e.tm||'–'}</td>${cell(c.num,'num')}<td class="b" title="${esc(c.parties||c.client)}">${esc(sn(c.client))}${e.sure?'':' <span class="wr" style="font-weight:400">· збіг за ПІБ</span>'}</td>${cell(sc(e.court||c.court))}${cell((e.rm||'').replace('зал/каб. ',''),'m')}${cell(sn(c.judge),'m')}<td class="act">${chip(left(e.d))}</td></tr>`;
+const dlCols=[['','4%'],['Останній день','12%'],['Через','9%'],['Що подаємо','24%'],['№ справи','12%'],['Клієнт / сторони','20%'],['Примітка','15%'],['','4%']];
+const dlTr=({c,d})=>`<tr class="${d.done?'done':''}" data-a="open" data-v="${esc(c.key)}"><td class="act"><button class="chk${d.done?' on':''}" data-a="dldone" data-v="${esc(d.key)}" aria-label="Позначити строк виконаним"></button></td><td>${fdS(d.due)}</td><td class="act">${d.done?'виконано':chip(left(d.due))}</td>${cell(d.t,'b')}${cell(c.num,'num')}${cell(sn(c.client))}${cell(d.b,'m')}<td class="act"><button class="x" data-a="dldel" data-v="${esc(d.key)}" aria-label="Видалити строк" title="Видалити строк">✕</button></td></tr>`;
+function wToday(){
+ const hs=hearings(),ds=dls(),hot=ds.filter(x=>left(x.d.due)<=7),cf=conflicts(hs);
+ return `<header class="top"><p class="eyebrow">${fh(T0)}</p><h1>Сьогодні</h1></header>${fresh()}
+ <div class="tiles"><div class="tile"><b>${hs.filter(h=>left(h.e.d)<=7).length}</b><span>засідань за 7 днів</span></div><div class="tile${hot.length?' hot':''}"><b>${hot.length}</b><span>строків за 7 днів</span></div><div class="tile${NC.length?' hot':''}"><b>${NC.length}</b><span>нових справ</span></div></div>
+ <div class="today2"><div class="stack"><h2>Найближчі засідання (${hs.length})</h2><div class="fill">${hs.length?tbl([['Дата','11%'],['Час','7%'],['№ справи','15%'],['Клієнт / сторони','27%'],['Суд','24%'],['Зал','7%'],['Через','9%']],hs.map(({c,e})=>`<tr data-a="open" data-v="${esc(c.key)}"><td>${fdS(e.d)}</td><td class="b">${e.tm||'–'}</td>${cell(c.num,'num')}<td class="b" title="${esc(c.parties||c.client)}">${esc(sn(c.client))}${e.sure?'':' <span class="wr" style="font-weight:400">· збіг за ПІБ</span>'}</td>${cell(sc(e.court||c.court))}${cell((e.rm||'').replace('зал/каб. ',''),'m')}<td class="act">${chip(left(e.d))}</td></tr>`)):'<p class="empty">Засідань не знайдено.</p>'}</div></div>
+ <div class="fill">${cf.map(([a,b])=>`<div class="alert"><b>Накладка засідань ${fd(a.e.d)}</b>${a.e.tm} ${esc(sc(a.e.court||a.c.court))} та ${b.e.tm} ${esc(sc(b.e.court||b.c.court))}. Подайте клопотання про відкладення або участь у режимі відеоконференції.</div>`).join('')}
+ ${NC.length?`<h2>Нові справи</h2>${NC.map(n=>`<div class="card"><b><span class="num">${esc(n.number)}</span></b><p>${esc(sc(n.court))}</p>${n.involved?`<p>${esc(sn(n.involved))}</p>`:''}<p>Бот знайшов ${esc(n.found)}${n.date?'. Засідання '+esc(n.date):''}</p>${n.reliable?'':'<p class="wr">Збіг лише за ПІБ – перевірте, чи це ваш клієнт.</p>'}<div class="acts">${byKey(caseKey(n.number))?`<button class="btn ghost sm" data-a="open" data-v="${esc(caseKey(n.number))}">Відкрити справу</button>`:''}<button class="btn ghost sm" data-a="ncdone" data-v="${esc(n.key)}">Переглянуто</button></div></div>`).join('')}`:''}
+ <h2>Строки на цьому тижні</h2><div class="list">${hot.map(x=>dRow(x)).join('')||'<p class="empty">Найближчі 7 днів без строків.</p>'}</div></div></div>`;
+}
+function wDl(){
+ const all=C.flatMap(c=>c.dl.map(d=>({c,d}))).sort((a,b)=>(a.d.done-b.d.done)||(a.d.due-b.d.due)),act=all.filter(x=>!x.d.done).length;
+ return `<header class="top"><p class="eyebrow">Активних: ${act} · виконаних: ${all.length-act}</p><h1>Строки</h1></header>
+ <div class="toolbar"><button class="btn" data-a="sheet" data-v="dlnew">Додати строк</button><p class="empty" style="padding:0">Календарні дні; з суботи чи неділі строк переноситься на понеділок; святкові дні не враховано.</p></div>
+ <div class="fill">${all.length?tbl(dlCols,all.map(dlTr)):'<p class="empty">Строків ще немає. Додайте строк кнопкою вище, з картки справи або з документа суду.</p>'}</div>`;
+}
+function navList(){const r=listCases();return r.some(c=>c.key===S.cid)?r:C}
+function navBar(c,docBack){
+ const L=navList(),i=L.findIndex(x=>x.key===c.key);
+ return `<div class="navbar"><button data-a="${docBack?'docback':'back'}">‹ ${docBack?'До справи '+esc(c.num):'До списку справ'}</button>${docBack?'':`<button data-a="flip" data-v="-1"${i>0?'':' disabled'}>‹ Попередня</button><button data-a="flip" data-v="1"${i>=0&&i<L.length-1?'':' disabled'}>Наступна ›</button><span>${i>=0?`${i+1} з ${L.length} · `:''}клавіші ← → гортають справи, Esc повертає до списку</span>`}</div>`;
+}
+function wCase(c){
+ const up=c.ev.filter(e=>left(e.d)>=0),D=DOCS[c.key]||{};
+ return `${navBar(c,false)}<header class="top"><p class="eyebrow"><span class="num">№ ${esc(c.num)}</span> · ${TYPES[c.type]}${c.role?' · '+esc(c.role):''}${c.tracked?' · стеження за номером':''}</p><h1 title="${esc(c.parties||c.client)}">${esc(sn(c.client))}</h1>${c.subj?`<p class="eyebrow" title="${esc(c.subj)}">${esc(c.subj)}</p>`:''}</header>
+ <div class="two"><div class="fill"><dl class="meta"><div><dt>Суд</dt><dd>${esc(c.court)}</dd></div><div><dt>Суддя</dt><dd>${esc(c.judge)}</dd></div>${c.parties?`<div><dt>Сторони</dt><dd>${esc(c.parties)}</dd></div>`:''}</dl>
+ <div class="acts"><button class="btn ghost sm" data-a="copy" data-v="${esc(c.key)}">Скопіювати реквізити</button><button class="btn ghost sm" data-a="sheet" data-v="hear">Додати засідання</button><button class="btn ghost sm" data-a="sheet" data-v="dl">Розрахувати строк</button>${c.tracked?`<button class="btn danger sm" data-a="untrack" data-v="${esc(c.num)}">Не стежити за номером</button>`:`<button class="btn ghost sm" data-a="track" data-v="${esc(c.num)}">Стежити за номером</button>`}</div>
+ <h2>Засідання</h2>${up.length?tbl([['Дата','20%'],['Час','10%'],['Суд','30%'],['Зал','10%'],['Через','12%'],['','18%']],up.map(e=>`<tr><td>${fdS(e.d)}</td><td class="b">${e.tm||'–'}</td>${cell(sc(e.court||c.court))}${cell((e.rm||'').replace('зал/каб. ',''),'m')}<td class="act">${chip(left(e.d))}</td><td class="act">${e.src==='cli'&&!e.sure?`<button class="btn ghost" data-a="gcal" data-v="${c.ev.indexOf(e)}" title="Збіг лише за ПІБ. Якщо це ваш клієнт, додайте засідання в календар">У календар</button>`:''}</td></tr>`)):'<p class="empty">Не призначено. Щойно дата з\'явиться на сайті суду, бот її знайде.</p>'}
+ <h2>Процесуальні строки</h2>${c.dl.length?tbl([['','8%'],['Останній день','26%'],['Що подаємо','40%'],['Через','16%'],['','10%']],c.dl.map(d=>`<tr class="${d.done?'done':''}"><td class="act"><button class="chk${d.done?' on':''}" data-a="dldone" data-v="${esc(d.key)}" aria-label="Позначити строк виконаним"></button></td><td>${fdS(d.due)}</td><td class="b" title="${esc(d.t+(d.b?' · '+d.b:''))}">${esc(d.t)}</td><td class="act">${d.done?'виконано':chip(left(d.due))}</td><td class="act"><button class="x" data-a="dldel" data-v="${esc(d.key)}" aria-label="Видалити строк" title="Видалити строк">✕</button></td></tr>`)):'<p class="empty">Строків немає.</p>'}</div>
+ <div class="stack"><div class="hrow"><h2>Документи суду${D.rows?` (${D.rows.length})`:''}</h2>${D.loading?'<span class="spin"></span>':'<button class="btn ghost sm" data-a="docs">Оновити з реєстру</button>'}</div>
+ <div class="fill">${(D.rows||[]).length?tbl([['Дата','17%'],['Документ','20%'],['Суть','41%'],['Суддя','22%']],D.rows.map(d=>{const pend=(d.findings||[]).filter((f,i)=>!(d.applied||[]).includes(i));return `<tr data-a="doc" data-v="${esc(d.id)}">${cell(d.date)}${cell(d.form,'b')}<td title="${esc((d.labels||[]).join(' · '))}">${esc((d.labels||[]).join(' · '))}${pend.length?` <span class="wr">${(d.labels||[]).length?'· ':''}є дані для внесення</span>`:''}${!(d.labels||[]).length&&!pend.length?'<span style="color:var(--muted)">відкрийте, щоб прочитати</span>':''}</td>${cell(sn(d.judge),'m')}</tr>`})):''}
+ ${D.loading&&!(D.rows||[]).length?'<p class="empty">Шукаю в реєстрі судових рішень.</p>':''}
+ ${D.err?`<p class="err">${esc(D.err)}</p><a class="btn ghost sm" href="https://reyestr.court.gov.ua/" target="_blank" rel="noopener">Відкрити пошук у реєстрі</a>`:''}
+ ${D.rows&&!D.rows.length&&!D.loading&&!D.err?'<p class="empty">У реєстрі рішень у цій справі поки нічого немає.</p>':''}</div></div></div>`;
+}
 const ICON={today:'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',cases:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',dl:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',mon:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'};
-const WIDE=matchMedia('(min-width:960px)');
 const TABS=[['today','Сьогодні'],['cases','Справи'],['cal','Календар'],['dl','Строки'],['mon','Моніторинг']];
 const VIEWS={today:vToday,cases:vCases,cal:vCal,dl:vDl,mon:vMon};
-let lastKey='';
+const WVIEWS={today:wToday,cases:wCases,cal:vCal,dl:wDl,mon:vMon};
+let lastKey='';const SCROLL={};
 function render(){
  const app=document.getElementById('app');
  if(!S.token){app.innerHTML=vLogin();return}
  if(!S.ready){app.innerHTML=!S.err?'<div class="login"><div class="row"><span class="spin"></span><span class="main"><small>Завантажую справи</small></span></div></div>':`<div class="login"><p class="err">${esc(S.err)}</p><button class="btn" data-a="reload">Спробувати ще раз</button><button class="btn ghost" data-a="logout">Вийти</button></div>`;return}
- const c=byKey(S.cid),key=S.tab+'|'+S.cid+'|'+S.doc,same=key===lastKey;lastKey=key;
- const pos={};app.querySelectorAll('.scr').forEach(el=>{pos[el.id||'m']=el.scrollTop});
+ const c=byKey(S.cid),wide=WIDE.matches,tab=c?'cases':S.tab,key=(wide?'w':'m')+tab+'|'+S.cid+'|'+S.doc;
+ if(lastKey)SCROLL[lastKey]=[...app.querySelectorAll('.scr,.fill,.agenda,.cal')].map(el=>el.scrollTop);lastKey=key;
  const badge={dl:dls().filter(x=>left(x.d.due)<=2).length,today:NC.length};
- if(WIDE.matches){
-  const tab=c?'cases':S.tab;
-  const body=tab==='cases'
-   ?`<div class="split"><section class="scr pane pl" id="pl">${vCases()}</section><section class="scr pane pd" id="pd">${c?(S.doc?vDoc(c,S.doc):vCase(c)):'<div class="hint">Оберіть справу зі списку ліворуч, щоб побачити засідання, документи суду й строки.</div>'}</section></div>`
-   :`<section class="scr pane" id="pm">${VIEWS[tab]()}</section>`;
+ if(wide){
+  const v=c?(S.doc?vDoc(c,S.doc):wCase(c)):WVIEWS[tab]();
   app.innerHTML=`<aside class="side"><div class="brand"><b>Мої судові справи</b><small>Адвокат Осадько О.О.</small></div>
    <nav>${TABS.map(([k,t])=>`<button class="${tab===k?'on':''}" data-a="tab" data-v="${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg><span>${t}</span>${badge[k]?`<em>${badge[k]}</em>`:''}</button>`).join('')}</nav>
-   <div class="sidefoot"><small>${S.err?esc(S.err):'Бот оновив перелік '+esc(S.updated||'(час невідомий)')}</small><button data-a="reload"${S.busy?' disabled':''}>Оновити дані</button><button data-a="scan">Запустити прогін</button><button data-a="logout">Вийти</button></div></aside>
-   <div class="mainarea">${body}</div>${sheet()}`;
-  app.querySelectorAll('.scr').forEach(el=>{if(el.id==='pl'||same)el.scrollTop=pos[el.id]||0});
-  return;
+   <div class="sidefoot"><small>${S.err?esc(S.err):'Бот оновив перелік '+esc(S.updated||'(час невідомий)')}</small><button data-a="reload"${S.busy?' disabled':''}>Оновити дані</button><button data-a="scan">Запустити прогін</button><button data-a="theme">${theme.eff()==='dark'?'Денна тема':'Нічна тема'}</button><button data-a="logout">Вийти</button></div></aside>
+   <div class="mainarea"><section class="scr pane${tab==='mon'||(c&&S.doc)?' free':''}">${v}</section></div>${sheet()}`;
+ }else{
+  const v=c?(S.doc?vDoc(c,S.doc):vCase(c)):VIEWS[S.tab]();
+  app.innerHTML=`<main class="scr">${v}</main><nav class="tabs">${TABS.map(([k,t])=>`<button class="${(S.tab===k&&!c)||(c&&k==='cases')?'on':''}" data-a="tab" data-v="${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>${t}${badge[k]?`<em>${badge[k]}</em>`:''}</button>`).join('')}</nav>${sheet()}`;
  }
- const v=c?(S.doc?vDoc(c,S.doc):vCase(c)):VIEWS[S.tab]();
- app.innerHTML=`<main class="scr">${v}</main><nav class="tabs">${TABS.map(([k,t])=>`<button class="${(S.tab===k&&!c)||(c&&k==='cases')?'on':''}" data-a="tab" data-v="${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>${t}${badge[k]?`<em>${badge[k]}</em>`:''}</button>`).join('')}</nav>${sheet()}`;
- app.querySelector('.scr').scrollTop=same?(pos.m||0):0;
+ const pos=SCROLL[key]||[];app.querySelectorAll('.scr,.fill,.agenda,.cal').forEach((el,i)=>{el.scrollTop=pos[i]||0});
 }
+const WIDE=matchMedia('(min-width:960px)');
 WIDE.addEventListener('change',()=>render());
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.sheet){S.sheet=null;S.preset=null;render()}});
+function openCase(k){S.cid=k;S.doc=null;if(WIDE.matches)S.tab='cases';delete SCROLL[(WIDE.matches?'w':'m')+'cases|'+k+'|null'];render();const x=byKey(k);if(x)loadDocs(x,false)}
+function flip(step){const L=navList(),i=L.findIndex(x=>x.key===S.cid),n=L[i+step];if(i>=0&&n)openCase(n.key)}
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&S.sheet){S.sheet=null;S.preset=null;render();return}
+ if(!WIDE.matches||S.sheet||!S.cid||/^(INPUT|SELECT|TEXTAREA)$/.test((e.target||{}).tagName||''))return;
+ if(e.key==='Escape'){if(S.doc)S.doc=null;else S.cid=null;render()}
+ else if(!S.doc&&e.key==='ArrowRight'){e.preventDefault();flip(1)}
+ else if(!S.doc&&e.key==='ArrowLeft'){e.preventDefault();flip(-1)}
+});
 let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600)}
 
 // ── дії ──
@@ -475,7 +614,10 @@ document.addEventListener('click',async e=>{
  const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v,c=byKey(S.cid);
  if(a==='close'){if(e.target!==b)return;S.sheet=null;S.preset=null}
  else if(a==='tab'){S.tab=v;S.cid=null;S.doc=null}
- else if(a==='open'){S.cid=v;S.doc=null;if(WIDE.matches)S.tab='cases';render();const x=byKey(v);if(x)loadDocs(x,false);return}
+ else if(a==='open'){openCase(v);return}
+ else if(a==='flip'){flip(+v);return}
+ else if(a==='theme')theme.toggle();
+ else if(a==='sort'){S.sort=S.sort.k===v?{k:v,d:-S.sort.d}:{k:v,d:1}}
  else if(a==='back'){S.cid=null;S.doc=null}
  else if(a==='docback')S.doc=null;
  else if(a==='doc'){S.doc=v;render();loadDoc(v,false);return}
@@ -517,6 +659,7 @@ document.addEventListener('submit',async e=>{
   const p=S.preset&&+val('dltpl')===0?S.preset:null;
   const ok=await act('deadline',{add:{number:c.num,date:fd(due),title:t[0],note:`${t[1]} дн. від ${fd(from)}, ${t[2]}`},doc:p?p.doc:undefined,idx:p?p.idx:undefined},'Строк до '+fd(due));
   if(ok){S.sheet=null;S.preset=null;render();if(p)loadDoc(p.doc,false)}return}
+ if(f==='dlnew'){const ok=await act('deadline',{add:{number:val('dncase'),date:fd(pd(val('dndate'))),title:val('dntitle'),note:'дату вказано вручну'}},'Строк додано');if(ok){S.sheet=null;render()}return}
  if(f==='hear'&&c){const d=pd(val('hdate'));const ok=await act('hearing',{number:c.num,date:fd(d),time:val('htime'),court:c.court,judge:c.judge==='не визначено'?'':c.judge,courtroom:val('hroom'),note:'Додано вручну'},'Засідання додано');if(ok){S.sheet=null;render()}return}
 });
 if(S.token)load(false);else render();
