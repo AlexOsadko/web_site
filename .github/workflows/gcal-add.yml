@@ -35,4 +35,6 @@ jobs:
           BOT_WORKER_SECRET: ${{ secrets.BOT_WORKER_SECRET }}
           GOOGLE_CALENDAR_SA: ${{ secrets.GOOGLE_CALENDAR_SA }}
           GOOGLE_CALENDAR_ID: ${{ secrets.GOOGLE_CALENDAR_ID }}
+          # Нагадування про процесуальні строки (/strok), хвилини до початку дня.
+          GCAL_DEADLINE_REMINDERS: ${{ vars.GCAL_DEADLINE_REMINDERS }}
         run: python3 gcal_drain.py

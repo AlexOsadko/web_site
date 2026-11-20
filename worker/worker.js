@@ -114,6 +114,128 @@ async function onSummons(env, sm) {
     message_id: res.message_id, rec }), { expirationTtl: 60 * 24 * 3600 });
 }
 
+// ── Процесуальні строки: /strok <номер> <дата | +N [від дата]> <що подати> ──
+// Строк зберігається приватно в KV (court_deadlines) і стає в ту саму чергу
+// календаря, що й підтверджені засідання: gcal-add.yml створює подію на весь день.
+function kyivToday() {
+  const [y, mo, d] = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Kyiv' }).split('-').map(Number);
+  return new Date(Date.UTC(y, mo - 1, d));
+}
+const fmtDate = (dt) => String(dt.getUTCDate()).padStart(2, '0') + '.'
+  + String(dt.getUTCMonth() + 1).padStart(2, '0') + '.' + dt.getUTCFullYear();
+function utcDate(d, mo, y) {
+  const dt = new Date(Date.UTC(+y, +mo - 1, +d));
+  return (dt.getUTCDate() === +d && dt.getUTCMonth() === +mo - 1) ? dt : null;
+}
+function parseDeadline(arg) {
+  let t = String(arg || '').replace(/\s+/g, ' ').trim();
+  const sp = t.indexOf(' ');
+  if (sp < 0) return null;
+  const number = normCaseNum(t.slice(0, sp));
+  if (!number) return null;
+  t = t.slice(sp + 1).trim();
+  let due, calc = '';
+  let m = t.match(/^(\d{2})\.(\d{2})\.(\d{4})\s+/);
+  if (m) {
+    due = utcDate(m[1], m[2], m[3]);
+    if (!due) return null;
+  } else {
+    m = t.match(/^\+\s?(\d{1,3})(?:\s*дн[а-яії]*\.?)?(?:\s+(?:від|з)\s+(\d{2})\.(\d{2})\.(\d{4}))?\s+/i);
+    if (!m) return null;
+    const from = m[2] ? utcDate(m[2], m[3], m[4]) : kyivToday();
+    if (!from) return null;
+    due = new Date(from.getTime() + (+m[1]) * 86400000);
+    // останній день строку, що припав на суботу чи неділю, – перший робочий день
+    while (due.getUTCDay() === 0 || due.getUTCDay() === 6) due = new Date(due.getTime() + 86400000);
+    calc = `${m[1]} дн. від ${fmtDate(from)}`;
+  }
+  const title = t.slice(m[0].length).trim().slice(0, 120);
+  if (title.length < 2) return null;
+  return { number, date: fmtDate(due), title, calc };
+}
+const DEADLINE_ASK = '⏳ <b>Процесуальний строк у календар</b>\n'
+  + '<code>/strok 757/12345/26 05.12.2026 Відзив на позов</code> – конкретна дата\n'
+  + '<code>/strok 757/12345/26 +15 від 20.11.2026 Відзив на позов</code> – порахувати від дати\n'
+  + '<code>/strok 757/12345/26 +30 Апеляційна скарга</code> – порахувати від сьогодні\n'
+  + 'Якщо останній день випав на вихідний, строк переноситься на понеділок. Усі строки: /stroky';
+async function getDeadlines(env) {
+  return (await env.KV.get('court_deadlines', 'json')) || [];
+}
+// Запуск швидкої задачі «лише календар» (тротлінг 20 с — кілька дій обробить один запуск).
+async function kickGcal(env) {
+  if (!env.GH_TOKEN) return false;
+  const last = parseInt((await env.KV.get('gcal_run_at')) || '0', 10);
+  if (Date.now() - last < 20000) return true;
+  const st = await triggerScan(env, 'gcal-add.yml', {});
+  await env.KV.put('gcal_run_at', String(Date.now()));
+  return st === 204;
+}
+async function onDeadline(env, d) {
+  const key = shortHash('dl|' + d.number + '|' + d.date + '|' + d.title);
+  const lines = ['⏳ <b>Строк записано</b>', '', `📁 Справа: <b>${esc(d.number)}</b>`,
+    `📌 ${esc(d.title)}`, `📅 Останній день: <b>${esc(d.date)}</b>`];
+  if (d.calc) lines.push(`🧮 ${esc(d.calc)}`);
+  const r = await tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML', text: lines.join('\n'),
+    reply_markup: { inline_keyboard: [[{ text: '⏳ Додаю строк у календар…', callback_data: 'cnoop' }]] } });
+  const res = (r && r.result) || {};
+  await env.KV.put('gcal_pending_' + key, JSON.stringify({ key, court: '', chat_id: (res.chat || {}).id,
+    message_id: res.message_id, rec: { kind: 'deadline', number: d.number, date: d.date, title: d.title, note: d.calc } }),
+    { expirationTtl: 60 * 24 * 3600 });
+  const ks = (await env.KV.get('gcal_approved', 'json')) || [];
+  if (!ks.includes(key)) { ks.push(key); await env.KV.put('gcal_approved', JSON.stringify(ks)); }
+  // список строків: без дублів, без тих, що минули понад 30 днів тому
+  const list = (await getDeadlines(env)).filter((x) => x.key !== key && (daysUntil(x.date) ?? 0) >= -30);
+  list.push({ key, number: d.number, date: d.date, title: d.title, note: d.calc });
+  await env.KV.put('court_deadlines', JSON.stringify(list.slice(-200)));
+  await kickGcal(env);
+}
+async function showDeadlines(env, prefix = '') {
+  const list = (await getDeadlines(env)).slice().sort((a, b) => (hearingTs(a.date) || 0) - (hearingTs(b.date) || 0));
+  if (!list.length) {
+    return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+      text: prefix + 'Строків немає.\n\n' + DEADLINE_ASK });
+  }
+  const txt = list.map((x, i) => {
+    const n = daysUntil(x.date);
+    const left = n === null ? '' : n < 0 ? ` · минув ${-n} дн. тому` : n === 0 ? ' · <b>сьогодні</b>' : ` · через ${n} дн.`;
+    return `${i + 1}. <b>${esc(x.date)}</b>${left}\n   ${esc(x.title)} – <code>${esc(x.number)}</code>`;
+  }).join('\n');
+  const rows = list.map((x, i) => [{ text: `🗑 ${i + 1}. ${x.date} ${x.title}`.slice(0, 60), callback_data: `dldel:${x.key}` }]);
+  return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+    text: prefix + `⏳ <b>Процесуальні строки (${list.length})</b>\n\n${txt}\n\n`
+      + '🗑 прибирає строк зі списку бота. Подію в Google Календарі видаліть вручну.',
+    reply_markup: { inline_keyboard: rows } });
+}
+
+// ── Вивантаження даних для застосунку «Мої судові справи» (/export) ──
+// Надсилає в приватний чат JSON-файл: майбутні засідання (адвокат + клієнти),
+// справи під наглядом за номером, список клієнтів і строки.
+async function sendExport(env) {
+  const a = await visibleReport(env, 'advocate');
+  const c = await visibleReport(env, 'clients');
+  const data = {
+    format: 'osadko-court-export', version: 1,
+    exported: new Date().toISOString(), updated: a.updated || c.updated || '',
+    advocate: a.visible, clients: c.visible,
+    tracked: await getCaseNums(env), names: await getNames(env),
+    deadlines: await getDeadlines(env),
+  };
+  const day = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Kyiv' });
+  const fd = new FormData();
+  fd.append('chat_id', String(env.REVIEW_CHAT));
+  fd.append('caption', `Дані для застосунку: засідань ${a.visible.length + c.visible.length}, `
+    + `справ за номером ${data.tracked.length}, строків ${data.deadlines.length}. `
+    + 'Файл містить дані клієнтів – не пересилайте його.');
+  fd.append('document', new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }),
+    `court-export-${day}.json`);
+  const r = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendDocument`,
+    { method: 'POST', body: fd });
+  const j = await r.json().catch(() => ({}));
+  if (!j.ok) {
+    await tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, text: 'Не вдалося надіслати файл експорту. Спробуйте ще раз.' });
+  }
+}
+
 const CASE_ASK = '📌 Надішліть номер справи, напр. <code>757/12345/26-ц</code> або <code>752/1234/25</code>. '
   + 'Бот стежитиме за засіданнями в ній у всіх судах зі списку. Скасувати — /cancel.';
 
@@ -189,6 +311,9 @@ async function setupCommands(env) {
     { command: 'reminders', description: '🔔 Нагадування' },
     { command: 'list', description: '📋 Список клієнтів' },
     { command: 'add', description: '➕ Додати клієнта' },
+    { command: 'strok', description: '⏳ Строк у календар' },
+    { command: 'stroky', description: '⏳ Усі строки' },
+    { command: 'export', description: '📤 Дані для застосунку' },
     { command: 'restart', description: '🔄 Терміновий прогін' },
     { command: 'vs', description: '🔎 Практика судів за темою' },
     { command: 'digest', description: '📰 Свіжа практика зараз' },
@@ -843,6 +968,15 @@ async function handleUpdate(update, env) {
       return startAgent(env, pr.task, mid);
     }
 
+    // --- прибрати процесуальний строк зі списку бота ---
+    if (action === 'dldel') {
+      await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
+      const list = await getDeadlines(env);
+      const gone = list.find((x) => x.key === pid);
+      await env.KV.put('court_deadlines', JSON.stringify(list.filter((x) => x.key !== pid)));
+      return showDeadlines(env, gone ? `🗑 Прибрано: ${esc(gone.title)} (${esc(gone.date)}).\n\n` : '');
+    }
+
     // --- підтвердження додавання клієнтської справи в Google Calendar ---
     if (action === 'gcaladd' || action === 'gcalskip') {
       await tg(env, 'answerCallbackQuery', { callback_query_id: cq.id });
@@ -1071,11 +1205,35 @@ async function handleUpdate(update, env) {
           '/add — ➕ додати клієнта\n' +
           '/track &lt;номер&gt; — 📌 стежити за справою за номером\n/cases — 📁 справи під наглядом\n' +
           '📨 перешліть боту повістку (SUDPOVISTKA, SMS) — справа стане на стеження, засідання — у календар\n' +
+          '/strok &lt;номер&gt; &lt;дата або +N&gt; &lt;що подати&gt; — ⏳ строк у календар\n/stroky — ⏳ усі строки\n' +
+          '/export — 📤 файл із даними для застосунку «Мої судові справи»\n' +
           '/restart — 🔄 терміновий прогін\n' +
           '/vs &lt;тема&gt; — 🔎 практика судів за темою (або кнопка «🔎 Пошук практики»)\n' +
           '/digest — 📰 свіжа практика зараз (щоранку приходить сама)\n' +
           '/agent — 🤖 завдання агенту: надішліть Word/PDF і напишіть, що зробити\n' +
           '/cancel — ↩️ скасувати', reply_markup: courtReplyKb() });
+    }
+
+    // Процесуальні строки та експорт для застосунку
+    if (/^\/(?:stroky|строки|deadlines)$/i.test(body)) {
+      await env.KV.delete('court_await');
+      return showDeadlines(env);
+    }
+    {
+      const dm = body.match(/^\/(?:strok|строк|deadline)(?:\s+([\s\S]*))?$/i);
+      if (dm) {
+        await env.KV.delete('court_await');
+        const d = parseDeadline(dm[1]);
+        if (!d) {
+          return tg(env, 'sendMessage', { chat_id: env.REVIEW_CHAT, parse_mode: 'HTML',
+            text: (dm[1] ? 'Не розібрав строк. Формат:\n\n' : '') + DEADLINE_ASK });
+        }
+        return onDeadline(env, d);
+      }
+    }
+    if (/^\/(?:export|експорт)$/i.test(body)) {
+      await env.KV.delete('court_await');
+      return sendExport(env);
     }
 
     // Стеження за справою за номером: /track 757/12345/26-ц, /cases

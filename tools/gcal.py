@@ -12,6 +12,13 @@
   GCAL_EVENT_HOURS  — тривалість події у годинах, типово 1.
   GCAL_REMINDERS    — попап-нагадування у хвилинах через кому, типово «1440,120»
                       (за добу і за 2 год). «0» або порожньо — без нагадувань.
+  GCAL_DEADLINE_REMINDERS — нагадування про процесуальний строк (подія на весь
+                      день), хвилини до початку дня через кому. Типово «3780,900»:
+                      за 3 дні о 09:00 і напередодні о 09:00.
+
+Крім засідань (add_event), модуль створює події на весь день:
+  add_deadline  — процесуальний строк (команда бота /strok);
+  add_new_case  — позначка «нова справа» в день, коли бот уперше побачив справу.
 
 Ідемпотентність: iCalUID детермінований (номер+дата+суддя+суд), тож повторні
 прогони НЕ дублюють подію — events.import оновлює наявну. Перепризначення на іншу
@@ -20,6 +27,7 @@
 Приватність: у публічні логи НЕ виводимо ПІБ/номери справ — лише знеособлені
 повідомлення про помилки. Дані потрапляють тільки у приватний календар адвоката.
 """
+import datetime
 import hashlib
 import json
 import os
@@ -35,6 +43,10 @@ _TZ = os.environ.get("GCAL_TIMEZONE", "Europe/Kyiv").strip() or "Europe/Kyiv"
 _HOURS = float(os.environ.get("GCAL_EVENT_HOURS", "1") or "1")
 _REMINDERS = [int(x) for x in re.findall(r"\d+",
               os.environ.get("GCAL_REMINDERS", "1440,120")) if int(x) > 0]
+
+_DL_REMINDERS = [int(x) for x in re.findall(r"\d+",
+                 os.environ.get("GCAL_DEADLINE_REMINDERS", "") or "3780,900")
+                 if 0 < int(x) <= 40320]
 
 _TOKEN_URL = "https://oauth2.googleapis.com/token"
 _SCOPE = "https://www.googleapis.com/auth/calendar.events"
@@ -198,6 +210,11 @@ def add_event(court_name, rec):
                               "overrides": [{"method": "popup", "minutes": m}
                                             for m in _REMINDERS]}
 
+    return _import(event, token)
+
+
+def _import(event, token):
+    """events.import: створити або оновити подію за її iCalUID. True/False."""
     url = ("https://www.googleapis.com/calendar/v3/calendars/"
            + urllib.parse.quote(_CAL_ID, safe="") + "/events/import")
     body = json.dumps(event).encode("utf-8")
@@ -216,3 +233,101 @@ def add_event(court_name, rec):
     except Exception as e:
         print("Календар: подію не додано:", str(e)[:60])
         return False
+
+
+def _iso_date(s):
+    """«05.12.2026» або «2026-12-05» → «2026-12-05». None, якщо дати немає."""
+    s = (s or "").strip()
+    m = re.search(r"(\d{4})-(\d{2})-(\d{2})", s)
+    if m:
+        y, mo, d = m.group(1), m.group(2), m.group(3)
+    else:
+        m = re.search(r"(\d{2})\.(\d{2})\.(\d{4})", s)
+        if not m:
+            return None
+        d, mo, y = m.group(1), m.group(2), m.group(3)
+    try:
+        return datetime.date(int(y), int(mo), int(d)).isoformat()
+    except ValueError:
+        return None
+
+
+def today_kyiv():
+    """Сьогоднішня дата за часовим поясом календаря («2026-11-21»)."""
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.datetime.now(ZoneInfo(_TZ)).date().isoformat()
+    except Exception:
+        return (datetime.datetime.utcnow() + datetime.timedelta(hours=2)).date().isoformat()
+
+
+def add_allday(uid_base, summary, date, description="", reminders=None):
+    """Подія на весь день. Ідемпотентна за uid_base. True/False/None(вимкнено
+    або дату не розпізнано)."""
+    if not enabled():
+        return None
+    day = _iso_date(date)
+    if not day:
+        return None
+    token = _access_token()
+    if not token:
+        return False
+    y, mo, d = (int(x) for x in day.split("-"))
+    nxt = (datetime.date(y, mo, d) + datetime.timedelta(days=1)).isoformat()
+    event = {
+        "iCalUID": hashlib.sha1(uid_base.encode("utf-8")).hexdigest()[:24] + "@osadko.online",
+        "summary": summary,
+        "description": description,
+        "start": {"date": day},
+        "end": {"date": nxt},
+        "transparency": "transparent",  # не займає час у календарі
+        "source": {"title": "Бот відстеження справ", "url": "https://osadko.online/"},
+        "reminders": {"useDefault": False,
+                      "overrides": [{"method": "popup", "minutes": m}
+                                    for m in (reminders or [])]},
+    }
+    return _import(event, token)
+
+
+def add_deadline(number, title, due, note=""):
+    """Процесуальний строк: подія на весь день у останній день строку з
+    нагадуваннями заздалегідь (GCAL_DEADLINE_REMINDERS)."""
+    number = (number or "").strip()
+    title = (title or "").strip() or "Процесуальний строк"
+    day = _iso_date(due)
+    if not day:
+        return None
+    desc = ["Останній день строку."]
+    if number:
+        desc.append("Справа: " + number)
+    if note:
+        desc.append("Розрахунок: " + note.strip())
+    summary = "⏳ Строк: " + title + (" – " + number if number else "")
+    return add_allday("deadline|" + number + "|" + day + "|" + title,
+                      summary, day, "\n".join(desc), _DL_REMINDERS)
+
+
+def add_new_case(court_name, rec, day=None, unverified=False):
+    """Позначка «нова справа» в день, коли бот уперше побачив справу. Одна на
+    справу в суді: повторний виклик оновлює ту саму подію, а не створює другу."""
+    number = (rec.get("number") or "").strip()
+    if not number:
+        return None
+    desc = []
+    if court_name:
+        desc.append("Суд: " + court_name)
+    if rec.get("judge"):
+        desc.append("Суддя: " + rec["judge"].strip())
+    if rec.get("involved"):
+        desc.append("Сторони: " + rec["involved"].strip())
+    if rec.get("description"):
+        desc.append("Суть: " + rec["description"].strip())
+    if rec.get("date"):
+        desc.append("Найближче засідання: " + rec["date"].strip())
+    if unverified:
+        # Збіг лише за ПІБ клієнта: можливий тезка, тож просимо перевірити.
+        desc.insert(0, "Знайдено за збігом ПІБ – перевірте, чи це ваш клієнт.")
+    summary = ("🆕 Нова справа " + ("(перевірити) " if unverified else "") + number
+               + (" – " + court_name if court_name else ""))
+    return add_allday("newcase|" + number + "|" + (court_name or ""),
+                      summary, day or today_kyiv(), "\n".join(desc), [])
