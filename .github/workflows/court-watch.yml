@@ -75,8 +75,8 @@ jobs:
           # Що додавати в календар без кнопки підтвердження: own | tracked | all
           # (Settings → Secrets and variables → Actions → Variables → GCAL_AUTO).
           GCAL_AUTO: ${{ vars.GCAL_AUTO || 'tracked' }}
-          # Позначка «🆕 Нова справа» в календарі (0 – вимкнути).
-          GCAL_NEW_CASE: ${{ vars.GCAL_NEW_CASE || '1' }}
+          # Позначка «🆕 Нова справа» в календарі: типово вимкнена (1 – увімкнути).
+          GCAL_NEW_CASE: ${{ vars.GCAL_NEW_CASE || '0' }}
           GCAL_DEADLINE_REMINDERS: ${{ vars.GCAL_DEADLINE_REMINDERS }}
           # Список ПІБ, яким керуєте з Telegram-меню бота (зберігається приватно у
           # Cloudflare Worker KV). Ті самі секрети, що й для миттєвих кнопок каналу.
