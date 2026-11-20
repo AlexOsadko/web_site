@@ -17,7 +17,7 @@
 - `articles/`, `poslugy/`, `kontakty/` — згенеровані сторінки (**не редагувати руками**)
 - `dogovir/` — генератор договорів про надання правничої допомоги
 - `p/` — оплата, `vidguk/` — відгук, `privacy/` — політика конфіденційності,
-  `zrazky/`, `docs/index.html` — допоміжні сторінки
+  `docs/index.html` — конструктор документів
 - `css/site.css` — спільні стилі (темно-синій + білий, заголовки Source Serif 4);
   `css/style.css`, `css/fonts.css` — базові стилі та шрифти
 - `assets/` — `site.js` (спільний скрипт), `chat.js` (чат), `lead-form.js` і
@@ -25,7 +25,7 @@
 - `sitemap.xml`, `robots.txt`, `llms.txt` — генеруються білдером
 - `tools/` — білдер, AI-генерація статей, SEO, скрипти ботів
 - `worker/` — код Cloudflare Workers (боти, заявки, чат)
-- `docs/*.md` — внутрішні нотатки й інструкції
+- `notes/` — внутрішні нотатки й інструкції (на сайт не публікуються, як і `tools/`, `worker/`)
 
 ## Збірка сайту
 
@@ -83,9 +83,8 @@ SEO-теги, OG, JSON-LD (`Article`, `BreadcrumbList`, `FAQPage`), хлібні
 - `court-watch.yml` — відстеження судових справ (щогодини)
 - `vs-practice.yml` — практика судів за запитом
 - `practice-digest.yml` — щоденна добірка практики
-- `court-healthcheck.yml`, `court-probe.yml`, `court-diag.yml` — перевірка й діагностика
+- `court-healthcheck.yml`, `court-diag.yml` — перевірка й діагностика
   джерел судів
-- `gcal-backfill.yml` — разова синхронізація засідань у Google Calendar
 
 ## Секрети
 
