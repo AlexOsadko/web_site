@@ -103,7 +103,8 @@ TIME_BUDGET_MIN = float(os.environ.get("COURT_TIME_BUDGET_MIN", "0") or "0")
 # Решта приходить із кнопкою «📅 Додати в календар», як і раніше.
 GCAL_AUTO = (os.environ.get("GCAL_AUTO", "tracked").strip().lower() or "tracked")
 # Позначка «🆕 Нова справа» в календарі в день, коли бот уперше побачив справу.
-GCAL_NEW_CASE = os.environ.get("GCAL_NEW_CASE", "1").strip() not in ("0", "false", "no", "")
+# Типово вимкнена; вмикається змінною GCAL_NEW_CASE=1.
+GCAL_NEW_CASE = os.environ.get("GCAL_NEW_CASE", "0").strip() not in ("0", "false", "no", "")
 MAX_NEW_CASE_EVENTS = int(os.environ.get("GCAL_NEW_CASE_MAX", "15") or "15")
 
 
