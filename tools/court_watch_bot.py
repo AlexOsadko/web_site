@@ -961,6 +961,29 @@ def build_status_message(court_name, rec, matched):
     return "\n".join(lines)
 
 
+def post_worker_newcase(court_name, rec, reliable):
+    """Передати у Worker нову справу – для списку «Нові справи» у вебзастосунку.
+    Дані йдуть у приватне сховище (KV), у логи нічого не друкуємо. True/False."""
+    if not (WORKER_URL and WORKER_SECRET):
+        return False
+    body = json.dumps({
+        "number": rec.get("number", ""), "court": court_name, "reliable": bool(reliable),
+        "found": time.strftime("%d.%m.%Y", time.gmtime(time.time() + 2 * 3600)),
+        "date": rec.get("date", ""), "judge": rec.get("judge", ""),
+        "involved": rec.get("involved", ""), "description": rec.get("description", ""),
+    }).encode("utf-8")
+    try:
+        req = urllib.request.Request(
+            WORKER_URL.rstrip("/") + "/court_newcase", data=body,
+            headers={"X-Auth-Token": WORKER_SECRET,
+                     "Content-Type": "application/json", "User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            r.read()
+        return True
+    except Exception:
+        return False
+
+
 def _case_hash(number):
     """Знеособлений ключ справи для стану (state.json лежить у відкритому
     репозиторії, тож самих номерів справ туди не пишемо)."""
@@ -1055,22 +1078,27 @@ def main():
         h = _case_hash(rec.get("number", ""))
         if not h or h in known or DRY_RUN:
             return
-        if seed_known or not GCAL_NEW_CASE:
+        if seed_known:
             known[h] = 1
             return
-        if gcal is None or not gcal.enabled():
-            return  # календар не налаштовано: позначимо, коли його ввімкнуть
         if new_case_marked >= MAX_NEW_CASE_EVENTS:
             return  # решта наступним прогоном
-        try:
-            # Надійний збіг: адвокат у сторонах або справа під наглядом за номером.
-            sure = (advocate_matches(rec.get("involved", ""))
-                    or str(who or "").startswith("справа № "))
-            if gcal.add_new_case(court_name, rec, unverified=not sure):
-                known[h] = 1
-                new_case_marked += 1
-        except Exception:
-            print("  Календар: помилка позначки нової справи (пропущено).")
+        # Надійний збіг: адвокат у сторонах або справа під наглядом за номером.
+        sure = (advocate_matches(rec.get("involved", ""))
+                or str(who or "").startswith("справа № "))
+        # Список «Нові справи» у вебзастосунку (Worker) ведеться завжди; позначка
+        # в календарі – лише коли ввімкнено GCAL_NEW_CASE (типово вимкнена).
+        # Справу вважаємо врахованою, якщо вдалося хоча б одне з двох.
+        posted = post_worker_newcase(court_name, rec, sure)
+        marked = False
+        if GCAL_NEW_CASE and gcal is not None and gcal.enabled():
+            try:
+                marked = bool(gcal.add_new_case(court_name, rec, unverified=not sure))
+            except Exception:
+                print("  Календар: помилка позначки нової справи (пропущено).")
+        if posted or marked or not (WORKER_URL and WORKER_SECRET or GCAL_NEW_CASE):
+            known[h] = 1
+            new_case_marked += 1
 
     # Шардинг: цей прогін сканує лише частину судів (решта — наступними прогонами).
     # scanned_ok — назви судів, які цього прогону завантажилися УСПІШНО. Саме їх
@@ -1351,7 +1379,7 @@ def main():
                 print("  Помилка надсилання нагадування.")
         print(f"Нагадувань надіслано: {reminded}")
     if new_case_marked:
-        print(f"Календар: позначок «нова справа» — {new_case_marked}")
+        print(f"Нових справ позначено: {new_case_marked}")
 
     st["last_run"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     if not DRY_RUN:
