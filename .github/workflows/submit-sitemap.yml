@@ -4,7 +4,7 @@ name: Надіслати sitemap у Search Console
 # змінюється (тобто після додавання нової статті). Потребує двох секретів:
 #   GSC_SA_KEY   — JSON-ключ сервісного акаунта Google (доданого власником у GSC)
 #   GSC_SITE_URL — ресурс у GSC (https://osadko.online/ або sc-domain:osadko.online)
-# Налаштування описано в docs/search-console-auto.md.
+# Налаштування описано в notes/search-console-auto.md.
 
 on:
   push:

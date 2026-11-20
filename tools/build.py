@@ -2299,7 +2299,7 @@ def restyle_page(html):
 def restyle_all():
     """Застосовує стиль «E» до всіх сторінок, окрім головної та службових інструментів."""
     files = (glob.glob(os.path.join(ART, "*.html")) + glob.glob(os.path.join(POSLUGY, "*.html"))
-             + [os.path.join(ROOT, d, "index.html") for d in ("kontakty", "vartist", "privacy", "kanal")]
+             + [os.path.join(ROOT, d, "index.html") for d in ("kontakty", "vartist", "privacy")]
              + [os.path.join(ROOT, "404.html")])
     n = 0
     for path in files:
