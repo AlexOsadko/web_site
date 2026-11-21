@@ -463,6 +463,49 @@ body,.side,.field,.card,.box{transition:background-color .2s ease,border-color .
 #app.enter .bar i{animation:grow .7s cubic-bezier(.2,.7,.2,1) .25s both;transform-origin:left center}
 #app.sheet-in .shade{animation:fade .16s ease both}
 #app.sheet-in .sheet{animation:pop .2s cubic-bezier(.2,.7,.2,1) both}
+
+/* ── «Моніторинг»: рядок стану, розкривні секції, журнал прогонів ── */
+.strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;background:var(--grey);border:1px solid var(--line);border-radius:8px;padding:10px 16px;margin-top:16px;font-size:14.5px;color:var(--soft)}
+.strip > i{flex:none;width:10px;height:10px;border-radius:50%;background:var(--ok)}
+.strip.bad > i{background:var(--crit)}
+.strip b{color:var(--head);font-weight:600}
+.strip .btn{margin:0 0 0 auto}
+.folds{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.fold{background:var(--grey);border:1px solid var(--line);border-radius:8px;overflow:hidden;transition:border-color .15s ease}
+.fold.on{border-color:var(--rule)}
+.fh{width:100%;min-height:54px;padding:10px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;cursor:pointer;transition:background-color .15s ease}
+.fh:hover{background:var(--side-on)}
+.fh > b{flex:0 0 200px;font:600 17px/1.2 var(--font-display);color:var(--head)}
+.fh > span{flex:1 1 200px;min-width:0;color:var(--muted);font-size:14.5px}
+.fh > span .ty{margin-right:14px}
+.fh > i{flex:none;font-style:normal;font-size:13.5px;color:var(--link)}
+.fh > i::after{content:" ▾"}
+.fold.on .fh > i::after{content:" ▴"}
+.fb{padding:2px 18px 16px;border-top:1px solid var(--line)}
+.fb .day{margin-top:14px}
+.fb .inline{max-width:560px}
+.grow,.lrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:10px 0;border-bottom:1px solid var(--line)}
+.grow .main,.lrow .main{flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:1px}
+.grow .main b{font-weight:600;color:var(--head)}
+.grow small,.lrow small{color:var(--muted);font-size:13px}
+.gl{flex:0 0 180px;display:flex;align-items:center;gap:10px}
+.gl.wide{flex:2 1 220px}
+.gl .bar{flex:1}
+.lrow .tm{flex:0 0 60px;font:600 19px/1 var(--font-display);color:var(--head);font-variant-numeric:tabular-nums}
+.seg{flex:none;display:inline-flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.seg button{min-height:36px;padding:0 12px;font-size:13.5px;color:var(--muted);text-align:center;transition:background-color .15s ease,color .15s ease}
+.seg button + button{border-left:1px solid var(--rule)}
+.seg button:hover{color:var(--head)}
+.seg button.on{font-weight:600}
+.seg button.on.always{background:var(--ok-soft);color:var(--ok);box-shadow:inset 0 -2px 0 var(--ok)}
+.seg button.on.rotate{background:var(--side-on);color:var(--link);box-shadow:inset 0 -2px 0 var(--acc)}
+.seg button.on.off{background:var(--bg);color:var(--head);box-shadow:inset 0 -2px 0 var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:8px;padding-top:12px}
+.tag{display:inline-flex;align-items:center;gap:2px;padding:0 2px 0 12px;border-radius:16px;background:var(--side-on);border:1px solid var(--rule);font-size:14.5px}
+.tag button{width:30px;height:30px;text-align:center;color:var(--muted);border-radius:50%;font-size:13px}
+.tag button:hover{color:var(--crit)}
+#app.fold-in .fb{animation:rise .22s cubic-bezier(.2,.7,.2,1) both}
+@media (min-width:960px){.mobonly{display:none}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -493,7 +536,7 @@ const TPL={
 };
 const store={get(k){try{return localStorage.getItem(k)||''}catch(_){return ''}},set(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(_){}}};
 const theme={get(){return store.get('cc_theme')},eff(){return this.get()||'dark'},apply(){const t=this.get();if(t)document.documentElement.dataset.theme=t},toggle(){store.set('cc_theme',this.eff()==='dark'?'light':'dark');this.apply()}};theme.apply();
-const S={scan:null,groups:{},lastScan:{},token:store.get('cc_token'),ready:false,busy:false,err:'',updated:'',calendar:false,tab:'today',cid:null,doc:null,filter:'all',q:'',sort:{k:'next',d:1},sheet:null,preset:null,
+const S={scan:null,groups:{},lastScan:{},token:store.get('cc_token'),ready:false,busy:false,err:'',updated:'',calendar:false,tab:'today',cid:null,doc:null,filter:'all',q:'',sort:{k:'next',d:1},sheet:null,preset:null,log:[],mon:(m=>m==='none'?'':(m||'log'))(store.get('cc_mon')),
  calM:new Date(T0.getFullYear(),T0.getMonth(),1),calD:null};
 let C=[],W=[],TR=[],NC=[];const DOCS={},DOC={};
 
@@ -538,7 +581,7 @@ function build(o){
   if(!c.client){const t=c.parties.split(/[,;]/).filter(x=>!/осадьк/i.test(x)).join(',').replace(/\s+/g,' ').replace(/^[\s,]+|[\s,]+$/g,'').trim();c.client=!t?'Справа № '+c.num:t.length<=90?t:t.slice(0,90).replace(/[\s,;:]+\S*$/,'')+'…'}if(!c.court)c.court='Суд не визначено';if(!c.judge)c.judge='не визначено'});
  list.sort((a,b)=>((a.ev[0]||{}).d||9e15)-((b.ev[0]||{}).d||9e15));
  C=list;W=o.names||[];TR=o.tracked||[];NC=o.newCases||[];S.updated=o.updated||'';S.calendar=!!o.calendar;
- S.scan=o.scan||null;S.groups=o.groups||{};S.lastScan=o.lastScan||{};
+ S.scan=o.scan||null;S.groups=o.groups||{};S.lastScan=o.lastScan||{};S.log=o.log||[];
 }
 async function load(quiet){
  if(!quiet){S.busy=true;render()}
@@ -708,15 +751,40 @@ function vDl(){
  <div><h2>Виконано</h2><div class="list">${done.map(x=>dRow(x)).join('')||'<p class="empty">Поки нічого.</p>'}</div></div></div>
  <p class="empty">Рахуються календарні дні. Якщо останній день випав на суботу чи неділю, строк перенесено на понеділок. Святкові дні не враховано.</p>`;
 }
+const SRC={cron:'за розкладом',app:'вручну із застосунку',tg:'вручну з Telegram'};
+const durS=n=>n?`${Math.floor(n/60)} хв ${p2(Math.round(n%60))} с`:'';
+function fold(k,title,sum,body){const on=S.mon===k;return `<section class="fold${on?' on':''}"><button class="fh" data-a="fold" data-v="${k}" aria-expanded="${on}"><b>${title}</b><span>${sum}</span><i>${on?'згорнути':'розгорнути'}</i></button>${on?`<div class="fb">${body}</div>`:''}</section>`}
 function vMon(){
- return `<header class="top"><p class="eyebrow">Кого й що шукає бот</p><h1>Моніторинг</h1></header>
- <div class="duo"><div><h2>Клієнти (${W.length})</h2><div class="list">${W.map(w=>`<div class="row"><span class="main"><b>${esc(w)}</b></span><button class="btn danger sm" data-a="unname" data-v="${esc(w)}">Прибрати</button></div>`).join('')||'<p class="empty">Список порожній.</p>'}</div>
- <form class="inline" data-f="name"><input class="field" id="newname" placeholder="Прізвище Ім'я По батькові" aria-label="ПІБ клієнта" required><button class="btn sm">Додати</button></form></div>
- <div><h2>Справи за номером (${TR.length})</h2><div class="list">${TR.map(n=>`<div class="row"><span class="main"><b class="num">${esc(n)}</b></span><button class="btn danger sm" data-a="untrack" data-v="${esc(n)}">Прибрати</button></div>`).join('')||'<p class="empty">Список порожній.</p>'}</div>
- <form class="inline" data-f="track"><input class="field num" id="newnum" placeholder="757/12345/26-ц" aria-label="Номер справи" required><button class="btn sm">Стежити</button></form></div></div>
- ${vScan()}
- <p class="empty">Бот перевіряє суди за розкладом. Позачерговий прогін охоплює суди «щоразу» і наступну порцію черги, після нього натисніть «Оновити» на екрані «Сьогодні».</p>
- <div class="acts"><button class="btn ghost sm" data-a="scan">Запустити прогін зараз</button><button class="btn ghost sm" data-a="theme">${theme.eff()==='dark'?'Денна тема':'Нічна тема'}</button><button class="btn danger sm" data-a="logout">Вийти</button></div>`;
+ const s=S.scan,gs=(s&&s.groups)||[],own=(s&&s.own)||[],dead=(s&&s.dead_names)||[],L=(S.log||[]).slice().reverse();
+ const rows=GROUPS.filter(([id])=>id!=='other'||gs.some(x=>x.id==='other'&&x.total)).map(g=>({g,m:gmode(g[0]),st:gs.find(x=>x.id===g[0])}));
+ const cntM=m=>rows.filter(x=>x.m===m).length,SEG=[['always','Щоразу'],['rotate','По черзі'],['off','Ні']];
+ const bGroups=`<div>${rows.map(({g:[id,name,hint],m,st})=>`<div class="grow"><span class="main"><b>${name}</b><small>${hint}${st?` · судів: ${st.total}`:''}</small></span><span class="gl">${m==='off'?'<small>вимкнено</small>':st&&st.planned?`<span class="bar" aria-hidden="true"><i style="width:${Math.round(st.ok/st.planned*100)}%"></i></span><span class="num">${st.ok} з ${st.planned}</span>`:'<small>в останньому прогоні не перевірялась</small>'}</span><span class="seg" role="group" aria-label="Режим групи: ${name}">${SEG.map(([v,t])=>`<button class="${v===m?'on '+v:''}" data-a="gmode" data-g="${id}" data-v="${v}" aria-pressed="${v===m}">${t}</button>`).join('')}</span></div>`).join('')}</div>
+ <p class="empty">Щоразу: у кожному прогоні. По черзі: частинами, повне коло за кілька прогонів. Ні: нових справ у цих судах бот не шукатиме. Зміна діє з наступного прогону.</p>`;
+ const dayK=ts=>{const d=new Date(ts*1000);d.setHours(0,0,0,0);return +d},dayL=k=>{const n=Math.round((+T0-k)/864e5);return n===0?'сьогодні':n===1?'вчора':fh(new Date(k))};
+ let prev=null;
+ const bLog=L.length?L.map(e=>{const k=dayK(e.ts),d=new Date(e.ts*1000),h=k!==prev?`<h3 class="day"><b>${dayL(k)}</b></h3>`:'';prev=k;
+  return `${h}<div class="lrow"><b class="tm">${p2(d.getHours())}:${p2(d.getMinutes())}</b><span class="main"><span>${SRC[e.src]||'запуск із GitHub'}${e.full?' · повний прогін':''}</span><small>${durS(e.dur)}</small></span><span class="gl wide"><span class="bar" aria-hidden="true"><i style="width:${e.planned?Math.round(e.ok/e.planned*100):0}%"></i></span><span class="num">${e.ok} з ${e.planned}</span></span>${e.failed?`<small class="wr">не відповіли: ${e.failed}</small>`:''}</div>`}).join('')+'<p class="empty">Час у журналі показує завершення прогону. Зберігаються прогони за останні 7 днів.</p>'
+  :'<p class="empty">Журнал почне наповнюватися з наступного прогону. Попередні прогони в нього не потрапляють.</p>';
+ const today=L.filter(e=>dayK(e.ts)===+T0).length;
+ const few=(a,f)=>a.length?`${a.length}: ${a.slice(0,3).map(f).join(', ')}${a.length>3?` та ще ${a.length-3}`:''}`:'список порожній';
+ const bNames=`<div class="tags">${W.map(w=>`<span class="tag">${esc(w)}<button data-a="unname" data-v="${esc(w)}" aria-label="Прибрати: ${esc(w)}" title="Прибрати">✕</button></span>`).join('')||'<p class="empty">Список порожній.</p>'}</div>
+ <form class="inline" data-f="name"><input class="field" id="newname" placeholder="Прізвище Ім'я По батькові" aria-label="ПІБ клієнта" required><button class="btn sm">Додати</button></form>`;
+ const bNums=`<div class="tags">${TR.map(n=>`<span class="tag num">${esc(n)}<button data-a="untrack" data-v="${esc(n)}" aria-label="Не стежити: ${esc(n)}" title="Прибрати">✕</button></span>`).join('')||'<p class="empty">Список порожній.</p>'}</div>
+ <form class="inline" data-f="track"><input class="field num" id="newnum" placeholder="757/12345/26-ц" aria-label="Номер справи" required><button class="btn sm">Стежити</button></form>`;
+ const bOwn=`<div>${own.map(n=>`<div class="grow"><span class="main"><b>${esc(n)}</b></span><small>${S.lastScan[n]?'перевірено '+fts(S.lastScan[n]):'час перевірки ще не записано'}</small></div>`).join('')||'<p class="empty">Поки порожньо.</p>'}</div>
+ <p class="empty">Суди, де є ваші засідання або справа на стеженні за номером. Перевіряються щоразу, навіть якщо їхню групу вимкнено.</p>`;
+ return `<header class="top"><p class="eyebrow">Кого й де шукає бот</p><h1>Моніторинг</h1></header>
+ <div class="strip${S.err?' bad':''}"><i></i>${S.err?`<span>${esc(S.err)}</span>`:s?`<b>Останній прогін ${fts(s.ts)}</b><span>перевірено ${s.ok} із ${s.planned} судів${s.failed?`, не відповіли ${s.failed}`:''}</span>${!s.full&&s.rotation?`<span>коло ${s.cursor} із ${s.rotation}</span>`:''}<span>наступний ${fts(etaRuns(1)/1000)}</span>`:'<span>Лічильники зʼявляться після першого прогону.</span>'}<button class="btn sm" data-a="scan">Запустити прогін</button></div>
+ <div class="folds">
+ ${fold('log','Журнал прогонів',L.length?`сьогодні: ${today} · останній ${fts(L[0].ts)}${SRC[L[0].src]?', '+SRC[L[0].src]:''}`:'ще порожній',bLog)}
+ ${fold('groups','Групи судів',`<span class="ty" style="--tc:var(--ok)">щоразу: ${cntM('always')}</span><span class="ty" style="--tc:var(--acc)">по черзі: ${cntM('rotate')}</span><span class="ty">вимкнено: ${cntM('off')}</span>`,bGroups)}
+ ${fold('names','Клієнти',few(W,w=>esc(sn(w))),bNames)}
+ ${fold('nums','Справи за номером',few(TR,esc),bNums)}
+ ${fold('own','Суди моїх справ',own.length?`судів: ${own.length}, перевіряються щоразу`:'поки порожньо',bOwn)}
+ ${dead.length?fold('dead','Не відповідають',`судів: ${dead.length}, недоступні кілька прогонів поспіль`,`<p class="empty">${dead.map(esc).join(', ')}</p>`):''}
+ </div>
+ <p class="empty">Після позачергового прогону натисніть «Оновити» на екрані «Сьогодні».</p>
+ <div class="acts mobonly"><button class="btn ghost sm" data-a="theme">${theme.eff()==='dark'?'Денна тема':'Нічна тема'}</button><button class="btn danger sm" data-a="logout">Вийти</button></div>`;
 }
 function sheet(){
  if(!S.sheet)return '';const c=byKey(S.cid);let b='';
@@ -796,14 +864,14 @@ const ICON={today:'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h
 const TABS=[['today','Сьогодні'],['cases','Справи'],['cal','Календар'],['dl','Строки'],['mon','Моніторинг']];
 const VIEWS={today:vToday,cases:vCases,cal:vCal,dl:vDl,mon:vMon};
 const WVIEWS={today:wToday,cases:wCases,cal:vCal,dl:wDl,mon:vMon};
-let lastKey='',lastSheet=null;const SCROLL={};
+let lastKey='',lastSheet=null,lastMon=null;const SCROLL={};
 function render(){
  const app=document.getElementById('app');
  if(!S.token){app.innerHTML=vLogin();return}
  if(!S.ready){app.innerHTML=!S.err?'<div class="login"><div class="row"><span class="spin"></span><span class="main"><small>Завантажую справи</small></span></div></div>':`<div class="login"><p class="err">${esc(S.err)}</p><button class="btn" data-a="reload">Спробувати ще раз</button><button class="btn ghost" data-a="logout">Вийти</button></div>`;return}
  const c=byKey(S.cid),wide=WIDE.matches,tab=c?'cases':S.tab,key=(wide?'w':'m')+tab+'|'+S.cid+'|'+S.doc;
  if(lastKey)SCROLL[lastKey]=[...app.querySelectorAll('.scr,.fill,.agenda,.cal')].map(el=>el.scrollTop);
- app.classList.toggle('enter',key!==lastKey);app.classList.toggle('sheet-in',!!S.sheet&&S.sheet!==lastSheet);lastSheet=S.sheet;lastKey=key;
+ app.classList.toggle('enter',key!==lastKey);app.classList.toggle('sheet-in',!!S.sheet&&S.sheet!==lastSheet);lastSheet=S.sheet;app.classList.toggle('fold-in',key===lastKey&&lastMon!==null&&S.mon!==lastMon);lastMon=S.mon;lastKey=key;
  const badge={dl:dls().filter(x=>left(x.d.due)<=2).length,today:NC.length};
  if(wide){
   const v=c?(S.doc?vDoc(c,S.doc):wCase(c)):WVIEWS[tab]();
@@ -838,6 +906,8 @@ document.addEventListener('click',async e=>{
  else if(a==='open'){openCase(v);return}
  else if(a==='flip'){flip(+v);return}
  else if(a==='theme')theme.toggle();
+ else if(a==='fold'){S.mon=S.mon===v?'':v;store.set('cc_mon',S.mon||'none')}
+ else if(a==='gmode'){await act('groups',{id:b.dataset.g,mode:v},'Режим збережено. Діятиме з наступного прогону.');return}
  else if(a==='sort'){S.sort=S.sort.k===v?{k:v,d:-S.sort.d}:{k:v,d:1}}
  else if(a==='back'){S.cid=null;S.doc=null}
  else if(a==='docback')S.doc=null;
