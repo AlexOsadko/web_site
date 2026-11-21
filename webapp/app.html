@@ -20,6 +20,7 @@
   --bg:#10142a; --grey:#171c36; --text:#dfe3ef; --muted:#a3aac2; --soft:#c5cbe0; --line:#272d4a;
   --head:#ffffff; --fill:#34437f; --fill-h:#40509a; --on-fill:#ffffff; --on-fill-muted:#c9d0ea; --rule:#363d60; --link:#a9b7ea; --acc:#93a4dc;
   --side:#0c1022; --side-on:#1b2140;
+  --t-civ:#7fb2ff; --t-com:#5fd0b8; --t-crim:#f0a898; --t-adm:#e3c07a; --t-admj:#b8a4f0; --t-oth:#a3aac2;
   --crit:#f0a898; --crit-soft:#2a1a1e; --crit-line:#57303a; --warn:#e3c07a; --warn-soft:#2a2619; --ok:#7cc79a; --ok-soft:#14281f;
   --font-display:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
   --font-body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
@@ -34,6 +35,7 @@
   --bg:#ffffff; --grey:#f3f4f7; --text:#222736; --muted:#606779; --soft:#3d4458; --line:#e1e3ea;
   --head:#1b2a6b; --fill:#1b2a6b; --fill-h:#13205a; --on-fill:#ffffff; --on-fill-muted:#c9d0ea; --rule:#c5cad8; --link:#1b2a6b; --acc:#1b2a6b;
   --side:#f3f4f7; --side-on:#e3e6f0;
+  --t-civ:#1f5fbf; --t-com:#0f7a68; --t-crim:#b3402f; --t-adm:#8a5a00; --t-admj:#5b3fb0; --t-oth:#606779;
   --crit:#a1221b; --crit-soft:#fbe9e7; --crit-line:#e9b9b4; --warn:#8a5a00; --warn-soft:#fbf0d6; --ok:#1e6a39; --ok-soft:#e3f2e7;
 }
 *{box-sizing:border-box}
@@ -305,6 +307,7 @@ h2{font:600 17px/1.2 var(--font-display);color:var(--head);border-top:0;padding:
 .date{background:var(--grey);color:var(--head);box-shadow:inset 0 0 0 1px var(--line);border-radius:6px;font-size:12px}
 .date u{border-top-color:var(--line)}
 .own,.row small.hl{color:var(--link)}
+.own.chk1{color:var(--warn)}
 .chip{font:600 12.5px/1 var(--font-display);border-radius:4px}
 .chip.ok{background:transparent;color:var(--soft);box-shadow:inset 0 0 0 1px var(--rule)}
 .chk{border-radius:4px}
@@ -411,6 +414,56 @@ h2{font:600 17px/1.2 var(--font-display);color:var(--head);border-top:0;padding:
   .grid button.sel .evs em{background:var(--grey);color:var(--text);border-left-color:var(--acc)}
   .btn.ghost:hover,.btn.danger:hover{background:var(--side-on)}
 }
+
+/* ── кольори видів справ, більші картки, переходи ── */
+.ty{color:var(--tc,var(--muted));font-weight:600;white-space:nowrap}
+.ty::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:1px}
+.hc{box-shadow:inset 4px 0 0 var(--tc,var(--rule));padding:15px 20px 15px 22px;gap:22px;margin-bottom:10px}
+.hc .tm{flex:0 0 72px;font-size:25px}
+.hc .main{gap:5px}
+.hc .main b{font-size:17px}
+.hc .main small{font-size:14.5px}
+.hc .rt{gap:6px}
+.hc .rt .num{font-size:14.5px}
+.hc .rt small{font-size:14px}
+.nx{box-shadow:inset 4px 0 0 var(--tc,var(--acc));padding:18px 22px 18px 24px}
+.nx .big{font-size:34px}
+.nx b{font-size:17px}
+.wk .on{background:color-mix(in srgb,var(--acc) 13%,var(--grey));border-color:color-mix(in srgb,var(--acc) 38%,var(--line))}
+.wk .dots{display:flex;gap:4px;min-height:7px}
+.wk .dots i{width:7px;height:7px;border-radius:50%;background:var(--tc,var(--acc))}
+.dayh span.r1{color:var(--crit);font-weight:600}
+.dayh span.r7{color:var(--warn);font-weight:600}
+.kv b.a{color:var(--acc)}
+.kv b.y{color:var(--warn)}
+.kv b.g{color:var(--ok)}
+.side nav button.on svg{color:var(--acc)}
+#caselist .tb{font-size:15.5px}
+#caselist .tb td{padding:15px 12px 15px 0}
+#caselist .tb td.num{font-size:14.5px}
+#caselist .tb tr td:first-child{box-shadow:inset 3px 0 0 var(--tc,transparent);padding-left:12px}
+#caselist .tb th:first-child{padding-left:12px}
+.row .main b{font-size:16.5px}
+.row{padding:15px 0}
+
+body,.side,.field,.card,.box{transition:background-color .2s ease,border-color .2s ease,color .2s ease}
+.btn,.side nav button,.sidefoot button,.filters button,.tabs button,.calhead button,.grid button,.row,.tb tbody tr,.hc,.nx,.wk div,.chk,.lnk,.navbar button{transition:background-color .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease,transform .15s ease,opacity .15s ease}
+.hc:hover,.nx:hover{border-color:var(--acc);transform:translateY(-1px)}
+.hc:active,.nx:active,.btn:active{transform:scale(.985)}
+.wk div:hover{border-color:var(--rule)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:none}}
+#app.enter .scr > *{animation:rise .24s cubic-bezier(.2,.7,.2,1) both}
+#app.enter .scr > *:nth-child(2){animation-delay:.03s}
+#app.enter .scr > *:nth-child(3){animation-delay:.06s}
+#app.enter .scr > *:nth-child(n+4){animation-delay:.09s}
+#app.enter .hc,#app.enter .dayh,#app.enter .cf,#app.enter .box,#app.enter .wk div{animation:rise .28s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(.08s + var(--i,0)*.028s)}
+#app.enter .bar i{animation:grow .7s cubic-bezier(.2,.7,.2,1) .25s both;transform-origin:left center}
+#app.sheet-in .shade{animation:fade .16s ease both}
+#app.sheet-in .sheet{animation:pop .2s cubic-bezier(.2,.7,.2,1) both}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -471,7 +524,7 @@ function build(o){
   c.court=c.court||it.court||'';c.judge=c.judge||it.judge||'';c.parties=c.parties||it.involved||'';c.subj=c.subj||it.description||'';
   if(c.type==='oth')c.type=typeOf(it.forma,it.number,it.description,it.court,it.involved);
   const m=String(it.matched||'');if(m&&!m.startsWith('справа №'))c.client=m;
-  if(src==='adv')c.role='ваша справа';
+  if(src==='adv')c.role='я у справі';
   const d=/(\d{2})\.(\d{2})\.(\d{4})(?:\D+(\d{1,2}):(\d{2}))?/.exec(it.date||'');
   if(d){const dt=new Date(+d[3],+d[2]-1,+d[1]),tm=d[4]?p2(+d[4])+':'+d[5]:'';
    const sure=src!=='cli'||m.startsWith('справа №');
@@ -584,8 +637,8 @@ function caseList(){
  const r=listCases();
  if(!r.length)return `<p class="empty">${C.length?'Нічого не знайдено. Перевірте номер або прізвище.':'Справ поки немає. Додайте клієнтів чи номери справ у «Моніторингу».'}</p>`;
  if(!WIDE.matches)return r.map(cRow).join('');
- return tbl([['№ справи','12%','num'],['Клієнт / сторони','25%','client'],['Вид','10%','type'],['Суд','21%','court'],['Суддя','11%','judge'],['Засідання','12%','next'],['Строк','9%','dl']],
-  r.map(c=>{const h=nextH(c),d=nextD(c);return `<tr data-a="open" data-v="${esc(c.key)}">${cell(c.num,'num')}<td class="b" title="${esc(c.parties||c.client)}">${c.role?'<span class="own">моя</span> ':''}${esc(sn(c.client))}</td>${cell(TYPES[c.type],'m')}${cell(sc(c.court))}${cell(sn(c.judge),'m')}<td>${h?`${fdS(h.d)}${h.tm?' · '+h.tm:''}`:'<span class="m" style="color:var(--muted)">не призначено</span>'}</td><td>${d?`<span style="color:var(--${left(d.due)<=2?'crit':left(d.due)<=7?'warn':'text'})" title="${esc(d.t)}">${fd(d.due)}</span>`:''}</td></tr>`}));
+ return tbl([['№ справи','12%','num'],['Клієнт / сторони','23%','client'],['Вид','13%','type'],['Суд','20%','court'],['Суддя','11%','judge'],['Засідання','12%','next'],['Строк','9%','dl']],
+  r.map(c=>{const h=nextH(c),d=nextD(c);return `<tr style="--tc:var(--t-${c.type})" data-a="open" data-v="${esc(c.key)}">${cell(c.num,'num')}<td class="b" title="${esc(c.parties||c.client)}">${c.role?'':`<span class="own${c.tracked?'':' chk1'}" title="${c.tracked?'Ви стежите за цією справою за номером':'Бот знайшов справу за ПІБ клієнта, а не за вашим прізвищем. Можливий збіг імен: перевірте, чи це ваш клієнт'}">${c.tracked?'стежу':'перевірити'}</span> `}${esc(sn(c.client))}</td><td><span class="ty">${TYPES[c.type]}</span></td>${cell(sc(c.court))}${cell(sn(c.judge),'m')}<td>${h?`${fdS(h.d)}${h.tm?' · '+h.tm:''}`:'<span class="m" style="color:var(--muted)">не призначено</span>'}</td><td>${d?`<span style="color:var(--${left(d.due)<=2?'crit':left(d.due)<=7?'warn':'text'})" title="${esc(d.t)}">${fd(d.due)}</span>`:''}</td></tr>`}));
 }
 function vCases(){
  return `<header class="top"><p class="eyebrow">${C.length} у роботі</p><h1>Справи</h1></header>
@@ -636,7 +689,7 @@ function vCal(){
  let cells='';
  for(let i=0;i<off;i++)cells+='<span></span>';
  for(let i=1;i<=n;i++){const d=new Date(y,m,i),g=days.get(+d),hh=g&&g.hs.length,dd=g&&g.ds.length;
-  cells+=`<button class="${+d===+T0?'today ':''}${S.calD&&+d===+S.calD?'sel':''}" data-a="calday" data-v="${+d}" aria-label="${fh(d)}${hh?', засідань: '+hh:''}${dd?', строків: '+dd:''}">${i}${hh||dd?`<i class="${hh&&dd?'both':dd?'d':''}"></i><span class="evs">${g.hs.slice(0,3).map(x=>`<em>${x.e.tm?x.e.tm+' ':''}${esc(x.c.client)}</em>`).join('')}${g.ds.slice(0,2).map(x=>`<em class="d">${esc(x.d.t)}</em>`).join('')}${g.hs.length+g.ds.length>5?`<em>ще ${g.hs.length+g.ds.length-5}</em>`:''}</span>`:''}</button>`}
+  cells+=`<button class="${+d===+T0?'today ':''}${S.calD&&+d===+S.calD?'sel':''}" data-a="calday" data-v="${+d}" aria-label="${fh(d)}${hh?', засідань: '+hh:''}${dd?', строків: '+dd:''}">${i}${hh||dd?`<i class="${hh&&dd?'both':dd?'d':''}"></i><span class="evs">${g.hs.slice(0,3).map(x=>`<em style="border-left-color:var(--t-${x.c.type})">${x.e.tm?x.e.tm+' ':''}${esc(x.c.client)}</em>`).join('')}${g.ds.slice(0,2).map(x=>`<em class="d">${esc(x.d.t)}</em>`).join('')}${g.hs.length+g.ds.length>5?`<em>ще ${g.hs.length+g.ds.length-5}</em>`:''}</span>`:''}</button>`}
  const cur=y===T0.getFullYear()&&m===T0.getMonth();
  const list=[...days.values()].sort((a,b)=>a.d-b.d).filter(g=>!S.calD||+g.d===+S.calD);
  const rel=d=>{const k=left(d);return k===0?'сьогодні':k===1?'завтра':k>0?`через ${k} дн.`:`${-k} дн. тому`};
@@ -694,21 +747,21 @@ function wToday(){
  const rel=d=>{const k=left(d);return k===0?'сьогодні':k===1?'завтра':`через ${k} дн.`};
  const cnt=n=>n===0?'вільно':n+' засід.';
  const pct=(a,b)=>b?Math.max(2,Math.min(100,Math.round(a/b*100))):0;
- const week=[...Array(7)].map((_,i)=>{const d=new Date(T0.getFullYear(),T0.getMonth(),T0.getDate()+i);return {d,n:hs.filter(h=>+h.e.d===+d).length}});
+ const week=[...Array(7)].map((_,i)=>{const d=new Date(T0.getFullYear(),T0.getMonth(),T0.getDate()+i);const hh=hs.filter(h=>+h.e.d===+d);return {d,n:hh.length,hh}});
  const days=[];hs.forEach(h=>{const g=days[days.length-1];if(g&&+g.d===+h.e.d)g.hs.push(h);else days.push({d:h.e.d,hs:[h]})});
  const room=e=>(e.rm||'').replace('зал/каб. ','зал ');
  const warn='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17.5v.5"/></svg>';
- const cf7=cf.filter(([a])=>left(a.e.d)<=7).length;
+ const cf7=cf.filter(([a])=>left(a.e.d)<=7).length;let ord=0;
  return `<header class="top"><p class="eyebrow">${fh(T0)}</p><h1>Сьогодні</h1></header>
- <div class="tg-top">${nx?`<button class="nx" data-a="open" data-v="${esc(nx.c.key)}"><span class="lb">Наступне засідання</span><span class="big">${left(nx.e.d)<=1?rel(nx.e.d):fdS(nx.e.d)}${nx.e.tm?', '+nx.e.tm:''}</span><b title="${esc(nx.c.parties||nx.c.client)}">${esc(sn(nx.c.client))}</b><small>${esc(sc(nx.e.court||nx.c.court))}${nx.e.rm?', '+esc(room(nx.e)):''}</small></button>`:`<div class="nx"><span class="lb">Наступне засідання</span><span class="big">немає</span><small>Засідань не знайдено.</small></div>`}
- <div class="wk">${week.map(({d,n},i)=>`<div class="${i?'':'now '}${n?'on':''}"><small>${i?WD[d.getDay()]:'сьогодні'}</small><b>${d.getDate()}</b><span title="Засідань: ${n}">${cnt(n)}</span></div>`).join('')}</div></div>
- <div class="today3"><div class="fill">${days.map(g=>{const c2=cf.filter(([a])=>+a.e.d===+g.d);
-  return `<h2 class="dayh"><b>${WDF[g.d.getDay()]}, ${g.d.getDate()} ${MG[g.d.getMonth()]}${g.d.getFullYear()===T0.getFullYear()?'':' '+g.d.getFullYear()}</b><span>${rel(g.d)}</span></h2>
+ <div class="tg-top">${nx?`<button class="nx" style="--tc:var(--t-${nx.c.type})" data-a="open" data-v="${esc(nx.c.key)}"><span class="lb">Наступне засідання</span><span class="big">${left(nx.e.d)<=1?rel(nx.e.d):fdS(nx.e.d)}${nx.e.tm?', '+nx.e.tm:''}</span><b title="${esc(nx.c.parties||nx.c.client)}">${esc(sn(nx.c.client))}</b><small><span class="ty">${TYPES[nx.c.type]}</span> · ${esc(sc(nx.e.court||nx.c.court))}${nx.e.rm?', '+esc(room(nx.e)):''}</small></button>`:`<div class="nx"><span class="lb">Наступне засідання</span><span class="big">немає</span><small>Засідань не знайдено.</small></div>`}
+ <div class="wk">${week.map(({d,n,hh},i)=>`<div class="${i?'':'now '}${n?'on':''}" style="--i:${i}"><small>${i?WD[d.getDay()]:'сьогодні'}</small><b>${d.getDate()}</b><span title="Засідань: ${n}">${cnt(n)}</span><span class="dots" aria-hidden="true">${hh.slice(0,6).map(h=>`<i style="--tc:var(--t-${h.c.type})"></i>`).join('')}</span></div>`).join('')}</div></div>
+ <div class="today3"><div class="fill">${days.map(g=>{const c2=cf.filter(([a])=>+a.e.d===+g.d),k=left(g.d);
+  return `<h2 class="dayh"><b>${WDF[g.d.getDay()]}, ${g.d.getDate()} ${MG[g.d.getMonth()]}${g.d.getFullYear()===T0.getFullYear()?'':' '+g.d.getFullYear()}</b><span class="${k<=1?'r1':k<=7?'r7':''}">${rel(g.d)}</span></h2>
   ${c2.length?`<div class="cf">${warn}<span><b>Накладка.</b> ${c2.map(([a,b])=>`${a.e.tm} ${esc(sc(a.e.court||a.c.court))} і ${b.e.tm} ${esc(sc(b.e.court||b.c.court))}`).join('; ').replace(/\.$/,'')}. Подайте клопотання про відкладення або участь у режимі відеоконференції.</span></div>`:''}
-  ${g.hs.map(({c,e})=>`<button class="hc" data-a="open" data-v="${esc(c.key)}"><span class="tm">${e.tm||'–'}</span><span class="main"><b title="${esc(c.parties||c.client)}">${esc(sn(c.client))}</b><small>${esc(sc(e.court||c.court))}${e.sure?'':' <span class="wr">· збіг за ПІБ, перевірте</span>'}</small></span><span class="rt"><span class="num">${esc(c.num)}</span><small>${esc(room(e))}</small></span></button>`).join('')}`}).join('')||'<p class="empty">Засідань не знайдено.</p>'}</div>
+  ${g.hs.map(({c,e})=>`<button class="hc" style="--tc:var(--t-${c.type});--i:${Math.min(ord++,14)}" data-a="open" data-v="${esc(c.key)}"><span class="tm">${e.tm||'–'}</span><span class="main"><b title="${esc(c.parties||c.client)}">${esc(sn(c.client))}</b><small><span class="ty">${TYPES[c.type]}</span> · ${esc(sc(e.court||c.court))}${c.judge&&c.judge!=='не визначено'?' · суддя '+esc(sn(c.judge)):''}${e.sure?'':' <span class="wr">· збіг за ПІБ, перевірте</span>'}</small></span><span class="rt"><span class="num">${esc(c.num)}</span><small>${esc(room(e))}</small></span></button>`).join('')}`}).join('')||'<p class="empty">Засідань не знайдено.</p>'}</div>
  <div class="fill">
  ${NC.length?`<h2>Нові справи</h2>${NC.map(n=>`<div class="card"><b><span class="num">${esc(n.number)}</span></b><p>${esc(sc(n.court))}</p>${n.involved?`<p>${esc(sn(n.involved))}</p>`:''}<p>Бот знайшов ${esc(n.found)}${n.date?'. Засідання '+esc(n.date):''}</p>${n.reliable?'':'<p class="wr">Збіг лише за ПІБ – перевірте, чи це ваш клієнт.</p>'}<div class="acts">${byKey(caseKey(n.number))?`<button class="btn ghost sm" data-a="open" data-v="${esc(caseKey(n.number))}">Відкрити справу</button>`:''}<button class="btn ghost sm" data-a="ncdone" data-v="${esc(n.key)}">Переглянуто</button></div></div>`).join('')}`:''}
- <div class="box"><h2>Найближчі 7 днів</h2><div class="kv"><span>Засідання</span><b>${hs.filter(h=>left(h.e.d)<=7).length}</b></div><div class="kv"><span>Накладки</span><b class="${cf7?'w':''}">${cf7}</b></div><div class="kv"><span>Процесуальні строки</span><b class="${hot.length?'w':''}">${hot.length}</b></div><div class="kv"><span>Нові справи</span><b>${NC.length}</b></div></div>
+ <div class="box"><h2>Найближчі 7 днів</h2><div class="kv"><span>Засідання</span><b class="a">${hs.filter(h=>left(h.e.d)<=7).length}</b></div><div class="kv"><span>Накладки</span><b class="${cf7?'w':''}">${cf7}</b></div><div class="kv"><span>Процесуальні строки</span><b class="${hot.length?'y':''}">${hot.length}</b></div><div class="kv"><span>Нові справи</span><b class="${NC.length?'g':''}">${NC.length}</b></div></div>
  <div class="box"><h2>Строки на цьому тижні</h2>${hot.length?`<div class="list">${hot.map(x=>dRow(x)).join('')}</div>`:'<p class="empty">Найближчі 7 днів без строків.</p>'}</div>
  <div class="box"><div class="kv"><h2>Моніторинг судів</h2><small>${s?fts(s.ts):esc(S.updated||'')}</small></div>
  ${S.err?`<p class="err">${esc(S.err)}</p>`:''}
@@ -743,13 +796,14 @@ const ICON={today:'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h
 const TABS=[['today','Сьогодні'],['cases','Справи'],['cal','Календар'],['dl','Строки'],['mon','Моніторинг']];
 const VIEWS={today:vToday,cases:vCases,cal:vCal,dl:vDl,mon:vMon};
 const WVIEWS={today:wToday,cases:wCases,cal:vCal,dl:wDl,mon:vMon};
-let lastKey='';const SCROLL={};
+let lastKey='',lastSheet=null;const SCROLL={};
 function render(){
  const app=document.getElementById('app');
  if(!S.token){app.innerHTML=vLogin();return}
  if(!S.ready){app.innerHTML=!S.err?'<div class="login"><div class="row"><span class="spin"></span><span class="main"><small>Завантажую справи</small></span></div></div>':`<div class="login"><p class="err">${esc(S.err)}</p><button class="btn" data-a="reload">Спробувати ще раз</button><button class="btn ghost" data-a="logout">Вийти</button></div>`;return}
  const c=byKey(S.cid),wide=WIDE.matches,tab=c?'cases':S.tab,key=(wide?'w':'m')+tab+'|'+S.cid+'|'+S.doc;
- if(lastKey)SCROLL[lastKey]=[...app.querySelectorAll('.scr,.fill,.agenda,.cal')].map(el=>el.scrollTop);lastKey=key;
+ if(lastKey)SCROLL[lastKey]=[...app.querySelectorAll('.scr,.fill,.agenda,.cal')].map(el=>el.scrollTop);
+ app.classList.toggle('enter',key!==lastKey);app.classList.toggle('sheet-in',!!S.sheet&&S.sheet!==lastSheet);lastSheet=S.sheet;lastKey=key;
  const badge={dl:dls().filter(x=>left(x.d.due)<=2).length,today:NC.length};
  if(wide){
   const v=c?(S.doc?vDoc(c,S.doc):wCase(c)):WVIEWS[tab]();
