@@ -287,6 +287,9 @@ button.row:active,.row button.main:active{background:var(--grey)}
   .btn:hover{background:var(--fill-h)}
   .btn.ghost:hover,.btn.danger:hover{background:var(--grey)}
 }
+.gsel{flex:none;width:auto;max-width:46%;border-right:1px solid var(--line);padding:9px 10px;font-size:14px;-webkit-appearance:menulist;appearance:auto}
+details.dead{margin-top:16px}
+details.dead summary{cursor:pointer;color:var(--muted);font-size:14.5px}
 </style>
 </head>
 <body>
@@ -316,7 +319,7 @@ const TPL={
 };
 const store={get(k){try{return localStorage.getItem(k)||''}catch(_){return ''}},set(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(_){}}};
 const theme={get(){return store.get('cc_theme')},eff(){return this.get()||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')},apply(){const t=this.get();if(t)document.documentElement.dataset.theme=t},toggle(){store.set('cc_theme',this.eff()==='dark'?'light':'dark');this.apply()}};theme.apply();
-const S={token:store.get('cc_token'),ready:false,busy:false,err:'',updated:'',calendar:false,tab:'today',cid:null,doc:null,filter:'all',q:'',sort:{k:'next',d:1},sheet:null,preset:null,
+const S={scan:null,groups:{},lastScan:{},token:store.get('cc_token'),ready:false,busy:false,err:'',updated:'',calendar:false,tab:'today',cid:null,doc:null,filter:'all',q:'',sort:{k:'next',d:1},sheet:null,preset:null,
  calM:new Date(T0.getFullYear(),T0.getMonth(),1),calD:null};
 let C=[],W=[],TR=[],NC=[];const DOCS={},DOC={};
 
@@ -361,6 +364,7 @@ function build(o){
   if(!c.client){const t=c.parties.split(/[,;]/).filter(x=>!/осадьк/i.test(x)).join(',').replace(/\s+/g,' ').replace(/^[\s,]+|[\s,]+$/g,'').trim();c.client=!t?'Справа № '+c.num:t.length<=90?t:t.slice(0,90).replace(/[\s,;:]+\S*$/,'')+'…'}if(!c.court)c.court='Суд не визначено';if(!c.judge)c.judge='не визначено'});
  list.sort((a,b)=>((a.ev[0]||{}).d||9e15)-((b.ev[0]||{}).d||9e15));
  C=list;W=o.names||[];TR=o.tracked||[];NC=o.newCases||[];S.updated=o.updated||'';S.calendar=!!o.calendar;
+ S.scan=o.scan||null;S.groups=o.groups||{};S.lastScan=o.lastScan||{};
 }
 async function load(quiet){
  if(!quiet){S.busy=true;render()}
@@ -415,7 +419,30 @@ const dateBox=(d,tm)=>`<span class="date"><b>${d.getDate()}</b>${MS[d.getMonth()
 const hRow=({c,e},link=true)=>`<${link?'button data-a="open" data-v="'+esc(c.key)+'"':'div'} class="row">${dateBox(e.d,e.tm)}<span class="main">${link?`<b class="clamp">${esc(c.client)}</b><small><span class="num">${esc(c.num)}</span></small><small>${esc(e.court||c.court)}${e.rm?', '+esc(e.rm):''}</small>`:`<b>${esc(e.court||c.court)}</b>${e.rm?`<small>${esc(e.rm)}</small>`:''}<small>${fh(e.d)}${e.src==='man'?' · додано вручну або з документа':''}</small>`}${e.sure?'':'<small class="wr">Збіг лише за ПІБ – перевірте</small>'}</span>${chip(left(e.d))}</${link?'button':'div'}>`;
 const dRow=({c,d},showCase=true)=>`<div class="row${d.done?' done':''}"><button class="chk${d.done?' on':''}" data-a="dldone" data-v="${esc(d.key)}" aria-label="Позначити строк виконаним"></button><button class="main" data-a="open" data-v="${esc(c.key)}"><b>${esc(d.t)}</b><small>до ${fd(d.due)}${d.b?' · '+esc(d.b):''}</small>${showCase?`<small><span class="num">${esc(c.num)}</span> · ${esc(c.client)}</small>`:''}</button>${d.done?'':chip(left(d.due))}</div>`;
 const cRow=c=>{const h=c.ev.find(e=>left(e.d)>=0);return `<button class="row${S.cid===c.key?' cur':''}" data-a="open" data-v="${esc(c.key)}"><span class="main"><b class="clamp">${esc(c.client)}</b><small><span class="num">${esc(c.num)}</span> · ${TYPES[c.type]}${c.role?` · <span class="own">${esc(c.role)}</span>`:''}</small>${c.subj?`<small class="clamp">${esc(c.subj)}</small>`:''}<small class="${h?'hl':''}">${h?`Засідання ${fd(h.d)}${h.tm?' о '+h.tm:''}`:'Засідання не призначено'}</small></span></button>`};
-const fresh=()=>`<div class="fresh${S.err?' bad':''}"><i></i><span>${S.err?esc(S.err):`Бот оновив перелік ${S.updated?esc(S.updated):'(час невідомий)'}. Дату й час засідання звіряйте з ЄСІТС.`}</span><button class="btn ghost sm" data-a="reload"${S.busy?' disabled':''}>Оновити</button></div>`;
+const GROUPS=[['kyiv','Київ і Київська область','районні та міськрайонні суди'],['gen_n','Загальні суди: Північ','Житомирська, Сумська, Чернігівська області'],['gen_w','Загальні суди: Захід','Волинська, Закарпатська, Івано-Франківська, Львівська, Рівненська, Тернопільська, Хмельницька, Чернівецька області'],['gen_s','Загальні суди: Південь','Запорізька, Миколаївська, Одеська, Херсонська області'],['gen_e','Загальні суди: Схід','Дніпропетровська, Донецька, Луганська, Харківська області'],['gen_c','Загальні суди: Центр','Вінницька, Кіровоградська, Полтавська, Черкаська області'],['app','Апеляційні суди','загальні апеляційні суди всіх областей'],['adm','Адміністративні суди','окружні та апеляційні'],['gos','Господарські суди','місцеві та апеляційні'],['other','Інші суди','поза переліком груп']];
+const GMODES=[['always','Щоразу'],['rotate','По черзі'],['off','Не перевіряти']];
+const gmode=id=>S.groups[id]||(id==='kyiv'?'always':'rotate');
+const fts=ts=>{if(!ts)return '';const d=new Date(ts*1000);return `${p2(d.getDate())}.${p2(d.getMonth()+1)} ${p2(d.getHours())}:${p2(d.getMinutes())}`};
+const nruns=n=>n+' '+(n%10===1&&n%100!==11?'прогін':(n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'прогони':'прогонів'));
+function etaRuns(n){const t=new Date();t.setMinutes(17,0,0);if(t<=new Date())t.setHours(t.getHours()+1);for(let g=0;g<400;g++){const h=t.getHours();if(h>=7&&h<=20){n--;if(n<=0)break}t.setHours(t.getHours()+1)}return t}
+const scanShort=()=>S.scan?`Прогін ${fts(S.scan.ts)}: перевірено ${S.scan.ok} з ${S.scan.planned} судів`:'';
+const cycleShort=()=>S.scan&&!S.scan.full&&S.scan.rotation?`Коло: ${S.scan.cursor} з ${S.scan.rotation}`:'';
+function scanLine(){const s=S.scan;if(!s)return '';return `Останній прогін ${fts(s.ts)}: перевірено ${s.ok} з ${s.planned} судів`+(s.failed?`, не відповіли ${s.failed}`:'')+(s.dead?`, пропущено як недоступні ${s.dead}`:'')+(s.cut?`, не встиг ${s.cut}`:'')+'.'}
+function cycleLine(){const s=S.scan;if(!s)return '';if(s.full)return 'Це був повний прогін: усі суди за раз.';if(!s.rotation)return '';const n=Math.ceil(Math.max(0,s.rotation-s.cursor)/(s.shard||70));return `Коло: пройдено ${s.cursor} з ${s.rotation} судів, що йдуть по черзі. До кінця кола ${nruns(n)}, приблизно до ${fts(etaRuns(n)/1000)}.`}
+function scanInfo(c){if(!S.scan)return '';const tc=S.scan.tracked_courts||{};let n=c.court&&c.court!=='Суд не визначено'?c.court:'';if(!n){const k=Object.keys(tc).find(x=>caseKey(x)===c.key);n=k?tc[k]:''}
+ const ts=n&&S.lastScan[n];
+ return `<div><dt>Перевірка</dt><dd>${ts?'Суд перевірено '+fts(ts):(n?esc(n)+': час перевірки ще не записано':'Суд цієї справи бот ще не визначив. Це станеться, коли до суду дійде черга.')}</dd></div>`}
+function vScan(){
+ const s=S.scan,gs=(s&&s.groups)||[],own=(s&&s.own)||[],dead=(s&&s.dead_names)||[];
+ return `<h2>Перевірка судів</h2><p class="empty">${s?esc(scanLine()+' '+cycleLine()):'Лічильники з\'являться після першого прогону оновленого бота.'}</p>
+ <div class="duo"><div><h2>Групи судів</h2><div class="list">${GROUPS.map(([id,name,hint])=>{const g=gs.find(x=>x.id===id);if(id==='other'&&!(g&&g.total))return '';const m=gmode(id);
+  return `<div class="row"><span class="main"><b>${name}</b><small>${hint}${g?` · судів: ${g.total}`:''}${g&&g.planned?` · останній прогін: ${g.ok} з ${g.planned}`:''}</small></span><select class="field gsel" data-g="${id}" aria-label="Режим групи: ${name}">${GMODES.map(([v,t])=>`<option value="${v}"${v===m?' selected':''}>${t}</option>`).join('')}</select></div>`}).join('')}</div>
+ <p class="empty">Щоразу: у кожному прогоні. По черзі: частинами, повне коло за кілька прогонів. Не перевіряти: нових справ у цих судах бот не шукатиме. Зміна діє з наступного прогону.</p></div>
+ <div><h2>Суди ваших справ (${own.length})</h2><div class="list">${own.map(n=>`<div class="row"><span class="main"><b>${esc(n)}</b><small>${S.lastScan[n]?'перевірено '+fts(S.lastScan[n]):'час перевірки ще не записано'}</small></span></div>`).join('')||'<p class="empty">Поки порожньо.</p>'}</div>
+ <p class="empty">Суди, де є ваші засідання або справа на стеженні за номером. Перевіряються щоразу, навіть якщо їхню групу вимкнено.</p>
+ ${dead.length?`<details class="dead"><summary>Не відповідають кілька прогонів поспіль (${dead.length})</summary><p class="empty">${dead.map(esc).join(', ')}</p></details>`:''}</div></div>`;
+}
+const fresh=()=>`<div class="fresh${S.err?' bad':''}"><i></i><span>${S.err?esc(S.err):`Бот оновив перелік ${S.updated?esc(S.updated):'(час невідомий)'}. ${scanShort()?esc(scanShort())+'. ':''}Дату й час засідання звіряйте з ЄСІТС.`}</span><button class="btn ghost sm" data-a="reload"${S.busy?' disabled':''}>Оновити</button></div>`;
 
 // ── екрани ──
 function vLogin(){
@@ -454,7 +481,7 @@ function vCase(c){
  const up=c.ev.filter(e=>left(e.d)>=0),D=DOCS[c.key]||{};
  return `<button class="back" data-a="back">‹ Назад</button>
  <header class="top"><p class="eyebrow"><span class="num">№ ${esc(c.num)}</span> · ${TYPES[c.type]}</p><h1>${esc(c.client)}</h1>${c.subj?`<p class="eyebrow">${esc(c.subj)}</p>`:''}</header>
- <div class="cols2"><div class="k-a"><dl class="meta"><div><dt>Суд</dt><dd>${esc(c.court)}</dd></div><div><dt>Суддя</dt><dd>${esc(c.judge)}</dd></div>${c.parties?`<div><dt>Сторони</dt><dd>${esc(c.parties)}</dd></div>`:''}</dl>
+ <div class="cols2"><div class="k-a"><dl class="meta"><div><dt>Суд</dt><dd>${esc(c.court)}</dd></div><div><dt>Суддя</dt><dd>${esc(c.judge)}</dd></div>${scanInfo(c)}${c.parties?`<div><dt>Сторони</dt><dd>${esc(c.parties)}</dd></div>`:''}</dl>
  <div class="acts"><button class="btn ghost sm" data-a="copy" data-v="${esc(c.key)}">Скопіювати реквізити</button><button class="btn ghost sm" data-a="sheet" data-v="hear">Додати засідання</button></div>
  <h2>Засідання</h2><div class="list">${up.map(e=>hRow({c,e},false)+(e.src==='cli'&&!e.sure?`<button class="btn ghost sm" data-a="gcal" data-v="${c.ev.indexOf(e)}">Це мій клієнт – додати в календар</button>`:'')).join('')||'<p class="empty">Не призначено. Щойно дата з\'явиться на сайті суду, бот її знайде.</p>'}</div></div>
  <div class="k-b"><h2>Документи суду${D.rows?` (${D.rows.length})`:''}</h2><div class="list">${(D.rows||[]).map(d=>docRow(c,d)).join('')}
@@ -513,7 +540,8 @@ function vMon(){
  <form class="inline" data-f="name"><input class="field" id="newname" placeholder="Прізвище Ім'я По батькові" aria-label="ПІБ клієнта" required><button class="btn sm">Додати</button></form></div>
  <div><h2>Справи за номером (${TR.length})</h2><div class="list">${TR.map(n=>`<div class="row"><span class="main"><b class="num">${esc(n)}</b></span><button class="btn danger sm" data-a="untrack" data-v="${esc(n)}">Прибрати</button></div>`).join('')||'<p class="empty">Список порожній.</p>'}</div>
  <form class="inline" data-f="track"><input class="field num" id="newnum" placeholder="757/12345/26-ц" aria-label="Номер справи" required><button class="btn sm">Стежити</button></form></div></div>
- <h2>Перевірка судів</h2><p class="empty">Бот перевіряє суди за розкладом кілька разів на добу. Позачерговий прогін триває кілька хвилин, після нього натисніть «Оновити» на екрані «Сьогодні».</p>
+ ${vScan()}
+ <p class="empty">Бот перевіряє суди за розкладом. Позачерговий прогін охоплює суди «щоразу» і наступну порцію черги, після нього натисніть «Оновити» на екрані «Сьогодні».</p>
  <div class="acts"><button class="btn ghost sm" data-a="scan">Запустити прогін зараз</button><button class="btn ghost sm" data-a="theme">${theme.eff()==='dark'?'Денна тема':'Нічна тема'}</button><button class="btn danger sm" data-a="logout">Вийти</button></div>`;
 }
 function sheet(){
@@ -562,7 +590,7 @@ function navBar(c,docBack){
 function wCase(c){
  const up=c.ev.filter(e=>left(e.d)>=0),D=DOCS[c.key]||{};
  return `${navBar(c,false)}<header class="top"><p class="eyebrow"><span class="num">№ ${esc(c.num)}</span> · ${TYPES[c.type]}${c.role?' · '+esc(c.role):''}${c.tracked?' · стеження за номером':''}</p><h1 title="${esc(c.parties||c.client)}">${esc(sn(c.client))}</h1>${c.subj?`<p class="eyebrow" title="${esc(c.subj)}">${esc(c.subj)}</p>`:''}</header>
- <div class="two"><div class="fill"><dl class="meta"><div><dt>Суд</dt><dd>${esc(c.court)}</dd></div><div><dt>Суддя</dt><dd>${esc(c.judge)}</dd></div>${c.parties?`<div><dt>Сторони</dt><dd>${esc(c.parties)}</dd></div>`:''}</dl>
+ <div class="two"><div class="fill"><dl class="meta"><div><dt>Суд</dt><dd>${esc(c.court)}</dd></div><div><dt>Суддя</dt><dd>${esc(c.judge)}</dd></div>${scanInfo(c)}${c.parties?`<div><dt>Сторони</dt><dd>${esc(c.parties)}</dd></div>`:''}</dl>
  <div class="acts"><button class="btn ghost sm" data-a="copy" data-v="${esc(c.key)}">Скопіювати реквізити</button><button class="btn ghost sm" data-a="sheet" data-v="hear">Додати засідання</button><button class="btn ghost sm" data-a="sheet" data-v="dl">Розрахувати строк</button>${c.tracked?`<button class="btn danger sm" data-a="untrack" data-v="${esc(c.num)}">Не стежити за номером</button>`:`<button class="btn ghost sm" data-a="track" data-v="${esc(c.num)}">Стежити за номером</button>`}</div>
  <h2>Засідання</h2>${up.length?tbl([['Дата','20%'],['Час','10%'],['Суд','30%'],['Зал','10%'],['Через','12%'],['','18%']],up.map(e=>`<tr><td>${fdS(e.d)}</td><td class="b">${e.tm||'–'}</td>${cell(sc(e.court||c.court))}${cell((e.rm||'').replace('зал/каб. ',''),'m')}<td class="act">${chip(left(e.d))}</td><td class="act">${e.src==='cli'&&!e.sure?`<button class="btn ghost" data-a="gcal" data-v="${c.ev.indexOf(e)}" title="Збіг лише за ПІБ. Якщо це ваш клієнт, додайте засідання в календар">У календар</button>`:''}</td></tr>`)):'<p class="empty">Не призначено. Щойно дата з\'явиться на сайті суду, бот її знайде.</p>'}
  <h2>Процесуальні строки</h2>${c.dl.length?tbl([['','8%'],['Останній день','26%'],['Що подаємо','40%'],['Через','16%'],['','10%']],c.dl.map(d=>`<tr class="${d.done?'done':''}"><td class="act"><button class="chk${d.done?' on':''}" data-a="dldone" data-v="${esc(d.key)}" aria-label="Позначити строк виконаним"></button></td><td>${fdS(d.due)}</td><td class="b" title="${esc(d.t+(d.b?' · '+d.b:''))}">${esc(d.t)}</td><td class="act">${d.done?'виконано':chip(left(d.due))}</td><td class="act"><button class="x" data-a="dldel" data-v="${esc(d.key)}" aria-label="Видалити строк" title="Видалити строк">✕</button></td></tr>`)):'<p class="empty">Строків немає.</p>'}</div>
@@ -588,7 +616,7 @@ function render(){
   const v=c?(S.doc?vDoc(c,S.doc):wCase(c)):WVIEWS[tab]();
   app.innerHTML=`<aside class="side"><div class="brand"><b>Мої судові справи</b><small>Адвокат Осадько О.О.</small></div>
    <nav>${TABS.map(([k,t])=>`<button class="${tab===k?'on':''}" data-a="tab" data-v="${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg><span>${t}</span>${badge[k]?`<em>${badge[k]}</em>`:''}</button>`).join('')}</nav>
-   <div class="sidefoot"><small>${S.err?esc(S.err):'Бот оновив перелік '+esc(S.updated||'(час невідомий)')}</small><button data-a="reload"${S.busy?' disabled':''}>Оновити дані</button><button data-a="scan">Запустити прогін</button><button data-a="theme">${theme.eff()==='dark'?'Денна тема':'Нічна тема'}</button><button data-a="logout">Вийти</button></div></aside>
+   <div class="sidefoot"><small>${S.err?esc(S.err):'Бот оновив перелік '+esc(S.updated||'(час невідомий)')+(S.scan?'<br>'+esc(scanShort())+(cycleShort()?'<br>'+esc(cycleShort()):''):'')}</small><button data-a="reload"${S.busy?' disabled':''}>Оновити дані</button><button data-a="scan">Запустити прогін</button><button data-a="theme">${theme.eff()==='dark'?'Денна тема':'Нічна тема'}</button><button data-a="logout">Вийти</button></div></aside>
    <div class="mainarea"><section class="scr pane${tab==='mon'||(c&&S.doc)?' free':''}">${v}</section></div>${sheet()}`;
  }else{
   const v=c?(S.doc?vDoc(c,S.doc):vCase(c)):VIEWS[S.tab]();
@@ -649,6 +677,7 @@ document.addEventListener('click',async e=>{
  render();
 });
 document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;document.getElementById('caselist').innerHTML=caseList()}});
+document.addEventListener('change',async e=>{const g=e.target&&e.target.dataset?e.target.dataset.g:'';if(!g)return;await act('groups',{id:g,mode:e.target.value},'Режим збережено. Діятиме з наступного прогону.')});
 document.addEventListener('submit',async e=>{
  e.preventDefault();const f=e.target.dataset.f,c=byKey(S.cid),val=id=>{const el=document.getElementById(id);return el?el.value.trim():''};
  if(f==='login'){S.busy=true;S.err='';const pw=val('pw');render();
