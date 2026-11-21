@@ -142,6 +142,131 @@ ADVOCATE_ALIASES = [a.strip() for a in os.environ.get(
     if a.strip()]
 
 
+def kyiv_now_str():
+    """Поточний час за Києвом «дд.мм.рррр гг:хв» (з урахуванням літнього/зимового часу)."""
+    try:
+        from zoneinfo import ZoneInfo
+        import datetime as _dt
+        return _dt.datetime.now(ZoneInfo("Europe/Kyiv")).strftime("%d.%m.%Y %H:%M")
+    except Exception:
+        return time.strftime("%d.%m.%Y %H:%M", time.gmtime(time.time() + 2 * 3600))
+
+
+# ───────────────────────── групи судів ─────────────────────────
+# Кожна група має режим: always (щоразу), rotate (по черзі, шардами) або off
+# (не перевіряти). Режими задаються у вебзастосунку (Worker KV) і приходять через
+# /court_cfg. Суди, де вже є засідання адвоката/клієнтів або справа під наглядом
+# за номером («суди ваших справ»), скануються ЩОРАЗУ незалежно від режиму групи.
+GROUPS = [
+    ("kyiv", "Київ і Київська область"),
+    ("gen_n", "Загальні суди: Північ"),
+    ("gen_w", "Загальні суди: Захід"),
+    ("gen_s", "Загальні суди: Південь"),
+    ("gen_e", "Загальні суди: Схід"),
+    ("gen_c", "Загальні суди: Центр"),
+    ("app", "Апеляційні суди"),
+    ("adm", "Адміністративні суди"),
+    ("gos", "Господарські суди"),
+    ("other", "Інші суди"),
+]
+GROUP_DEFAULT = {"kyiv": "always"}   # решта груп типово — rotate
+_REGION_OF = {
+    "10": "kyiv", "26": "kyiv",
+    "06": "gen_n", "18": "gen_n", "25": "gen_n",
+    "03": "gen_w", "07": "gen_w", "09": "gen_w", "13": "gen_w", "17": "gen_w",
+    "19": "gen_w", "22": "gen_w", "24": "gen_w",
+    "08": "gen_s", "14": "gen_s", "15": "gen_s", "21": "gen_s",
+    "04": "gen_e", "05": "gen_e", "12": "gen_e", "20": "gen_e",
+    "02": "gen_c", "11": "gen_c", "16": "gen_c", "23": "gen_c",
+}
+
+
+def court_group(court):
+    """Група суду: спеціалізація за назвою, інакше регіон за першими цифрами коду."""
+    name = (court.get("name") or "").lower()
+    if "адміністративн" in name:
+        return "adm"
+    if "господарськ" in name:
+        return "gos"
+    if "апеляційн" in name:
+        return "app"
+    code = str(court.get("code") or "").strip()
+    if not code.isdigit():
+        return "other"
+    return _REGION_OF.get(code.zfill(4)[:2], "other")
+
+
+def group_modes(cfg_groups):
+    """Режими всіх груп: задані у Worker поверх типових."""
+    modes = {gid: GROUP_DEFAULT.get(gid, "rotate") for gid, _ in GROUPS}
+    for gid, mode in (cfg_groups or {}).items():
+        if gid in modes and mode in ("always", "rotate", "off"):
+            modes[gid] = mode
+    return modes
+
+
+def fetch_worker_cfg():
+    """Налаштування прогону з Worker: режими груп і «суди ваших справ».
+    Старий Worker (без /court_cfg) → ({}, None): працюємо з типовими режимами."""
+    if not (WORKER_URL and WORKER_SECRET):
+        return {}, None
+    try:
+        req = urllib.request.Request(
+            WORKER_URL.rstrip("/") + "/court_cfg",
+            headers={"X-Auth-Token": WORKER_SECRET, "User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            data = json.loads(r.read().decode("utf-8"))
+        groups = data.get("groups") if isinstance(data.get("groups"), dict) else {}
+        own = data.get("own_courts")
+        return groups, ([str(x) for x in own] if isinstance(own, list) else None)
+    except Exception as e:
+        print("Налаштування груп із Worker недоступні (типові режими):", str(e)[:60])
+        return {}, None
+
+
+def post_worker_stats(stats):
+    """Статистика прогону для вебзастосунку (лічильники, без персональних даних)."""
+    if not (WORKER_URL and WORKER_SECRET):
+        return
+    try:
+        req = urllib.request.Request(
+            WORKER_URL.rstrip("/") + "/court_stats",
+            data=json.dumps(stats).encode("utf-8"),
+            headers={"X-Auth-Token": WORKER_SECRET, "Content-Type": "application/json",
+                     "User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            r.read()
+    except Exception as e:
+        print("Не вдалося зберегти статистику прогону:", str(e)[:60])
+
+
+def _case_prefix(num):
+    """Перші цифри ядра номера справи («204» для 204/14022/26) — код суду у номері."""
+    core = _case_core(num)
+    return core.split("/")[0] if core else ""
+
+
+def learn_prefix(prefix_map, court, records):
+    """Запам'ятати, який префікс номерів справ належить суду першої інстанції
+    (апеляційні пропускаємо: там номери чужих судів). Потрібен переконливий збіг."""
+    if "апеляційн" in (court.get("name") or "").lower():
+        return
+    code = str(court.get("code") or "").strip()
+    if not code:
+        return
+    cnt = {}
+    for rec in records:
+        pfx = _case_prefix(rec.get("number", ""))
+        if pfx:
+            cnt[pfx] = cnt.get(pfx, 0) + 1
+    total = sum(cnt.values())
+    if total < 5:
+        return
+    top = max(cnt, key=cnt.get)
+    if cnt[top] / total >= 0.6:
+        prefix_map[top] = code
+
+
 def post_worker_report(items, kind="advocate", scanned=None):
     """Зберегти у Worker (KV) звіт (advocate|clients) для перегляду з меню.
 
@@ -152,7 +277,7 @@ def post_worker_report(items, kind="advocate", scanned=None):
         return
     body = {
         "kind": kind,
-        "updated": time.strftime("%d.%m.%Y %H:%M", time.gmtime(time.time() + 3 * 3600)),
+        "updated": kyiv_now_str(),
         "count": len(items),
         "items": items[:300],
     }
@@ -1109,9 +1234,37 @@ def main():
     scanned_ok = []
     t_start = time.time()
     fails = st.setdefault("court_fail", {})  # код суду → {"n": поспіль невдач, "ts": остання спроба}
-    priority = [c for c in courts if is_priority(c)]
-    rotation = [c for c in courts if not is_priority(c)]
+    # ── План обходу: групи судів, «суди ваших справ», шардинг ──
+    cfg_groups, own_names = fetch_worker_cfg()
+    modes = group_modes(cfg_groups)
+    if own_names is None and not DRY_RUN:
+        # Старий Worker: беремо суди з накопичених звітів (майбутні засідання).
+        own_names = [it.get("court", "") for it in
+                     fetch_worker_cases("advocate") + fetch_worker_cases("clients")]
+    own_set = {n for n in (own_names or []) if n}
+    # Суд справи під наглядом за номером — за вивченим префіксом номера.
+    prefix_map = st.setdefault("case_prefix", {})
+    own_codes = {prefix_map[p] for p in (_case_prefix(t) for t in tracked) if p in prefix_map}
+
+    def _code(c):
+        return str(c.get("code") or "").strip()
+
+    def own_court(c):
+        return c["name"] in own_set or (_code(c) and _code(c) in own_codes)
+
+    def is_prio(c):
+        if own_court(c):
+            return True
+        g = modes.get(court_group(c), "rotate")
+        return g == "always" or (g != "off" and _code(c).zfill(4) in PRIORITY_CODES)
+
+    active = [c for c in courts if own_court(c) or modes.get(court_group(c), "rotate") != "off"]
+    priority = [c for c in active if is_prio(c)]
+    rotation = [c for c in active if not is_prio(c)]
     courts_to_scan = priority + rotation
+    shard_mode = False
+    cur = 0
+    wrapped = False
     # Ручна перевірка окремих судів: COURT_ONLY_CODES="4824,4811" — без шардингу.
     only = {c.strip().zfill(4) for c in os.environ.get("COURT_ONLY_CODES", "").split(",")
             if c.strip()}
@@ -1119,25 +1272,34 @@ def main():
         courts_to_scan = [c for c in courts if str(c.get("code") or "").zfill(4) in only]
         print(f"Лише вибрані суди: {len(courts_to_scan)}")
     elif SHARD_SIZE > 0 and len(rotation) > SHARD_SIZE:
+        shard_mode = True
         cur = int(st.get("shard_cursor", 0)) % len(rotation)
         end = cur + SHARD_SIZE
         shard = rotation[cur:end]
         if end > len(rotation):                    # перенос через кінець списку
             shard = shard + rotation[:end - len(rotation)]
+        wrapped = end >= len(rotation)
         st["shard_cursor"] = end % len(rotation)
+        if cur == 0 or "cycle_started" not in st:
+            st["cycle_started"] = int(time.time())
         courts_to_scan = priority + shard
-        print(f"Пріоритетні (Київ і область): {len(priority)} · шард: {len(shard)} "
+        print(f"Щоразу: {len(priority)} (з них суди ваших справ: "
+              f"{sum(1 for c in priority if own_court(c))}) · шард: {len(shard)} "
               f"судів (позиція {cur}), наступний курсор {st['shard_cursor']}; "
-              f"повне коло за {-(-len(rotation)//SHARD_SIZE)} прогонів")
+              f"повне коло за {-(-len(rotation)//SHARD_SIZE)} прогонів · "
+              f"вимкнено груп: {sum(1 for m in modes.values() if m == 'off')}")
     else:
-        print(f"Повний прогін: пріоритетні {len(priority)} + решта {len(rotation)}")
+        print(f"Повний прогін: щоразу {len(priority)} + решта {len(rotation)}")
+    outcome = {}   # назва суду → ok | fail | dead (для статистики у застосунку)
+    reached = 0    # скільки судів зі списку цього прогону опрацьовано
 
     # Спершу обробляємо клієнтські справи, які адвокат підтвердив кнопкою у боті
     # (Worker тримає чергу) — додаємо їх у Google Calendar і позначаємо «✅».
     drain_gcal_approved()
 
     skipped_dead = 0
-    for court in courts_to_scan:
+    for idx, court in enumerate(courts_to_scan):
+        reached = idx
         url = csz_url_for(court)
         if not url:
             continue
@@ -1147,9 +1309,10 @@ def main():
             break
         code = str(court.get("code") or court["name"])
         f = fails.get(code)
-        if (not only and not is_priority(court) and f and f.get("n", 0) >= DEAD_AFTER
+        if (not only and not is_prio(court) and f and f.get("n", 0) >= DEAD_AFTER
                 and time.time() - f.get("ts", 0) < DEAD_RETRY_DAYS * 86400):
             skipped_dead += 1
+            outcome[court["name"]] = "dead"
             continue
         try:
             if court.get("kind") == "kas":
@@ -1159,9 +1322,12 @@ def main():
         except Exception as e:
             print(f"[{court['name']}] помилка завантаження: {e}")
             fails[code] = {"n": (f or {}).get("n", 0) + 1, "ts": int(time.time())}
+            outcome[court["name"]] = "fail"
             continue
         fails.pop(code, None)
         scanned_ok.append(court["name"])  # суд завантажився — його справи актуальні
+        outcome[court["name"]] = "ok"
+        learn_prefix(prefix_map, court, records)
         time.sleep(REQUEST_PAUSE)  # ввічлива пауза між судами
 
         # Окремо: справи, де фігурує сам адвокат (для перегляду з меню).
@@ -1272,6 +1438,7 @@ def main():
             # підтвердження кнопкою (їх обробляє drain_gcal_approved).
         if sent >= MAX_ALERTS:
             print("  Досягнуто ліміту сповіщень за запуск — решта наступного разу.")
+            reached = idx + 1
             break
 
         # ── (Експериментально) автопризначення «Призначено склад суду» ──
@@ -1308,6 +1475,15 @@ def main():
                         time.sleep(0.5)
                 except Exception:
                     print("  Помилка надсилання сповіщення (статус).")
+
+    else:
+        reached = len(courts_to_scan)
+    # Прогін обірвано (ліміт часу або сповіщень): курсор повертаємо на перший
+    # неопрацьований суд шарда, щоб він не чекав ціле коло.
+    if shard_mode and reached < len(courts_to_scan):
+        done_in_shard = max(0, reached - len(priority))
+        st["shard_cursor"] = (cur + done_in_shard) % len(rotation)
+        wrapped = wrapped and st["shard_cursor"] < cur
 
     # Звіти «справи адвоката» і «справи клієнтів» (майбутні, за датою, без дублів).
     # Worker зливає ЛИШЕ справи успішно завантажених судів (scanned_ok); решту
@@ -1382,8 +1558,52 @@ def main():
         print(f"Нових справ позначено: {new_case_marked}")
 
     st["last_run"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    if shard_mode and wrapped:
+        st["cycle_done"] = int(time.time())
     if not DRY_RUN:
         save_state(st)
+        if not only:
+            names_by_gid = dict(GROUPS)
+            gstat = {gid: {"id": gid, "name": names_by_gid[gid], "mode": modes[gid], "total": 0,
+                           "planned": 0, "ok": 0, "fail": 0} for gid, _ in GROUPS}
+            for c in courts:
+                gstat[court_group(c)]["total"] += 1
+            for c in courts_to_scan:
+                g = gstat[court_group(c)]
+                g["planned"] += 1
+                res = outcome.get(c["name"])
+                if res == "ok":
+                    g["ok"] += 1
+                elif res == "fail":
+                    g["fail"] += 1
+            code_name = {str(c.get("code") or "").strip(): c["name"] for c in courts}
+            tracked_courts = {t: code_name.get(prefix_map.get(_case_prefix(t), ""), "")
+                              for t in tracked}
+            dead_names = [c["name"] for c in courts
+                          if (fails.get(str(c.get("code") or c["name"])) or {}).get("n", 0) >= DEAD_AFTER]
+            post_worker_stats({
+                "ts": int(time.time()),
+                "updated": kyiv_now_str(),
+                "duration": int(time.time() - t_start),
+                "full": not shard_mode,
+                "planned": len(courts_to_scan),
+                "ok": len(scanned_ok),
+                "failed": sum(1 for v in outcome.values() if v == "fail"),
+                "dead": skipped_dead,
+                "cut": max(0, len(courts_to_scan) - reached),
+                "always": len(priority),
+                "own": sorted(c["name"] for c in priority if own_court(c)),
+                "rotation": len(rotation),
+                "shard": SHARD_SIZE if shard_mode else len(rotation),
+                "cursor": st.get("shard_cursor", 0) if shard_mode else len(rotation),
+                "wrapped": bool(wrapped) or not shard_mode,
+                "cycle_started": st.get("cycle_started", 0),
+                "cycle_done": st.get("cycle_done", 0),
+                "groups": [g for g in gstat.values() if g["total"]],
+                "scanned": scanned_ok,
+                "dead_names": dead_names,
+                "tracked_courts": tracked_courts,
+            })
     note = " (перший запуск — зафіксовано поточні засідання)" if first_time else ""
     if DRY_RUN:
         print(f"DRY-RUN: нових збігів усього: {total_new} (нічого не надіслано){note}")
