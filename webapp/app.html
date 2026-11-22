@@ -310,6 +310,11 @@ h2{font:600 17px/1.2 var(--font-display);color:var(--head);border-top:0;padding:
 .own.chk1{color:var(--warn)}
 .chip{font:600 12.5px/1 var(--font-display);border-radius:4px}
 .chip.ok{background:transparent;color:var(--soft);box-shadow:inset 0 0 0 1px var(--rule)}
+.chip.gdone{display:inline-block;background:var(--ok-soft);color:var(--ok);box-shadow:inset 0 0 0 1px var(--ok);padding:7px 10px}
+.wrapcells .tb td{white-space:normal;overflow:visible;overflow-wrap:anywhere}
+.wrapcells .tb td.act{white-space:nowrap}
+.chip.gwait{display:inline-block;background:var(--warn-soft);color:var(--warn);padding:7px 10px}
+.list > .chip.gdone,.list > .chip.gwait{align-self:flex-start;margin:0 0 14px}
 .chk{border-radius:4px}
 .filters button{font:500 14.5px/1 var(--font-display)}
 .filters button.on{color:var(--head);border-bottom-color:var(--acc)}
@@ -536,7 +541,7 @@ const TPL={
 };
 const store={get(k){try{return localStorage.getItem(k)||''}catch(_){return ''}},set(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(_){}}};
 const theme={get(){return store.get('cc_theme')},eff(){return this.get()||'dark'},apply(){const t=this.get();if(t)document.documentElement.dataset.theme=t},toggle(){store.set('cc_theme',this.eff()==='dark'?'light':'dark');this.apply()}};theme.apply();
-const S={scan:null,groups:{},lastScan:{},token:store.get('cc_token'),ready:false,busy:false,err:'',updated:'',calendar:false,tab:'today',cid:null,doc:null,filter:'all',q:'',sort:{k:'next',d:1},sheet:null,preset:null,log:[],mon:(m=>m==='none'?'':(m||'log'))(store.get('cc_mon')),
+const S={scan:null,groups:{},lastScan:{},token:store.get('cc_token'),ready:false,busy:false,err:'',updated:'',calendar:false,tab:'today',cid:null,doc:null,filter:'all',q:'',sort:{k:'next',d:1},sheet:null,preset:null,log:[],gcal:{},mon:(m=>m==='none'?'':(m||'log'))(store.get('cc_mon')),
  calM:new Date(T0.getFullYear(),T0.getMonth(),1),calD:null};
 let C=[],W=[],TR=[],NC=[];const DOCS={},DOC={};
 
@@ -581,7 +586,7 @@ function build(o){
   if(!c.client){const t=c.parties.split(/[,;]/).filter(x=>!/осадьк/i.test(x)).join(',').replace(/\s+/g,' ').replace(/^[\s,]+|[\s,]+$/g,'').trim();c.client=!t?'Справа № '+c.num:t.length<=90?t:t.slice(0,90).replace(/[\s,;:]+\S*$/,'')+'…'}if(!c.court)c.court='Суд не визначено';if(!c.judge)c.judge='не визначено'});
  list.sort((a,b)=>((a.ev[0]||{}).d||9e15)-((b.ev[0]||{}).d||9e15));
  C=list;W=o.names||[];TR=o.tracked||[];NC=o.newCases||[];S.updated=o.updated||'';S.calendar=!!o.calendar;
- S.scan=o.scan||null;S.groups=o.groups||{};S.lastScan=o.lastScan||{};S.log=o.log||[];
+ S.scan=o.scan||null;S.groups=o.groups||{};S.lastScan=o.lastScan||{};S.log=o.log||[];S.gcal=o.gcal||{};
 }
 async function load(quiet){
  if(!quiet){S.busy=true;render()}
@@ -614,6 +619,15 @@ const sn=t=>ORG.reduce((x,[re,v])=>x.replace(re,v),String(t||'')).replace(/([А-
 const sc=t=>String(t||'').replace(/міськрайонний суд/i,'міськрайсуд').replace(/районний суд/i,'райсуд').replace(/міський суд/i,'міськсуд').replace(/\sміста\s/,' м. ').replace(/області/,'обл.');
 const cell=(v,cls)=>`<td${cls?` class="${cls}"`:''} title="${esc(v)}">${esc(v)}</td>`;
 const tbl=(cols,rows)=>`<div class="tw"><table class="tb"><colgroup>${cols.map(c=>`<col style="width:${c[1]}">`).join('')}</colgroup><thead><tr>${cols.map(c=>c[2]?`<th class="s${S.sort.k===c[2]?(S.sort.d>0?' up':' dn'):''}" data-a="sort" data-v="${c[2]}" title="Сортувати">${c[0]}</th>`:`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+const gid=(n,d)=>{const m=/(\d{2})\.(\d{2})\.(\d{4})(?:\D+(\d{1,2}):(\d{2}))?/.exec(String(d||''));return String(n||'').toLowerCase().replace(/\s+/g,'')+'|'+(m?`${m[1]}.${m[2]}.${m[3]}|${m[4]?p2(+m[4])+':'+m[5]:''}`:'')};
+const rmS=e=>(e.rm||'').replace('зал/каб. ','').replace(/^кабінет\s*/i,'каб. ');
+function gcalBtn(c,e,long){
+ if(!(e.src==='cli'&&!e.sure))return '';
+ const st=S.gcal[gid((e.raw||{}).number||c.num,(e.raw||{}).date)];
+ if(st==='done')return `<span class="chip gdone" title="Засідання додано в Google Календар">✓ ${long?'додано в календар':'додано'}</span>`;
+ if(st==='queued')return `<span class="chip gwait" title="Засідання в черзі. Зазвичай зʼявляється в календарі за хвилину-дві">додається…</span>`;
+ return `<button class="btn ghost${long?' sm':''}" data-a="gcal" data-v="${c.ev.indexOf(e)}" title="Збіг лише за ПІБ. Якщо це ваш клієнт, додайте засідання в календар">${long?'Це мій клієнт – додати в календар':'У календар'}</button>`;
+}
 const nextH=c=>c.ev.find(e=>left(e.d)>=0);
 const nextD=c=>c.dl.filter(d=>!d.done).sort((a,b)=>a.due-b.due)[0];
 function listCases(){
@@ -700,7 +714,7 @@ function vCase(c){
  <header class="top"><p class="eyebrow"><span class="num">№ ${esc(c.num)}</span> · ${TYPES[c.type]}</p><h1>${esc(c.client)}</h1>${c.subj?`<p class="eyebrow">${esc(c.subj)}</p>`:''}</header>
  <div class="cols2"><div class="k-a"><dl class="meta"><div><dt>Суд</dt><dd>${esc(c.court)}</dd></div><div><dt>Суддя</dt><dd>${esc(c.judge)}</dd></div>${scanInfo(c)}${c.parties?`<div><dt>Сторони</dt><dd>${esc(c.parties)}</dd></div>`:''}</dl>
  <div class="acts"><button class="btn ghost sm" data-a="copy" data-v="${esc(c.key)}">Скопіювати реквізити</button><button class="btn ghost sm" data-a="sheet" data-v="hear">Додати засідання</button></div>
- <h2>Засідання</h2><div class="list">${up.map(e=>hRow({c,e},false)+(e.src==='cli'&&!e.sure?`<button class="btn ghost sm" data-a="gcal" data-v="${c.ev.indexOf(e)}">Це мій клієнт – додати в календар</button>`:'')).join('')||'<p class="empty">Не призначено. Щойно дата з\'явиться на сайті суду, бот її знайде.</p>'}</div></div>
+ <h2>Засідання</h2><div class="list">${up.map(e=>hRow({c,e},false)+gcalBtn(c,e,true)).join('')||'<p class="empty">Не призначено. Щойно дата з\'явиться на сайті суду, бот її знайде.</p>'}</div></div>
  <div class="k-b"><h2>Документи суду${D.rows?` (${D.rows.length})`:''}</h2><div class="list">${(D.rows||[]).map(d=>docRow(c,d)).join('')}
  ${D.loading?'<div class="row"><span class="spin"></span><span class="main"><small>Шукаю в реєстрі судових рішень</small></span></div>':''}
  ${D.err?`<p class="err">${esc(D.err)}</p><a class="btn ghost sm" href="https://reyestr.court.gov.ua/" target="_blank" rel="noopener">Відкрити пошук у реєстрі</a>`:''}
@@ -817,7 +831,7 @@ function wToday(){
  const pct=(a,b)=>b?Math.max(2,Math.min(100,Math.round(a/b*100))):0;
  const week=[...Array(7)].map((_,i)=>{const d=new Date(T0.getFullYear(),T0.getMonth(),T0.getDate()+i);const hh=hs.filter(h=>+h.e.d===+d);return {d,n:hh.length,hh}});
  const days=[];hs.forEach(h=>{const g=days[days.length-1];if(g&&+g.d===+h.e.d)g.hs.push(h);else days.push({d:h.e.d,hs:[h]})});
- const room=e=>(e.rm||'').replace('зал/каб. ','зал ');
+ const room=e=>{const r=rmS(e);return !r?'':/^каб\./.test(r)?r:'зал '+r};
  const warn='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17.5v.5"/></svg>';
  const cf7=cf.filter(([a])=>left(a.e.d)<=7).length;let ord=0;
  return `<header class="top"><p class="eyebrow">${fh(T0)}</p><h1>Сьогодні</h1></header>
@@ -852,7 +866,7 @@ function wCase(c){
  return `${navBar(c,false)}<header class="top"><p class="eyebrow"><span class="num">№ ${esc(c.num)}</span> · ${TYPES[c.type]}${c.role?' · '+esc(c.role):''}${c.tracked?' · стеження за номером':''}</p><h1 title="${esc(c.parties||c.client)}">${esc(sn(c.client))}</h1>${c.subj?`<p class="eyebrow" title="${esc(c.subj)}">${esc(c.subj)}</p>`:''}</header>
  <div class="two"><div class="fill"><dl class="meta"><div><dt>Суд</dt><dd>${esc(c.court)}</dd></div><div><dt>Суддя</dt><dd>${esc(c.judge)}</dd></div>${scanInfo(c)}${c.parties?`<div><dt>Сторони</dt><dd>${esc(c.parties)}</dd></div>`:''}</dl>
  <div class="acts"><button class="btn ghost sm" data-a="copy" data-v="${esc(c.key)}">Скопіювати реквізити</button><button class="btn ghost sm" data-a="sheet" data-v="hear">Додати засідання</button><button class="btn ghost sm" data-a="sheet" data-v="dl">Розрахувати строк</button>${c.tracked?`<button class="btn danger sm" data-a="untrack" data-v="${esc(c.num)}">Не стежити за номером</button>`:`<button class="btn ghost sm" data-a="track" data-v="${esc(c.num)}">Стежити за номером</button>`}</div>
- <h2>Засідання</h2>${up.length?tbl([['Дата','20%'],['Час','10%'],['Суд','30%'],['Зал','10%'],['Через','12%'],['','18%']],up.map(e=>`<tr><td>${fdS(e.d)}</td><td class="b">${e.tm||'–'}</td>${cell(sc(e.court||c.court))}${cell((e.rm||'').replace('зал/каб. ',''),'m')}<td class="act">${chip(left(e.d))}</td><td class="act">${e.src==='cli'&&!e.sure?`<button class="btn ghost" data-a="gcal" data-v="${c.ev.indexOf(e)}" title="Збіг лише за ПІБ. Якщо це ваш клієнт, додайте засідання в календар">У календар</button>`:''}</td></tr>`)):'<p class="empty">Не призначено. Щойно дата з\'явиться на сайті суду, бот її знайде.</p>'}
+ <h2>Засідання</h2>${up.length?'<div class="wrapcells">'+tbl([['Дата','15%'],['Час','9%'],['Суд','30%'],['Зал','13%'],['Через','13%'],['','20%']],up.map(e=>`<tr><td>${fdS(e.d)}</td><td class="b">${e.tm||'–'}</td>${cell(sc(e.court||c.court))}${cell(rmS(e),'m')}<td class="act">${chip(left(e.d))}</td><td class="act">${gcalBtn(c,e,false)}</td></tr>`))+'</div>':'<p class="empty">Не призначено. Щойно дата з\'явиться на сайті суду, бот її знайде.</p>'}
  <h2>Процесуальні строки</h2>${c.dl.length?tbl([['','8%'],['Останній день','26%'],['Що подаємо','40%'],['Через','16%'],['','10%']],c.dl.map(d=>`<tr class="${d.done?'done':''}"><td class="act"><button class="chk${d.done?' on':''}" data-a="dldone" data-v="${esc(d.key)}" aria-label="Позначити строк виконаним"></button></td><td>${fdS(d.due)}</td><td class="b" title="${esc(d.t+(d.b?' · '+d.b:''))}">${esc(d.t)}</td><td class="act">${d.done?'виконано':chip(left(d.due))}</td><td class="act"><button class="x" data-a="dldel" data-v="${esc(d.key)}" aria-label="Видалити строк" title="Видалити строк">✕</button></td></tr>`)):'<p class="empty">Строків немає.</p>'}</div>
  <div class="stack"><div class="hrow"><h2>Документи суду${D.rows?` (${D.rows.length})`:''}</h2>${D.loading?'<span class="spin"></span>':'<button class="btn ghost sm" data-a="docs">Оновити з реєстру</button>'}</div>
  <div class="fill">${(D.rows||[]).length?tbl([['Дата','17%'],['Документ','20%'],['Суть','41%'],['Суддя','22%']],D.rows.map(d=>{const pend=(d.findings||[]).filter((f,i)=>!(d.applied||[]).includes(i));return `<tr data-a="doc" data-v="${esc(d.id)}">${cell(d.date)}${cell(d.form,'b')}<td title="${esc((d.labels||[]).join(' · '))}">${esc((d.labels||[]).join(' · '))}${pend.length?` <span class="wr">${(d.labels||[]).length?'· ':''}є дані для внесення</span>`:''}${!(d.labels||[]).length&&!pend.length?'<span style="color:var(--muted)">відкрийте, щоб прочитати</span>':''}</td>${cell(sn(d.judge),'m')}</tr>`})):''}
@@ -929,7 +943,7 @@ document.addEventListener('click',async e=>{
  else if(a==='unname'){await act('names',{remove:v},'Клієнта прибрано');return}
  else if(a==='dldone'){const d=C.flatMap(x=>x.dl).find(x=>x.key===v);if(d)await act('deadline',{done:v,value:!d.done});return}
  else if(a==='dldel'){await act('deadline',{remove:v},'Строк видалено. Подію в календарі приберіть вручну.');return}
- else if(a==='gcal'){const ev=c&&c.ev[+v];if(ev){try{await api('gcal',{item:ev.raw});toast('Засідання поставлено в чергу календаря')}catch(err){toast(err.message)}}return}
+ else if(a==='gcal'){const ev=c&&c.ev[+v];if(ev){try{await api('gcal',{item:ev.raw});S.gcal[gid(ev.raw.number,ev.raw.date)]='queued';toast('Засідання поставлено в чергу календаря');render();setTimeout(()=>load(true),60000);setTimeout(()=>load(true),150000)}catch(err){toast(err.message)}}return}
  else if(a==='apply'){
   const row=((DOCS[c.key]||{}).rows||[]).find(d=>d.id===S.doc)||{},X=DOC[S.doc]||{},f=(X.findings||row.findings||[])[+v];if(!f)return;
   if(f.kind==='deadline'){S.preset={title:f.title,days:f.days,basis:`${(row.form||'документ').toLowerCase()} від ${row.date||''}`,doc:S.doc,idx:+v};S.sheet='dl'}
