@@ -276,7 +276,9 @@
 .ctype-opt.on{border-color:var(--navy,#1f3864);background:rgba(31,56,100,.06);font-weight:600;color:var(--navy,#1f3864)}
 .ctype-opt input{accent-color:var(--navy,#1f3864);margin:0}
 .reg-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
-.reg-count{margin-left:auto;font-size:13px;color:var(--muted,#8a7f6d)}
+.reg-sort{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted,#8a7f6d)}
+.reg-sort select{font:inherit;font-size:14px;color:var(--ink,#1f2a44);padding:8px 10px;border:1px solid var(--line,#d9d0c2);border-radius:8px;background:var(--card,#fff)}
+.reg-count{font-size:13px;color:var(--muted,#8a7f6d)}
 /* ── адаптив: не дати сітці/навігації розпирати сторінку ── */
 .wrap>nav.rail,.wrap>main{min-width:0}
 input,select,textarea{max-width:100%;box-sizing:border-box}
@@ -287,7 +289,7 @@ input,select,textarea{max-width:100%;box-sizing:border-box}
 }
 @media (max-width:480px){
   .ctype-opt{flex:1 1 100%;min-width:0}
-  .reg-count{margin-left:0}
+  .reg-count,.reg-sort{margin-left:0}
 }
 .reg-empty{padding:22px;text-align:center;color:var(--muted,#8a7f6d);font-size:14px;border:1px dashed var(--line,#d9d0c2);border-radius:10px}
 .reg-tablewrap{overflow-x:auto}
@@ -871,6 +873,14 @@ input[readonly]{background:#f1f3f7;color:var(--ink-2)}
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
             Експортувати реєстр (.xlsx)
           </button>
+          <label class="reg-sort">Сортування
+            <select id="reg_sort" aria-label="Сортування реєстру">
+              <option value="">як додано</option>
+              <option value="name">за ПІБ (А → Я)</option>
+              <option value="date_new">за датою укладення (нові спершу)</option>
+              <option value="date_old">за датою укладення (старі спершу)</option>
+            </select>
+          </label>
           <span class="reg-count">Записів у реєстрі: <b id="reg_count">0</b></span>
         </div>
 
@@ -3260,6 +3270,17 @@ function addRegistryRow(){
   renderRegistry();
 }
 
+/* «23 листопада 2026 року» або «23.11.2026» → число для порівняння; null, якщо дату не розпізнано */
+function regDateTs(v){
+  const t=String(v||"").toLowerCase().replace(/\u00a0/g," ").trim();
+  let m=t.match(/(\d{1,2})\s+([а-яіїєґ]+)\s+(\d{4})/);
+  if(m){ const mo=MONTHS.indexOf(m[2]); if(mo>=0) return Date.UTC(+m[3],mo,+m[1]); }
+  m=t.match(/(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})/);
+  if(m) return Date.UTC(+m[3],+m[2]-1,+m[1]);
+  m=t.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return Date.UTC(+m[1],+m[2]-1,+m[3]);
+  return null;
+}
 function renderRegistry(){
   if(!window.REG_OPEN) window.REG_OPEN=new Set();
   saveRegistry();
@@ -3273,8 +3294,22 @@ function renderRegistry(){
   const groups=new Map();
   registry.forEach((e,i)=>{ if(!e||!e.row) return; const k=gk(e.row); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(i); });
   const no=x=>parseInt(String(x||"").replace(/\D/g,""),10)||0;
+  /* сортування карток: за ПІБ або за датою укладення договору (вибір запам'ятовується) */
+  const sortSel=$("#reg_sort");
+  let sortMode=""; try{ sortMode=localStorage.getItem("reg_sort")||""; }catch(_){}
+  if(sortSel && sortSel.value!==sortMode) sortSel.value=sortMode;
+  const groupList=[...groups.values()];
+  if(sortMode==="name"){
+    const nm=ids=>String(registry[ids[0]].row["Клієнт"]||"").trim();
+    groupList.sort((a,b)=>nm(a).localeCompare(nm(b),"uk",{sensitivity:"base"}));
+  } else if(sortMode==="date_new"||sortMode==="date_old"){
+    const dt=ids=>regDateTs(registry[ids[0]].row["Дата укладення"]);
+    const dir=sortMode==="date_new"?-1:1;
+    /* записи без розпізнаної дати — завжди в кінці */
+    groupList.sort((a,b)=>{ const x=dt(a), y=dt(b); if(x===null||y===null) return (x===null)-(y===null); return (x-y)*dir; });
+  }
   let html="", gi=0;
-  groups.forEach(ids=>{
+  groupList.forEach(ids=>{
     if(gi++) html+=`<tr class="reg-gap" aria-hidden="true"><td colspan="5"></td></tr>`;
     ids.sort((a,b)=>no(registry[a].row["№ дод. угоди"])-no(registry[b].row["№ дод. угоди"]));
     const r0=registry[ids[0]].row, prov=regProvider(registry[ids[0]]);
@@ -3421,6 +3456,7 @@ function exportRegistry(){
   }catch(err){ console.error(err); toast("Помилка експорту: "+(err.message||err),true); }
 }
 $("#reg_export").addEventListener("click",exportRegistry);
+$("#reg_sort").addEventListener("change",e=>{ try{ localStorage.setItem("reg_sort",e.target.value); }catch(_){} renderRegistry(); });
 $("#reg_import").addEventListener("change",async ev=>{
   const f=ev.target.files[0]; if(!f) return;
   if(typeof XLSX==="undefined"){ toast("Бібліотеку для Excel не завантажено.",true); ev.target.value=""; return; }
@@ -4059,7 +4095,7 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 <script>
 /* Версія генератора: при кожній зміні шаблонів/логіки оновлюється тут і в dogovir/version.json.
    Якщо сторінку відкрито зі старого кешу — показуємо червону плашку «Оновити сторінку». */
-const GEN_VERSION="2026-11-17.1";
+const GEN_VERSION="2026-11-23.1";
 (function(){
   const sub=document.querySelector("header.top .sub");
   if(sub){ const s=document.createElement("div"); s.className="sub"; s.style.opacity=".65"; s.textContent="Версія генератора: "+GEN_VERSION; sub.after(s); }
