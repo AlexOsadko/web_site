@@ -20,13 +20,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    # Для workflow_run — деплоїмо лише при успішній генерації; для інших подій — завжди.
+  # Збирання і публікація рознесені у два завдання: коли обидва кроки йшли в
+  # одному завданні, публікація шукала архів сайту за секунду після завантаження
+  # і не знаходила його («No artifacts named github-pages»).
+  build:
+    # Для workflow_run збираємо лише при успішній генерації; для інших подій завжди.
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,9 +37,17 @@ jobs:
       # На сайт потрапляють лише сторінки: внутрішні нотатки, код ботів і їхній
       # стан лишаються тільки в репозиторії.
       - name: Прибрати службові папки з публікації
-        run: rm -rf notes tools worker README.md .court-bot .practice-bot
+        run: rm -rf notes tools worker README.md .court-bot .practice-bot webapp
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
