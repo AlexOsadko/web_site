@@ -900,7 +900,7 @@ ARTICLE_PAGE = """<!DOCTYPE html>
   <meta name="description" content="{desc}">
   <meta name="keywords" content="{kw}">
   <link rel="canonical" href="{url}">
-  <meta name="robots" content="index, follow">
+  <meta name="robots" content="{robots}">
   <meta property="og:type" content="article">
   <meta property="og:title" content="{title}">
   <meta property="og:description" content="{desc}">
@@ -1021,6 +1021,8 @@ def render_article(a, allmeta, seealso_map=None):
     kw = f"{a['title'].lower()}, адвокат, юрист, {KW_BASE[a['cat']]}, Україна, консультація адвоката"
     repl = {
         "{titletag}": seo_title(a.get("seo_title") or a["title"]),
+        # "noindex": true у JSON статті — сторінка лишається на сайті, але закрита від пошуковиків
+        "{robots}": "noindex, follow" if a.get("noindex") else "index, follow",
         "{title}": esc(a["title"]), "{desc}": esc(a["desc"]), "{kw}": esc(kw),
         "{url}": ART_BASE_URL + a["slug"] + ".html", "{jsonld}": build_jsonld(a, faq),
         "{cat}": a["cat"], "{catname}": CATS[a["cat"]], "{crumb}": esc(a["title"]),
@@ -2684,8 +2686,10 @@ def main():
 
     restyled = restyle_all()
     c1, c2 = update_homepage_count(n)
-    write_sitemap(arts, landings)
-    write_feed(arts)
+    # Статті з "noindex" не потрапляють у карту сайту й RSS (але лишаються в рубриках).
+    indexable = [a for a in arts if not a.get("noindex")]
+    write_sitemap(indexable, landings)
+    write_feed(indexable)
     write_robots()
     write_llms(arts, landings)
     write_chat_kb(landings)
