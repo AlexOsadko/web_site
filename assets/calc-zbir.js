@@ -44,10 +44,10 @@
                norm: 'п. 3 ч. 1 ст. 5 Закону «Про судовий збір»' };
     }
     if (kind === 'shlub') return { sum: 0.4 * PM, how: pm(0.4), norm: 'пп. 3 п. 1 ч. 2 ст. 4' };
-    if (kind === 'nakaz') return { sum: 0.1 * PM, how: pm(0.1), norm: court === 'gosp' ? 'пп. 4-1 п. 2 ч. 2 ст. 4' : 'пп. 4-1 п. 1 ч. 2 ст. 4' };
+    if (kind === 'nakaz') return { sum: 0.1 * PM, how: pm(0.1), norm: court === 'gosp' ? 'пп. 3 п. 2 ч. 2 ст. 4' : 'пп. 4-1 п. 1 ч. 2 ст. 4' };
     if (kind === 'okreme' || kind === 'zaochne') {
       var k = legal || fop ? 0.5 : 0.2;
-      return { sum: k * PM, how: pm(k), norm: 'п. 1 ч. 2 ст. 4' };
+      return { sum: k * PM, how: pm(k), norm: 'пп. 4 п. 1 ч. 2 ст. 4' };
     }
     if (kind === 'podil') {
       return pct(price, 1, 0.4, 3, 'пп. 3 п. 1 ч. 2 ст. 4');
@@ -59,8 +59,8 @@
     }
     /* майновий позов */
     if (court === 'gosp') return pct(price, 1.5, 1, 350, 'пп. 1 п. 2 ч. 2 ст. 4');
-    if (court === 'adm') {
-      return legal || fop ? pct(price, 1.5, 1, 10, 'пп. 1 п. 3 ч. 2 ст. 4') : pct(price, 1, 0.4, 5, 'пп. 1 п. 3 ч. 2 ст. 4');
+    if (court === 'adm') {   // ФОП в адмінсуді за майновим позовом платить як фізична особа
+      return legal ? pct(price, 1.5, 1, 10, 'пп. 1 п. 3 ч. 2 ст. 4') : pct(price, 1, 0.4, 5, 'пп. 1 п. 3 ч. 2 ст. 4');
     }
     return legal ? pct(price, 1.5, 1, 350, 'пп. 1 п. 1 ч. 2 ст. 4') : pct(price, 1, 0.4, 5, 'пп. 1 п. 1 ч. 2 ст. 4');
   }
@@ -88,12 +88,28 @@
       return;
     }
     if (stage === 'ukhvala') {
-      var ku = (who === 'fiz' && court !== 'gosp') ? 0.2 : 1;
-      sum = ku * PM; steps = ['Скарга на ухвалу суду: ' + pm(ku) + '.']; norm = 'ч. 2 ст. 4';
+      /* цивільний суд: фізособа 0,2, решта 1; господарський і адміністративний — 1 для всіх */
+      var ku = (who === 'fiz' && court === 'civil') ? 0.2 : 1;
+      sum = ku * PM; steps = ['Скарга на ухвалу суду: ' + pm(ku) + '.'];
+      norm = court === 'civil' ? 'пп. 9 п. 1 ч. 2 ст. 4' : court === 'gosp' ? 'пп. 8 п. 2 ч. 2 ст. 4' : 'пп. 5 п. 3 ч. 2 ст. 4';
     } else if (stage === 'apel' || stage === 'kas') {
-      var mult = stage === 'apel' ? 150 : 200;
-      steps.push((stage === 'apel' ? 'Апеляційна' : 'Касаційна') + ' скарга на рішення: ' + mult + '% ставки за подання позову = ' + money(sum * mult / 100) + '.');
+      var ap = stage === 'apel', mult = ap ? 150 : 200;
+      steps.push((ap ? 'Апеляційна' : 'Касаційна') + ' скарга на рішення: ' + mult + '% ставки за подання позову = ' + money(sum * mult / 100) + '.');
       sum = sum * mult / 100;
+      /* граничні розміри для апеляції й касації */
+      var capK = 0;
+      if (court === 'adm') capK = ap ? 15 : 20;
+      else if (court === 'civil' && who !== 'yur') {
+        if (kind === 'mayn' || kind === 'podil') capK = ap ? 8 : 10;
+        else if (kind === 'shlub') capK = ap ? 3 : 5;
+      }
+      if (capK && sum > capK * PM) {
+        sum = capK * PM;
+        steps.push('Але не більше ' + pm(capK) + ' — це граничний розмір для такої скарги.');
+      }
+      norm = court === 'civil' ? (ap ? 'пп. 6 п. 1 ч. 2 ст. 4' : 'пп. 7 п. 1 ч. 2 ст. 4')
+           : court === 'gosp' ? (ap ? 'пп. 6 п. 2 ч. 2 ст. 4' : 'пп. 7 п. 2 ч. 2 ст. 4')
+           : (ap ? 'пп. 2 п. 3 ч. 2 ст. 4' : 'пп. 3 п. 3 ч. 2 ст. 4');
     }
     if ($('zbEsud').checked) {
       steps.push('Подання через «Електронний суд»: коефіцієнт 0,8 (ч. 3 ст. 4).');
